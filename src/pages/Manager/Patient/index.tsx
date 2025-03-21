@@ -188,7 +188,7 @@ const PatientPage: React.FC = () => {
               ) : (
                 <tr>
                   <td colSpan={5} className="py-4 text-center text-gray-500">
-                    ບໍ່ມີຂໍ້ມູນ
+                    ບໍ່ມີຂໍ້ມູນທທ
                   </td>
                 </tr>
               )}
