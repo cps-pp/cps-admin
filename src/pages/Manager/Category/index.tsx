@@ -17,7 +17,6 @@ const CategoryPage: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
-  // ดึงข้อมูลหมวดหมู่จาก API
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -44,16 +43,26 @@ const CategoryPage: React.FC = () => {
     fetchCategories();
   }, []);
 
-  // เปิด modal การยืนยันการลบ
+  // Add a useEffect to apply search filtering whenever searchQuery or categories change
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredCategories(categories);
+    } else {
+      const filtered = categories.filter(category => 
+        category.type_name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredCategories(filtered);
+    }
+  }, [searchQuery, categories]);
+
   const openDeleteModal = (id: string) => () => {
     setSelectedCategoryId(id);
-    setShowModal(true); // เปิด modal การยืนยันการลบ
+    setShowModal(true); 
   };
 
-  // ลบหมวดหมู่
   const handleDeleteCategory = async () => {
     if (!selectedCategoryId) return;
-
+  
     try {
       const response = await fetch(
         `http://localhost:4000/manager/category/${selectedCategoryId}`,
@@ -61,58 +70,54 @@ const CategoryPage: React.FC = () => {
           method: 'DELETE',
         },
       );
-
+  
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-
-      // อัปเดตรายการหลังจากลบสำเร็จ
+  
+      // Just update the categories state - the useEffect will automatically update filteredCategories
       setCategory((prevCategories) =>
         prevCategories.filter(
-          (category) => category.category_id !== selectedCategoryId,
+          (category) => category.category_id !== selectedCategoryId && 
+                       category.medtype_id !== selectedCategoryId
         ),
       );
-      setFilteredCategories((prevCategories) =>
-        prevCategories.filter(
-          (category) => category.category_id !== selectedCategoryId,
-        ),
-      );
+      
       setShowModal(false);
+      setSelectedCategoryId(null); 
     } catch (error) {
       console.error('Error deleting category:', error);
     }
   };
-
-  // แก้ไขข้อมูลหมวดหมู่
+  
   const handleEditCategory = (id: string) => {
     navigate(`/category/edit/${id}`);
   };
 
-  // ดูรายละเอียดหมวดหมู่
   const handleViewCategory = (id: string) => {
     navigate(`/category/detail/${id}`);
   };
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
-      <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark2">ຈັດການຂໍ້ມູນປະເພດການຢາ</h1>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => navigate('/category/create')}
-            icon={iconAdd}
-            className="bg-primary"
-          >
-            ເພີ່ມຂໍ້ມູນປະເພດການຢາ
-          </Button>
-        </div>
+    <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
+      <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">ຈັດການຂໍ້ມູນປະເພດຢາ</h1>
+      <div className="flex items-center gap-2">
+        <Button
+          onClick={() => navigate('/category/create')}
+          icon={iconAdd}
+          className="bg-primary"
+        >
+          ເພີ່ມຂໍ້ມູນຢາ
+        </Button>
       </div>
+    </div>
 
       <div className="grid w-full gap-4 p-4">
         <Search
           type="text"
           name="search"
-          placeholder="ຄົ້ນຫາຊື່ ຫຼື ເບີໂທຜູ້ປ່ວຍ..."
+          placeholder="ຄົ້ນຫາຊື່ປະເພດ..."
           className="rounded border border-stroke dark:border-strokedark"
           onChange={(e) => {
             const query = e.target.value;
@@ -121,7 +126,7 @@ const CategoryPage: React.FC = () => {
         />
       </div>
 
-      <div className="text-md text-strokedark dark:text-bodydark2">
+      <div className="text-md text-strokedark dark:text-bodydark3">
         <div className="overflow-x-auto">
           <table className="w-full min-w-max table-auto border-collapse ">
             <thead>
@@ -166,12 +171,11 @@ const CategoryPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Confirm Delete Modal */}
       <ConfirmModal
         show={showModal}
         setShow={setShowModal}
-        message="ທ່ານຕ້ອງການລົບຄົນເຈັບນີ້ອອກຈາກລະບົບບໍ່？"
-        handleConfirm={handleDeleteCategory} // Handle deletion on confirm
+        message="ທ່ານຕ້ອງການລົບປະເພດຢານີ້ອອກຈາກລະບົບບໍ່？"
+        handleConfirm={handleDeleteCategory} 
       />
     </div>
   );

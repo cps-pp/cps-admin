@@ -1,3 +1,4 @@
+import BackButton from '@/components/BackButton';
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 
@@ -37,13 +38,8 @@ const DetailCategory: React.FC = () => {
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
       <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-stroke">ລາຍລະອຽດປະເພດການຢາ</h1>
-          
-          <button
-            onClick={() => navigate(-1)}
-            className="inline-flex items-center justify-center rounded bg-slate-500 px-4 py-2 text-center font-medium text-white transition-all duration-150 ease-linear hover:bg-opacity-90 hover:shadow-lg focus:outline-none active:bg-slate-600"
-          >
-            ກັບຄືນ
-          </button>
+        <BackButton className="mb-4" />
+
         </div>
 
       <div className="space-y-4 py-8">

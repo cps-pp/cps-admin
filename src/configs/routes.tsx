@@ -24,6 +24,7 @@ import DiseasePage from '@/pages/Manager/Disease';
 import CreateCetegory from '@/pages/Manager/Category/create';
 import EditCate from '@/pages/Manager/Category/edit';
 import DetailCategory from '@/pages/Manager/Category/detail';
+import CreateServiceList from '@/pages/Manager/ServiceList/create';
 
 export interface IRoute {
   path: string;
@@ -61,7 +62,7 @@ export const ROUTES: IRoute[] = [
   },
   {
     path: '/patient/detail/:id',
-    title: 'Detail Patient | CPS Admin',
+    title: 'Patient Detail | CPS Admin',
     component: <DetailPatient />,
   },
 //  -------------------------- Employee Path --------------------------------
@@ -108,7 +109,22 @@ export const ROUTES: IRoute[] = [
 // -------------------------- Service Path --------------------------------
 {
   path: '/manager/servicelist',
-  title: 'Service | CPS Admin',
+  title: 'Service List | CPS Admin',
+  component: <ServcicePage />,
+},
+{
+  path: '/servicelist/create',
+  title: 'Service Create | CPS Admin',
+  component: <CreateServiceList />,
+},
+{
+  path: '/servicelist/detail/:id',
+  title: 'Service Detail | CPS Admin',
+  component: <ServcicePage />,
+},
+{
+  path: '/servicelist/edit/:id',
+  title: 'Service Edit| CPS Admin',
   component: <ServcicePage />,
 },
 // -------------------------- Exchange Path --------------------------------

@@ -64,7 +64,6 @@ const PatientPage: React.FC = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      // อัปเดตรายการหลังจากลบสำเร็จ
       setPatients((prevPatients) =>
         prevPatients.filter(
           (patient) => patient.patient_id !== selectedPatientId,

@@ -5,6 +5,7 @@ import Input from '@/components/Forms/Input_two';
 import DatePicker from '@/components/DatePicker_two';
 import Select from '@/components/Forms/Select';
 import React, { useState, useEffect } from 'react';
+import BackButton from '@/components/BackButton';
 
 const EditPatient: React.FC = () => {
   const navigate = useNavigate();
@@ -90,12 +91,8 @@ const EditPatient: React.FC = () => {
         <h1 className="text-md md:text-lg lg:text-xl font-medium  text-strokedark dark:text-bodydark3">
           ແກ້ໄຂຂໍ້ມູນຄົນເຈັບ
         </h1>
-        <button
-          onClick={() => navigate(-1)}
-          className="inline-flex items-center justify-center rounded bg-slate-500 px-4 py-2 text-white hover:bg-opacity-90"
-        >
-          ກັບຄືນ
-        </button>
+        <BackButton className="mb-4" />
+
       </div>
 
       <form
@@ -110,7 +107,6 @@ const EditPatient: React.FC = () => {
           register={register}
           formOptions={{ required: 'ກະລຸນາປ້ອນຊື່ຄົນເຈັບກ່ອນ' }}
           errors={errors}
-           className="text-strokedark dark:text-bodydark3"
         />
         <Input
           label="ນາມສະກຸນ"
@@ -120,7 +116,6 @@ const EditPatient: React.FC = () => {
           register={register}
           formOptions={{ required: 'ກະລຸນາປ້ອນນາມສະກຸນກ່ອນ' }}
           errors={errors}
-          className="text-strokedark dark:text-bodydark3"
 
         />
         <Select
@@ -153,7 +148,6 @@ const EditPatient: React.FC = () => {
           placeholder="ເບີຕິດຕໍ່"
           register={register}
           formOptions={{ required: 'ກະລຸນາປ້ອນເບີຕິດຕໍ່ກ່ອນ' }}
-          className="text-strokedark dark:text-bodydark3"
 
           errors={errors}
         />
@@ -165,7 +159,6 @@ const EditPatient: React.FC = () => {
           register={register}
           formOptions={{ required: 'ກະລຸນາປ້ອນເບີຕິດຕໍ່ສຳຮອງກ່ອນ' }}
           errors={errors}
-          className="text-strokedark dark:text-bodydark3"
 
         />
         <Input
@@ -176,7 +169,6 @@ const EditPatient: React.FC = () => {
           register={register}
           formOptions={{ required: 'ກະລຸນາປ້ອນບ້ານກ່ອນ' }}
           errors={errors}
-          className="text-strokedark dark:text-bodydark3"
 
         />
         <Input
@@ -187,7 +179,6 @@ const EditPatient: React.FC = () => {
           register={register}
           formOptions={{ required: 'ກະລຸນາປ້ອນເມືອງກ່ອນ' }}
           errors={errors}
-          className="text-strokedark dark:text-bodydark3"
 
         />
         <Input
@@ -198,17 +189,16 @@ const EditPatient: React.FC = () => {
           register={register}
           formOptions={{ required: 'ກະລຸນາປ້ອນແຂວງກ່ອນ' }}
           errors={errors}
-          className="text-strokedark dark:text-bodydark3"
 
         />
 
         <div className="mt-8 flex justify-end space-x-4 col-span-full px-4 py-4">
           <button
-            className="px-6 py-2 text-sm font-bold text-red-500"
+            className="px-6 py-2 text-md font-medium text-red-500"
             type="button"
             onClick={() => navigate('/manager/patient')}
           >
-            Cancel
+            ຍົກເລິກ
           </button>
           <Button variant="save" type="submit">
             ບັນທຶກ

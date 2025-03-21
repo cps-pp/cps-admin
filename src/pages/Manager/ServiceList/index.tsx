@@ -1,93 +1,166 @@
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { iconAdd, iconCalendar } from '@/configs/icon';
+import { iconAdd } from '@/configs/icon';
 import Button from '@/components/Button';
 import Search from '@/components/Forms/Search';
+import { TableAction } from '@/components/Tables/TableAction';
+import ConfirmModal from '@/components/Modal';
+import Alerts from '@/components/Alerts';
 import { ServiceHeaders } from './column/service';
 
-
-const ServcicePage: React.FC = () => {
-  const [patients, setPatients] = useState<any[]>([]);  // Ensure patients data is stored in state
+const ServicePage: React.FC = () => {
+  const [services, setServices] = useState<any[]>([]); // Data ของบริการ
+  const [filteredServices, setFilteredServices] = useState<any[]>([]); // Data ที่กรองแล้ว
   const [showModal, setShowModal] = useState(false);
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState(''); // ค่าของการค้นหาที่ผู้ใช้ป้อน
   const navigate = useNavigate();
-  const { control, watch } = useForm();
-  const [selectedPatients, setSelectedPatients] = useState<string[]>([]);
-  const [selectedBox, setSelectedBox] = useState<string[]>([]);
-  const selectedDateRange = watch('appointment_date');
+  const [loading, setLoading] = useState(true);
 
-  const openDeleteModal = (ids: string) => () => {
-    setSelectedBox([ids]);
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`http://localhost:4000/manager/servicelist`, {
+          method: 'GET',
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Data received:', data); // Debugging
+        setServices(data.data); // บันทึกข้อมูลบริการ
+        setFilteredServices(data.data); // เริ่มต้นให้ผลลัพธ์เป็นทั้งหมด
+      } catch (error) {
+        console.error('Error fetching services:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, []);
+
+  // Add a useEffect to apply search filtering whenever searchQuery or services change
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredServices(services);
+    } else {
+      const filtered = services.filter(service =>
+        service.ser_name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredServices(filtered);
+    }
+  }, [searchQuery, services]);
+
+  const openDeleteModal = (id: string) => () => {
+    setSelectedServiceId(id);
     setShowModal(true);
   };
 
-  const handleSelectPatient = (e: React.ChangeEvent<HTMLInputElement>, patientId: string) => {
-    setSelectedPatients((prevSelected) =>
-      e.target.checked ? [...prevSelected, patientId] : prevSelected.filter((id) => id !== patientId),
-    );
+  const handleDeleteService = async () => {
+    if (!selectedServiceId) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:4000/manager/service/${selectedServiceId}`,
+        {
+          method: 'DELETE',
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      // Just update the services state - the useEffect will automatically update filteredServices
+      setServices((prevServices) =>
+        prevServices.filter(
+          (service) => service.ser_id !== selectedServiceId
+        ),
+      );
+
+      setShowModal(false);
+      setSelectedServiceId(null);
+    } catch (error) {
+      console.error('Error deleting service:', error);
+    }
+  };
+
+  const handleEditService = (id: string) => {
+    navigate(`/service/edit/${id}`);
+  };
+
+  const handleViewService = (id: string) => {
+    navigate(`/service/detail/${id}`);
   };
 
   return (
-    <div className="rounded-xl bg-white pt-4 dark:bg-boxdark">
+    <div className="rounded bg-white pt-4 dark:bg-boxdark">
       <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-        <h1 className="text-xl font-bold">ຈັດການຂໍ້ມູນລາຍການບໍລີການ</h1>
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">ຈັດການຂໍ້ມູນລາຍງານບໍລິການ</h1>
         <div className="flex items-center gap-2">
-          
-          <Button onClick={() => navigate('/patient/create')} icon={iconAdd} className="bg-primary">
-            ເພີ່ມຂໍ້ມູນລາຍການບໍລິການ
+          <Button
+            onClick={() => navigate('/servicelist/create')}
+            icon={iconAdd}
+            className="bg-primary"
+          >
+            ເພີ່ມຂໍ້ມູນລາຍການ
           </Button>
         </div>
       </div>
 
-      <div className="grid w-full  gap-4 p-4">
+      <div className="grid w-full gap-4 p-4">
         <Search
           type="text"
           name="search"
-          placeholder="ຄົ້ນຫາລາຍການບໍລິການ"
-          className="rounded border-stroke"
+          placeholder="ຄົ້ນຫາຊື່ລາຍການ..."
+          className="rounded border border-stroke dark:border-strokedark"
+          onChange={(e) => {
+            const query = e.target.value;
+            setSearchQuery(query);
+          }}
         />
-
-      
       </div>
 
-      <div className="text-sm">
+      <div className="text-md text-strokedark dark:text-bodydark3">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-max table-auto">
+          <table className="w-full min-w-max table-auto border-collapse ">
             <thead>
-              <tr className="border-b border-gray-300 bg-gray-2 text-left dark:bg-meta-4">
+              <tr className="border-b border-gray-300 bg-gray-100 text-left dark:bg-meta-4 bg-blue-100">
                 {ServiceHeaders.map((header, index) => (
-                  <th key={index} className="px-4 py-4 font-normal text-primarySecond dark:font-medium border-b border-stroke dark:text-gray-500">
+                  <th
+                    key={index}
+                    className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300 "
+                  >
                     {header.name}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {patients.length > 0 ? (
-                patients.map((patient, index) => (
-                  <tr key={index} className="border-b border-stroke dark:border-strokedark">
-                    <td className="p-4 px-4">
-                      <input
-                        className="h-5 w-5"
-                        type="checkbox"
-                        onChange={(e) => handleSelectPatient(e, patient.patient_id.toString())} // Updated to use patient_id
-                        checked={selectedPatients.includes(patient.patient_id.toString())} // Updated to use patient_id
+              {filteredServices.length > 0 ? (
+                filteredServices.map((service, index) => (
+                  <tr
+                    key={index}
+                    className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
+                  >
+                    <td className="px-4 py-4">{service.ser_name}</td>
+                    <td className="px-4 py-4">{service.price}</td>
+                    <td className="px-3 py-4 text-center">
+                      <TableAction
+                        onView={() => handleViewService(service.ser_id)}
+                        onDelete={openDeleteModal(service.ser_id)}
+                        onEdit={() => handleEditService(service.ser_id)}
                       />
-                    </td>
-                    <td className="px-4">{`${patient.patient_name} ${patient.patient_surname}`}</td> {/* Combine patient_name and patient_surname */}
-                    <td className="px-4">{patient.phone1}</td> {/* Assuming phone1 is the correct phone */}
-                    <td className="px-4">{patient.dob}</td> {/* Use dob for age */}
-                    <td className="px-4">{patient.gender}</td>
-                    <td className="px-10">
-                      <button onClick={openDeleteModal(patient.patient_id.toString())} className="text-red-500">
-                        ລົບ
-                      </button>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="py-4 text-center text-gray-500">
+                  <td colSpan={5} className="py-4 text-center text-gray-500">
                     ບໍ່ມີຂໍ້ມູນ
                   </td>
                 </tr>
@@ -96,8 +169,15 @@ const ServcicePage: React.FC = () => {
           </table>
         </div>
       </div>
+
+      <ConfirmModal
+        show={showModal}
+        setShow={setShowModal}
+        message="ທ່ານຕ້ອງການລົບບິກຊິບນີ້ອອກຈາກລະບົບບໍ່？"
+        handleConfirm={handleDeleteService} 
+      />
     </div>
   );
 };
 
-export default ServcicePage;
+export default ServicePage;

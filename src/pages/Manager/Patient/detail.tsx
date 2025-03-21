@@ -1,3 +1,4 @@
+import BackButton from '@/components/BackButton';
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 
@@ -32,34 +33,50 @@ const DetailPatient: React.FC = () => {
     }
   }, [id, patient]);
 
-  if (loading) return <div className="text-center p-4">Loading patient details...</div>;
-  if (!patient) return <div className="text-center p-4 text-red-500">ບໍ່ພົບຂໍ້ມູນ</div>;
+  // ฟังก์ชันที่ใช้ในการแสดงรายละเอียดที่ซ้ำกัน
+  const renderDetailItem = (label: string, value: string | null | undefined) => {
+    return (
+      <p>
+        <span className="text-md text-strokedark dark:text-bodydark3">
+          {label}:
+        </span>{" "}
+        <span className="text-md text-strokedark dark:text-bodydark3">{value || "-"}</span>
+      </p>
+    );
+  };
+
+  if (loading)
+    return <div className="text-center p-4">Loading patient details...</div>;
+  if (!patient)
+    return (
+      <div className="text-center p-4 text-red-500">ບໍ່ພົບຂໍ້ມູນ</div>
+    );
 
   return (
-    <div className="rounded bg-white shadow-lg pt-4 px-4 dark:bg-boxdark dark:text-white">
-      <div className="border-b border-stroke px-4 pb-4 dark:border-strokedark">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl  text-gray-800 dark:text-white">ລະລາຍອຽດຄົນເຈັບ</h2>
-          <button
-            onClick={() => navigate(-1)}
-            className="inline-flex items-center justify-center rounded bg-slate-500 px-4 py-2 text-center font-medium text-white transition-all duration-150 ease-linear hover:bg-opacity-90 hover:shadow-lg focus:outline-none active:bg-slate-600"
-          >
-            ກັບຄືນ
-          </button>
-        </div>
+    <div className="rounded bg-white pt-4 dark:bg-boxdark">
+      <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+          ລາຍລະອຽດຄົນເຈັບ
+        </h1>
+        <BackButton className="mb-4" />
+
       </div>
 
-      <div className="space-y-4 py-8">
+      {/* 2 */}
+      <div className="space-y-4 py-4 px-4">
         <div className="space-y-2">
-          <p><strong className="text-lg font-medium">ລະຫັດຄົນເຈັບ:</strong> <span className="text-gray-700 dark:text-gray-300">{patient.patient_id}</span></p>
-          <p><strong className="text-lg font-medium">ຊື່:</strong> <span className="text-gray-700 dark:text-gray-300">{patient.patient_name} {patient.patient_surname}</span></p>
-          <p><strong className="text-lg font-medium">ເພດ:</strong> <span className="text-gray-700 dark:text-gray-300">{patient.gender}</span></p>
-          <p><strong className="text-lg font-medium">ວັນເດືອນປີເກີດ:</strong> <span className="text-gray-700 dark:text-gray-300">{patient.dob}</span></p>
-          <p><strong className="text-lg font-medium">ບ້ານ:</strong> <span className="text-gray-700 dark:text-gray-300">{patient.village}</span></p>
-          <p><strong className="text-lg font-medium">ເມືອງ:</strong> <span className="text-gray-700 dark:text-gray-300">{patient.district}</span></p>
-          <p><strong className="text-lg font-medium">ແຂວງ:</strong> <span className="text-gray-700 dark:text-gray-300">{patient.province}</span></p>
-          <p><strong className="text-lg font-medium">ເບີໂທ 1:</strong> <span className="text-gray-700 dark:text-gray-300">{patient.phone1}</span></p>
-          <p><strong className="text-lg font-medium">ເບີໂທ 2:</strong> <span className="text-gray-700 dark:text-gray-300">{patient.phone2}</span></p>
+          {renderDetailItem("ລະຫັດຄົນເຈັບ", patient.patient_id)}
+          {renderDetailItem(
+            "ຊື່",
+            `${patient.patient_name} ${patient.patient_surname}`
+          )}
+          {renderDetailItem("ເພດ", patient.gender)}
+          {renderDetailItem("ວັນເດືອນປີເກີດ", patient.dob)}
+          {renderDetailItem("ບ້ານ", patient.village)}
+          {renderDetailItem("ເມືອງ", patient.district)}
+          {renderDetailItem("ແຂວງ", patient.province)}
+          {renderDetailItem("ເບີໂທ 1", patient.phone1)}
+          {renderDetailItem("ເບີໂທ 2", patient.phone2)}
         </div>
       </div>
     </div>
@@ -67,3 +84,4 @@ const DetailPatient: React.FC = () => {
 };
 
 export default DetailPatient;
+

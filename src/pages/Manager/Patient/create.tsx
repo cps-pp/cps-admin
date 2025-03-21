@@ -6,6 +6,7 @@ import DatePicker from "@/components/DatePicker_two";
 import SelectGender from "@/components/Forms/SelectGender";
 import Select from "@/components/Forms/Select";
 import React, { useState } from "react";
+import BackButton from "@/components/BackButton";
 
 const CreatePatient: React.FC = () => {
   const navigate = useNavigate();
@@ -40,12 +41,7 @@ const CreatePatient: React.FC = () => {
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
       <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
         <h1 className="text-md md:text-lg lg:text-xl font-medium  text-strokedark dark:text-bodydark3">ເພີ່ມຂໍ້ມູນຄົນເຈັບ</h1>
-        <button
-          onClick={() => navigate(-1)}
-          className="translate-all inline-flex cursor-pointer items-center justify-center rounded bg-slate-500 px-4 py-2 text-center font-medium text-white outline-none duration-150 ease-linear hover:bg-opacity-90 hover:shadow-lg focus:outline-none active:bg-slate-600"
-        >
-          ກັບຄືນ
-        </button>
+        <BackButton className="mb-4" />
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1  gap-4 px-4 pt-4">
@@ -135,8 +131,8 @@ const CreatePatient: React.FC = () => {
 
 
         <div className="mt-8 flex justify-end space-x-4 col-span-full px-4 py-4">
-          <button className="px-6 py-2 text-sm font-bold uppercase text-red-500" type="button" onClick={() => navigate("/manager/patient")}>
-            Cancel
+          <button className="px-6 py-2 text-md font-medium uppercase text-red-500" type="button" onClick={() => navigate("/manager/patient")}>
+          ຍົກເລິກ
           </button>
           <Button variant="save" type="submit">
             ບັນທຶກ
