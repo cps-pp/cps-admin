@@ -65,7 +65,7 @@ const ServicePage: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:4000/manager/service/${selectedServiceId}`,
+        `http://localhost:4000/manager/servicelist/${selectedServiceId}`,
         {
           method: 'DELETE',
         },
@@ -90,11 +90,11 @@ const ServicePage: React.FC = () => {
   };
 
   const handleEditService = (id: string) => {
-    navigate(`/service/edit/${id}`);
+    navigate(`/servicelist/edit/${id}`);
   };
 
   const handleViewService = (id: string) => {
-    navigate(`/service/detail/${id}`);
+    navigate(`/servicelist/detail/${id}`);
   };
 
   return (
@@ -148,7 +148,9 @@ const ServicePage: React.FC = () => {
                     className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
                     <td className="px-4 py-4">{service.ser_name}</td>
-                    <td className="px-4 py-4">{service.price}</td>
+                    <td className="px-4 py-4">{(service.price * 1000).toLocaleString()}</td>
+
+
                     <td className="px-3 py-4 text-center">
                       <TableAction
                         onView={() => handleViewService(service.ser_id)}
@@ -173,7 +175,7 @@ const ServicePage: React.FC = () => {
       <ConfirmModal
         show={showModal}
         setShow={setShowModal}
-        message="ທ່ານຕ້ອງການລົບບິກຊິບນີ້ອອກຈາກລະບົບບໍ່？"
+        message="ທ່ານຕ້ອງການລົບລາຍການນີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteService} 
       />
     </div>

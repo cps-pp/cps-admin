@@ -3,9 +3,7 @@ import SignIn from '@/pages/Authentication/SignIn';
 import NotFound from '@/pages/NotFound';
 import Profile from '@/pages/Profile';
 import { ReactElement } from 'react';
-import CreateBlogs from '@/pages/Manager/CreateBlog';
-import BlogDetailPage from '@/pages/Manager/BlogDetail';
-import EditBlogPage from '@/pages/Manager/EditBlog';
+
 import PatientPage from '@/pages/Manager/Patient';
 import CreatePatient from '@/pages/Manager/Patient/create';
 import EmployeePage from '@/pages/Manager/Employee';
@@ -25,6 +23,8 @@ import CreateCetegory from '@/pages/Manager/Category/create';
 import EditCate from '@/pages/Manager/Category/edit';
 import DetailCategory from '@/pages/Manager/Category/detail';
 import CreateServiceList from '@/pages/Manager/ServiceList/create';
+import DetailServiceList from '@/pages/Manager/ServiceList/detail';
+import EditServicerList from '@/pages/Manager/ServiceList/edit';
 
 export interface IRoute {
   path: string;
@@ -120,12 +120,12 @@ export const ROUTES: IRoute[] = [
 {
   path: '/servicelist/detail/:id',
   title: 'Service Detail | CPS Admin',
-  component: <ServcicePage />,
+  component: <DetailServiceList />,
 },
 {
   path: '/servicelist/edit/:id',
   title: 'Service Edit| CPS Admin',
-  component: <ServcicePage />,
+  component: <EditServicerList />,
 },
 // -------------------------- Exchange Path --------------------------------
 
@@ -167,21 +167,6 @@ export const ROUTES: IRoute[] = [
   component: <FollowPage />,
 },
 
-  {
-    path: '/blogs/article/details/:id',
-    title: 'Blogs Detail| CPS Admin',
-    component: <BlogDetailPage />,
-  },
-  {
-    path: '/blogs/article/edit/:id',
-    title: 'Blogs Edit| CPS Admin',
-    component: <EditBlogPage />,
-  },
-  {
-    path: '/blogs/create',
-    title: 'Blogs Create | CPS Admin',
-    component: <CreateBlogs />,
-  },
 
 
   {

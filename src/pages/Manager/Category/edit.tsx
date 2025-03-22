@@ -19,7 +19,7 @@ const EditCate: React.FC = () => {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
-        setValue('type_name', data.data.type_name); // ตั้งค่าชื่อหมวดหมู่
+        setValue('type_name', data.data.type_name);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching category data:', error);

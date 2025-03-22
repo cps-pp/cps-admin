@@ -38,13 +38,13 @@ const CreatePatient: React.FC = () => {
   };
 
   return (
-    <div className="rounded bg-white pt-4 dark:bg-boxdark">
-      <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
+    <div className="rounded bg-white pt-2 dark:bg-boxdark">
+      <div className="flex items-center justify-between border-b border-stroke px-4  dark:border-strokedark">
         <h1 className="text-md md:text-lg lg:text-xl font-medium  text-strokedark dark:text-bodydark3">ເພີ່ມຂໍ້ມູນຄົນເຈັບ</h1>
         <BackButton className="mb-4" />
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1  gap-4 px-4 pt-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1  gap-4 px-4 pt-4 ">
       <Input
         label="ຊື່ຄົນເຈັບ"
         name="patient_name"

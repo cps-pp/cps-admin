@@ -104,7 +104,7 @@ const PatientPage: React.FC = () => {
     navigate(`/patient/edit/${id}`);
   };
   const handleViewPatient = (id: string) => {
-    navigate(`/patient/detail/${id}`); // Directly navigate without fetching details
+    navigate(`/patient/detail/${id}`); 
   };
 
   return (
