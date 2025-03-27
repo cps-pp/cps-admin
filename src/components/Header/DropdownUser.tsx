@@ -2,22 +2,21 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ClickOutside from '../ClickOutside';
 import Avatar from '../../images/user/avatar.png';
-import api, { TOKEN_KEY } from '../../api/axios';
 import { IUser } from '../../types/user';
 
 const DropdownUser = ({ user }: { user: IUser }) => {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const handleLogout = async () => {
-    try {
-      await api.post('/logout');
-    } catch (error) {
-    } finally {
-      localStorage.removeItem(TOKEN_KEY);
-      navigate('/auth');
-    }
-  };
+  // const handleLogout = async () => {
+  //   try {
+  //     await api.post('/logout');
+  //   } catch (error) {
+  //   } finally {
+  //     localStorage.removeItem(TOKEN_KEY);
+  //     navigate('/auth');
+  //   }
+  // };
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -106,7 +105,7 @@ const DropdownUser = ({ user }: { user: IUser }) => {
             </li>
           </ul>
           <div
-            onClick={handleLogout}
+            // onClick={handleLogout}
             className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base cursor-pointer"
           >
             <svg

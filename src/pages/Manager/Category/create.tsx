@@ -35,13 +35,12 @@ const CreateCategory: React.FC = () => {
   };
 
   return (
-    <div className="rounded bg-white pt-2 dark:bg-boxdark">
-      <div className="flex items-center justify-between border-b border-stroke px-4  dark:border-strokedark">
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
-          ສ້າງປະເພດຢາໃຫມ່
+    <div className="rounded bg-white pt-4 dark:bg-boxdark">
+      <div className="flex items-center  border-b border-stroke px-4 dark:border-strokedark pb-4">
+        <BackButton className="" />
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-6">
+          ເພີ່ມຂໍ້ມູນ
         </h1>
-        <BackButton className="mb-4" />
-
       </div>
 
       <form onSubmit={handleSubmit(handleSave)} className="mt-4 px-4">

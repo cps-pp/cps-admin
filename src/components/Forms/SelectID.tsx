@@ -1,56 +1,66 @@
 import React from 'react';
-import { UseFormRegister } from 'react-hook-form';
+import { UseFormRegister, FieldErrors } from 'react-hook-form';
 
 type Option = {
   value: string;
   label: string;
 };
 
-type TSelectProps = {
+type SelectProps = {
   label: string;
   name: string;
-  select?: string | undefined;
   register: UseFormRegister<any>;
   options: Option[];
-  errors: Record<string, any>;
+  errors?: FieldErrors;
+  value?: string;
   onSelect?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
-  value?: string | undefined ;
-  onChange?: any;
 };
-const Select = ({
+
+const Select: React.FC<SelectProps> = ({
   label,
   name,
   register,
   options,
   errors,
   value = '',
-  onChange,
-}: TSelectProps) => {
-  // console.log(value);
-  const hasValue = Boolean(value); 
-  // check has value or not ,if has value don't show error
+  onSelect,
+}) => {
+  // Check if there's a value to determine error display
+  const hasValue = Boolean(value);
+
   return (
     <div className="mb-5.5">
-      <label className="mb-2.5 block text-black dark:text-white">{label}</label>
-
+      <label 
+        htmlFor={name} 
+        className="mb-3 block text-sm font-medium text-strokedark dark:text-bodydark3"
+      >
+        {label}
+      </label>
+      
       <div className="relative z-20 bg-transparent dark:bg-form-input">
         <select
-          // {...register(name, { required: true })}
-          {...register(name, { required: !hasValue })}
+          id={name}
+          {...register(name, { 
+            required: {
+              value: !hasValue,
+              message: `ກະລຸນາເລືອກ${label}`
+            },
+            onChange: onSelect
+          })}
           value={value}
-          onChange={onChange}
-          className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:disabled:bg-meta-4 dark:focus:border-primary text-black dark:text-white capitalize"
+          className=" text-strokedark dark:text-stroke relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:disabled:bg-meta-4 dark:focus:border-primary capitalize"
         >
           <option value="" disabled>
-            Select {name}
+            ເລືອກ{label}
           </option>
-
           {options.map((option, index) => (
-            <option key={index} value={option.value}>
+            <option key={`${option.value}-${index}`} value={option.value}>
               {option.label}
             </option>
           ))}
         </select>
+        
+        {/* Dropdown arrow icon */}
         <span className="absolute top-1/2 right-4 z-30 -translate-y-1/2">
           <svg
             className="fill-current"
@@ -71,10 +81,12 @@ const Select = ({
           </svg>
         </span>
       </div>
-
-      {/* {errors[name]?.type === 'required' && ( */}
-      {!hasValue && errors[name]?.type === 'required' && (
-        <span className="text-red-500">Please select {name}</span>
+      
+      {/* Error message */}
+      {errors?.[name] && (
+        <span className="text-red-500 text-xs mt-1">
+          {errors[name]?.message as string}
+        </span>
       )}
     </div>
   );

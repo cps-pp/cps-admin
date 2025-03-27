@@ -27,19 +27,20 @@ const CreateServiceList: React.FC = () => {
       }
 
       reset();
-      navigate("/manager/serviceList");
+      navigate("/manager/servicelist");
     } catch (error: any) {
       alert(error.message || "ມີຂໍ້ຜິດພາດ");
     }
   };
 
   return (
-    <div className="rounded bg-white pt-2 dark:bg-boxdark">
-      <div className="flex items-center justify-between border-b border-stroke px-4  dark:border-strokedark">
-        <h1 className="text-md md:text-lg lg:text-xl font-medium  text-strokedark dark:text-bodydark3">ເພີ່ມຂໍ້ມູນລາຍການບໍລິການ</h1>
-        <BackButton className="mb-4" />
-      </div>
-
+    <div className="rounded bg-white pt-4 dark:bg-boxdark">
+    <div className="flex items-center  border-b border-stroke px-4 dark:border-strokedark pb-4">
+      <BackButton className="" />
+      <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-6">
+        ເພີ່ມຂໍ້ມູນ
+      </h1>
+    </div>
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1  gap-4 px-4 pt-4">
       <Input
         label="ຊື່ລາຍການ"
@@ -62,7 +63,7 @@ const CreateServiceList: React.FC = () => {
       
       
         <div className="mt-8 flex justify-end space-x-4 col-span-full px-4 py-4">
-          <button className="px-6 py-2 text-md font-medium uppercase text-red-500" type="button" onClick={() => navigate("/manager/patient")}>
+          <button className="px-6 py-2 text-md font-medium uppercase text-red-500" type="button" onClick={() => navigate("/manager/servicelist")}>
           ຍົກເລິກ
           </button>
           <Button variant="save" type="submit">

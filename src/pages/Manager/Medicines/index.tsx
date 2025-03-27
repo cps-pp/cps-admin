@@ -1,93 +1,205 @@
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { iconAdd, iconCalendar } from '@/configs/icon';
+import { iconAdd } from '@/configs/icon';
 import Button from '@/components/Button';
 import Search from '@/components/Forms/Search';
+import { TableAction } from '@/components/Tables/TableAction';
+import ConfirmModal from '@/components/Modal';
+import Alerts from '@/components/Alerts';
 import { MedicinesHeaders } from './column/medicines';
 
-
 const MedicinesPage: React.FC = () => {
-  const [patients, setPatients] = useState<any[]>([]);  // Ensure patients data is stored in state
+  const [medicines, setMedicines] = useState<any[]>([]); // Data ของยาทั้งหมด
+  const [filteredMedicines, setFilteredMedicines] = useState<any[]>([]); // Data ที่กรองแล้ว
   const [showModal, setShowModal] = useState(false);
-  const navigate = useNavigate();
-  const { control, watch } = useForm();
-  const [selectedPatients, setSelectedPatients] = useState<string[]>([]);
-  const [selectedBox, setSelectedBox] = useState<string[]>([]);
-  const selectedDateRange = watch('appointment_date');
+  const [selectedMedicineId, setSelectedMedicineId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState(''); // ค่าของการค้นหาที่ผู้ใช้ป้อน
+  const [categories, setCategories] = useState<any[]>([]); // Data ของหมวดหมู่ประเภทยา
+  const [loading, setLoading] = useState(true);
 
-  const openDeleteModal = (ids: string) => () => {
-    setSelectedBox([ids]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchMedicines = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`http://localhost:4000/manager/medicines`, {
+          method: 'GET',
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setMedicines(data.data); // บันทึกข้อมูลยา
+        setFilteredMedicines(data.data); // เริ่มต้นให้ผลลัพธ์เป็นทั้งหมด
+      } catch (error) {
+        console.error('Error fetching medicines:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMedicines();
+  }, []);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`http://localhost:4000/manager/category`, {
+          method: 'GET',
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setCategories(data.data); // บันทึกข้อมูลหมวดหมู่
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredMedicines(medicines);
+    } else {
+      const filtered = medicines.filter((medicine) =>
+        medicine.med_name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredMedicines(filtered);
+    }
+  }, [searchQuery, medicines]);
+
+  const openDeleteModal = (id: string) => () => {
+    setSelectedMedicineId(id);
     setShowModal(true);
   };
 
-  const handleSelectPatient = (e: React.ChangeEvent<HTMLInputElement>, patientId: string) => {
-    setSelectedPatients((prevSelected) =>
-      e.target.checked ? [...prevSelected, patientId] : prevSelected.filter((id) => id !== patientId),
-    );
+  const handleDeleteMedicine = async () => {
+    if (!selectedMedicineId) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:4000/medicines/${selectedMedicineId}`,
+        {
+          method: 'DELETE',
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      setMedicines((prevMedicines) =>
+        prevMedicines.filter((medicine) => medicine.medicine_id !== selectedMedicineId)
+      );
+      setShowModal(false);
+      setSelectedMedicineId(null);
+    } catch (error) {
+      console.error('Error deleting medicine:', error);
+    }
+  };
+
+  const handleEditMedicine = (id: string) => {
+    navigate(`/medicines/edit/${id}`);
+  };
+
+  const handleViewMedicine = (id: string) => {
+    navigate(`/medicines/detail/${id}`);
+  };
+
+  // Function to get the type name based on medtype_id
+  const getTypeName = (medtype_id: number) => {
+    const category = categories.find((cat) => cat.medtype_id === medtype_id);
+    return category ? category.type_name : 'ບໍ່ລະບຸປະເພດ';
   };
 
   return (
-    <div className="rounded-xl bg-white pt-4 dark:bg-boxdark">
+    <div className="rounded bg-white pt-4 dark:bg-boxdark">
       <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-        <h1 className="text-xl font-bold">ຈັດການຂໍ້ມູນຢາ</h1>
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">ຈັດການຂໍ້ມູນຢາ ແລະ ອຸປະກອນ</h1>
         <div className="flex items-center gap-2">
-          
-          <Button onClick={() => navigate('/patient/create')} icon={iconAdd} className="bg-primary">
-            ເພີ່ມຂໍ້ມູນຢາ
+          <Button
+            onClick={() => navigate('/medicines/create')}
+            icon={iconAdd}
+            className="bg-primary"
+          >
+            ເພີ່ມຂໍ້ມູນ
           </Button>
         </div>
       </div>
 
-      <div className="grid w-full  gap-4 p-4">
+      <div className="grid w-full gap-4 p-4">
         <Search
           type="text"
           name="search"
-          placeholder="ຄົ້ນຫາຊື່ພະນັກງານ"
-          className="rounded border-stroke"
+          placeholder="ຄົ້ນຫາຊື່ຢາ..."
+          className="rounded border border-stroke dark:border-strokedark"
+          onChange={(e) => {
+            const query = e.target.value;
+            setSearchQuery(query);
+          }}
         />
-
-      
       </div>
 
-      <div className="text-sm">
+      <div className="text-md text-strokedark dark:text-bodydark3">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-max table-auto">
+          <table className="w-full min-w-max table-auto border-collapse">
             <thead>
-              <tr className="border-b border-gray-300 bg-gray-2 text-left dark:bg-meta-4">
+              <tr className="border-b border-gray-300 bg-gray-100 text-left dark:bg-meta-4 bg-blue-100">
                 {MedicinesHeaders.map((header, index) => (
-                  <th key={index} className="px-4 py-4 font-normal text-primarySecond dark:font-medium border-b border-stroke dark:text-gray-500">
+                  <th
+                    key={index}
+                    className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300"
+                  >
                     {header.name}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {patients.length > 0 ? (
-                patients.map((patient, index) => (
-                  <tr key={index} className="border-b border-stroke dark:border-strokedark">
-                    <td className="p-4 px-4">
-                      <input
-                        className="h-5 w-5"
-                        type="checkbox"
-                        onChange={(e) => handleSelectPatient(e, patient.patient_id.toString())} // Updated to use patient_id
-                        checked={selectedPatients.includes(patient.patient_id.toString())} // Updated to use patient_id
-                      />
+              {filteredMedicines.length > 0 ? (
+                filteredMedicines.map((medicine, index) => (
+                  <tr
+                    key={index}
+                    className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
+                  >
+                    <td className="px-4 py-4">{medicine.med_id}</td>
+                    <td className="px-4 py-4">{medicine.med_name}</td>
+                    <td className="px-4 py-4">{medicine.qty}</td>
+                    <td className="px-4 py-4">{medicine.status}</td>
+                    <td className="px-4 py-4">
+                      {(medicine.price * 1).toLocaleString()}
                     </td>
-                    <td className="px-4">{`${patient.patient_name} ${patient.patient_surname}`}</td> {/* Combine patient_name and patient_surname */}
-                    <td className="px-4">{patient.phone1}</td> {/* Assuming phone1 is the correct phone */}
-                    <td className="px-4">{patient.dob}</td> {/* Use dob for age */}
-                    <td className="px-4">{patient.gender}</td>
-                    <td className="px-10">
-                      <button onClick={openDeleteModal(patient.patient_id.toString())} className="text-red-500">
-                        ລົບ
-                      </button>
+                    <td className="px-4 py-4">
+                      {new Date(medicine.expired).toLocaleDateString('th-TH', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                      })}
+                    </td>
+                    <td className="px-4 py-4">{getTypeName(medicine.medtype_id)}</td>
+                    <td className="px-3 py-4 text-center">
+                      <TableAction
+                        onView={() => handleViewMedicine(medicine.med_id)}
+                        onDelete={openDeleteModal(medicine.med_id)} // Pass medicine id
+                        onEdit={() => handleEditMedicine(medicine.med_id)} // Pass medicine id
+                      />
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="py-4 text-center text-gray-500">
+                  <td colSpan={5} className="py-4 text-center text-gray-500">
                     ບໍ່ມີຂໍ້ມູນ
                   </td>
                 </tr>
@@ -96,6 +208,13 @@ const MedicinesPage: React.FC = () => {
           </table>
         </div>
       </div>
+
+      <ConfirmModal
+        show={showModal}
+        setShow={setShowModal}
+        message="ທ່ານຕ້ອງການລົບຢານີ້ອອກຈາກລະບົບບໍ່？"
+        handleConfirm={handleDeleteMedicine}
+      />
     </div>
   );
 };

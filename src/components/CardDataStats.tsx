@@ -20,7 +20,7 @@ const CardDataStats: React.FC<CardDataStatsProps> = ({
 
       <div className="mt-4 flex items-end w-full">
         <div>
-          <h4 className="text-title-md font-bold text-black dark:text-white whitespace-nowrap">
+          <h4 className="text-title-md font-bold text-graydark dark:text-white whitespace-nowrap">
             {total}
           </h4>
         </div>

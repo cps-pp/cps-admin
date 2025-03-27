@@ -25,6 +25,8 @@ import DetailCategory from '@/pages/Manager/Category/detail';
 import CreateServiceList from '@/pages/Manager/ServiceList/create';
 import DetailServiceList from '@/pages/Manager/ServiceList/detail';
 import EditServicerList from '@/pages/Manager/ServiceList/edit';
+import CreateMedicines from '@/pages/Manager/Medicines/create';
+import EditMedicines from '@/pages/Manager/Medicines/edit';
 
 export interface IRoute {
   path: string;
@@ -99,12 +101,27 @@ export const ROUTES: IRoute[] = [
     title: 'Medicines | CPS Admin',
     component: <MedicinesPage />,
   },
+  {
+    path: '/medicines/create',
+    title: 'Medicines Create | CPS Admin',
+    component: <CreateMedicines />,
+  },
+  {
+    path: '/medicines/edit/:id',
+    title: 'Medicines Edit | CPS Admin',
+    component: <EditMedicines />,
+  },
+  {
+    path: '/medicines/detail/:id',
+    title: 'Medicines Detail | CPS Admin',
+    component: <MedicinesPage />,
+  },
 // -------------------------- EquipmentPage Path --------------------------------
-{
-  path: '/manager/equipment',
-  title: 'Equipment | CPS Admin',
-  component: <EquipmentPage />,
-},
+// {
+//   path: '/manager/equipment',
+//   title: 'Equipment | CPS Admin',
+//   component: <EquipmentPage />,
+// },
 
 // -------------------------- Service Path --------------------------------
 {

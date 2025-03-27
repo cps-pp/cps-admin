@@ -22,7 +22,7 @@ const CreatePatient: React.FC = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, gender }),
       });
 
       const result = await response.json();
@@ -38,13 +38,24 @@ const CreatePatient: React.FC = () => {
   };
 
   return (
-    <div className="rounded bg-white pt-2 dark:bg-boxdark">
-      <div className="flex items-center justify-between border-b border-stroke px-4  dark:border-strokedark">
-        <h1 className="text-md md:text-lg lg:text-xl font-medium  text-strokedark dark:text-bodydark3">ເພີ່ມຂໍ້ມູນຄົນເຈັບ</h1>
-        <BackButton className="mb-4" />
+    <div className="rounded bg-white pt-4 dark:bg-boxdark">
+      <div className="flex items-center  border-b border-stroke px-4 dark:border-strokedark pb-4">
+        <BackButton className="" />
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-6">
+          ເພີ່ມຂໍ້ມູນຄົນເຈັບ
+        </h1>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1  gap-4 px-4 pt-4 ">
+      <Input
+        label="ຊື່ຄົນເຈັບ"
+        name="patient_id"
+        type="text"
+        placeholder="ປ້ອນລະຫັດຄົນເຈັບ"
+        register={register}
+        formOptions={{ required: "ກະລຸນາປ້ອນລະຫັດຄົນເຈັບກ່ອນ" }}
+        errors={errors}
+      />
       <Input
         label="ຊື່ຄົນເຈັບ"
         name="patient_name"
@@ -64,15 +75,16 @@ const CreatePatient: React.FC = () => {
         errors={errors}
       />
       
-        <Select
-          label="ເພດ"
-          name="ເພດ"
-          options={['ຊາຍ', 'ຍິງ']}
-          register={register}
-          errors={errors}
-          value={gender} // Pass the selected gender value
-          onSelect={(e) => setGender(e.target.value)} // Handle gender selection
-        />
+      <Select
+  label="ເພດ"
+  name="gender"
+  options={['ຊາຍ', 'ຍິງ']}
+  register={register}
+  errors={errors}
+  value={gender}
+  onSelect={(e) => setGender(e.target.value)}
+/>
+
 
         <DatePicker
         select=""

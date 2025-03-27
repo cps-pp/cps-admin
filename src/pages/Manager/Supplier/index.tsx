@@ -50,7 +50,7 @@ const SupplierPage: React.FC = () => {
       
       </div>
 
-      <div className="text-sm">
+      {/* <div className="text-sm">
         <div className="overflow-x-auto">
           <table className="w-full min-w-max table-auto">
             <thead>
@@ -70,13 +70,13 @@ const SupplierPage: React.FC = () => {
                       <input
                         className="h-5 w-5"
                         type="checkbox"
-                        onChange={(e) => handleSelectPatient(e, patient.patient_id.toString())} // Updated to use patient_id
-                        checked={selectedPatients.includes(patient.patient_id.toString())} // Updated to use patient_id
+                        onChange={(e) => handleSelectPatient(e, patient.patient_id.toString())}
+                        checked={selectedPatients.includes(patient.patient_id.toString())}
                       />
                     </td>
-                    <td className="px-4">{`${patient.patient_name} ${patient.patient_surname}`}</td> {/* Combine patient_name and patient_surname */}
-                    <td className="px-4">{patient.phone1}</td> {/* Assuming phone1 is the correct phone */}
-                    <td className="px-4">{patient.dob}</td> {/* Use dob for age */}
+                    <td className="px-4">{`${patient.patient_name} ${patient.patient_surname}`}</td> 
+                    <td className="px-4">{patient.phone1}</td> 
+                    <td className="px-4">{patient.dob}</td> 
                     <td className="px-4">{patient.gender}</td>
                     <td className="px-10">
                       <button onClick={openDeleteModal(patient.patient_id.toString())} className="text-red-500">
@@ -95,7 +95,7 @@ const SupplierPage: React.FC = () => {
             </tbody>
           </table>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

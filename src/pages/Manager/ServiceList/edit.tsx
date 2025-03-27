@@ -91,7 +91,7 @@ const EditServicerList: React.FC = () => {
           <button
             className="px-6 py-2 text-md font-medium text-red-500"
             type="button"
-            onClick={() => navigate('/manager/patient')}
+            onClick={() => navigate('/manager/servicelist')}
           >
             ຍົກເລິກ
           </button>

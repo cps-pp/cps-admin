@@ -184,13 +184,13 @@ export const MENU: IMenu = [
         path: '/manager/category',
       },
       {
-        name: 'ຂໍ້ມູນຢາ',
+        name: 'ຂໍ້ມູນຢາ ແລະ ອຸປະກອນ',
         path: '/manager/medicines',
       },
-      {
-        name: 'ຂໍ້ມູນອຸປະກອນ',
-        path: '/manager/equipment',
-      },
+      // {
+      //   name: 'ຂໍ້ມູນອຸປະກອນ',
+      //   path: '/manager/equipment',
+      // },
       {
         name: 'ຂໍ້ມູນລາຍການບໍລິການ',
         path: '/manager/servicelist',

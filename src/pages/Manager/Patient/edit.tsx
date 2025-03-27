@@ -20,6 +20,7 @@ const EditPatient: React.FC = () => {
     watch,
   } = useForm({
     defaultValues: {
+      patient_id:'',
       patient_name: '',
       patient_surname: '',
       gender: '',
@@ -99,6 +100,15 @@ const EditPatient: React.FC = () => {
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 gap-4 px-4 pt-4 "
       >
+         <Input
+                label="ຊື່ຄົນເຈັບ"
+                name="patient_id"
+                type="text"
+                placeholder="ປ້ອນລະຫັດຄົນເຈັບ"
+                register={register}
+                formOptions={{ required: "ກະລຸນາປ້ອນລະຫັດຄົນເຈັບກ່ອນ" }}
+                errors={errors}
+              />
         <Input
           label="ຊື່ຄົນເຈັບ"
           name="patient_name"
