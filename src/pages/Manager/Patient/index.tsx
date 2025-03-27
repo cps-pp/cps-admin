@@ -8,13 +8,14 @@ import axiosCreate from '@/api/axios';
 import { TableAction } from '@/components/Tables/TableAction';
 import ConfirmModal from '@/components/Modal';
 import Alerts from '@/components/Alerts';
+import PatientStatsCard from './column/PatientStatsCard';
 
 const PatientPage: React.FC = () => {
-  const [patients, setPatients] = useState<any[]>([]); // Data ของผู้ป่วย
-  const [filteredPatients, setFilteredPatients] = useState<any[]>([]); // Data ที่กรองแล้ว
+  const [patients, setPatients] = useState<any[]>([]); 
+  const [filteredPatients, setFilteredPatients] = useState<any[]>([]); 
   const [showModal, setShowModal] = useState(false);
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState(''); // ค่าของการค้นหาที่ผู้ใช้ป้อน
+  const [searchQuery, setSearchQuery] = useState(''); 
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
@@ -31,9 +32,9 @@ const PatientPage: React.FC = () => {
         }
 
         const data = await response.json();
-        console.log('Data received:', data); // Debugging
-        setPatients(data.data); // บันทึกข้อมูลผู้ป่วย
-        setFilteredPatients(data.data); // เริ่มต้นให้ผลลัพธ์เป็นทั้งหมด
+        console.log('Data received:', data); 
+        setPatients(data.data); 
+        setFilteredPatients(data.data); 
       } catch (error) {
         console.error('Error fetching patients:', error);
       } finally {
@@ -46,7 +47,7 @@ const PatientPage: React.FC = () => {
 
   const openDeleteModal = (id: string) => () => {
     setSelectedPatientId(id);
-    setShowModal(true); // เปิด modal การยืนยันการลบ
+    setShowModal(true); 
   };
 
   const handleDeletePatient = async () => {
@@ -108,7 +109,12 @@ const PatientPage: React.FC = () => {
   };
 
   return (
+    <>
+    <div className=" pb-4">
+        <PatientStatsCard patients={filteredPatients} />
+      </div>
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
+      
       <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">ຈັດການຂໍ້ມູນຄົນເຈັບ</h1>
         <div className="flex items-center gap-2">
@@ -132,7 +138,7 @@ const PatientPage: React.FC = () => {
           onChange={(e) => {
             const query = e.target.value;
             setSearchQuery(query);
-            handleSearch(query); // Trigger search on input change
+            handleSearch(query); 
           }}
         />
       </div>
@@ -159,7 +165,7 @@ const PatientPage: React.FC = () => {
                     key={index}
                     className="border-b border-stroke dark:border-strokedark  hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
-                    {/* <td className="px-4 py-4">{patient.patient_id}</td> */}
+                    <td className="px-4 py-4">{patient.patient_id}</td>
                     <td className="px-4 py-4">{patient.patient_name}</td>
                     <td className="px-4 py-4">{patient.patient_surname}</td>
                     <td className="px-4 py-4">{patient.gender}</td>
@@ -178,8 +184,8 @@ const PatientPage: React.FC = () => {
                     <td className="px-3 py-4 text-center">
                       <TableAction
                         onView={() => handleViewPatient(patient.patient_id)}
-                        onDelete={openDeleteModal(patient.patient_id)} // Pass patient id
-                        onEdit={() => handleEditPatient(patient.patient_id)} // Pass patient id
+                        onDelete={openDeleteModal(patient.patient_id)} 
+                        onEdit={() => handleEditPatient(patient.patient_id)} 
                       />
                     </td>
                   </tr>
@@ -204,6 +210,7 @@ const PatientPage: React.FC = () => {
         handleConfirm={handleDeletePatient} // Handle deletion on confirm
       />
     </div>
+    </>
   );
 };
 

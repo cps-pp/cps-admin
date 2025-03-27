@@ -5,47 +5,53 @@ import Button from '@/components/Button';
 import Input from '@/components/Forms/Input_two';
 import BackButton from '@/components/BackButton';
 
-const EditCate: React.FC = () => {
+const EditExChange: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors }, setValue } = useForm();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCategoryData = async () => {
+    const fetchListData = async () => {
       try {
-        const response = await fetch(`http://localhost:4000/manager/category/${id}`);
+        const response = await fetch(`http://localhost:4000/manager/exchange/${id}`);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
-        setValue('type_name', data.data.type_name);
+        setValue('ex_type', data.data.ex_type);
+        setValue('ex_rate', data.data.ex_rate);
+
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching category data:', error);
+        console.error('Error fetching exchange data:', error);
       }
     };
 
-    fetchCategoryData();
+    fetchListData();
   }, [id, setValue]);
 
   const handleSave = async (formData: any) => {
     try {
-      const response = await fetch(`http://localhost:4000/manager/category/${id}`, {
+      const response = await fetch(`http://localhost:4000/manager/exchange/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ type_name: formData.type_name }), // ส่ง type_name
+        body: JSON.stringify({ 
+            ser_name: formData.ex_type,
+            price: formData.ex_rate
+          })
+        
       });
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      navigate('/manager/category'); 
+      navigate('/manager/exchange'); 
     } catch (error) {
-      console.error('Error saving category:', error);
+      console.error('Error saving exchange:', error);
     }
   };
 
@@ -59,23 +65,32 @@ const EditCate: React.FC = () => {
           ແກ້ໄຂ
         </h1>
       </div>
+
       <form onSubmit={handleSubmit(handleSave)} className="mt-4 px-4">
-        <Input
-          label="ຊື່ປະເພດ"
-          name="type_name"
-          type="text"
-          placeholder="ປ້ອນຊື່ປະເພດ"
-          register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນຊື່ປະເພດ' }}
-          errors={errors}
-          className="text-strokedark dark:text-bodydark3"
-        />
+      <Input
+        label="ສະກຸນເງິນ"
+        name="ex_type"
+        type="text"
+        placeholder="ປ້ອນສະກຸນເງິນ"
+        register={register}
+        formOptions={{ required: "ກະລຸນາປ້ອນສະກຸນເງິນກ່ອນ" }}
+        errors={errors}
+      />
+      <Input
+        label="ຈຳນວນເລດ"
+        name="ex_rate"
+        type="text"
+        placeholder="ປ້ອນເລດ"
+        register={register}
+        formOptions={{ required: "ກະລຸນາປ້ອນຈຳນວນກ່ອນ" }}
+        errors={errors}
+      />
 
         <div className="mt-8 flex justify-end space-x-4 col-span-full py-4">
           <button
             className="px-6 py-2 text-md font-medium text-red-500"
             type="button"
-            onClick={() => navigate('/manager/patient')}
+            onClick={() => navigate('/manager/exchange')}
           >
             ຍົກເລິກ
           </button>
@@ -88,4 +103,4 @@ const EditCate: React.FC = () => {
   );
 };
 
-export default EditCate;
+export default EditExChange;

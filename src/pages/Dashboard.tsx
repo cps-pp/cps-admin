@@ -1,28 +1,91 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import CardDataStats from '../components/CardDataStats';
 import MonthChart from '../components/Charts/MonthChart';
 import BarChart from '../components/Charts/BarChart';
 import WeekChart from '../components/Charts/WeekChart';
 
 const Dashboard: React.FC = () => {
+  const [patients, setPatients] = useState<number | null>(null);
+  const [filteredPatients, setFilteredPatients] = useState<any[]>([]); 
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`http://localhost:4000/manager/patient`, {
+          method: 'GET',
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Data received:', data); 
+        
+        // Set total number of patients
+        setPatients(data.data.length);
+        
+        // Set filtered patients (in case you need it later)
+        setFilteredPatients(data.data);
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+        setPatients(0);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPatients();
+  }, []);
+
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
-        <CardDataStats title="ຄົນເຈັບທັງໝົດ" total="60">
-        <svg
+        
+        <CardDataStats title="ລາຍຮັບທັງໝົດ" total="60,000,000 ກີບ">
+          <svg
+            className="w-6 h-6 text-blue-500 dark:text-white"
+            aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
-            width="1.7em"
-            height="1.7em"
-            className="text-blue-500 dark:text-white"
+            width="24"
+            height="24"
+            fill="none"
             viewBox="0 0 24 24"
           >
             <path
-              fill="currentColor"
-              d="M20 17q.86 0 1.45.6t.58 1.4L14 22l-7-2v-9h1.95l7.27 2.69q.78.31.78 1.12q0 .47-.34.82t-.86.37H13l-1.75-.67l-.33.94L13 17zM16 3.23Q17.06 2 18.7 2q1.36 0 2.3 1t1 2.3q0 1.03-1 2.46t-1.97 2.39T16 13q-2.08-1.89-3.06-2.85t-1.97-2.39T10 5.3q0-1.36.97-2.3t2.34-1q1.6 0 2.69 1.23M.984 11H5v11H.984z"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M10 3v4a1 1 0 0 1-1 1H5m4 10v-2m3 2v-6m3 6v-3m4-11v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7.914a1 1 0 0 1 .293-.707l3.914-3.914A1 1 0 0 1 9.914 3H18a1 1 0 0 1 1 1Z"
             />
           </svg>
         </CardDataStats>
-        <CardDataStats title="ການນັດໝາຍທັງໝົດ" total="3,000">
+        <CardDataStats title="ນັດໝາຍທັງໝົດ" total="30 ນັດໝາຍ">
+          <svg
+            className="w-9 h-6 text-blue-500 dark:text-white"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            width="1.7em"
+            height="1.7em"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z"
+            />
+          </svg>
+        </CardDataStats>
+        <CardDataStats 
+          title="ຄົນເຈັບທັງໝົດ" 
+          total={patients !== null ? `${patients} ຄົນ` : "ກຳລັງໂຫຼດ..."}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="1.7em"
@@ -43,39 +106,27 @@ const Dashboard: React.FC = () => {
             </g>
           </svg>
         </CardDataStats>
-        <CardDataStats title="Youth Ambassadors" total="300">
+        <CardDataStats title="ທ່ານຫມໍທັງໝົດ" total="2 ຄົນ">
           <svg
+            className="w-9 h-6 text-blue-500 dark:text-white"
+            aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
-            width="1.7em"
-            height="1.7em"
-            className="text-blue-500 dark:text-white"
+            width="24"
+            height="24"
+            fill="none"
             viewBox="0 0 24 24"
           >
             <path
-              fill="currentColor"
-              d="M20 17q.86 0 1.45.6t.58 1.4L14 22l-7-2v-9h1.95l7.27 2.69q.78.31.78 1.12q0 .47-.34.82t-.86.37H13l-1.75-.67l-.33.94L13 17zM16 3.23Q17.06 2 18.7 2q1.36 0 2.3 1t1 2.3q0 1.03-1 2.46t-1.97 2.39T16 13q-2.08-1.89-3.06-2.85t-1.97-2.39T10 5.3q0-1.36.97-2.3t2.34-1q1.6 0 2.69 1.23M.984 11H5v11H.984z"
-            />
-          </svg>
-        </CardDataStats>
-        <CardDataStats title="Skills trained" total="32">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="1.7em"
-            height="1.7em"
-            className="text-blue-500 dark:text-white"
-            viewBox="0 0 32 32"
-          >
-            <path
-              fill="currentColor"
-              d="M2 7.25A3.25 3.25 0 0 1 5.25 4h21.5A3.25 3.25 0 0 1 30 7.25v14.5A3.25 3.25 0 0 1 26.75 25H13.5v-1.893l.063-.107H26.75c.69 0 1.25-.56 1.25-1.25V7.25C28 6.56 27.44 6 26.75 6H5.25C4.56 6 4 6.56 4 7.25v6.187a7 7 0 0 0-2 1.732zM13 19.5a5.5 5.5 0 1 1-11 0a5.5 5.5 0 0 1 11 0m-1 5.362A6.97 6.97 0 0 1 7.5 26.5A6.97 6.97 0 0 1 3 24.862V29a1 1 0 0 0 1.528.849l2.972-1.85l2.972 1.85a1 1 0 0 0 1.528-.85zM8 11a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H9a1 1 0 0 1-1-1m9 6a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2z"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeWidth="2"
+              d="M16 19h4a1 1 0 0 0 1-1v-1a3 3 0 0 0-3-3h-2m-2.236-4a3 3 0 1 0 0-4M3 18v-1a3 3 0 0 1 3-3h4a3 3 0 0 1 3 3v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Zm8-10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
             />
           </svg>
         </CardDataStats>
       </div>
 
       <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
-        <BarChart />
-        <WeekChart />
         <MonthChart />
       </div>
     </>

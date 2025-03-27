@@ -5,7 +5,7 @@ import Input from "@/components/Forms/Input_two";
 import React, { useState } from "react";
 import BackButton from "@/components/BackButton";
 
-const CreateServiceList: React.FC = () => {
+const CreateExChange: React.FC = () => {
   const navigate = useNavigate();
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
 
@@ -13,7 +13,7 @@ const CreateServiceList: React.FC = () => {
 
   const onSubmit = async (data: any) => {
     try {
-      const response = await fetch("http://localhost:4000/manager/servicelist", {
+      const response = await fetch("http://localhost:4000/manager/exchange", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -27,7 +27,7 @@ const CreateServiceList: React.FC = () => {
       }
 
       reset();
-      navigate("/manager/servicelist");
+      navigate("/manager/exchange");
     } catch (error: any) {
       alert(error.message || "ມີຂໍ້ຜິດພາດ");
     }
@@ -43,8 +43,8 @@ const CreateServiceList: React.FC = () => {
     </div>
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1  gap-4 px-4 pt-4">
       <Input
-        label="ລະຫັດ"
-        name="ser_id"
+        label="ລະຫັດອັດຕາແລກປ່ຽນ"
+        name="ex_id"
         type="text"
         placeholder="ປ້ອນລະຫັດ"
         register={register}
@@ -52,27 +52,27 @@ const CreateServiceList: React.FC = () => {
         errors={errors}
       />
       <Input
-        label="ຊື່ລາຍການ"
-        name="ser_name"
+        label="ສະກຸນເງິນ"
+        name="ex_type"
         type="text"
-        placeholder="ປ້ອນຊຶ່ລາຍການ"
+        placeholder="ປ້ອນສະກຸນເງິນ"
         register={register}
-        formOptions={{ required: "ກະລຸນາປ້ອນຊື່ລາຍການກ່ອນ" }}
+        formOptions={{ required: "ກະລຸນາປ້ອນສະກຸນເງິນກ່ອນ" }}
         errors={errors}
       />
       <Input
-        label="ລາຄາ"
-        name="price"
+        label="ຈຳນວນເລດ"
+        name="ex_rate"
         type="text"
-        placeholder="ປ້ອນລາຄາ"
+        placeholder="ປ້ອນເລດ"
         register={register}
-        formOptions={{ required: "ກະລຸນາປ້ອນລາຄາກ່ອນ" }}
+        formOptions={{ required: "ກະລຸນາປ້ອນເລດຫກ່ອນ" }}
         errors={errors}
       />
       
       
         <div className="mt-8 flex justify-end space-x-4 col-span-full px-4 py-4">
-          <button className="px-6 py-2 text-md font-medium uppercase text-red-500" type="button" onClick={() => navigate("/manager/servicelist")}>
+          <button className="px-6 py-2 text-md font-medium uppercase text-red-500" type="button" onClick={() => navigate("/manager/exchange")}>
           ຍົກເລິກ
           </button>
           <Button variant="save" type="submit">
@@ -84,4 +84,4 @@ const CreateServiceList: React.FC = () => {
   );
 };
 
-export default CreateServiceList;
+export default CreateExChange;

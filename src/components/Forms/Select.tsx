@@ -29,7 +29,7 @@ const Select = ({
           {...register(name, { required: true })}
           value={value}
           onChange={onSelect}
-          className="relative z-20 w-full  text-strokedark dark:text-bodydark3 appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:disabled:bg-meta-4 dark:focus:border-primary capitalize"
+          className="relative z-20 w-full  text-strokedark dark:text-bodydark3  appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:disabled:bg-meta-4 dark:focus:border-primary capitalize"
         >
           <option value="" disabled>
             ເລືອກ{name}

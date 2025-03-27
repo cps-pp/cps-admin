@@ -147,13 +147,15 @@ const ServicePage: React.FC = () => {
                     key={index}
                     className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
+                    <td className="px-4 py-4">{service.ser_id}</td>
+
                     <td className="px-4 py-4">{service.ser_name}</td>
-                    <td className="px-4 py-4">{(service.price * 1000).toLocaleString()}</td>
+                    <td className="px-4 py-4">{(service.price * 1).toLocaleString()}</td>
 
 
                     <td className="px-3 py-4 text-center">
                       <TableAction
-                        onView={() => handleViewService(service.ser_id)}
+                        // onView={() => handleViewService(service.ser_id)}
                         onDelete={openDeleteModal(service.ser_id)}
                         onEdit={() => handleEditService(service.ser_id)}
                       />

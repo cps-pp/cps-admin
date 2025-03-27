@@ -1,7 +1,7 @@
 import { ITableHeader } from '@/types/table';
 
 export const PatientHeaders: ITableHeader[] = [
-  // { id: 'ລະຫັດ', name: 'ລະຫັດ', sortable: true },
+  { id: 'ລະຫັດ', name: 'ລະຫັດ', sortable: true },
   { id: 'ຊື່', name: 'ຊື່', sortable: true },
   { id: 'ນາມສະກຸນ', name: 'ນາມສະກຸນ', sortable: true },
   { id: 'ເພດ', name: 'ເພດ', sortable: true },

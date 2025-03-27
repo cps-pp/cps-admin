@@ -148,13 +148,15 @@ const CategoryPage: React.FC = () => {
                     key={index}
                     className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
+                    <td className="px-4 py-4">{cate.medtype_id}</td>
+
                     <td className="px-4 py-4">{cate.type_name}</td>
                     
                     <td className="px-3 py-4 text-center">
                       <TableAction
-                        onView={() => handleViewCategory(cate.medtype_id)}
-                        onDelete={openDeleteModal(cate.medtype_id)} // Pass category id
-                        onEdit={() => handleEditCategory(cate.medtype_id)} // Pass category id
+                        // onView={() => handleViewCategory(cate.medtype_id)}
+                        onDelete={openDeleteModal(cate.medtype_id)} 
+                        onEdit={() => handleEditCategory(cate.medtype_id)} 
                       />
                     </td>
                   </tr>

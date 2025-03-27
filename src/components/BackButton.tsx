@@ -19,9 +19,25 @@ const BackButton: React.FC<BackButtonProps> = ({ className, onClick }) => {
   return (
     <button
       onClick={handleBack}
-      className={`text-md inline-flex items-center justify-center rounded bg-slate-500 px-4 py-2 text-white hover:bg-opacity-90 ${className}`}
+      className={`text-md inline-flex items-center justify-center rounded bg-slate-500 px-2 py-2 text-white hover:bg-opacity-90 ${className}`}
     >
-      ກັບຄືນ
+      <svg
+        className="w-5 h-5 text-gray-800 dark:text-white "
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="m15 19-7-7 7-7"
+        />
+      </svg>
     </button>
   );
 };

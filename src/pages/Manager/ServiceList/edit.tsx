@@ -59,14 +59,12 @@ const EditServicerList: React.FC = () => {
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
-      <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
-          ແກ້ໄຂຂໍ້ມູນບໍລີການ
+       <div className="flex items-center  border-b border-stroke px-4 dark:border-strokedark pb-4">
+        <BackButton className="" />
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-6">
+          ແກ້ໄຂ
         </h1>
-        <BackButton className="mb-4" />
-
       </div>
-
       <form onSubmit={handleSubmit(handleSave)} className="mt-4 px-4">
       <Input
         label="ຊື່ລາຍການ"
@@ -91,7 +89,7 @@ const EditServicerList: React.FC = () => {
           <button
             className="px-6 py-2 text-md font-medium text-red-500"
             type="button"
-            onClick={() => navigate('/manager/patient')}
+            onClick={() => navigate('/manager/servicelist')}
           >
             ຍົກເລິກ
           </button>

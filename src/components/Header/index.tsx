@@ -8,7 +8,7 @@ const Header = (props: {
   sidebarOpen: string | boolean | undefined;
   setSidebarOpen: (arg0: boolean) => void;
 }) => {
-  const [user, setUser] = useState(null); // ตั้งค่า state สำหรับผู้ใช้
+  const [user, setUser] = useState(null); 
 
   return (
     <header className="sticky top-0 z-10 flex w-full bg-white drop-shadow-1 dark:bg-boxdark dark:drop-shadow-none">
@@ -72,7 +72,7 @@ const Header = (props: {
         <div className="hidden sm:block">
           <div className="relative">
             <button className="absolute left-0 top-1/2 -translate-y-1/2">
-              <svg
+              {/* <svg
                 className="fill-body hover:fill-primary dark:fill-bodydark dark:hover:fill-primary"
                 width="20"
                 height="20"
@@ -90,14 +90,14 @@ const Header = (props: {
                   clipRule="evenodd"
                   d="M13.2857 13.2857C13.6112 12.9603 14.1388 12.9603 14.4642 13.2857L18.0892 16.9107C18.4147 17.2362 18.4147 17.7638 18.0892 18.0892C17.7638 18.4147 17.2362 18.4147 16.9107 18.0892L13.2857 14.4642C12.9603 14.1388 12.9603 13.6112 13.2857 13.2857Z"
                 />
-              </svg>
+              </svg> */}
             </button>
 
-            <input
+            {/* <input
               type="text"
               placeholder="Type to search..."
               className="w-full bg-transparent pl-9 pr-4 text-black focus:outline-none dark:text-white xl:w-125"
-            />
+            /> */}
           </div>
         </div>
 
@@ -106,7 +106,7 @@ const Header = (props: {
             <DarkModeSwitcher />
             {/* <DropdownNotification /> */}
           </ul>
-          {/* <DropdownUser user={user} /> */}
+          <DropdownUser user={user} />
         </div>
       </div>
     </header>

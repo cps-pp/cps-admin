@@ -5,7 +5,7 @@ import Button from '@/components/Button';
 import Input from '@/components/Forms/Input_two';
 import BackButton from '@/components/BackButton';
 
-const CreateCategory: React.FC = () => {
+const CreateDisease: React.FC = () => {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [loading, setLoading] = useState(false);
@@ -13,27 +13,25 @@ const CreateCategory: React.FC = () => {
   const handleSave = async (formData: any) => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:4000/manager/category', {
+      const response = await fetch('http://localhost:4000/manager/disease', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          type_name: formData.type_name,
-          medtype_id: formData.medtype_id, // Add medtype_id here
-        }),
-        
+            disease_id: formData.disease_id,
+            disease_name: formData.disease_name, 
+          }),
       });
-      
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      navigate('/manager/category'); // กลับไปหน้าหมวดหมู่
+      navigate('/manager/disease'); 
     } catch (error) {
-      console.error('Error saving category:', error);
-      alert('ບໍ່ສາມາດເພີ່ມຂໍ້ມູນປະເພດຢາ');
+      console.error('Error saving disease:', error);
+      alert('ບໍ່ສາມາດເພີ່ມຂໍ້ມູນພະຍາດແຂວ້');
     } finally {
       setLoading(false);
     }
@@ -50,22 +48,22 @@ const CreateCategory: React.FC = () => {
 
       <form onSubmit={handleSubmit(handleSave)} className="mt-4 px-4">
       <Input
-          label="ລະຫັດປະເພດ"
-          name="medtype_id"
+          label="ລະຫັດພະຍາດແຂ້ວ"
+          name="disease_id"
           type="text"
-          placeholder="ປ້ອນລະຫັດປະເພດ"
+          placeholder="ປ້ອນລະຫັດພະຍາດແຂ້ວ"
           register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນລະຫັດປະເພດກ່ອນ' }}
+          formOptions={{ required: 'ກະລຸນາປ້ອນລະຫັດພະຍາດແຂ້ວກ່ອນ' }}
           errors={errors}
           className="text-strokedark dark:text-bodydark3"
         />
         <Input
-          label="ຊື່ປະເພດ"
-          name="type_name"
+          label="ພະຍາດແຂ້ວ"
+          name="disease_name"
           type="text"
-          placeholder="ປ້ອນຊື່ປະເພດ"
+          placeholder="ປ້ອນຊື່ພະຍາດແຂ້ວ"
           register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນຊື່ປະເພດກ່ອນ' }}
+          formOptions={{ required: 'ກະລຸນາປ້ອນຊື່ພະຍາດແຂ້ວກ່ອນ' }}
           errors={errors}
           className="text-strokedark dark:text-bodydark3"
         />
@@ -82,5 +80,4 @@ const CreateCategory: React.FC = () => {
     </div>
   );
 };
-
-export default CreateCategory;
+export default CreateDisease;
