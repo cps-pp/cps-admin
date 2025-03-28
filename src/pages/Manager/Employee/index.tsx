@@ -34,7 +34,7 @@ const EmployeePage: React.FC = () => {
         <div className="flex items-center gap-2">
           
           <Button onClick={() => navigate('/patient/create')} icon={iconAdd} className="bg-primary">
-            ເພີ່ມພະນັກງານ
+            ເພີ່ມພະນັກງານນນນນນ
           </Button>
         </div>
       </div>
