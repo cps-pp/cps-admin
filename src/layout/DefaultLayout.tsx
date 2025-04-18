@@ -1,10 +1,11 @@
 import React, { useState, ReactNode } from 'react';
 import Header from '../components/Header/index';
 import Sidebar from '../components/Sidebar/index';
-import { useLocation } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Alerts from '@/components/Alerts';
 
-const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
+// const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const DefaultLayout: React.FC = () => {
   const location = useLocation();
   const { pathname } = location;
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -19,7 +20,7 @@ const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
             <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
             <main>
               <div className="mx-auto max-w-screen-3xl p-4 md:p-6 3xl:p-10 relative">
-                {children}
+              <Outlet />
                 <Alerts />
               </div>
             </main>
@@ -27,7 +28,7 @@ const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
         </div>
       ) : (
         <main>
-          {children}
+          {/* {children} */}
           <Alerts />
         </main>
       )}

@@ -36,7 +36,7 @@ const EditCate: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ type_name: formData.type_name }), // ส่ง type_name
+        body: JSON.stringify({ type_name: formData.type_name }), 
       });
 
       if (!response.ok) {

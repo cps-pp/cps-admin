@@ -31,6 +31,9 @@ import CreateExChange from '@/pages/Manager/Exchange/create';
 import EditExChange from '@/pages/Manager/Exchange/edit';
 import CreateDisease from '@/pages/Manager/Disease/create';
 import EditDisease from '@/pages/Manager/Disease/edit';
+import EditSupplier from '@/pages/Manager/Supplier/edit';
+import CreateSupplier from '@/pages/Manager/Supplier/create';
+import CreateFollow from '@/pages/Follow/create';
 
 export interface IRoute {
   path: string;
@@ -45,7 +48,7 @@ export const ROUTES: IRoute[] = [
     component: <Dashboard />,
   },
   {
-    path: '/auth',
+    path: '/login',
     title: 'Signin | CPS Admin',
     component: <SignIn />,
   },
@@ -173,12 +176,12 @@ export const ROUTES: IRoute[] = [
 },
 {
   path: '/disease/create',
-  title: 'Disease | CPS Admin',
+  title: 'Disease Create | CPS Admin',
   component: <CreateDisease />,
 },
 {
   path: '/disease/edit/:id',
-  title: 'Disease | CPS Admin',
+  title: 'Disease Edit | CPS Admin',
   component: <EditDisease />,
 },
 // -------------------------- SupplierPage Path --------------------------------
@@ -191,11 +194,25 @@ export const ROUTES: IRoute[] = [
   component: <SupplierPage />,
 },
 
+
+{
+  path: '/supplier/edit/:id',
+  title: 'Supplier Edit | CPS Admin',
+  component: <EditSupplier />,
+},
+
+
+{
+  path: '/supplier/create',
+  title: 'Supplier Create | CPS Admin',
+  component: <CreateSupplier />,
+},
+
 // -------------------------- ServicePatient Path --------------------------------
 
 {
-  path: '/service',
-  title: 'Servicepatient | CPS Admin',
+  path: '/service/create',
+  title: 'Supplier Create | CPS Admin',
   component: <ServicePatientPage />,
 },
 
@@ -205,6 +222,12 @@ export const ROUTES: IRoute[] = [
   path: '/follow',
   title: 'Follow | CPS Admin',
   component: <FollowPage />,
+},
+
+{
+  path: '/follow/create',
+  title: 'Follow Create | CPS Admin',
+  component: <CreateFollow />,
 },
 
 

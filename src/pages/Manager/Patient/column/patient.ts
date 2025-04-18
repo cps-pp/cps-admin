@@ -11,5 +11,5 @@ export const PatientHeaders: ITableHeader[] = [
   { id: 'ແຂວງ', name: 'ແຂວງ', sortable: true },
   { id: 'ເບີຕີດຕໍ່1', name: 'ເບີຕິດຕໍ່1', sortable: true },
   { id: 'ເບີຕີດຕໍ່2', name: 'ເບີຕິດຕໍ່2', sortable: true },
-  { id: 'ຈັດການ', name: 'ຈັດການ', sortable: true },
+  { id: '', name: '', sortable: true },
 ];

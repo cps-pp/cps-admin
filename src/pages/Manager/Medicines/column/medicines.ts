@@ -9,7 +9,7 @@ export const MedicinesHeaders: ITableHeader[] = [
   { id: 'ລາຄາ', name: 'ລາຄາ', sortable: true },
   { id: 'ວັນໝົດອາຍຸ', name: 'ວັນໝົດອາຍຸ', sortable: true },
   { id: 'ປະເພດ', name: 'ປະເພດ', sortable: true },
-  { id: 'ຈັດການ', name: 'ຈັດການ', sortable: true },
+  { id: '', name: '', sortable: true },
 
 
  

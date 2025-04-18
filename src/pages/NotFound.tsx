@@ -27,7 +27,7 @@ function NotFound() {
             
             {/* Message */}
             <div className="text-center space-y-3">
-              <h2 className="text-2xl sm:text-3xl font-bold text-white">Page Not Found</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-700 dark:text-white">Page Not Found</h2>
               <p className="text-gray-300 max-w-md mx-auto">
                 The page you're looking for has drifted into the digital void. Don't worry, we'll help you find your way back.
               </p>

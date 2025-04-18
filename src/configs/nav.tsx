@@ -246,7 +246,7 @@ export const IMPORT: IMenu = [
 
 ];
 
-export const ADMIN: IMenu = [
+export const REPORTALL: IMenu = [
   // {
   //   name: 'Report',
   //   path: 'admin/account',

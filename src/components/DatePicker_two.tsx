@@ -12,7 +12,8 @@ type DatePickerProps = {
   name: string;
   formOptions?: RegisterOptions;
   setValue: UseFormSetValue<any>;
-  className?: string;  // Add className prop
+  className?: string;
+  withTime?: boolean; // ✅ เพิ่มตรงนี้
 };
 
 const DatePicker: React.FC<DatePickerProps> = ({
@@ -23,7 +24,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
   name,
   formOptions,
   setValue,
-  className,  // Destructure className prop
+  className,
+  withTime,  // Destructure className prop
 }) => {
   useEffect(() => {
     register(name, formOptions);
@@ -39,13 +41,22 @@ const DatePicker: React.FC<DatePickerProps> = ({
           placeholder="ເລືອກວັນເດືອນປີເກີດ (ວັນ/ເດືອນ/ປີ)"
           value={select}
           options={{
-            enableTime: false,
-            dateFormat: "d/m/Y",
+            enableTime: withTime || false, // ✅ เงื่อนไขตรงนี้
+            noCalendar: false,
+            time_24hr: true,
+            dateFormat: withTime ? "d/m/Y H:i" : "d/m/Y", // ✅ เปลี่ยนรูปแบบตามเวลา
+            allowInput: true,
+            defaultHour: 0,
+            defaultMinute: 0,
             prevArrow: '<span class="text-gray-600 dark:text-white">‹</span>',
             nextArrow: '<span class="text-gray-600 dark:text-white">›</span>',
           }}
           onChange={(date: Date[]) => {
-            setValue(name, new Date(date[0]).toISOString());
+            if (date.length > 0) {
+              setValue(name, new Date(date[0]).toISOString());
+            } else {
+              setValue(name, "");
+            }
           }}
         />
 
