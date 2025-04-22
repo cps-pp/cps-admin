@@ -5,11 +5,26 @@ import Button from '@/components/Button';
 import Input from '@/components/Forms/Input_two';
 import BackButton from '@/components/BackButton';
 
-const EditServicerList: React.FC = () => {
-  const { id } = useParams();
+
+
+interface EditProps {
+  id: string;
+  onClose: () => void;
+  setShow: (value: boolean) => void;
+  getList?: () => void;
+}
+
+
+const EditServicerList: React.FC<EditProps>= ({
+  id,
+  onClose,
+  setShow,
+  getList, 
+}) => {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors }, setValue } = useForm();
   const [loading, setLoading] = useState(true);
+  const [fetching, setFetching] = useState(false); 
 
   useEffect(() => {
     const fetchListData = async () => {
@@ -29,9 +44,12 @@ const EditServicerList: React.FC = () => {
     };
 
     fetchListData();
-  }, [id, setValue]);
+  }, [id, setValue,fetching]);
+
+
 
   const handleSave = async (formData: any) => {
+    setLoading(true);  
     try {
       const response = await fetch(`http://localhost:4000/manager/servicelist/${id}`, {
         method: 'PUT',
@@ -39,29 +57,35 @@ const EditServicerList: React.FC = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-            ser_name: formData.ser_name,
-            price: formData.price
-          })
-        
+          ser_name: formData.ser_name,
+          price: formData.price
+        })
       });
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      navigate('/manager/servicelist'); 
+      if (getList) {
+        getList();
+      }
+      
+      setFetching(!fetching);  
+      onClose(); 
     } catch (error) {
-      console.error('Error saving servicelist:', error);
+      console.error('Error saving disease:', error);
+    } finally {
+      setLoading(false); 
     }
   };
+
 
   if (loading) return <div>Loading...</div>;
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
-       <div className="flex items-center  border-b border-stroke px-4 dark:border-strokedark pb-4">
-        <BackButton className="" />
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-6">
+       <div className="flex items-center  border-b border-stroke  dark:border-strokedark pb-4">
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
           ແກ້ໄຂ
         </h1>
       </div>
@@ -86,13 +110,13 @@ const EditServicerList: React.FC = () => {
       />
 
         <div className="mt-8 flex justify-end space-x-4 col-span-full py-4">
-          <button
+          {/* <button
             className="px-6 py-2 text-md font-medium text-red-500"
             type="button"
             onClick={() => navigate('/manager/servicelist')}
           >
             ຍົກເລິກ
-          </button>
+          </button> */}
           <Button variant="save" type="submit">
             ບັນທຶກ
           </Button>

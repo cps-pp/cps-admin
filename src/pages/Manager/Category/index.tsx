@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { iconAdd } from '@/configs/icon';
 import Button from '@/components/Button';
@@ -7,62 +7,59 @@ import { TableAction } from '@/components/Tables/TableAction';
 import ConfirmModal from '@/components/Modal';
 import Alerts from '@/components/Alerts';
 import { CateHeaders } from './column/cate';
+import CreateCategory from './create';
+import EditCate from './edit';
 
 const CategoryPage: React.FC = () => {
-  const [categories, setCategory] = useState<any[]>([]); // Data ของหมวดหมู่
-  const [filteredCategories, setFilteredCategories] = useState<any[]>([]); // Data ที่กรองแล้ว
-  const [showModal, setShowModal] = useState(false);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState(''); // ค่าของการค้นหาที่ผู้ใช้ป้อน
-  const navigate = useNavigate();
+  const [categories, setCategory] = useState<any[]>([]);
+  const [filteredCategories, setFilteredCategories] = useState<any[]>([]);
+  const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    null,
+  );
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:4000/manager/category`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setCategory(data.data);
+      setFilteredCategories(data.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`http://localhost:4000/manager/category`, {
-          method: 'GET',
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Data received:', data); // Debugging
-        setCategory(data.data); // บันทึกข้อมูลหมวดหมู่
-        setFilteredCategories(data.data); // เริ่มต้นให้ผลลัพธ์เป็นทั้งหมด
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchCategories();
   }, []);
 
-  // Add a useEffect to apply search filtering whenever searchQuery or categories change
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setFilteredCategories(categories);
     } else {
-      const filtered = categories.filter(category => 
-        category.type_name.toLowerCase().includes(searchQuery.toLowerCase())
+      const filtered = categories.filter((category) =>
+        category.type_name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
       setFilteredCategories(filtered);
     }
   }, [searchQuery, categories]);
 
-  const openDeleteModal = (id: string) => () => {
-    setSelectedCategoryId(id);
-    setShowModal(true); 
-  };
-
   const handleDeleteCategory = async () => {
     if (!selectedCategoryId) return;
-  
+
     try {
       const response = await fetch(
         `http://localhost:4000/manager/category/${selectedCategoryId}`,
@@ -70,49 +67,54 @@ const CategoryPage: React.FC = () => {
           method: 'DELETE',
         },
       );
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-  
-      // Just update the categories state - the useEffect will automatically update filteredCategories
+
       setCategory((prevCategories) =>
         prevCategories.filter(
-          (category) => category.category_id !== selectedCategoryId && 
-                       category.medtype_id !== selectedCategoryId
+          (category) =>
+            category.category_id !== selectedCategoryId &&
+            category.medtype_id !== selectedCategoryId,
         ),
       );
-      
-      setShowModal(false);
-      setSelectedCategoryId(null); 
+
+      setShowDeleteModal(false);
+      setSelectedCategoryId(null);
     } catch (error) {
       console.error('Error deleting category:', error);
     }
   };
-  
-  const handleEditCategory = (id: string) => {
-    navigate(`/category/edit/${id}`);
+
+  const openDeleteModal = (id: string) => () => {
+    setSelectedCategoryId(id);
+    setShowDeleteModal(true);
   };
 
-  const handleViewCategory = (id: string) => {
-    navigate(`/category/detail/${id}`);
+  const handleEditCategory = (id: string) => {
+    setSelectedId(id);
+    setShowEditModal(true);
   };
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
-    <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-      <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">ຈັດການຂໍ້ມູນປະເພດຢາ</h1>
-      <div className="flex items-center gap-2">
-        <Button
-          onClick={() => navigate('/category/create')}
-          icon={iconAdd}
-          className="bg-primary"
-        >
-          ເພີ່ມຂໍ້ມູນຢາ
-        </Button>
+      <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+          ຈັດການຂໍ້ມູນປະເພດຢາ
+        </h1>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => setShowAddCategoryModal(true)}
+            icon={iconAdd}
+            className="bg-primary"
+          >
+            ເພີ່ມຂໍ້ມູນຢາ
+          </Button>
+        </div>
       </div>
-    </div>
 
+      {/* Search */}
       <div className="grid w-full gap-4 p-4">
         <Search
           type="text"
@@ -126,9 +128,10 @@ const CategoryPage: React.FC = () => {
         />
       </div>
 
+      {/* Table */}
       <div className="text-md text-strokedark dark:text-bodydark3">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-max table-auto border-collapse ">
+          <table className="w-full min-w-max table-auto border-collapse">
             <thead>
               <tr className="border-b border-gray-300 bg-gray-100 text-left dark:bg-meta-4 bg-blue-100">
                 {CateHeaders.map((header, index) => (
@@ -149,14 +152,11 @@ const CategoryPage: React.FC = () => {
                     className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
                     <td className="px-4 py-4">{cate.medtype_id}</td>
-
                     <td className="px-4 py-4">{cate.type_name}</td>
-                    
                     <td className="px-3 py-4 text-center">
                       <TableAction
-                        // onView={() => handleViewCategory(cate.medtype_id)}
-                        onDelete={openDeleteModal(cate.medtype_id)} 
-                        onEdit={() => handleEditCategory(cate.medtype_id)} 
+                        onDelete={openDeleteModal(cate.medtype_id)}
+                        onEdit={() => handleEditCategory(cate.medtype_id)}
                       />
                     </td>
                   </tr>
@@ -173,14 +173,261 @@ const CategoryPage: React.FC = () => {
         </div>
       </div>
 
+      {showAddCategoryModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="rounded-lg w-full max-w-2xl  relative px-4">
+            <button
+              onClick={() => setShowAddCategoryModal(false)}
+              className="absolute px-4 top-4 right-2 text-gray-500 hover:text-gray-700"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            <CreateCategory
+              setShow={setShowAddCategoryModal}
+              getListCategory={fetchCategories}
+            />
+          </div>
+        </div>
+      )}
+
+      {showEditModal && selectedId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
+          <div className="rounded-lg w-full max-w-2xl bg-white relative ">
+            <button
+              onClick={() => setShowEditModal(false)}
+              className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            <EditCate id={selectedId} onClose={() => setShowEditModal(false)} setShow={setShowEditModal} />
+            </div>
+          </div>
+      )}
+
+      {/* Confirm Delete Modal */}
       <ConfirmModal
-        show={showModal}
-        setShow={setShowModal}
+        show={showDeleteModal}
+        setShow={setShowDeleteModal}
         message="ທ່ານຕ້ອງການລົບປະເພດຢານີ້ອອກຈາກລະບົບບໍ່？"
-        handleConfirm={handleDeleteCategory} 
+        handleConfirm={handleDeleteCategory}
       />
     </div>
   );
 };
 
 export default CategoryPage;
+
+// import { useEffect, useState } from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import { iconAdd } from '@/configs/icon';
+// import Button from '@/components/Button';
+// import Search from '@/components/Forms/Search';
+// import { TableAction } from '@/components/Tables/TableAction';
+// import ConfirmModal from '@/components/Modal';
+// import Alerts from '@/components/Alerts';
+// import { CateHeaders } from './column/cate';
+
+// const CategoryPage: React.FC = () => {
+//   const [categories, setCategory] = useState<any[]>([]); // Data ของหมวดหมู่
+//   const [filteredCategories, setFilteredCategories] = useState<any[]>([]); // Data ที่กรองแล้ว
+//   const [showModal, setShowModal] = useState(false);
+//   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+//   const [searchQuery, setSearchQuery] = useState(''); // ค่าของการค้นหาที่ผู้ใช้ป้อน
+//   const navigate = useNavigate();
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     const fetchCategories = async () => {
+//       try {
+//         setLoading(true);
+//         const response = await fetch(`http://localhost:4000/manager/category`, {
+//           method: 'GET',
+//         });
+
+//         if (!response.ok) {
+//           throw new Error(`HTTP error! Status: ${response.status}`);
+//         }
+
+//         const data = await response.json();
+//         console.log('Data received:', data); // Debugging
+//         setCategory(data.data); // บันทึกข้อมูลหมวดหมู่
+//         setFilteredCategories(data.data); // เริ่มต้นให้ผลลัพธ์เป็นทั้งหมด
+//       } catch (error) {
+//         console.error('Error fetching categories:', error);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchCategories();
+//   }, []);
+
+//   // Add a useEffect to apply search filtering whenever searchQuery or categories change
+//   useEffect(() => {
+//     if (searchQuery.trim() === '') {
+//       setFilteredCategories(categories);
+//     } else {
+//       const filtered = categories.filter(category =>
+//         category.type_name.toLowerCase().includes(searchQuery.toLowerCase())
+//       );
+//       setFilteredCategories(filtered);
+//     }
+//   }, [searchQuery, categories]);
+
+//   const openDeleteModal = (id: string) => () => {
+//     setSelectedCategoryId(id);
+//     setShowModal(true);
+//   };
+
+//   const handleDeleteCategory = async () => {
+//     if (!selectedCategoryId) return;
+
+//     try {
+//       const response = await fetch(
+//         `http://localhost:4000/manager/category/${selectedCategoryId}`,
+//         {
+//           method: 'DELETE',
+//         },
+//       );
+
+//       if (!response.ok) {
+//         throw new Error(`HTTP error! Status: ${response.status}`);
+//       }
+
+//       // Just update the categories state - the useEffect will automatically update filteredCategories
+//       setCategory((prevCategories) =>
+//         prevCategories.filter(
+//           (category) => category.category_id !== selectedCategoryId &&
+//                        category.medtype_id !== selectedCategoryId
+//         ),
+//       );
+
+//       setShowModal(false);
+//       setSelectedCategoryId(null);
+//     } catch (error) {
+//       console.error('Error deleting category:', error);
+//     }
+//   };
+
+//   const handleEditCategory = (id: string) => {
+//     navigate(`/category/edit/${id}`);
+//   };
+
+//   const handleViewCategory = (id: string) => {
+//     navigate(`/category/detail/${id}`);
+//   };
+
+//   return (
+//     <div className="rounded bg-white pt-4 dark:bg-boxdark">
+//     <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
+//       <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">ຈັດການຂໍ້ມູນປະເພດຢາ</h1>
+//       <div className="flex items-center gap-2">
+//         <Button
+//           onClick={() => navigate('/category/create')}
+//           icon={iconAdd}
+//           className="bg-primary"
+//         >
+//           ເພີ່ມຂໍ້ມູນຢາ
+//         </Button>
+//       </div>
+//     </div>
+
+//       <div className="grid w-full gap-4 p-4">
+//         <Search
+//           type="text"
+//           name="search"
+//           placeholder="ຄົ້ນຫາຊື່ປະເພດ..."
+//           className="rounded border border-stroke dark:border-strokedark"
+//           onChange={(e) => {
+//             const query = e.target.value;
+//             setSearchQuery(query);
+//           }}
+//         />
+//       </div>
+
+//       <div className="text-md text-strokedark dark:text-bodydark3">
+//         <div className="overflow-x-auto">
+//           <table className="w-full min-w-max table-auto border-collapse ">
+//             <thead>
+//               <tr className="border-b border-gray-300 bg-gray-100 text-left dark:bg-meta-4 bg-blue-100">
+//                 {CateHeaders.map((header, index) => (
+//                   <th
+//                     key={index}
+//                     className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300 "
+//                   >
+//                     {header.name}
+//                   </th>
+//                 ))}
+//               </tr>
+//             </thead>
+//             <tbody>
+//               {filteredCategories.length > 0 ? (
+//                 filteredCategories.map((cate, index) => (
+//                   <tr
+//                     key={index}
+//                     className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
+//                   >
+//                     <td className="px-4 py-4">{cate.medtype_id}</td>
+
+//                     <td className="px-4 py-4">{cate.type_name}</td>
+
+//                     <td className="px-3 py-4 text-center">
+//                       <TableAction
+//                         // onView={() => handleViewCategory(cate.medtype_id)}
+//                         onDelete={openDeleteModal(cate.medtype_id)}
+//                         onEdit={() => handleEditCategory(cate.medtype_id)}
+//                       />
+//                     </td>
+//                   </tr>
+//                 ))
+//               ) : (
+//                 <tr>
+//                   <td colSpan={5} className="py-4 text-center text-gray-500">
+//                     ບໍ່ມີຂໍ້ມູນ
+//                   </td>
+//                 </tr>
+//               )}
+//             </tbody>
+//           </table>
+//         </div>
+//       </div>
+
+//       <ConfirmModal
+//         show={showModal}
+//         setShow={setShowModal}
+//         message="ທ່ານຕ້ອງການລົບປະເພດຢານີ້ອອກຈາກລະບົບບໍ່？"
+//         handleConfirm={handleDeleteCategory}
+//       />
+//     </div>
+//   );
+// };
+
+// export default CategoryPage;

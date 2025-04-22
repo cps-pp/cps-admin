@@ -5,8 +5,9 @@ import Button from '@/components/Button';
 import Search from '@/components/Forms/Search';
 import { TableAction } from '@/components/Tables/TableAction';
 import ConfirmModal from '@/components/Modal';
-import Alerts from '@/components/Alerts';
 import { SupHeaders } from './column/sup';
+import CreateSupplier from './create';
+import EditSupplier from './edit';
 
 const SupplierPage: React.FC = () => {
   const [suppliers, setSuppliers] = useState<any[]>([]); // Data ของ Supplier
@@ -18,35 +19,34 @@ const SupplierPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState(''); // ค่าของการค้นหาที่ผู้ใช้ป้อน
   const [loading, setLoading] = useState(true);
 
-  const navigate = useNavigate();
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // ดึงข้อมูล Supplier
-  useEffect(() => {
-    const fetchSuppliers = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('http://localhost:4000/manager/supplier', {
-          method: 'GET',
-        });
+  
+  const fetchSuppliers = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:4000/manager/supplier`);
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        setSuppliers(data.data); // บันทึกข้อมูล Supplier
-        setFilteredSuppliers(data.data); // เริ่มต้นให้ผลลัพธ์เป็นทั้งหมด
-      } catch (error) {
-        console.error('Error fetching suppliers:', error);
-      } finally {
-        setLoading(false);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
-    };
 
+      const data = await response.json();
+      setSuppliers(data.data);
+      setFilteredSuppliers(data.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchSuppliers();
   }, []);
 
-  // ฟังก์ชั่นกรอง Supplier ตามคำค้นหา
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setFilteredSuppliers(suppliers);
@@ -58,13 +58,11 @@ const SupplierPage: React.FC = () => {
     }
   }, [searchQuery, suppliers]);
 
-  // ฟังก์ชั่นเปิด Modal การลบ Supplier
   const openDeleteModal = (id: string) => () => {
     setSelectedSupplierId(id);
     setShowModal(true);
   };
 
-  // ฟังก์ชั่นลบ Supplier
   const handleDeleteSupplier = async () => {
     if (!selectedSupplierId) return;
 
@@ -90,12 +88,11 @@ const SupplierPage: React.FC = () => {
     }
   };
 
-  const handleViewSupplier = (id: string) => {
-    navigate(`/supplier/detail/${id}`);
-  };
   const handleEdit = (id: string) => {
-    navigate(`/supplier/edit/${id}`);
+    setSelectedId(id);
+    setShowEditModal(true);
   };
+
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
       <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
@@ -104,7 +101,7 @@ const SupplierPage: React.FC = () => {
         </h1>
         <div className="flex items-center gap-2">
           <Button
-            onClick={() => navigate('/supplier/create')}
+            onClick={() => setShowAddModal(true)}
             icon={iconAdd}
             className="bg-primary"
           >
@@ -159,10 +156,8 @@ const SupplierPage: React.FC = () => {
                     </td>
                     <td className="px-3 py-4 text-center">
                       <TableAction
-                        // onView={() => handleViewSupplier(supplier.sup_id)}
-                        onDelete={openDeleteModal(supplier.sup_id)} // Pass supplier id
+                        onDelete={openDeleteModal(supplier.sup_id)} 
                         onEdit={() => handleEdit(supplier.sup_id)}
-
                       />
                     </td>
                   </tr>
@@ -178,6 +173,70 @@ const SupplierPage: React.FC = () => {
           </table>
         </div>
       </div>
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="rounded-lg w-full max-w-2xl relative px-4 ">
+            <button
+              onClick={() => setShowAddModal(false)}
+              className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            <CreateSupplier
+              setShow={setShowAddModal}
+              getList={fetchSuppliers}
+            />
+          </div>
+        </div>
+      )}
+
+      {showEditModal && selectedId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
+          <div className="rounded-lg w-full max-w-2xl bg-white relative ">
+            <button
+              onClick={() => setShowEditModal(false)}
+              className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            <EditSupplier
+              id={selectedId}
+              onClose={() => setShowEditModal(false)}
+              setShow={setShowEditModal}
+              getList={fetchSuppliers}
+            />
+          </div>
+        </div>
+      )}
+
 
       <ConfirmModal
         show={showModal}

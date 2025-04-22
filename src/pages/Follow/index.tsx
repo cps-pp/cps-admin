@@ -8,12 +8,12 @@ import { TableAction } from '@/components/Tables/TableAction';
 import ConfirmModal from '@/components/Modal';
 import Alerts from '@/components/Alerts';
 import { FollowHeaders } from './column/follow';
-import AppointmentCard from './column/ApponitCard'; // Renaming to AppointmentCard
 
 const FollowPage: React.FC = () => {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [filteredAppointments, setFilteredAppointments] = useState<any[]>([]);
-  const [patientName, setPatientName] = useState<any[]>([]); // State to store patient data
+  const [patientName, setPatientName] = useState<any[]>([]);
+  const [empName, setEmpName] = useState<any[]>([]); // State to store patient data
   const [showModal, setShowModal] = useState(false);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<
     string | null
@@ -41,9 +41,15 @@ const FollowPage: React.FC = () => {
         }
 
         const data = await response.json();
+        console.log('API Response:', data);
+        console.log('Appointments data:', data.data);
         setAppointments(data.data);
         setFilteredAppointments(data.data);
+        setAppointments(data.data);
+        setFilteredAppointments(data.data);
+        console.log('Appointments after setting state:', data.data);
         const allAppointments = data.data;
+        console.log(response, '');
 
         setAppointments(allAppointments);
         setFilteredAppointments(allAppointments);
@@ -69,8 +75,6 @@ const FollowPage: React.FC = () => {
     fetchAppointments();
   }, []);
 
-
-  
   useEffect(() => {
     const fetchPatient = async () => {
       try {
@@ -94,6 +98,35 @@ const FollowPage: React.FC = () => {
 
     fetchPatient();
   }, []);
+
+  useEffect(() => {
+    const fetchDoctor = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:4000/manager/emp', {
+          method: 'GET',
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setEmpName(data.data); // Populate patientName state
+      } catch (error) {
+        console.error('Error fetching patient data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctor();
+  }, []);
+
+  const getDoctorName = (emp_id: number) => {
+    const emp = empName.find((employee) => employee.emp_id === emp_id);
+    return emp ? `${emp.emp_name} ${emp.emp_surname}` : 'ບໍ່ພົບຊື່';
+  };
 
   const getPatientName = (patient_id: number) => {
     const patient = patientName.find((pat) => pat.patient_id === patient_id);
@@ -160,10 +193,6 @@ const FollowPage: React.FC = () => {
 
   const handleEditAppointment = (id: string) => {
     navigate(`/follow/edit/${id}`);
-  };
-
-  const handleViewAppointment = (id: string) => {
-    navigate(`/follow/detail/${id}`);
   };
 
   return (
@@ -326,7 +355,6 @@ const FollowPage: React.FC = () => {
                       <td className="px-4 py-4">{appointment.appoint_id}</td>
                       <td className="px-4 py-4">
                         {getPatientName(appointment.patient_id)}{' '}
-                        {/* Corrected here */}
                       </td>
                       <td className="px-4 py-4">
                         {new Date(appointment.date_addmintted).toLocaleString(
@@ -341,8 +369,23 @@ const FollowPage: React.FC = () => {
                           },
                         )}
                       </td>
-                      <td className="px-4 py-4">{appointment.status}</td>
-                      <td className="px-4 py-4">{appointment.emp_id}</td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
+                            appointment.status === 'ກວດແລ້ວ'
+                              ? 'bg-green-100 text-green-700'
+                              : appointment.status === 'ລໍຖ້າ'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-gray-100 text-gray-700'
+                          }`}
+                        >
+                          {appointment.status}
+                        </span>
+                      </td>
+                      {/* <td className="px-4 py-4">{appointment.emp_id}</td> */}
+                      <td className="px-4 py-4">
+                        {getDoctorName(appointment.emp_id)}{' '}
+                      </td>
                       <td className="px-4 py-4">{appointment.description}</td>
                       <td className="px-3 py-4 text-center">
                         <TableAction

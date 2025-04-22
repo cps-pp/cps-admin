@@ -1,22 +1,56 @@
+
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 
 interface ProtectedRouteProps {
-  allowedRoles: Array<'admin' | 'superadmin'>;
-  children: React.ReactElement;
+  children: React.ReactNode;
+  allowedRoles: string[];
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, children }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
   const { role } = useAuth();
-
+  
+  console.log('ProtectedRoute - Current role:', role);
+  
   if (!role) {
+    // console.log('ProtectedRoute - Redirecting to login...');
     return <Navigate to="/login" replace />;
   }
-  if (!allowedRoles.includes(role)) {
-    return <Navigate to="/" replace />;
+  
+  if (allowedRoles.includes(role)) {
+    return <>{children}</>;
   }
-  return children;
+  
+  return <Navigate to="/login" replace />;
 };
 
 export default ProtectedRoute;
+// import React from 'react';
+// import { Navigate } from 'react-router-dom';
+// import { useAuth } from '../AuthContext';
+
+// interface ProtectedRouteProps {
+//   children: React.ReactNode;
+//   allowedRoles: string[];
+// }
+
+// const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
+//   const { role, isAuthenticated } = useAuth();
+
+//   if (isLoading) {
+//     return <div>Loading...</div>;
+//   }
+
+//   if (!isAuthenticated) {  
+//     return <Navigate to="/login" />;
+//   }
+
+//   if (role && allowedRoles.includes(role)) {
+//     return <>{children}</>;
+//   }
+
+//   return <Navigate to="/login" />;
+// };
+
+// export default ProtectedRoute;

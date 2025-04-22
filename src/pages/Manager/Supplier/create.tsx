@@ -4,11 +4,18 @@ import { useForm } from 'react-hook-form';
 import Button from '@/components/Button';
 import Input from '@/components/Forms/Input_two';
 import BackButton from '@/components/BackButton';
+interface CreateProps {
+  setShow: (value: boolean) => void;
+  getList: any;
+}
 
-const CreateSupplier: React.FC = () => {
+
+const CreateSupplier: React.FC<CreateProps> = ({setShow,getList}) => {
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors } } = useForm();
-  const [loading, setLoading] = useState(false);
+  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+ const [loading, setLoading] = useState(false);
+  
+
 
   const handleSave = async (formData: any) => {
     setLoading(true);
@@ -24,6 +31,9 @@ const CreateSupplier: React.FC = () => {
           address: formData.address,
           phone: formData.phone,
           status: formData.status,
+
+
+
         }),
       });
 
@@ -31,10 +41,12 @@ const CreateSupplier: React.FC = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      navigate('/manager/supplier');
+      setShow(false);
+      await getList(); 
+      reset();
     } catch (error) {
-      console.error('Error saving supplier:', error);
-      alert('ບໍ່ສາມາດເພີ່ມຂໍ້ມູນ Supplier ❌');
+      console.error('Error saving :', error);
+      alert('ບໍ່ສາມາດເພີ່ມຂໍ້ມູນ');
     } finally {
       setLoading(false);
     }
@@ -42,9 +54,8 @@ const CreateSupplier: React.FC = () => {
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
-      <div className="flex items-center border-b border-stroke px-4 dark:border-strokedark pb-4">
-        <BackButton className="" />
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-6">
+      <div className="flex items-center border-b border-stroke  dark:border-strokedark pb-4">
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
           ເພີ່ມຂໍ້ມູນ Supplier
         </h1>
       </div>
@@ -97,13 +108,13 @@ const CreateSupplier: React.FC = () => {
         />
 
         <div className="mt-8 flex justify-end space-x-4 col-span-full px-4 py-4">
-          <button
+          {/* <button
             className="px-6 py-2 text-md font-medium uppercase text-red-500"
             type="button"
             onClick={() => navigate('/manager/supplier')}
           >
             ຍົກເລິກ
-          </button>
+          </button> */}
           <Button variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </Button>

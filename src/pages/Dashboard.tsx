@@ -3,12 +3,23 @@ import CardDataStats from '../components/CardDataStats';
 import MonthChart from '../components/Charts/MonthChart';
 import BarChart from '../components/Charts/BarChart';
 import WeekChart from '../components/Charts/WeekChart';
+import { getAppointments } from '@/api/getAppointments';
+import { FollowHeaders } from './Follow/column/follow';
+import { TableAction } from '@/components/Tables/TableAction';
 
 const Dashboard: React.FC = () => {
   const [patients, setPatients] = useState<number | null>(null);
-  const [filteredPatients, setFilteredPatients] = useState<any[]>([]); 
+  const [filteredPatients, setFilteredPatients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filteredAppointments, setFilteredAppointments] = useState<any[]>([]);
+  const [patientName, setPatientName] = useState<any[]>([]);
+  const [empName, setEmpName] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [doneCount, setDoneCount] = useState(0);
+  const [waitingCount, setWaitingCount] = useState(0);
 
+  const [doctorCount, setDoctorCount] = useState(0);
   useEffect(() => {
     const fetchPatients = async () => {
       try {
@@ -20,14 +31,8 @@ const Dashboard: React.FC = () => {
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-
         const data = await response.json();
-        console.log('Data received:', data); 
-        
-        // Set total number of patients
         setPatients(data.data.length);
-        
-        // Set filtered patients (in case you need it later)
         setFilteredPatients(data.data);
       } catch (error) {
         console.error('Error fetching patients:', error);
@@ -39,11 +44,102 @@ const Dashboard: React.FC = () => {
 
     fetchPatients();
   }, []);
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const response = await fetch('http://localhost:4000/manager/emp');
+        const data = await response.json();
+        setDoctorCount(data.data.length);
+      } catch (error) {
+        console.error('Error fetching doctors:', error);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const data = await getAppointments();
+      setAppointments(data);
+      setFilteredAppointments(data);
+      setTotalCount(data.length);
+      setDoneCount(
+        data.filter((item: { status: string }) => item.status === 'ກວດແລ້ວ')
+          .length,
+      );
+      setWaitingCount(
+        data.filter((item: { status: string }) => item.status === 'ລໍຖ້າ')
+          .length,
+      );
+      setLoading(false);
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchPatient = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:4000/manager/patient', {
+          method: 'GET',
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setPatientName(data.data); // Populate patientName state
+      } catch (error) {
+        console.error('Error fetching patient data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPatient();
+  }, []);
+  useEffect(() => {
+    const fetchDoctor = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:4000/manager/emp', {
+          method: 'GET',
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setEmpName(data.data); // Populate patientName state
+      } catch (error) {
+        console.error('Error fetching patient data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctor();
+  }, []);
+
+  const getPatientName = (patient_id: number) => {
+    const patient = patientName.find((pat) => pat.patient_id === patient_id);
+    return patient
+      ? `${patient.patient_name} ${patient.patient_surname}`
+      : 'ບໍ່ພົບຊື່';
+  };
+  const getDoctorName = (emp_id: number) => {
+    const emp = empName.find((employee) => employee.emp_id === emp_id);
+    return emp ? `${emp.emp_name} ${emp.emp_surname}` : 'ບໍ່ພົບຊື່';
+  };
 
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
-        
         <CardDataStats title="ລາຍຮັບທັງໝົດ" total="60,000,000 ກີບ">
           <svg
             className="w-6 h-6 text-blue-500 dark:text-white"
@@ -82,9 +178,9 @@ const Dashboard: React.FC = () => {
             />
           </svg>
         </CardDataStats>
-        <CardDataStats 
-          title="ຄົນເຈັບທັງໝົດ" 
-          total={patients !== null ? `${patients} ຄົນ` : "ກຳລັງໂຫຼດ..."}
+        <CardDataStats
+          title="ຄົນເຈັບທັງໝົດ"
+          total={patients !== null ? `${patients} ຄົນ` : 'ກຳລັງໂຫຼດ...'}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -106,7 +202,10 @@ const Dashboard: React.FC = () => {
             </g>
           </svg>
         </CardDataStats>
-        <CardDataStats title="ທ່ານຫມໍທັງໝົດ" total="2 ຄົນ">
+        <CardDataStats
+          title="ທ່ານຫມໍທັງໝົດ"
+          total={loading ? 'ກຳລັງໂຫຼດ...' : `${doctorCount} ຄົນ`}
+        >
           <svg
             className="w-9 h-6 text-blue-500 dark:text-white"
             aria-hidden="true"
@@ -128,6 +227,88 @@ const Dashboard: React.FC = () => {
 
       <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
         <MonthChart />
+      </div>
+
+      <div className="rounded bg-white pt-4 dark:bg-boxdark mt-8 shadow-lg">
+        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
+          <h1 className="text-md md:text-lg lg:text-xl font-semibold text-strokedark dark:text-bodydark3">
+            ຕາຕະລາງນັດໝາຍ
+          </h1>
+        </div>
+
+        <div className="text-md text-strokedark dark:text-bodydark3">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-max table-auto border-collapse ">
+              <thead>
+                <tr className="border-b border-gray-300 bg-gray-100 text-left dark:bg-meta-4 bg-blue-100">
+                  {FollowHeaders.map((header, index) => (
+                    <th
+                      key={index}
+                      className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300 "
+                    >
+                      {header.name}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredAppointments.length > 0 ? (
+                  filteredAppointments.map((appointment, index) => (
+                    <tr
+                      key={index}
+                      className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
+                    >
+                      <td className="px-4 py-4">{appointment.appoint_id}</td>
+                      <td className="px-4 py-4">
+                        {getPatientName(appointment.patient_id)}{' '}
+                        {/* Corrected here */}
+                      </td>
+                      <td className="px-4 py-4">
+                        {new Date(appointment.date_addmintted).toLocaleString(
+                          'lo-LA',
+                          {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false,
+                          },
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
+                            appointment.status === 'ກວດແລ້ວ'
+                              ? 'bg-green-100 text-green-700'
+                              : appointment.status === 'ລໍຖ້າ'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-gray-100 text-gray-700'
+                          }`}
+                        >
+                          {appointment.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        {getDoctorName(appointment.emp_id)}{' '}
+                      </td>
+                      <td className="px-4 py-4">{appointment.description}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={FollowHeaders.length}
+                      className="px-4 py-6 text-center text-gray-500 dark:text-gray-400"
+                    >
+                      ບໍ່ມີຂໍ້ມູນການນັດໝາຍ
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </>
   );

@@ -5,7 +5,7 @@ import Input from '@/components/Forms/Input_two';
 import DatePicker from '@/components/DatePicker_two';
 import SelectGender from '@/components/Forms/SelectGender';
 import Select from '@/components/Forms/Select';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import BackButton from '@/components/BackButton';
 
 const CreatePatient: React.FC = () => {
@@ -15,10 +15,27 @@ const CreatePatient: React.FC = () => {
     handleSubmit,
     reset,
     setValue,
-    formState: { errors },
+    formState: { isDirty,errors  },
   } = useForm();
 
-  const [gender, setGender] = useState<string>(''); // Initialize gender state
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (isDirty) {
+        const message = 'ທ່ານຍັງບໍ່ໄດ້ບັນທຶກຂໍ້ມູນ. ຢືນຢັນວ່າຈະອອກຈາກໜ້ານີ້ຫຼືບໍ?';
+        event.preventDefault(); 
+        event.returnValue = message;
+        return message;
+      }
+    };
+  
+    window.addEventListener('beforeunload', handleBeforeUnload);
+  
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isDirty]);
+
+  const [gender, setGender] = useState<string>(''); 
 
   const onSubmit = async (data: any) => {
     try {

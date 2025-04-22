@@ -22,7 +22,7 @@ const Select = ({
 }: TSelectProps) => {
   return (
     <div className="">
-      <label className="mb-3 block text-sm font-medium  text-strokedark dark:text-bodydark3">{label}</label>
+      <label className="mb-1 block text-sm font-medium  text-strokedark dark:text-bodydark3">{label}</label>
 
       <div className="relative z-20 bg-transparent dark:bg-form-input">
         <select

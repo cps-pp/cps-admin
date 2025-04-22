@@ -11,11 +11,13 @@ import Alerts from '@/components/Alerts';
 import PatientStatsCard from './column/PatientStatsCard';
 
 const PatientPage: React.FC = () => {
-  const [patients, setPatients] = useState<any[]>([]); 
-  const [filteredPatients, setFilteredPatients] = useState<any[]>([]); 
+  const [patients, setPatients] = useState<any[]>([]);
+  const [filteredPatients, setFilteredPatients] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState(''); 
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
+    null,
+  );
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
@@ -32,9 +34,9 @@ const PatientPage: React.FC = () => {
         }
 
         const data = await response.json();
-        console.log('Data received:', data); 
-        setPatients(data.data); 
-        setFilteredPatients(data.data); 
+        console.log('Data received:', data);
+        setPatients(data.data);
+        setFilteredPatients(data.data);
       } catch (error) {
         console.error('Error fetching patients:', error);
       } finally {
@@ -45,9 +47,40 @@ const PatientPage: React.FC = () => {
     fetchPatients();
   }, []);
 
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredPatients(patients);
+    } else {
+      const filtered = patients.filter(
+        (patient) =>
+          patient.patient_name
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          patient.patient_surname
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          (patient.village &&
+            patient.village
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())) ||
+          (patient.district &&
+            patient.district
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())) ||
+          (patient.province &&
+            patient.province
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())) ||
+          (patient.phone1 && patient.phone1.includes(searchQuery)) ||
+          (patient.phone2 && patient.phone2.includes(searchQuery)),
+      );
+      setFilteredPatients(filtered);
+    }
+  }, [searchQuery, patients]);
+
   const openDeleteModal = (id: string) => () => {
     setSelectedPatientId(id);
-    setShowModal(true); 
+    setShowModal(true);
   };
 
   const handleDeletePatient = async () => {
@@ -81,135 +114,115 @@ const PatientPage: React.FC = () => {
     }
   };
 
-  const handleSearch = async (query: string) => {
-    try {
-      const response = await fetch(
-        `http://localhost:4000/manager/search/patient?patient_name=${query}&patient_surname=${query}&village=${query}&province=${query}&district=${query}`,
-        {
-          method: 'GET',
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setFilteredPatients(data.data); 
-      } else {
-        console.error('Error searching patients:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error searching patients:', error);
-    }
-  };
 
   const handleEditPatient = (id: string) => {
     navigate(`/patient/edit/${id}`);
   };
   const handleViewPatient = (id: string) => {
-    navigate(`/patient/detail/${id}`); 
+    navigate(`/patient/detail/${id}`);
   };
 
   return (
     <>
-    <div className=" pb-4">
+      <div className=" pb-4">
         <PatientStatsCard patients={filteredPatients} />
       </div>
-    <div className="rounded bg-white pt-4 dark:bg-boxdark">
-      
-      <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">ຈັດການຂໍ້ມູນຄົນເຈັບ</h1>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => navigate('/patient/create')}
-            icon={iconAdd}
-            className="bg-primary"
-          >
-            ເພີ່ມຂໍ້ມູນຜູ່ປ່ວຍ
-          </Button>
+      <div className="rounded bg-white pt-4 dark:bg-boxdark">
+        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
+          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+            ຈັດການຂໍ້ມູນຄົນເຈັບ
+          </h1>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => navigate('/patient/create')}
+              icon={iconAdd}
+              className="bg-primary"
+            >
+              ເພີ່ມຂໍ້ມູນຜູ່ປ່ວຍ
+            </Button>
+          </div>
         </div>
-      </div>
 
-      <div className="grid w-full gap-4 p-4">
-        <Search
-          type="text"
-          name="search"
-          placeholder="ຄົ້ນຫາຊື່ ຫຼື ເບີໂທຜູ້ປ່ວຍ..."
-          className="rounded border border-stroke dark:border-strokedark"
-          // value={searchQuery}
-          onChange={(e) => {
-            const query = e.target.value;
-            setSearchQuery(query);
-            handleSearch(query); 
-          }}
-        />
-      </div>
+        <div className="grid w-full gap-4 p-4">
+          <Search
+            type="text"
+            name="search"
+            placeholder="ຄົ້ນຫາຊື່..."
+            className="rounded border border-stroke dark:border-strokedark"
+            // value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+            }}
+          />
+        </div>
 
-      <div className="text-md text-strokedark dark:text-bodydark3" >
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-max table-auto border-collapse ">
-            <thead>
-              <tr className="border-b border-gray-300 bg-gray-100 text-left dark:bg-meta-4 bg-blue-100">
-                {PatientHeaders.map((header, index) => (
-                  <th
-                    key={index}
-                    className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300 "
-                  >
-                    {header.name}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPatients.length > 0 ? (
-                filteredPatients.map((patient, index) => (
-                  <tr
-                    key={index}
-                    className="border-b border-stroke dark:border-strokedark  hover:bg-gray-50 dark:hover:bg-gray-800"
-                  >
-                    <td className="px-4 py-4">{patient.patient_id}</td>
-                    <td className="px-4 py-4">{patient.patient_name}</td>
-                    <td className="px-4 py-4">{patient.patient_surname}</td>
-                    <td className="px-4 py-4">{patient.gender}</td>
-                    <td className="px-4 py-4">
-                      {new Date(patient.dob).toLocaleDateString('th-TH', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                      })}
-                    </td>
-                    <td className="px-4 py-4">{patient.village}</td>
-                    <td className="px-4 py-4">{patient.district}</td>
-                    <td className="px-4 py-4">{patient.province}</td>
-                    <td className="px-4 py-4">{patient.phone1}</td>
-                    <td className="px-4 py-4">{patient.phone2}</td>
-                    <td className="px-3 py-4 text-center">
-                      <TableAction
-                        onView={() => handleViewPatient(patient.patient_id)}
-                        onDelete={openDeleteModal(patient.patient_id)} 
-                        onEdit={() => handleEditPatient(patient.patient_id)} 
-                      />
+        <div className="text-md text-strokedark dark:text-bodydark3">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-max table-auto border-collapse ">
+              <thead>
+                <tr className="border-b border-gray-300 bg-gray-100 text-left dark:bg-meta-4 bg-blue-100">
+                  {PatientHeaders.map((header, index) => (
+                    <th
+                      key={index}
+                      className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300 "
+                    >
+                      {header.name}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredPatients.length > 0 ? (
+                  filteredPatients.map((patient, index) => (
+                    <tr
+                      key={index}
+                      className="border-b border-stroke dark:border-strokedark  hover:bg-gray-50 dark:hover:bg-gray-800"
+                    >
+                      <td className="px-4 py-4">{patient.patient_id}</td>
+                      <td className="px-4 py-4">{patient.patient_name}</td>
+                      <td className="px-4 py-4">{patient.patient_surname}</td>
+                      <td className="px-4 py-4">{patient.gender}</td>
+                      <td className="px-4 py-4">
+                        {new Date(patient.dob).toLocaleDateString('th-TH', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                        })}
+                      </td>
+                      <td className="px-4 py-4">{patient.village}</td>
+                      <td className="px-4 py-4">{patient.district}</td>
+                      <td className="px-4 py-4">{patient.province}</td>
+                      <td className="px-4 py-4">{patient.phone1}</td>
+                      <td className="px-4 py-4">{patient.phone2}</td>
+                      <td className="px-3 py-4 text-center">
+                        <TableAction
+                          onView={() => handleViewPatient(patient.patient_id)}
+                          onDelete={openDeleteModal(patient.patient_id)}
+                          onEdit={() => handleEditPatient(patient.patient_id)}
+                        />
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="py-4 text-center text-gray-500">
+                      ບໍ່ມີຂໍ້ມູນທທ
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} className="py-4 text-center text-gray-500">
-                    ບໍ່ມີຂໍ້ມູນທທ
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-      {/* Confirm Delete Modal */}
-      <ConfirmModal
-        show={showModal}
-        setShow={setShowModal}
-        message="ທ່ານຕ້ອງການລົບຄົນເຈັບນີ້ອອກຈາກລະບົບບໍ່？"
-        handleConfirm={handleDeletePatient} // Handle deletion on confirm
-      />
-    </div>
+        {/* Confirm Delete Modal */}
+        <ConfirmModal
+          show={showModal}
+          setShow={setShowModal}
+          message="ທ່ານຕ້ອງການລົບຄົນເຈັບນີ້ອອກຈາກລະບົບບໍ່？"
+          handleConfirm={handleDeletePatient} // Handle deletion on confirm
+        />
+      </div>
     </>
   );
 };

@@ -220,7 +220,7 @@ export const MENU: IMenu = [
 export const SERVICE: IMenu = [
   {
     name: 'ບໍລິການ',
-    path: 'service',
+    path: 'treatment',
     icon: iconVolunteers,
   },
 ];
@@ -234,7 +234,7 @@ export const FOLLOW: IMenu = [
 export const IMPORT: IMenu = [
   {
     name: 'ສັ່ງຊື່',
-    path: 'order',
+    path: 'perorder',
     icon: iconCareer,
   },
 

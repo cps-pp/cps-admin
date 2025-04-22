@@ -32,12 +32,12 @@ const Select: React.FC<SelectProps> = ({
     <div className="mb-5.5">
       <label 
         htmlFor={name} 
-        className="mb-3 block text-sm font-medium text-strokedark dark:text-bodydark3"
+        className="mb-1 block text-sm font-medium text-strokedark dark:text-bodydark3"
       >
         {label}
       </label>
       
-      <div className="relative z-20 bg-transparent dark:bg-form-input">
+      <div className="relative z-20 bg-transparent dark:bg-form-input ">
         <select
           id={name}
           {...register(name, { 

@@ -33,7 +33,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
   return (
     <div className="w-full">
-      {label && <label className="mb-3 block text-sm font-medium text-strokedark dark:text-bodydark3">{label}</label>}
+      {label && <label className="mb-1 block text-sm font-medium text-strokedark dark:text-bodydark3">{label}</label>}
 
       <div className="relative">
         <Flatpickr
@@ -41,10 +41,10 @@ const DatePicker: React.FC<DatePickerProps> = ({
           placeholder="ເລືອກວັນເດືອນປີເກີດ (ວັນ/ເດືອນ/ປີ)"
           value={select}
           options={{
-            enableTime: withTime || false, // ✅ เงื่อนไขตรงนี้
+            enableTime: withTime || false, 
             noCalendar: false,
             time_24hr: true,
-            dateFormat: withTime ? "d/m/Y H:i" : "d/m/Y", // ✅ เปลี่ยนรูปแบบตามเวลา
+            dateFormat: withTime ? "d/m/Y H:i" : "d/m/Y", 
             allowInput: true,
             defaultHour: 0,
             defaultMinute: 0,
@@ -60,7 +60,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
           }}
         />
 
-        <CalendarIcon className="absolute right-3 top-4.5 h-5 w-5 text-gray-500 dark:text-gray-400" />
+        {/* <CalendarIcon className="absolute right-3 top-4.5 h-5 w-5 text-gray-500 dark:text-gray-400" /> */}
       </div>
 
       {errors?.[name] && <span className="mt-1 text-sm text-red-500">{errors[name]?.message}</span>}

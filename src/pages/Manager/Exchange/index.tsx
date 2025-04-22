@@ -7,59 +7,64 @@ import { TableAction } from '@/components/Tables/TableAction';
 import ConfirmModal from '@/components/Modal';
 import Alerts from '@/components/Alerts';
 import { ExchangeHeaders } from './column/exchange';
+import CreateServiceList from '../ServiceList/create';
+import CreateExChange from './create';
+import EditExChange from './edit';
 
 const ExchangePage: React.FC = () => {
-  const [exchanges, setExchanges] = useState<any[]>([]); 
-  const [filteredExchanges, setFilteredExchanges] = useState<any[]>([]); 
+  const [exchanges, setExchanges] = useState<any[]>([]);
+  const [filteredExchanges, setFilteredExchanges] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [selectedExchangeId, setSelectedExchangeId] = useState<string | null>(null); 
+  const [selectedExchangeId, setSelectedExchangeId] = useState<string | null>(
+    null,
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const fetchExchanges = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:4000/manager/exchange`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setExchanges(data.data);
+      setFilteredExchanges(data.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchExchanges = async () => { 
-      try {
-        setLoading(true);
-        const response = await fetch(`http://localhost:4000/manager/exchange`, { 
-          method: 'GET',
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Data received:', data);
-        setExchanges(data.data);
-        setFilteredExchanges(data.data);
-      } catch (error) {
-        console.error('Error fetching exchanges:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchExchanges(); 
+    fetchExchanges();
   }, []);
 
   useEffect(() => {
     if (searchQuery.trim() === '') {
-      setFilteredExchanges(exchanges); 
+      setFilteredExchanges(exchanges);
     } else {
-      const filtered = exchanges.filter(exchange => 
-        exchange.ser_name.toLowerCase().includes(searchQuery.toLowerCase())
+      const filtered = exchanges.filter((exchange) =>
+        exchange.ser_name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
       setFilteredExchanges(filtered);
     }
-  }, [searchQuery, exchanges]); 
+  }, [searchQuery, exchanges]);
 
   const openDeleteModal = (id: string) => () => {
-    setSelectedExchangeId(id); 
+    setSelectedExchangeId(id);
     setShowModal(true);
   };
 
-  const handleDeleteExchange = async () => { 
+  const handleDeleteExchange = async () => {
     if (!selectedExchangeId) return;
 
     try {
@@ -74,26 +79,24 @@ const ExchangePage: React.FC = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      setExchanges((prevExchanges) => 
+      setExchanges((prevExchanges) =>
         prevExchanges.filter(
-          (exchange) => exchange.ex_id !== selectedExchangeId
+          (exchange) => exchange.ex_id !== selectedExchangeId,
         ),
       );
 
       setShowModal(false);
-      setSelectedExchangeId(null); 
+      setSelectedExchangeId(null);
     } catch (error) {
-      console.error('Error deleting exchange:', error); 
+      console.error('Error deleting exchange:', error);
     }
   };
 
-  const handleEditExchange = (id: string) => { 
-    navigate(`/exchange/edit/${id}`);
+  const handleEdit = (id: string) => {
+    setSelectedId(id);
+    setShowEditModal(true);
   };
 
-  const handleViewExchange = (id: string) => { 
-    navigate(`/exchange/detail/${id}`);
-  };
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
@@ -103,7 +106,7 @@ const ExchangePage: React.FC = () => {
         </h1>
         <div className="flex items-center gap-2">
           <Button
-            onClick={() => navigate('/exchange/create')}
+            onClick={() => setShowAddModal(true)}
             icon={iconAdd}
             className="bg-primary"
           >
@@ -141,22 +144,23 @@ const ExchangePage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredExchanges.length > 0 ? ( 
+              {filteredExchanges.length > 0 ? (
                 filteredExchanges.map((exchange, index) => (
                   <tr
                     key={index}
                     className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
-                    <td className="px-4 py-4">{exchange.ex_id}</td> 
-                    <td className="px-4 py-4">{exchange.ex_type}</td> 
-                    <td className="px-4 py-4">{(exchange.ex_rate * 1).toLocaleString()}</td>
-
+                    <td className="px-4 py-4">{exchange.ex_id}</td>
+                    <td className="px-4 py-4">{exchange.ex_type}</td>
+                    <td className="px-4 py-4">
+                      {(exchange.ex_rate * 1).toLocaleString()}
+                    </td>
 
                     <td className="px-3 py-4 text-center">
                       <TableAction
-                        // onView={() => handleViewExchange(exchange.ex_id)} 
-                        onDelete={openDeleteModal(exchange.ex_id)} 
-                        onEdit={() => handleEditExchange(exchange.ex_id)} 
+                        // onView={() => handleViewExchange(exchange.ex_id)}
+                        onDelete={openDeleteModal(exchange.ex_id)}
+                        onEdit={() => handleEdit(exchange.ex_id)}
                       />
                     </td>
                   </tr>
@@ -173,15 +177,78 @@ const ExchangePage: React.FC = () => {
         </div>
       </div>
 
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="rounded-lg w-full max-w-2xl relative px-4 ">
+            <button
+              onClick={() => setShowAddModal(false)}
+              className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            <CreateExChange
+              setShow={setShowAddModal}
+              getList={fetchExchanges}
+            />
+          </div>
+        </div>
+      )}
+      
+      {showEditModal && selectedId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
+          <div className="rounded-lg w-full max-w-2xl bg-white relative ">
+            <button
+              onClick={() => setShowEditModal(false)}
+              className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            <EditExChange
+              id={selectedId}
+              onClose={() => setShowEditModal(false)}
+              setShow={setShowEditModal}
+              getList={fetchExchanges}
+            />
+          </div>
+        </div>
+      )}
+
       <ConfirmModal
         show={showModal}
         setShow={setShowModal}
-        message="ທ່ານຕ້ອງການລົບລາຍການນີ້ອອກຈາກລະບົບບໍ່？"
-        handleConfirm={handleDeleteExchange} 
+        message="ທ່ານຕ້ອງການລົບອັດຕາແລກປ່ຽນນີ້ອອກຈາກລະບົບບໍ່？"
+        handleConfirm={handleDeleteExchange}
       />
     </div>
   );
 };
 
 export default ExchangePage;
-

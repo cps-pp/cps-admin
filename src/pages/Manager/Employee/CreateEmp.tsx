@@ -2,26 +2,44 @@ import { useForm } from 'react-hook-form';
 import Button from '@/components/Button';
 import { iconAdd } from '@/configs/icon';
 import { useNavigate } from 'react-router-dom';
+import BackButton from '@/components/BackButton';
+import { useEffect } from 'react';
 
 const CreatePatient: React.FC = () => {
-  const { register, handleSubmit } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { isDirty },
+  } = useForm();
+  
   const navigate = useNavigate();
 
   const onSubmit = (data: any) => {
     console.log('Submitted Data:', data);
   };
-
+  
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (isDirty) {
+        const message = 'ທ່ານຍັງບໍ່ໄດ້ບັນທຶກຂໍ້ມູນ. ຢືນຢັນວ່າຈະອອກຈາກໜ້ານີ້ຫຼືບໍ?';
+        event.preventDefault(); 
+        event.returnValue = message;
+        return message;
+      }
+    };
+  
+    window.addEventListener('beforeunload', handleBeforeUnload);
+  
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isDirty]);
   return (
     <div className="rounded-xl bg-white pt-4 dark:bg-boxdark">
       <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
         <h1 className="text-xl font-bold">ເພີ່ມຂໍ້ມູນຄົນເຈັບ</h1>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate(-1)}
-            className="translate-all inline-flex cursor-pointer items-center justify-center rounded bg-slate-500 px-4 py-2 text-center font-medium text-white outline-none duration-150 ease-linear hover:bg-opacity-90 hover:shadow-lg focus:outline-none active:bg-slate-600"
-          >
-            ກັບຄືນ
-          </button>
+        <BackButton className="" />
         </div>
       </div>
 

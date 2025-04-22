@@ -14,7 +14,7 @@ import EquipmentPage from '@/pages/Manager/MedicinesEquipment';
 import ServcicePage from '@/pages/Manager/ServiceList';
 import ExchangePage from '@/pages/Manager/Exchange';
 import SupplierPage from '@/pages/Manager/Supplier';
-import ServicePatientPage from '@/pages/Service/ServicePatient';
+import ServicePatientPage from '@/pages/Service/Treatment';
 import FollowPage from '@/pages/Follow';
 import DetailPatient from '@/pages/Manager/Patient/detail';
 import EditPatient from '@/pages/Manager/Patient/edit';
@@ -34,6 +34,8 @@ import EditDisease from '@/pages/Manager/Disease/edit';
 import EditSupplier from '@/pages/Manager/Supplier/edit';
 import CreateSupplier from '@/pages/Manager/Supplier/create';
 import CreateFollow from '@/pages/Follow/create';
+import Order from '@/pages/Order';
+import Import from '@/pages/Import';
 
 export interface IRoute {
   path: string;
@@ -87,16 +89,7 @@ export const ROUTES: IRoute[] = [
   title: 'Category | CPS Admin',
   component: <CategoryPage />,
 },
-{
-  path: '/category/create',
-  title: 'Category Create | CPS Admin',
-  component: <CreateCetegory />,
-},
-{
-  path: '/category/edit/:id',
-  title: 'Category Edit | CPS Admin',
-  component: <EditCate />,
-},
+
 {
   path: '/category/detail/:id',
   title: 'Detail Category | CPS Admin',
@@ -108,16 +101,7 @@ export const ROUTES: IRoute[] = [
     title: 'Medicines | CPS Admin',
     component: <MedicinesPage />,
   },
-  {
-    path: '/medicines/create',
-    title: 'Medicines Create | CPS Admin',
-    component: <CreateMedicines />,
-  },
-  {
-    path: '/medicines/edit/:id',
-    title: 'Medicines Edit | CPS Admin',
-    component: <EditMedicines />,
-  },
+  
   {
     path: '/medicines/detail/:id',
     title: 'Medicines Detail | CPS Admin',
@@ -136,21 +120,13 @@ export const ROUTES: IRoute[] = [
   title: 'Service List | CPS Admin',
   component: <ServcicePage />,
 },
-{
-  path: '/servicelist/create',
-  title: 'Service Create | CPS Admin',
-  component: <CreateServiceList />,
-},
+
 {
   path: '/servicelist/detail/:id',
   title: 'Service Detail | CPS Admin',
   component: <DetailServiceList />,
 },
-{
-  path: '/servicelist/edit/:id',
-  title: 'Service Edit| CPS Admin',
-  component: <EditServicerList />,
-},
+
 // -------------------------- Exchange Path --------------------------------
 
 {
@@ -158,15 +134,7 @@ export const ROUTES: IRoute[] = [
   title: 'Exchange | CPS Admin',
   component: <ExchangePage />,
 },
-{
-  path: '/exchange/create',
-  title: 'Exchange Create | CPS Admin',
-  component: <CreateExChange />,
-},{
-  path: '/exchange/edit/:id',
-  title: 'Exchange Edit | CPS Admin',
-  component: < EditExChange/>,
-},
+
 // -------------------------- OralPage Path --------------------------------
 
 {
@@ -174,16 +142,7 @@ export const ROUTES: IRoute[] = [
   title: 'Disease | CPS Admin',
   component: <DiseasePage />,
 },
-{
-  path: '/disease/create',
-  title: 'Disease Create | CPS Admin',
-  component: <CreateDisease />,
-},
-{
-  path: '/disease/edit/:id',
-  title: 'Disease Edit | CPS Admin',
-  component: <EditDisease />,
-},
+
 // -------------------------- SupplierPage Path --------------------------------
 
 
@@ -194,26 +153,22 @@ export const ROUTES: IRoute[] = [
   component: <SupplierPage />,
 },
 
-
-{
-  path: '/supplier/edit/:id',
-  title: 'Supplier Edit | CPS Admin',
-  component: <EditSupplier />,
-},
-
-
-{
-  path: '/supplier/create',
-  title: 'Supplier Create | CPS Admin',
-  component: <CreateSupplier />,
-},
-
 // -------------------------- ServicePatient Path --------------------------------
 
 {
-  path: '/service/create',
-  title: 'Supplier Create | CPS Admin',
+  path: '/treatment',
+  title: 'Service Treatment Create | CPS Admin',
   component: <ServicePatientPage />,
+},
+{
+  path: '/perorder',
+  title: 'Order | CPS Admin',
+  component: < Order />,
+},
+{
+  path: '/import',
+  title: 'Import | CPS Admin',
+  component: < Import />,
 },
 
 

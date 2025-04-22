@@ -20,16 +20,16 @@ const Input: FC<InputProps> = ({ label, type = "text", placeholder, register, na
     <div className="">
       {label && (
         <label
-          className="mb-3 block text-sm font-medium  text-strokedark dark:text-bodydark3"
+          className="mb-1 block text-sm font-medium  text-strokedark dark:text-bodydark3"
           htmlFor={name}
         >
           {label}
         </label>
       )}
-      <div className="relative">
+      <div className="relative mb-2">
       <input
-          className={`relative z-20 w-full mb-2 appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:disabled:bg-meta-4 dark:focus:border-primary text-black dark:text-white capitalize
-            ${errors?.[name] ? "border-red-500" : ""} ${className}`} // Add className here
+          className={`relative z-20 w-full  appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:disabled:bg-meta-4 dark:focus:border-primary text-black dark:text-white capitalize
+            ${errors?.[name] ? "border-red-500 " : ""} ${className}`} // Add className here
           disabled={disabled}
           id={name}
           type={type}

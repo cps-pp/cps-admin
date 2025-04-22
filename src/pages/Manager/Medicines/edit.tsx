@@ -8,10 +8,18 @@ import DatePicker from '@/components/DatePicker_two';
 import SelectID from '@/components/Forms/SelectID';
 import Select from '@/components/Forms/Select';
 import PriceInput from '@/components/Forms/PriceInput';
-
-const EditMedicines: React.FC = () => {
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+interface EditProps {
+  id: string;
+  onClose: () => void;
+  setShow: (value: boolean) => void;
+  getList?: () => void;
+}
+const EditMedicines: React.FC<EditProps> = ({
+  id,
+  onClose,
+  setShow,
+  getList,
+}) => {
   const {
     register,
     handleSubmit,
@@ -38,6 +46,8 @@ const EditMedicines: React.FC = () => {
   >([]);
   const [selectedMedType, setSelectedMedType] = useState<string>('');
   const [status, setStatus] = useState<string>('');
+  const [fetching, setFetching] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -68,6 +78,7 @@ const EditMedicines: React.FC = () => {
           `http://localhost:4000/manager/medicines/${id}`,
         );
         const data = await response.json();
+       
         if (response.ok) {
           setValue('med_name', data.data.med_name);
           setValue('qty', data.data.qty);
@@ -77,6 +88,14 @@ const EditMedicines: React.FC = () => {
           setValue('medtype_id', data.data.medtype_id);
           setSelectedMedType(data.data.medtype_id);
           setStatus(data.data.status);
+
+
+          // setValue('med_name', data.data.med_name);
+          // setValue('qty', data.data.qty);
+          // setValue('price', data.data.price); // ✅
+          // setValue('expired', data.data.expired); // ✅
+          // setValue('status', data.data.status); // ✅
+          // setValue('medtype_id', data.data.medtype_id); // ✅
         } else {
           console.error('Failed to fetch medicine details', data);
         }
@@ -85,43 +104,59 @@ const EditMedicines: React.FC = () => {
       }
     };
     if (id) fetchMedicine();
-  }, [id, setValue]);
+  }, [id, setValue, fetching]);
 
-  const onSubmit = async (data: any) => {
+  const handleSave = async (formData: any) => {
+    setLoading(true);
     try {
       const response = await fetch(
         `http://localhost:4000/manager/medicines/${id}`,
         {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+          },
+
           body: JSON.stringify({
-            ...data,
-            status,
+            med_name: formData.med_name,
+            qty: formData.qty,
+            price: formData.price,
+            expired: formData.expired,
+            status: formData.status,
             medtype_id: selectedMedType,
           }),
         },
       );
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'ອັບເດດບໍ່ສຳເລັດ');
 
-      navigate('/manager/medicines');
-    } catch (error: any) {
-      alert(error.message || 'ມີຂໍ້ຜິດພາດ');
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      if (getList) {
+        getList();
+      }
+
+      setFetching(!fetching);
+      onClose();
+    } catch (error) {
+      console.error('Error saving disease:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
-      <div className="flex items-center border-b border-stroke px-4 dark:border-strokedark pb-4">
-        <BackButton />
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-6">
+      <div className="flex items-center border-b border-stroke  dark:border-strokedark pb-4">
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
           ແກ້ໄຂຂໍ້ມູນຢາ
         </h1>
       </div>
 
       <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-1 gap-4 px-4 pt-4"
+        onSubmit={handleSubmit(handleSave)}
+        className="grid grid-cols-1 md:grid-cols-2   xl:grid-cols-2 gap-4 mt-4 px-4"
+
       >
         <Input
           label="ຊື່ຢາ"
@@ -161,9 +196,10 @@ const EditMedicines: React.FC = () => {
           setValue={setValue}
           select={getValues('expired')}
         />
+
         <Select
           label="ສະຖານະ"
-          name="ສະຖານະ"
+          name="status"
           options={['ຍັງມີ', 'ໝົດ']}
           register={register}
           errors={errors}
@@ -174,9 +210,9 @@ const EditMedicines: React.FC = () => {
         <SelectID
           label="ປະເພດ"
           name="medtype_id"
-          value={selectedMedType}
-          register={register} // Add this
-          errors={errors} // Add this
+          value={selectedMedType} 
+          register={register} 
+          errors={errors} 
           options={categories.map((cat) => ({
             value: cat.medtype_id,
             label: cat.type_name,
@@ -185,15 +221,15 @@ const EditMedicines: React.FC = () => {
         />
 
         <div className="mt-8 flex justify-end space-x-4 col-span-full px-4 py-4">
-          <button
+          {/* <button
             className="px-6 py-2 text-md font-medium uppercase text-red-500"
             type="button"
-            onClick={() => navigate('/manager/medicines')}
+            onClick={() => setShow(false)}
           >
             ຍົກເລິກ
-          </button>
-          <Button variant="save" type="submit">
-            ບັນທຶກ
+          </button> */}
+          <Button variant="save" type="submit" disabled={loading}>
+            {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </Button>
         </div>
       </form>

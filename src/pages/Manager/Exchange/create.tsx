@@ -1,80 +1,102 @@
-import { useForm } from "react-hook-form";
-import Button from "@/components/Button";
-import { useNavigate } from "react-router-dom";
-import Input from "@/components/Forms/Input_two";
-import React, { useState } from "react";
-import BackButton from "@/components/BackButton";
+import { useForm } from 'react-hook-form';
+import Button from '@/components/Button';
+import { useNavigate } from 'react-router-dom';
+import Input from '@/components/Forms/Input_two';
+import React, { useState } from 'react';
 
-const CreateExChange: React.FC = () => {
+interface CreateProps {
+  setShow: (value: boolean) => void;
+  getList: any;
+}
+
+const CreateExChange: React.FC<CreateProps> = ({ setShow, getList }) => {
   const navigate = useNavigate();
-  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm();
+  const [loading, setLoading] = useState(false);
 
-  
+ 
 
-  const onSubmit = async (data: any) => {
+  const handleSave = async (formData: any) => {
+    setLoading(true);
     try {
-      const response = await fetch("http://localhost:4000/manager/exchange", {
-        method: "POST",
+      const response = await fetch('http://localhost:4000/manager/exchange', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          disease_id: formData.disease_id,
+          disease_name: formData.disease_name,
+        }),
       });
 
-      const result = await response.json();
       if (!response.ok) {
-        throw new Error(result.error || "ບັນທຶກບໍ່ສຳເລັດ");
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
+      setShow(false);
+      await getList(); 
       reset();
-      navigate("/manager/exchange");
-    } catch (error: any) {
-      alert(error.message || "ມີຂໍ້ຜິດພາດ");
+    } catch (error) {
+      console.error('Error saving disease:', error);
+      alert('ບໍ່ສາມາດເພີ່ມຂໍ້ມູນພະຍາດແຂວ້');
+    } finally {
+      setLoading(false);
     }
   };
-
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
-    <div className="flex items-center  border-b border-stroke px-4 dark:border-strokedark pb-4">
-      <BackButton className="" />
-      <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-6">
-        ເພີ່ມຂໍ້ມູນ
-      </h1>
-    </div>
-      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1  gap-4 px-4 pt-4">
-      <Input
-        label="ລະຫັດອັດຕາແລກປ່ຽນ"
-        name="ex_id"
-        type="text"
-        placeholder="ປ້ອນລະຫັດ"
-        register={register}
-        formOptions={{ required: "ກະລຸນາປ້ອນລະຫັດກ່ອນ" }}
-        errors={errors}
-      />
-      <Input
-        label="ສະກຸນເງິນ"
-        name="ex_type"
-        type="text"
-        placeholder="ປ້ອນສະກຸນເງິນ"
-        register={register}
-        formOptions={{ required: "ກະລຸນາປ້ອນສະກຸນເງິນກ່ອນ" }}
-        errors={errors}
-      />
-      <Input
-        label="ຈຳນວນເລດ"
-        name="ex_rate"
-        type="text"
-        placeholder="ປ້ອນເລດ"
-        register={register}
-        formOptions={{ required: "ກະລຸນາປ້ອນເລດຫກ່ອນ" }}
-        errors={errors}
-      />
-      
-      
+      <div className="flex items-center  border-b border-stroke  dark:border-strokedark pb-4">
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
+          ເພີ່ມຂໍ້ມູນ
+        </h1>
+      </div>
+      <form
+        onSubmit={handleSubmit(handleSave)}
+        className="grid grid-cols-1  gap-4 px-4 pt-4"
+      >
+        <Input
+          label="ລະຫັດອັດຕາແລກປ່ຽນ"
+          name="ex_id"
+          type="text"
+          placeholder="ປ້ອນລະຫັດ"
+          register={register}
+          formOptions={{ required: 'ກະລຸນາປ້ອນລະຫັດກ່ອນ' }}
+          errors={errors}
+        />
+        <Input
+          label="ສະກຸນເງິນ"
+          name="ex_type"
+          type="text"
+          placeholder="ປ້ອນສະກຸນເງິນ"
+          register={register}
+          formOptions={{ required: 'ກະລຸນາປ້ອນສະກຸນເງິນກ່ອນ' }}
+          errors={errors}
+        />
+        <Input
+          label="ຈຳນວນເລດ"
+          name="ex_rate"
+          type="text"
+          placeholder="ປ້ອນເລດ"
+          register={register}
+          formOptions={{ required: 'ກະລຸນາປ້ອນເລດຫກ່ອນ' }}
+          errors={errors}
+        />
+
         <div className="mt-8 flex justify-end space-x-4 col-span-full px-4 py-4">
-          <button className="px-6 py-2 text-md font-medium uppercase text-red-500" type="button" onClick={() => navigate("/manager/exchange")}>
-          ຍົກເລິກ
-          </button>
+          {/* <button
+            className="px-6 py-2 text-md font-medium uppercase text-red-500"
+            type="button"
+            onClick={() => navigate('/manager/exchange')}
+          >
+            ຍົກເລິກ
+          </button> */}
           <Button variant="save" type="submit">
             ບັນທຶກ
           </Button>

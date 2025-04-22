@@ -2,14 +2,6 @@ import React, { useState } from 'react';
 import Logo from '../images/logo/cps-logo.png'
 import { useAuth } from '@/AuthContext';
 import { useNavigate } from 'react-router-dom';
-// const useAuth = () => {
-//   return {
-//     login: (username: string, password: string) => {
-//       // Simple validation - in a real app this would connect to your auth system
-//       return username === 'admin' && password === 'password';
-//     }
-//   };
-// };
 
 const LoginForm: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -21,7 +13,6 @@ const LoginForm: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (auth.login(username, password)) {
-      // นำทางไปยัง dashboard แทนการเปลี่ยนสถานะ isLoggedIn
       navigate('/dashboard');
     } else {
       setError(' ຂໍ້ມູນບໍ່ຖືກຕ້ອງ');
@@ -50,14 +41,14 @@ const LoginForm: React.FC = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-strokedark relative">
       {/* Decorative elements */}
       {/* <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-blue-200 to-transparent opacity-30" /> */}
-      <div className="absolute bottom-0 right-0 w-full h-50 bg-gradient-to-t from-indigo-200 to-transparent opacity-10" />
+      {/* <div className="absolute bottom-0 right-0 w-full h-50 bg-gradient-to-t from-indigo-200 to-transparent opacity-10" /> */}
       
       <div className="mb-12 z-10">
-      <img src={Logo} alt="Logo" width={260} />
+      <img src={Logo} alt="Logo" width={300} />
       </div>
       
       {/* Card container */}
-      <div className="relative bg-white p-8 rounded-md shadow-xl w-full max-w-md z-10">
+      <div className="relative bg-white p-8 rounded-lg shadow-xl w-full max-w-md z-10">
         {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800">ຍິນດີຕ້ອນຮັບ</h1>
@@ -69,20 +60,20 @@ const LoginForm: React.FC = () => {
           <div className="relative">
             <input
               type="text"
-              placeholder="Username"
+              placeholder="ຊື່ຜູ້ໃຊ້"
               value={username}
               onChange={e => setUsername(e.target.value)}
-              className="w-full p-4 pl-4 pr-10 border border-stroke rounded focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
+              className="w-full text-strokedark p-4 pl-4 pr-10 border border-stroke rounded focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
             />
           </div>
           
           <div className="relative">
             <input
               type="password"
-              placeholder="Password"
+              placeholder="ລະຫັດຜ່ານ"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full p-4 pl-4 pr-10 border border-gray-50 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
+              className="w-full text-strokedark p-4 pl-4 pr-10 border border-stroke rounded focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
             />
           </div>
           
@@ -99,7 +90,7 @@ const LoginForm: React.FC = () => {
             type="submit" 
             className="bg-blue-600 hover:bg-blue-700 text-white font-medium p-4 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg"
           >
-            Sign In
+            ເຂົ້າສູ່ລະບົບ
           </button>
         </form>
       </div>

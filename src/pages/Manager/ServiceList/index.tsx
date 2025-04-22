@@ -7,49 +7,51 @@ import { TableAction } from '@/components/Tables/TableAction';
 import ConfirmModal from '@/components/Modal';
 import Alerts from '@/components/Alerts';
 import { ServiceHeaders } from './column/service';
+import EditServicerList from './edit';
+import CreateServiceList from './create';
 
 const ServicePage: React.FC = () => {
-  const [services, setServices] = useState<any[]>([]); // Data ของบริการ
-  const [filteredServices, setFilteredServices] = useState<any[]>([]); // Data ที่กรองแล้ว
+  const [services, setServices] = useState<any[]>([]);
+  const [filteredServices, setFilteredServices] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState(''); // ค่าของการค้นหาที่ผู้ใช้ป้อน
-  const navigate = useNavigate();
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
+    null,
+  );
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const fetchServiceList = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:4000/manager/servicelist`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setServices(data.data);
+      setFilteredServices(data.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`http://localhost:4000/manager/servicelist`, {
-          method: 'GET',
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Data received:', data); // Debugging
-        setServices(data.data); // บันทึกข้อมูลบริการ
-        setFilteredServices(data.data); // เริ่มต้นให้ผลลัพธ์เป็นทั้งหมด
-      } catch (error) {
-        console.error('Error fetching services:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchServices();
+    fetchServiceList();
   }, []);
 
-  // Add a useEffect to apply search filtering whenever searchQuery or services change
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setFilteredServices(services);
     } else {
-      const filtered = services.filter(service =>
-        service.ser_name.toLowerCase().includes(searchQuery.toLowerCase())
+      const filtered = services.filter((service) =>
+        service.ser_name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
       setFilteredServices(filtered);
     }
@@ -74,12 +76,8 @@ const ServicePage: React.FC = () => {
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-
-      // Just update the services state - the useEffect will automatically update filteredServices
       setServices((prevServices) =>
-        prevServices.filter(
-          (service) => service.ser_id !== selectedServiceId
-        ),
+        prevServices.filter((service) => service.ser_id !== selectedServiceId),
       );
 
       setShowModal(false);
@@ -89,21 +87,20 @@ const ServicePage: React.FC = () => {
     }
   };
 
-  const handleEditService = (id: string) => {
-    navigate(`/servicelist/edit/${id}`);
-  };
-
-  const handleViewService = (id: string) => {
-    navigate(`/servicelist/detail/${id}`);
+  const handleEdit = (id: string) => {
+    setSelectedId(id);
+    setShowEditModal(true);
   };
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
       <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">ຈັດການຂໍ້ມູນລາຍງານບໍລິການ</h1>
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+          ຈັດການຂໍ້ມູນລາຍງານບໍລິການ
+        </h1>
         <div className="flex items-center gap-2">
           <Button
-            onClick={() => navigate('/servicelist/create')}
+            onClick={() => setShowAddModal(true)}
             icon={iconAdd}
             className="bg-primary"
           >
@@ -150,14 +147,15 @@ const ServicePage: React.FC = () => {
                     <td className="px-4 py-4">{service.ser_id}</td>
 
                     <td className="px-4 py-4">{service.ser_name}</td>
-                    <td className="px-4 py-4">{(service.price * 1).toLocaleString()}</td>
-
+                    <td className="px-4 py-4">
+                      {(service.price * 1).toLocaleString()}
+                    </td>
 
                     <td className="px-3 py-4 text-center">
                       <TableAction
                         // onView={() => handleViewService(service.ser_id)}
                         onDelete={openDeleteModal(service.ser_id)}
-                        onEdit={() => handleEditService(service.ser_id)}
+                        onEdit={() => handleEdit(service.ser_id)}
                       />
                     </td>
                   </tr>
@@ -174,11 +172,75 @@ const ServicePage: React.FC = () => {
         </div>
       </div>
 
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="rounded-lg w-full max-w-2xl relative px-4 ">
+            <button
+              onClick={() => setShowAddModal(false)}
+              className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            <CreateServiceList
+              setShow={setShowAddModal}
+              getList={fetchServiceList}
+            />
+          </div>
+        </div>
+      )}
+
+      {showEditModal && selectedId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
+          <div className="rounded-lg w-full max-w-2xl bg-white relative ">
+            <button
+              onClick={() => setShowEditModal(false)}
+              className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            <EditServicerList
+              id={selectedId}
+              onClose={() => setShowEditModal(false)}
+              setShow={setShowEditModal}
+              getList={fetchServiceList}
+            />
+          </div>
+        </div>
+      )}
+
       <ConfirmModal
         show={showModal}
         setShow={setShowModal}
         message="ທ່ານຕ້ອງການລົບລາຍການນີ້ອອກຈາກລະບົບບໍ່？"
-        handleConfirm={handleDeleteService} 
+        handleConfirm={handleDeleteService}
       />
     </div>
   );
