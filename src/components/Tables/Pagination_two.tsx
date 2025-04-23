@@ -24,13 +24,18 @@ const TablePaginationDemo: React.FC<TablePaginationDemoProps> = ({
       onPageChange={onPageChange}
       rowsPerPage={rowsPerPage}
       onRowsPerPageChange={onRowsPerPageChange}
+      labelRowsPerPage="Rows per page:"
+      labelDisplayedRows={({ from, to, count }) => `${from}-${to} of ${count}`}
       sx={{
         '& .MuiTablePagination-displayedRows': {
           textAlign: 'left',
           color: 'var(--primarySecond)',
+          fontFamily: 'Noto Sans Lao, sans-serif', 
         },
         '& .MuiTablePagination-actions button': {
           borderRadius: '6px',
+          color: 'var(--primarySecond)',
+          
         },
         '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows, & .MuiTablePagination-actions': {
           color: 'var(--primarySecond)', 

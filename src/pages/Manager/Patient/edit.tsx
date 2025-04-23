@@ -5,11 +5,20 @@ import Input from '@/components/Forms/Input_two';
 import DatePicker from '@/components/DatePicker_two';
 import Select from '@/components/Forms/Select';
 import React, { useState, useEffect } from 'react';
-import BackButton from '@/components/BackButton';
+import { useAppDispatch } from '@/redux/hook';
+import { openAlert } from '@/redux/reducer/alert';
+import Alerts from '@/components/Alerts';
 
-const EditPatient: React.FC = () => {
+interface EditProps {
+  id: string;
+  onClose: () => void;
+  setShow: (value: boolean) => void;
+  getList?: () => void;
+}
+
+const EditPatient: React.FC<EditProps> = ({ id, onClose, setShow, getList }) => {
   const navigate = useNavigate();
-  const { id } = useParams();
+
   const {
     register,
     handleSubmit,
@@ -20,7 +29,7 @@ const EditPatient: React.FC = () => {
     watch,
   } = useForm({
     defaultValues: {
-      patient_id:'',
+      patient_id: '',
       patient_name: '',
       patient_surname: '',
       gender: '',
@@ -32,72 +41,96 @@ const EditPatient: React.FC = () => {
       province: '',
     },
   });
-
+  const dispatch = useAppDispatch();
+  const [loading, setLoading] = useState(true);
+  const [fetching, setFetching] = useState(false);
   const [gender, setGender] = useState<string>('');
 
   useEffect(() => {
-    const fetchPatient = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:4000/manager/patient/${id}`,
-        );
-        const result = await response.json();
+    const fetchPatientData = async () => {
+      if (!id) {
+        console.error('Patient ID is undefined');
+        return;
+      }
 
+      try {
+        const response = await fetch(`http://localhost:4000/manager/patient/${id}`);
         if (!response.ok) {
-          throw new Error(result.error || 'ດຶງຂໍ້ມູນຜິດພາດ');
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
+        const result = await response.json();
 
         reset(result.data);
         setGender(result.data.gender);
-      } catch (error: any) {
-        alert(error.message || 'ມີຂໍ້ຜິດພາດ');
+        setLoading(false);
+      } catch (err: any) {
+        console.error(err);
+       dispatch(openAlert({
+         type: 'error',
+         title: 'ດາວໂຫລດຂໍ້ມູນບໍ່ສຳເລັດ',
+         message: 'ບໍ່ສາມາດສະແດງຂໍ້ມູນຂອງຄົນເຈັບໄດ້'
+       }));
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchPatient();
-  }, [id, reset]);
+    fetchPatientData();
+  }, [id, reset, fetching]);
 
-  const onSubmit = async (data: any) => {
-    try {
-      const response = await fetch(
-        `http://localhost:4000/manager/patient/${id}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-        },
-      );
-
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.error || 'ບັນທຶກບໍ່ສຳເລັດ');
-      }
-
-      navigate('/manager/patient');
-    } catch (error: any) {
-      alert(error.message || 'ມີຂໍ້ຜິດພາດ');
-    }
-  };
   useEffect(() => {
     if (gender) {
       setValue('gender', gender);
     }
   }, [gender, setValue]);
 
+  const handleSave = async (formData: any) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`http://localhost:4000/manager/patient/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || `Status ${res.status}`);
+
+      dispatch(openAlert({
+        type: 'success',
+        title: 'ແກ້ໄຂສຳເລັດ',
+        message: 'ແກ້ໄຂຂໍ້ມູນຄົນເຈັບສຳເລັດແລ້ວ'
+      }));
+
+      if (getList) getList();
+      setShow(false);
+    } catch (err: any) {
+      console.error(err);
+     dispatch(openAlert({
+       type: 'error',
+       title: 'ແກ້ໄຂຂໍ້ມູນບໍ່ສຳເລັດ',
+       message: err.message || 'ເກີດຂໍ້ຜຶດພາດໃນການບັນທືກຂໍ້ມູນ'
+     }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  
+
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
-     <div className="flex items-center  border-b border-stroke px-4 dark:border-strokedark pb-4">
-        <BackButton className="" />
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-6">
+      <Alerts />
+
+     <div className="flex items-center  border-b border-stroke  dark:border-strokedark pb-4">
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
           ແກ້ໄຂ
         </h1>
       </div>
 
       <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-1 gap-4 px-4 pt-4 "
+        onSubmit={handleSubmit(handleSave)}
+        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4 mt-4 px-4"
+
       >
        
         <Input
@@ -194,13 +227,13 @@ const EditPatient: React.FC = () => {
         />
 
         <div className="mt-8 flex justify-end space-x-4 col-span-full px-4 py-4">
-          <button
+          {/* <button
             className="px-6 py-2 text-md font-medium text-red-500"
             type="button"
             onClick={() => navigate('/manager/patient')}
           >
             ຍົກເລິກ
-          </button>
+          </button> */}
           <Button variant="save" type="submit">
             ບັນທຶກ
           </Button>

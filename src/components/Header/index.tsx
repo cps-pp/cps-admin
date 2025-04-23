@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import DropdownUser from './DropdownUser';
+// import DropdownUser from './DropdownUser';
 import Logo from '../../images/logo/cps-logo.png';
 import DarkModeSwitcher from './DarkModeSwitcher';
 import { Link } from 'react-router-dom';
@@ -106,7 +106,7 @@ const Header = (props: {
             <DarkModeSwitcher />
             {/* <DropdownNotification /> */}
           </ul>
-          <DropdownUser user={user} />
+          {/* <DropdownUser user={user} /> */}
         </div>
       </div>
     </header>

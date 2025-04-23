@@ -10,13 +10,13 @@ import CreateSupplier from './create';
 import EditSupplier from './edit';
 
 const SupplierPage: React.FC = () => {
-  const [suppliers, setSuppliers] = useState<any[]>([]); // Data ของ Supplier
-  const [filteredSuppliers, setFilteredSuppliers] = useState<any[]>([]); // Data ที่กรองแล้ว
+  const [suppliers, setSuppliers] = useState<any[]>([]); 
+  const [filteredSuppliers, setFilteredSuppliers] = useState<any[]>([]); 
   const [showModal, setShowModal] = useState(false);
   const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(
     null,
   );
-  const [searchQuery, setSearchQuery] = useState(''); // ค่าของการค้นหาที่ผู้ใช้ป้อน
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
   const [showAddModal, setShowAddModal] = useState(false);

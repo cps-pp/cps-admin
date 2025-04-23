@@ -1,4 +1,4 @@
-import Account from '@/pages/Admin';
+// import Account from '@/pages/Admin';
 import SignIn from '@/pages/Authentication/SignIn';
 import NotFound from '@/pages/NotFound';
 import Profile from '@/pages/Profile';
@@ -61,16 +61,16 @@ export const ROUTES: IRoute[] = [
     title: 'Patient List| CPS Admin',
     component: <PatientPage />,
   },
-  {
-    path: '/patient/create',
-    title: 'Patient Create | CPS Admin',
-    component: <CreatePatient />,
-  },
-  {
-    path: '/patient/edit/:id',
-    title: 'Patient Edit | CPS Admin',
-    component: <EditPatient />,
-  },
+  // {
+  //   path: '/patient/create',
+  //   title: 'Patient Create | CPS Admin',
+  //   component: <CreatePatient />,
+  // },
+  // {
+  //   path: '/patient/edit/:id',
+  //   title: 'Patient Edit | CPS Admin',
+  //   component: <EditPatient />,
+  // },
   {
     path: '/patient/detail/:id',
     title: 'Patient Detail | CPS Admin',
@@ -193,11 +193,11 @@ export const ROUTES: IRoute[] = [
     component: <Profile />,
   },
 
-  {
-    path: '/admin/account',
-    title: 'Accounts | CPS Admin',
-    component: <Account />,
-  },
+  // {
+  //   path: '/admin/account',
+  //   title: 'Accounts | CPS Admin',
+  //   component: <Account />,
+  // },
   {
     path: '*',
     title: '404 Not Found',

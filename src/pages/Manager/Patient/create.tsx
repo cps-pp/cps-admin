@@ -3,41 +3,52 @@ import Button from '@/components/Button';
 import { useNavigate } from 'react-router-dom';
 import Input from '@/components/Forms/Input_two';
 import DatePicker from '@/components/DatePicker_two';
-import SelectGender from '@/components/Forms/SelectGender';
 import Select from '@/components/Forms/Select';
 import React, { useEffect, useState } from 'react';
-import BackButton from '@/components/BackButton';
+import { openAlert } from '@/redux/reducer/alert';
+import { useAppDispatch } from '@/redux/hook';
+import Alerts from '@/components/Alerts';
 
-const CreatePatient: React.FC = () => {
+interface CreateProps {
+  setShow: (value: boolean) => void;
+  getList: any;
+}
+
+const CreatePatient: React.FC<CreateProps> = ({ setShow, getList }) => {
+  const [loading, setLoading] = useState(false);
+  const dispatch = useAppDispatch(); // เพิ่ม Redux dispatch
+
   const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     reset,
     setValue,
-    formState: { isDirty,errors  },
+    formState: { isDirty, errors },
   } = useForm();
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       if (isDirty) {
-        const message = 'ທ່ານຍັງບໍ່ໄດ້ບັນທຶກຂໍ້ມູນ. ຢືນຢັນວ່າຈະອອກຈາກໜ້ານີ້ຫຼືບໍ?';
-        event.preventDefault(); 
+        const message =
+          'ທ່ານຍັງບໍ່ໄດ້ບັນທຶກຂໍ້ມູນ. ຢືນຢັນວ່າຈະອອກຈາກໜ້ານີ້ຫຼືບໍ?';
+        event.preventDefault();
         event.returnValue = message;
         return message;
       }
     };
-  
+
     window.addEventListener('beforeunload', handleBeforeUnload);
-  
+
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [isDirty]);
 
-  const [gender, setGender] = useState<string>(''); 
+  const [gender, setGender] = useState<string>('');
 
-  const onSubmit = async (data: any) => {
+  const handleSave = async (data: any) => {
+    setLoading(true);
     try {
       const response = await fetch('http://localhost:4000/manager/patient', {
         method: 'POST',
@@ -52,28 +63,46 @@ const CreatePatient: React.FC = () => {
         throw new Error(result.error || 'ບັນທຶກບໍ່ສຳເລັດ');
       }
 
+      dispatch(
+        openAlert({
+          type: 'success',
+          title: 'ສຳເລັດ',
+          message: 'ບັນທຶກຂໍ້ມູນຄົນເຈັບສຳເລັດແລ້ວ',
+        })
+      );
+
+      setShow(false);
+      await getList();
       reset();
-      navigate('/manager/patient');
     } catch (error: any) {
-      alert(error.message || 'ມີຂໍ້ຜິດພາດ');
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ເກີດຂໍ້ຜິດພາດ',
+          message: error.message || 'ມີຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
+        })
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
-      <div className="flex items-center  border-b border-stroke px-4 dark:border-strokedark pb-4">
-        <BackButton className="" />
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-6">
+      <Alerts />
+      
+      <div className="flex items-center border-b border-stroke dark:border-strokedark pb-4">
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
           ເພີ່ມຂໍ້ມູນ
         </h1>
       </div>
 
       <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-1  gap-4 px-4 pt-4 "
+        onSubmit={handleSubmit(handleSave)}
+        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4 mt-4 px-4"
       >
         <Input
-          label="ຊື່ຄົນເຈັບ"
+          label="ລະຫັດຄົນເຈັບ"
           name="patient_id"
           type="text"
           placeholder="ປ້ອນລະຫັດຄົນເຈັບ"
@@ -165,16 +194,13 @@ const CreatePatient: React.FC = () => {
           errors={errors}
         />
 
-        <div className="mt-8 flex justify-end space-x-4 col-span-full px-4 py-4">
-          <button
-            className="px-6 py-2 text-md font-medium uppercase text-red-500"
-            type="button"
-            onClick={() => navigate('/manager/patient')}
+        <div className="mt-4 flex justify-end space-x-4 col-span-full py-4">
+          <Button 
+            variant="save" 
+            type="submit" 
+            disabled={loading}
           >
-            ຍົກເລິກ
-          </button>
-          <Button variant="save" type="submit">
-            ບັນທຶກ
+            {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </Button>
         </div>
       </form>

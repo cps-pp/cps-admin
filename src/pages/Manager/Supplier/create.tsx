@@ -9,13 +9,15 @@ interface CreateProps {
   getList: any;
 }
 
-
-const CreateSupplier: React.FC<CreateProps> = ({setShow,getList}) => {
+const CreateSupplier: React.FC<CreateProps> = ({ setShow, getList }) => {
   const navigate = useNavigate();
-  const { register, handleSubmit, reset, formState: { errors } } = useForm();
- const [loading, setLoading] = useState(false);
-  
-
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
+  const [loading, setLoading] = useState(false);
 
   const handleSave = async (formData: any) => {
     setLoading(true);
@@ -31,9 +33,6 @@ const CreateSupplier: React.FC<CreateProps> = ({setShow,getList}) => {
           address: formData.address,
           phone: formData.phone,
           status: formData.status,
-
-
-
         }),
       });
 
@@ -42,7 +41,7 @@ const CreateSupplier: React.FC<CreateProps> = ({setShow,getList}) => {
       }
 
       setShow(false);
-      await getList(); 
+      await getList();
       reset();
     } catch (error) {
       console.error('Error saving :', error);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PatientHeaders } from './column/patient';
 import { iconAdd } from '@/configs/icon';
@@ -9,7 +9,11 @@ import { TableAction } from '@/components/Tables/TableAction';
 import ConfirmModal from '@/components/Modal';
 import Alerts from '@/components/Alerts';
 import PatientStatsCard from './column/PatientStatsCard';
-
+import CreatePatient from './create';
+import EditPatient from './edit';
+import TablePaginationDemo from '@/components/Tables/Pagination_two';
+import { useAppDispatch } from '@/redux/hook';
+import { openAlert } from '@/redux/reducer/alert';
 const PatientPage: React.FC = () => {
   const [patients, setPatients] = useState<any[]>([]);
   const [filteredPatients, setFilteredPatients] = useState<any[]>([]);
@@ -20,30 +24,32 @@ const PatientPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10); // Default to 10 rows per page
+
+  const fetchPatients = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:4000/manager/patient`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      setPatients(data.data);
+      setFilteredPatients(data.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`http://localhost:4000/manager/patient`, {
-          method: 'GET',
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Data received:', data);
-        setPatients(data.data);
-        setFilteredPatients(data.data);
-      } catch (error) {
-        console.error('Error fetching patients:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchPatients();
   }, []);
 
@@ -89,42 +95,71 @@ const PatientPage: React.FC = () => {
     try {
       const response = await fetch(
         `http://localhost:4000/manager/patient/${selectedPatientId}`,
-        {
-          method: 'DELETE',
-        },
+        { method: 'DELETE' },
       );
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      setPatients((prevPatients) =>
-        prevPatients.filter(
-          (patient) => patient.patient_id !== selectedPatientId,
-        ),
+      setPatients(prev =>
+        prev.filter(p => p.patient_id !== selectedPatientId)
       );
-      setFilteredPatients((prevPatients) =>
-        prevPatients.filter(
-          (patient) => patient.patient_id !== selectedPatientId,
-        ),
+      setFilteredPatients(prev =>
+        prev.filter(p => p.patient_id !== selectedPatientId)
       );
       setShowModal(false);
-    } catch (error) {
+
+     dispatch(openAlert({
+       type: 'success',
+       title: 'ລົບຂໍ້ມູນສຳເລັດ',
+       message: 'ລົບຂໍ້ມູນຄົນເຈັບສຳເລັດແລ້ວ',
+     }));
+    } catch (error: any) {
       console.error('Error deleting patient:', error);
+     dispatch(openAlert({
+       type: 'error',
+       title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
+       message: error.message || 'ເກີດຂໍ້ຜິດພາດໃນການລົບຂໍ້ມູນ',
+     }));
     }
   };
 
+ 
 
-  const handleEditPatient = (id: string) => {
-    navigate(`/patient/edit/${id}`);
-  };
   const handleViewPatient = (id: string) => {
     navigate(`/patient/detail/${id}`);
   };
 
+  const handleEdit = (id: string) => {
+    setSelectedId(id);
+    setShowEditModal(true);
+  };
+
+  // Handle page change in pagination
+  const handlePageChange = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number,
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleRowsPerPageChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); 
+  };
+
+  const paginatedPatients = filteredPatients.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage,
+  );
+
   return (
     <>
-      <div className=" pb-4">
+      <div className="pb-4">
+      <Alerts />
         <PatientStatsCard patients={filteredPatients} />
       </div>
       <div className="rounded bg-white pt-4 dark:bg-boxdark">
@@ -134,7 +169,7 @@ const PatientPage: React.FC = () => {
           </h1>
           <div className="flex items-center gap-2">
             <Button
-              onClick={() => navigate('/patient/create')}
+              onClick={() => setShowAddModal(true)}
               icon={iconAdd}
               className="bg-primary"
             >
@@ -149,7 +184,6 @@ const PatientPage: React.FC = () => {
             name="search"
             placeholder="ຄົ້ນຫາຊື່..."
             className="rounded border border-stroke dark:border-strokedark"
-            // value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
             }}
@@ -158,13 +192,13 @@ const PatientPage: React.FC = () => {
 
         <div className="text-md text-strokedark dark:text-bodydark3">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-max table-auto border-collapse ">
+            <table className="w-full min-w-max table-auto border-collapse">
               <thead>
                 <tr className="border-b border-gray-300 bg-gray-100 text-left dark:bg-meta-4 bg-blue-100">
                   {PatientHeaders.map((header, index) => (
                     <th
                       key={index}
-                      className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300 "
+                      className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300"
                     >
                       {header.name}
                     </th>
@@ -172,11 +206,11 @@ const PatientPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredPatients.length > 0 ? (
-                  filteredPatients.map((patient, index) => (
+                {paginatedPatients.length > 0 ? (
+                  paginatedPatients.map((patient, index) => (
                     <tr
                       key={index}
-                      className="border-b border-stroke dark:border-strokedark  hover:bg-gray-50 dark:hover:bg-gray-800"
+                      className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
                     >
                       <td className="px-4 py-4">{patient.patient_id}</td>
                       <td className="px-4 py-4">{patient.patient_name}</td>
@@ -196,9 +230,8 @@ const PatientPage: React.FC = () => {
                       <td className="px-4 py-4">{patient.phone2}</td>
                       <td className="px-3 py-4 text-center">
                         <TableAction
-                          onView={() => handleViewPatient(patient.patient_id)}
                           onDelete={openDeleteModal(patient.patient_id)}
-                          onEdit={() => handleEditPatient(patient.patient_id)}
+                          onEdit={() => handleEdit(patient.patient_id)}
                         />
                       </td>
                     </tr>
@@ -206,7 +239,7 @@ const PatientPage: React.FC = () => {
                 ) : (
                   <tr>
                     <td colSpan={5} className="py-4 text-center text-gray-500">
-                      ບໍ່ມີຂໍ້ມູນທທ
+                      ບໍ່ມີຂໍ້ມູນ
                     </td>
                   </tr>
                 )}
@@ -215,16 +248,387 @@ const PatientPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Confirm Delete Modal */}
+        {showAddModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="rounded-lg w-full max-w-2xl relative px-4 ">
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+
+              <CreatePatient
+                setShow={setShowAddModal}
+                getList={fetchPatients}
+              />
+            </div>
+          </div>
+        )}
+
+        {showEditModal && selectedId && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
+            <div className="rounded-lg w-full max-w-2xl bg-white relative ">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+
+              <EditPatient
+                id={selectedId}
+                onClose={() => setShowEditModal(false)}
+                setShow={setShowEditModal}
+                getList={fetchPatients}
+              />
+            </div>
+          </div>
+        )}
+
+      </div>
+        <TablePaginationDemo
+          count={filteredPatients.length}
+          page={page}
+          onPageChange={handlePageChange}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleRowsPerPageChange}
+        />
         <ConfirmModal
           show={showModal}
           setShow={setShowModal}
           message="ທ່ານຕ້ອງການລົບຄົນເຈັບນີ້ອອກຈາກລະບົບບໍ່？"
           handleConfirm={handleDeletePatient} // Handle deletion on confirm
         />
-      </div>
     </>
   );
 };
 
 export default PatientPage;
+
+// import { useEffect, useState } from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import { PatientHeaders } from './column/patient';
+// import { iconAdd } from '@/configs/icon';
+// import Button from '@/components/Button';
+// import Search from '@/components/Forms/Search';
+// import axiosCreate from '@/api/axios';
+// import { TableAction } from '@/components/Tables/TableAction';
+// import ConfirmModal from '@/components/Modal';
+// import Alerts from '@/components/Alerts';
+// import PatientStatsCard from './column/PatientStatsCard';
+// import CreatePatient from './create';
+// import EditPatient from './edit';
+
+// const PatientPage: React.FC = () => {
+//   const [patients, setPatients] = useState<any[]>([]);
+//   const [filteredPatients, setFilteredPatients] = useState<any[]>([]);
+//   const [showModal, setShowModal] = useState(false);
+//   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
+//     null,
+//   );
+//   const [searchQuery, setSearchQuery] = useState('');
+//   const navigate = useNavigate();
+//   const [loading, setLoading] = useState(true);
+
+//   const [showAddModal, setShowAddModal] = useState(false);
+//   const [showEditModal, setShowEditModal] = useState(false);
+//   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+//   const fetchPatients = async () => {
+//     try {
+//       setLoading(true);
+//       const response = await fetch(`http://localhost:4000/manager/patient`);
+
+//       if (!response.ok) {
+//         throw new Error(`HTTP error! Status: ${response.status}`);
+//       }
+
+//       const data = await response.json();
+//       setPatients(data.data);
+//       setFilteredPatients(data.data);
+//     } catch (error) {
+//       console.error('Error fetching categories:', error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchPatients();
+//   }, []);
+
+//   useEffect(() => {
+//     if (searchQuery.trim() === '') {
+//       setFilteredPatients(patients);
+//     } else {
+//       const filtered = patients.filter(
+//         (patient) =>
+//           patient.patient_name
+//             .toLowerCase()
+//             .includes(searchQuery.toLowerCase()) ||
+//           patient.patient_surname
+//             .toLowerCase()
+//             .includes(searchQuery.toLowerCase()) ||
+//           (patient.village &&
+//             patient.village
+//               .toLowerCase()
+//               .includes(searchQuery.toLowerCase())) ||
+//           (patient.district &&
+//             patient.district
+//               .toLowerCase()
+//               .includes(searchQuery.toLowerCase())) ||
+//           (patient.province &&
+//             patient.province
+//               .toLowerCase()
+//               .includes(searchQuery.toLowerCase())) ||
+//           (patient.phone1 && patient.phone1.includes(searchQuery)) ||
+//           (patient.phone2 && patient.phone2.includes(searchQuery)),
+//       );
+//       setFilteredPatients(filtered);
+//     }
+//   }, [searchQuery, patients]);
+
+//   const openDeleteModal = (id: string) => () => {
+//     setSelectedPatientId(id);
+//     setShowModal(true);
+//   };
+
+//   const handleDeletePatient = async () => {
+//     if (!selectedPatientId) return;
+
+//     try {
+//       const response = await fetch(
+//         `http://localhost:4000/manager/patient/${selectedPatientId}`,
+//         {
+//           method: 'DELETE',
+//         },
+//       );
+
+//       if (!response.ok) {
+//         throw new Error(`HTTP error! Status: ${response.status}`);
+//       }
+
+//       setPatients((prevPatients) =>
+//         prevPatients.filter(
+//           (patient) => patient.patient_id !== selectedPatientId,
+//         ),
+//       );
+//       setFilteredPatients((prevPatients) =>
+//         prevPatients.filter(
+//           (patient) => patient.patient_id !== selectedPatientId,
+//         ),
+//       );
+//       setShowModal(false);
+//     } catch (error) {
+//       console.error('Error deleting patient:', error);
+//     }
+//   };
+
+//   const handleEditPatient = (id: string) => {
+//     navigate(`/patient/edit/${id}`);
+//   };
+//   const handleViewPatient = (id: string) => {
+//     navigate(`/patient/detail/${id}`);
+//   };
+//   const handleEdit = (id: string) => {
+//     setSelectedId(id);
+//     setShowEditModal(true);
+//   };
+
+//   return (
+//     <>
+//       <div className=" pb-4">
+//         <PatientStatsCard patients={filteredPatients} />
+//       </div>
+//       <div className="rounded bg-white pt-4 dark:bg-boxdark">
+//         <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
+//           <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+//             ຈັດການຂໍ້ມູນຄົນເຈັບ
+//           </h1>
+//           <div className="flex items-center gap-2">
+//             <Button
+//                onClick={() => setShowAddModal(true)}
+//               icon={iconAdd}
+//               className="bg-primary"
+//             >
+//               ເພີ່ມຂໍ້ມູນຜູ່ປ່ວຍ
+//             </Button>
+//           </div>
+//         </div>
+
+//         <div className="grid w-full gap-4 p-4">
+//           <Search
+//             type="text"
+//             name="search"
+//             placeholder="ຄົ້ນຫາຊື່..."
+//             className="rounded border border-stroke dark:border-strokedark"
+//             // value={searchQuery}
+//             onChange={(e) => {
+//               setSearchQuery(e.target.value);
+//             }}
+//           />
+//         </div>
+
+//         <div className="text-md text-strokedark dark:text-bodydark3">
+//           <div className="overflow-x-auto">
+//             <table className="w-full min-w-max table-auto border-collapse ">
+//               <thead>
+//                 <tr className="border-b border-gray-300 bg-gray-100 text-left dark:bg-meta-4 bg-blue-100">
+//                   {PatientHeaders.map((header, index) => (
+//                     <th
+//                       key={index}
+//                       className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300 "
+//                     >
+//                       {header.name}
+//                     </th>
+//                   ))}
+//                 </tr>
+//               </thead>
+//               <tbody>
+//                 {filteredPatients.length > 0 ? (
+//                   filteredPatients.map((patient, index) => (
+//                     <tr
+//                       key={index}
+//                       className="border-b border-stroke dark:border-strokedark  hover:bg-gray-50 dark:hover:bg-gray-800"
+//                     >
+//                       <td className="px-4 py-4">{patient.patient_id}</td>
+//                       <td className="px-4 py-4">{patient.patient_name}</td>
+//                       <td className="px-4 py-4">{patient.patient_surname}</td>
+//                       <td className="px-4 py-4">{patient.gender}</td>
+//                       <td className="px-4 py-4">
+//                         {new Date(patient.dob).toLocaleDateString('th-TH', {
+//                           day: '2-digit',
+//                           month: '2-digit',
+//                           year: 'numeric',
+//                         })}
+//                       </td>
+//                       <td className="px-4 py-4">{patient.village}</td>
+//                       <td className="px-4 py-4">{patient.district}</td>
+//                       <td className="px-4 py-4">{patient.province}</td>
+//                       <td className="px-4 py-4">{patient.phone1}</td>
+//                       <td className="px-4 py-4">{patient.phone2}</td>
+//                       <td className="px-3 py-4 text-center">
+//                         <TableAction
+//                           // onView={() => handleViewPatient(patient.patient_id)}
+//                           onDelete={openDeleteModal(patient.patient_id)}
+//                           onEdit={() => handleEdit(patient.patient_id)}
+//                         />
+//                       </td>
+//                     </tr>
+//                   ))
+//                 ) : (
+//                   <tr>
+//                     <td colSpan={5} className="py-4 text-center text-gray-500">
+//                       ບໍ່ມີຂໍ້ມູນ
+//                     </td>
+//                   </tr>
+//                 )}
+//               </tbody>
+//             </table>
+//           </div>
+//         </div>
+
+//    {showAddModal && (
+//         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+//           <div className="rounded-lg w-full max-w-2xl relative px-4 ">
+//             <button
+//               onClick={() => setShowAddModal(false)}
+//               className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700"
+//             >
+//               <svg
+//                 xmlns="http://www.w3.org/2000/svg"
+//                 className="h-6 w-6"
+//                 fill="none"
+//                 viewBox="0 0 24 24"
+//                 stroke="currentColor"
+//               >
+//                 <path
+//                   strokeLinecap="round"
+//                   strokeLinejoin="round"
+//                   strokeWidth={2}
+//                   d="M6 18L18 6M6 6l12 12"
+//                 />
+//               </svg>
+//             </button>
+
+//             <CreatePatient
+//               setShow={setShowAddModal}
+//               getList={fetchPatients}
+//             />
+//           </div>
+//         </div>
+//       )}
+
+//       {showEditModal && selectedId && (
+//         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
+//           <div className="rounded-lg w-full max-w-2xl bg-white relative ">
+//             <button
+//               onClick={() => setShowEditModal(false)}
+//               className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"
+//             >
+//               <svg
+//                 xmlns="http://www.w3.org/2000/svg"
+//                 className="h-6 w-6"
+//                 fill="none"
+//                 viewBox="0 0 24 24"
+//                 stroke="currentColor"
+//               >
+//                 <path
+//                   strokeLinecap="round"
+//                   strokeLinejoin="round"
+//                   strokeWidth={2}
+//                   d="M6 18L18 6M6 6l12 12"
+//                 />
+//               </svg>
+//             </button>
+
+//             <EditPatient
+//               id={selectedId}
+//               onClose={() => setShowEditModal(false)}
+//               setShow={setShowEditModal}
+//               getList={fetchPatients}
+//             />
+//           </div>
+//         </div>
+//       )}
+
+//         {/* Confirm Delete Modal */}
+//         <ConfirmModal
+//           show={showModal}
+//           setShow={setShowModal}
+//           message="ທ່ານຕ້ອງການລົບຄົນເຈັບນີ້ອອກຈາກລະບົບບໍ່？"
+//           handleConfirm={handleDeletePatient} // Handle deletion on confirm
+//         />
+//       </div>
+//     </>
+//   );
+// };
+
+// export default PatientPage;
