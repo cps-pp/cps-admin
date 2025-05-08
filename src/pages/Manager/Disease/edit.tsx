@@ -4,23 +4,28 @@ import { useForm } from 'react-hook-form';
 import Button from '@/components/Button';
 import Input from '@/components/Forms/Input_two';
 import BackButton from '@/components/BackButton';
+import { useAppDispatch } from '@/redux/hook';
+import { openAlert } from '@/redux/reducer/alert';
+import Loader from '@/common/Loader';
+import Alerts from '@/components/Alerts';
 
 interface EditProps {
   id: string;
   onClose: () => void;
   setShow: (value: boolean) => void;
-  getListDisease?: () => void;
+  getList?: () => void;
 }
 
 const EditDisease: React.FC<EditProps> = ({
   id,
   onClose,
   setShow,
-  getListDisease, 
+  getList, 
 }) => {
   const { register, handleSubmit, formState: { errors }, setValue } = useForm();
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false); 
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const fetchDiseaseData = async () => {
@@ -45,7 +50,7 @@ const EditDisease: React.FC<EditProps> = ({
   const handleSave = async (formData: any) => {
     setLoading(true);  
     try {
-      const response = await fetch(`http://localhost:4000/manager/disease/${id}`, {
+      const response = await fetch(`http://localhost:4000/src/manager/disease/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -57,23 +62,36 @@ const EditDisease: React.FC<EditProps> = ({
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      if (getListDisease) {
-        getListDisease();
+      if (getList) {
+        getList();
       }
       
       setFetching(!fetching);  
-      onClose(); 
-    } catch (error) {
-      console.error('Error saving disease:', error);
-    } finally {
-      setLoading(false); 
-    }
-  };
-
-  if (loading) return <div>Loading...</div>;
-
+ 
+       dispatch(openAlert({
+         type: 'success',
+         title: 'ແກ້ໄຂສຳເລັດ',
+         message: 'ແກ້ໄຂຂໍ້ມູນພະຍາດແຂ້ວສຳເລັດແລ້ວ'
+       }));
+ 
+       if (getList) getList();
+       setShow(false);
+     } catch (err: any) {
+       console.error(err);
+      dispatch(openAlert({
+        type: 'error',
+        title: 'ແກ້ໄຂຂໍ້ມູນບໍ່ສຳເລັດ',
+        message:  'ເກີດຂໍ້ຜຶດພາດໃນການບັນທືກຂໍ້ມູນ'
+      }));
+     } finally {
+       setLoading(false);
+     }
+   };
+   if (loading) return <Loader />;
+ 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
+      <Alerts/>
        <div className="flex items-center border-b border-stroke dark:border-strokedark pb-4">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
           ແກ້ໄຂ

@@ -4,6 +4,9 @@ import { useForm } from 'react-hook-form';
 import Button from '@/components/Button';
 import Input from '@/components/Forms/Input_two';
 import BackButton from '@/components/BackButton';
+import { useAppDispatch } from '@/redux/hook';
+import { openAlert } from '@/redux/reducer/alert';
+import Loader from '@/common/Loader';
 
 
 
@@ -25,6 +28,7 @@ const EditServicerList: React.FC<EditProps>= ({
   const { register, handleSubmit, formState: { errors }, setValue } = useForm();
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false); 
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const fetchListData = async () => {
@@ -51,7 +55,7 @@ const EditServicerList: React.FC<EditProps>= ({
   const handleSave = async (formData: any) => {
     setLoading(true);  
     try {
-      const response = await fetch(`http://localhost:4000/manager/servicelist/${id}`, {
+      const response = await fetch(`http://localhost:4000/src/manager/servicelist/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -62,25 +66,32 @@ const EditServicerList: React.FC<EditProps>= ({
         })
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || `Status ${response.status}`);
+  
+        dispatch(openAlert({
+          type: 'success',
+          title: 'ແກ້ໄຂສຳເລັດ',
+          message: 'ແກ້ໄຂຂໍ້ມູນລາຍການສຳເລັດແລ້ວ'
+        }));
+  
+        if (getList) getList();
+        setShow(false);
+      } catch (err: any) {
+        console.error(err);
+       dispatch(openAlert({
+         type: 'error',
+         title: 'ແກ້ໄຂຂໍ້ມູນບໍ່ສຳເລັດ',
+         message: err.message || 'ເກີດຂໍ້ຜຶດພາດໃນການບັນທືກຂໍ້ມູນ'
+       }));
+      } finally {
+        setLoading(false);
       }
-
-      if (getList) {
-        getList();
-      }
-      
-      setFetching(!fetching);  
-      onClose(); 
-    } catch (error) {
-      console.error('Error saving disease:', error);
-    } finally {
-      setLoading(false); 
-    }
-  };
+    };
+  
 
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Loader/>;
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">

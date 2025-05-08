@@ -6,23 +6,29 @@ import DatePicker from '@/components/DatePicker_two';
 import SelectID from '@/components/Forms/SelectID';
 import Select from '@/components/Forms/Select';
 import PriceInput from '@/components/Forms/PriceInput';
+import { useAppDispatch } from '@/redux/hook';
+import { openAlert } from '@/redux/reducer/alert';
 
 interface CreateProps {
   setShow: (value: boolean) => void;
-  getListMedicines: any;
+  getList: any;
 }
 
-const CreateMedicines: React.FC<CreateProps> = ({setShow, getListMedicines}) => {
+const CreateMedicines: React.FC<CreateProps> = ({
+  setShow,
+  getList,
+}) => {
   const {
     register,
     handleSubmit,
     setValue,
     reset,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm();
 
-    const [loading, setLoading] = useState(false);
-  
+  const [loading, setLoading] = useState(false);
+  const dispatch = useAppDispatch();
+
   const [categories, setCategories] = useState<
     {
       medtype_id: any;
@@ -32,12 +38,26 @@ const CreateMedicines: React.FC<CreateProps> = ({setShow, getListMedicines}) => 
     }[]
   >([]);
   const [selectedMedType, setSelectedMedType] = useState<string>('');
-  const [status, setStatus] = useState<string>(''); // Initialize gender state
+  const [status, setStatus] = useState<string>('');
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (isDirty) {
+        const message =
+          'ທ່ານຍັງບໍ່ໄດ້ບັນທຶກຂໍ້ມູນ. ຢືນຢັນວ່າຈະອອກຈາກໜ້ານີ້ຫຼືບໍ?';
+        event.preventDefault();
+        event.returnValue = message;
+        return message;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('http://localhost:4000/manager/category');
+        const response = await fetch('http://localhost:4000/src/manager/category');
         const data = await response.json();
         if (response.ok) {
           console.log('API Response:', data.data);
@@ -57,34 +77,45 @@ const CreateMedicines: React.FC<CreateProps> = ({setShow, getListMedicines}) => 
     fetchCategories();
   }, []);
 
-
-  
   const handleSave = async (formData: any) => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:4000/manager/medicines', {
+      const response = await fetch('http://localhost:4000/src/manager/medicines', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, status, medtype_id: selectedMedType }),
+        body: JSON.stringify({
+          ...formData,
+          status,
+          medtype_id: selectedMedType,
+        }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      setShow(false);
-      await getListMedicines(); //Fetching Latest Data from the Server
-      reset();
-    } catch (error) {
-      console.error('Error saving disease:', error);
-      alert('ບໍ່ສາມາດເພີ່ມຂໍ້ມູນພະຍາດແຂວ້');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  
- 
+        const result = await response.json();
+           if (!response.ok) throw new Error(result.error || 'ບັນທຶກຂໍ້ມູບໍ່ສຳເລັດ');
+     
+           dispatch(
+             openAlert({
+               type: 'success',
+               title: 'ສຳເລັດ',
+               message: 'ບັນທຶກຂໍ້ມູນສຳເລັດແລ້ວ',
+             })
+           );
+     
+           await getList();
+           reset();
+           setShow(false);
+         } catch (error: any) {
+           dispatch(
+             openAlert({
+               type: 'error',
+               title: 'ເກີດຂໍ້ຜິດພາດ',
+               message: error.message || 'ມີຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
+             })
+           );
+         } finally {
+           setLoading(false);
+         }
+       };
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
@@ -96,9 +127,9 @@ const CreateMedicines: React.FC<CreateProps> = ({setShow, getListMedicines}) => 
 
       <form
         onSubmit={handleSubmit(handleSave)}
-          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4 mt-4 px-4"
+        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4 mt-4 px-4"
       >
-         <Input
+        <Input
           label="ລະຫັດ"
           name="med_id"
           type="text"
@@ -137,7 +168,7 @@ const CreateMedicines: React.FC<CreateProps> = ({setShow, getListMedicines}) => 
           }}
           errors={errors}
         />
-           {/* <Input
+        {/* <Input
           label="ລາຄາ"
           name="price"
           type="number"
@@ -179,7 +210,7 @@ const CreateMedicines: React.FC<CreateProps> = ({setShow, getListMedicines}) => 
         />
 
         <div className="flex justify-end space-x-4 col-span-full  py-4">
-        {/* <button
+          {/* <button
             className="px-6 py-2 text-md font-medium uppercase text-red-500"
             type="button"
             onClick={() => setShow(false)}

@@ -3,6 +3,10 @@ import Button from '@/components/Button';
 import { useNavigate } from 'react-router-dom';
 import Input from '@/components/Forms/Input_two';
 import React, { useState } from 'react';
+import { useAppDispatch } from '@/redux/hook';
+import { openAlert } from '@/redux/reducer/alert';
+import Loader from '@/common/Loader';
+import Alerts from '@/components/Alerts';
 
 interface CreateProps {
   setShow: (value: boolean) => void;
@@ -10,7 +14,6 @@ interface CreateProps {
 }
 
 const CreateExChange: React.FC<CreateProps> = ({ setShow, getList }) => {
-  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -19,39 +22,62 @@ const CreateExChange: React.FC<CreateProps> = ({ setShow, getList }) => {
     formState: { errors },
   } = useForm();
   const [loading, setLoading] = useState(false);
+  const dispatch = useAppDispatch();
 
  
 
   const handleSave = async (formData: any) => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:4000/manager/exchange', {
+      const response = await fetch('http://localhost:4000/src/manager/exchange', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          disease_id: formData.disease_id,
-          disease_name: formData.disease_name,
+          ex_id: formData.ex_id,
+          ex_type: formData.ex_type,
+          ex_rate: formData.ex_rate,
         }),
       });
-
+  
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-
-      setShow(false);
-      await getList(); 
-      reset();
-    } catch (error) {
-      console.error('Error saving disease:', error);
-      alert('ບໍ່ສາມາດເພີ່ມຂໍ້ມູນພະຍາດແຂວ້');
-    } finally {
+  
+      setTimeout(async () => {
+        setShow(false);
+        await getList();
+        reset();
+  
+        dispatch(
+          openAlert({
+            type: 'success',
+            title: 'ສຳເລັດ',
+            message: 'ບັນທຶກຂໍ້ມູນສຳເລັດແລ້ວ',
+          })
+        );
+  
+        setLoading(false);
+      }, 1000);
+    } catch (error: any) {
       setLoading(false);
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ເກີດຂໍ້ຜິດພາດ',
+          message: error.message || 'ມີຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
+        })
+      );
     }
   };
+  
+
+  if (loading) return <Loader />;
+
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
+      <Alerts/>
       <div className="flex items-center  border-b border-stroke  dark:border-strokedark pb-4">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
           ເພີ່ມຂໍ້ມູນ

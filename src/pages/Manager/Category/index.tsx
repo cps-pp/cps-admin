@@ -9,8 +9,11 @@ import Alerts from '@/components/Alerts';
 import { CateHeaders } from './column/cate';
 import CreateCategory from './create';
 import EditCate from './edit';
+import { useAppDispatch } from '@/redux/hook';
+import { openAlert } from '@/redux/reducer/alert';
+import TablePaginationDemo from '@/components/Tables/Pagination_two';
 
-const CategoryPage: React.FC = () => {
+const CategoryPage: React.FC<{}> = () => {
   const [categories, setCategory] = useState<any[]>([]);
   const [filteredCategories, setFilteredCategories] = useState<any[]>([]);
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
@@ -19,6 +22,9 @@ const CategoryPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     null,
@@ -26,7 +32,7 @@ const CategoryPage: React.FC = () => {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:4000/manager/category`);
+      const response = await fetch(`http://localhost:4000/src/manager/category`);
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -62,15 +68,13 @@ const CategoryPage: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:4000/manager/category/${selectedCategoryId}`,
+        `http://localhost:4000/src/${selectedCategoryId}`,
         {
           method: 'DELETE',
         },
       );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error('ບໍ່ສາມາດລົບປະເພດຢາໄດ້');
 
       setCategory((prevCategories) =>
         prevCategories.filter(
@@ -82,8 +86,21 @@ const CategoryPage: React.FC = () => {
 
       setShowDeleteModal(false);
       setSelectedCategoryId(null);
-    } catch (error) {
-      console.error('Error deleting category:', error);
+      dispatch(
+        openAlert({
+          type: 'success',
+          title: 'ລົບຂໍ້ມູນສຳເລັດ',
+          message: 'ລົບຂໍ້ມູນປະເພດຢາສຳເລັດແລ້ວ',
+        }),
+      );
+    } catch (error: any) {
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
+          message: error.message || 'ເກີດຂໍ້ຜິດພາດໃນການລົບຂໍ້ມູນ',
+        }),
+      );
     }
   };
 
@@ -96,8 +113,28 @@ const CategoryPage: React.FC = () => {
     setSelectedId(id);
     setShowEditModal(true);
   };
+ // Handle page change in pagination
+  const handlePageChange = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number,
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleRowsPerPageChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const paginatedCate = filteredCategories.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage,
+  );
 
   return (
+    <>
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
       <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
@@ -129,15 +166,14 @@ const CategoryPage: React.FC = () => {
       </div>
 
       {/* Table */}
-      <div className="text-md text-strokedark dark:text-bodydark3">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-max table-auto border-collapse">
+      <div className="overflow-x-auto rounded-lg shadow-md">
+          <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
             <thead>
-              <tr className="border-b border-gray-300 bg-gray-100 text-left dark:bg-meta-4 bg-blue-100">
+              <tr className="text-left bg-secondary2 text-white">
                 {CateHeaders.map((header, index) => (
                   <th
                     key={index}
-                    className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300 "
+                    className="px-4 py-3 font-medium  text-gray-600 dark:text-gray-300 "
                   >
                     {header.name}
                   </th>
@@ -145,8 +181,8 @@ const CategoryPage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredCategories.length > 0 ? (
-                filteredCategories.map((cate, index) => (
+              {paginatedCate.length > 0 ? (
+                paginatedCate.map((cate, index) => (
                   <tr
                     key={index}
                     className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -170,7 +206,6 @@ const CategoryPage: React.FC = () => {
               )}
             </tbody>
           </table>
-        </div>
       </div>
 
       {showAddCategoryModal && (
@@ -227,19 +262,33 @@ const CategoryPage: React.FC = () => {
               </svg>
             </button>
 
-            <EditCate id={selectedId} onClose={() => setShowEditModal(false)} setShow={setShowEditModal} />
-            </div>
-          </div>
-      )}
+            <EditCate
+              id={selectedId}
+              onClose={() => setShowEditModal(false)}
+              setShow={setShowEditModal}
+              getList={fetchCategories}
 
-      {/* Confirm Delete Modal */}
+            />
+          </div>
+        </div>
+      )}
+ 
+    </div>
+    
+      <TablePaginationDemo
+        count={filteredCategories.length}
+        page={page}
+        onPageChange={handlePageChange}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleRowsPerPageChange}
+      />
       <ConfirmModal
         show={showDeleteModal}
         setShow={setShowDeleteModal}
         message="ທ່ານຕ້ອງການລົບປະເພດຢານີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteCategory}
       />
-    </div>
+      </>
   );
 };
 

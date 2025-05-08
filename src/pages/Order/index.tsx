@@ -105,12 +105,10 @@ const OrderPage: React.FC = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
-
-      <div className="text-md text-strokedark dark:text-bodydark3">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-max table-auto border-collapse ">
+      <div className="overflow-x-auto rounded-lg shadow-md">
+          <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
             <thead>
-              <tr className="border-b border-gray-300 bg-gray-100 text-left dark:bg-meta-4 bg-blue-100">
+              <tr className="text-left bg-secondary2 text-white">
                 {OrderHeaders.map((header, index) => (
                   <th
                     key={index}
@@ -165,7 +163,6 @@ const OrderPage: React.FC = () => {
             </tbody>
           </table>
         </div>
-      </div>
 
       <ConfirmModal
         show={showModal}

@@ -514,4 +514,4 @@ export const iconErrorInfomation = (
 
 export const iconView = <Eye size={20} className="text-blue-600 hover:text-blue-700" />;
 
-export const iconEdit = <Pencil size={20} className="dark:text-stone-400 text-stone-600 hover:text-stone-500" />;
+export const iconEdit = <Pencil size={20} className="dark:text-Third text-slate-400 hover:text-slate-600" />;

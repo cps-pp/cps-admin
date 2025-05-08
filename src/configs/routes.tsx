@@ -14,7 +14,6 @@ import EquipmentPage from '@/pages/Manager/MedicinesEquipment';
 import ServcicePage from '@/pages/Manager/ServiceList';
 import ExchangePage from '@/pages/Manager/Exchange';
 import SupplierPage from '@/pages/Manager/Supplier';
-import ServicePatientPage from '@/pages/Service/Treatment';
 import FollowPage from '@/pages/Follow';
 import DetailPatient from '@/pages/Manager/Patient/detail';
 import EditPatient from '@/pages/Manager/Patient/edit';
@@ -36,6 +35,7 @@ import CreateSupplier from '@/pages/Manager/Supplier/create';
 import CreateFollow from '@/pages/Follow/create';
 import Order from '@/pages/Order';
 import Import from '@/pages/Import';
+import Treatment from '@/pages/Service/Treatment';
 
 export interface IRoute {
   path: string;
@@ -158,7 +158,7 @@ export const ROUTES: IRoute[] = [
 {
   path: '/treatment',
   title: 'Service Treatment Create | CPS Admin',
-  component: <ServicePatientPage />,
+  component: <Treatment />,
 },
 {
   path: '/perorder',

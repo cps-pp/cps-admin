@@ -1,6 +1,5 @@
 import { useForm } from 'react-hook-form';
 import Button from '@/components/Button';
-import { useNavigate } from 'react-router-dom';
 import Input from '@/components/Forms/Input_two';
 import DatePicker from '@/components/DatePicker_two';
 import Select from '@/components/Forms/Select';
@@ -8,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { openAlert } from '@/redux/reducer/alert';
 import { useAppDispatch } from '@/redux/hook';
 import Alerts from '@/components/Alerts';
+import Loader from '@/common/Loader';
 
 interface CreateProps {
   setShow: (value: boolean) => void;
@@ -16,9 +16,8 @@ interface CreateProps {
 
 const CreatePatient: React.FC<CreateProps> = ({ setShow, getList }) => {
   const [loading, setLoading] = useState(false);
-  const dispatch = useAppDispatch(); // เพิ่ม Redux dispatch
+  const dispatch = useAppDispatch(); 
 
-  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -50,7 +49,7 @@ const CreatePatient: React.FC<CreateProps> = ({ setShow, getList }) => {
   const handleSave = async (data: any) => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:4000/manager/patient', {
+      const response = await fetch('http://localhost:4000/src/manager/patient', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -62,7 +61,7 @@ const CreatePatient: React.FC<CreateProps> = ({ setShow, getList }) => {
       if (!response.ok) {
         throw new Error(result.error || 'ບັນທຶກບໍ່ສຳເລັດ');
       }
-
+    
       dispatch(
         openAlert({
           type: 'success',
@@ -72,6 +71,7 @@ const CreatePatient: React.FC<CreateProps> = ({ setShow, getList }) => {
       );
 
       setShow(false);
+
       await getList();
       reset();
     } catch (error: any) {
@@ -86,6 +86,9 @@ const CreatePatient: React.FC<CreateProps> = ({ setShow, getList }) => {
       setLoading(false);
     }
   };
+
+  if (loading) return <Loader />;
+
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
@@ -148,22 +151,42 @@ const CreatePatient: React.FC<CreateProps> = ({ setShow, getList }) => {
           formOptions={{ required: 'ກະລຸນາໃສ່ວັນເດືອນປີເກີດ' }}
           setValue={setValue}
         />
-        <Input
+          <Input
           label="ເບີຕິດຕໍ່"
           name="phone1"
-          type="text"
-          placeholder="ເບີຕິດຕໍ່"
+          type="tel"
+          placeholder="ປ້ອນເບີຕິດຕໍ່"
           register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນເບີຕິດຕໍ່ກ່ອນ' }}
+          formOptions={{
+            required: 'ກະລຸນາປ້ອນເບີຕິດຕໍ່ກ່ອນ',
+            pattern: {
+              value: /^[0-9]+$/,
+              message: 'ເບີຕິດຕໍ່ຕ້ອງເປັນຕົວເລກເທົ່ານັ້ນ',
+            },
+            minLength: {
+              value: 8,
+              message: 'ເບີຕິດຕໍ່ຕ້ອງມີຢ່າງໜ້ອຍ 8 ຕົວເລກ',
+            },
+          }}
           errors={errors}
         />
-        <Input
-          label="ເບີຕິດຕໍ່ສຳຮອງ"
+         <Input
+          label="ເບີຕິດຕໍ່"
           name="phone2"
-          type="text"
-          placeholder="ເບີຕິດຕໍ່ສຳຮອງ"
+          type="tel"
+          placeholder="ປ້ອນເບີຕິດຕໍ່"
           register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນເບີຕິດຕໍ່ສຳຮອງກ່ອນ' }}
+          formOptions={{
+            required: 'ກະລຸນາປ້ອນເບີຕິດຕໍ່ກ່ອນ',
+            pattern: {
+              value: /^[0-9]+$/,
+              message: 'ເບີຕິດຕໍ່ຕ້ອງເປັນຕົວເລກເທົ່ານັ້ນ',
+            },
+            minLength: {
+              value: 8,
+              message: 'ເບີຕິດຕໍ່ຕ້ອງມີຢ່າງໜ້ອຍ 8 ຕົວເລກ',
+            },
+          }}
           errors={errors}
         />
         <Input

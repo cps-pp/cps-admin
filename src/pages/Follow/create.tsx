@@ -69,7 +69,7 @@ const CreateFollow: React.FC = () => {
         return;
       }
   
-      const response = await fetch('http://localhost:4000/appoint/appointment', {
+      const response = await fetch('http://localhost:4000/src/appoint/appointment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

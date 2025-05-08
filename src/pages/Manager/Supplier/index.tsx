@@ -8,10 +8,14 @@ import ConfirmModal from '@/components/Modal';
 import { SupHeaders } from './column/sup';
 import CreateSupplier from './create';
 import EditSupplier from './edit';
+import { useAppDispatch } from '@/redux/hook';
+import TablePaginationDemo from '@/components/Tables/Pagination_two';
+import { openAlert } from '@/redux/reducer/alert';
+import Alerts from '@/components/Alerts';
 
 const SupplierPage: React.FC = () => {
-  const [suppliers, setSuppliers] = useState<any[]>([]); 
-  const [filteredSuppliers, setFilteredSuppliers] = useState<any[]>([]); 
+  const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [filteredSuppliers, setFilteredSuppliers] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(
     null,
@@ -22,12 +26,14 @@ const SupplierPage: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  
   const fetchSuppliers = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:4000/manager/supplier`);
+      const response = await fetch(`http://localhost:4000/src/manager/supplier`);
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -83,8 +89,21 @@ const SupplierPage: React.FC = () => {
       );
       setShowModal(false);
       setSelectedSupplierId(null);
-    } catch (error) {
-      console.error('Error deleting supplier:', error);
+      dispatch(
+        openAlert({
+          type: 'success',
+          title: 'ລົບຂໍ້ມູນສຳເລັດ',
+          message: 'ລົບຂໍ້ມູນຜູ້ສະໜອງສຳເລັດແລ້ວ',
+        }),
+      );
+    } catch (error: any) {
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
+          message: 'ເກີດຂໍ້ຜິດພາດໃນການລົບຂໍ້ມູນ',
+        }),
+      );
     }
   };
 
@@ -92,9 +111,29 @@ const SupplierPage: React.FC = () => {
     setSelectedId(id);
     setShowEditModal(true);
   };
+  const handlePageChange = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number,
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleRowsPerPageChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const paginatedPSup = filteredSuppliers.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage,
+  );
 
   return (
+    <>
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
+      <Alerts />
       <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
           ຈັດການຂໍ້ມູນຜູ້ສະໜອງ
@@ -123,11 +162,11 @@ const SupplierPage: React.FC = () => {
         />
       </div>
 
-      <div className="text-md text-strokedark dark:text-bodydark3">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-max table-auto border-collapse">
+   
+      <div className="overflow-x-auto rounded-lg shadow-md">
+          <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
             <thead>
-              <tr className="border-b border-gray-300 bg-gray-100 text-left dark:bg-meta-4 bg-blue-100">
+              <tr className="text-left bg-secondary2 text-white">
                 {SupHeaders.map((header, index) => (
                   <th
                     key={index}
@@ -139,8 +178,8 @@ const SupplierPage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredSuppliers.length > 0 ? (
-                filteredSuppliers.map((supplier, index) => (
+              {paginatedPSup.length > 0 ? (
+                paginatedPSup.map((supplier, index) => (
                   <tr
                     key={index}
                     className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -149,14 +188,22 @@ const SupplierPage: React.FC = () => {
                     <td className="px-4 py-4">{supplier.company_name}</td>
                     <td className="px-4 py-4">{supplier.address}</td>
                     <td className="px-4 py-4">{supplier.phone}</td>
-                    <td
-                      className={`px-4 py-4 ${supplier.status === 'ປິດ' ? 'text-red-500' : 'text-green-500'}`}
-                    >
-                      {supplier.status}
+                    <td className="">
+                      <span
+                        className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
+                          supplier.status === 'ເປີດ'
+                            ? 'bg-green-100 text-green-700'
+                            : supplier.status === 'ປິດ'
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-gray-100 text-gray-700'
+                        }`}
+                      >
+                        {supplier.status}
+                      </span>
                     </td>
                     <td className="px-3 py-4 text-center">
                       <TableAction
-                        onDelete={openDeleteModal(supplier.sup_id)} 
+                        onDelete={openDeleteModal(supplier.sup_id)}
                         onEdit={() => handleEdit(supplier.sup_id)}
                       />
                     </td>
@@ -171,7 +218,6 @@ const SupplierPage: React.FC = () => {
               )}
             </tbody>
           </table>
-        </div>
       </div>
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -236,7 +282,14 @@ const SupplierPage: React.FC = () => {
           </div>
         </div>
       )}
-
+    </div>
+      <TablePaginationDemo
+        count={paginatedPSup.length}
+        page={page}
+        onPageChange={handlePageChange}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleRowsPerPageChange}
+      />
 
       <ConfirmModal
         show={showModal}
@@ -244,7 +297,7 @@ const SupplierPage: React.FC = () => {
         message="ທ່ານຕ້ອງການລົບຜູ້ສະໜອງນີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteSupplier}
       />
-    </div>
+    </>
   );
 };
 

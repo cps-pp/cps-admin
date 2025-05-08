@@ -1,13 +1,14 @@
 import { useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
 import Button from '@/components/Button';
 import Input from '@/components/Forms/Input_two';
-import BackButton from '@/components/BackButton';
 import DatePicker from '@/components/DatePicker_two';
 import SelectID from '@/components/Forms/SelectID';
 import Select from '@/components/Forms/Select';
 import PriceInput from '@/components/Forms/PriceInput';
+import { openAlert } from '@/redux/reducer/alert';
+import { useAppDispatch } from '@/redux/hook';
+import Loader from '@/common/Loader';
 interface EditProps {
   id: string;
   onClose: () => void;
@@ -16,7 +17,6 @@ interface EditProps {
 }
 const EditMedicines: React.FC<EditProps> = ({
   id,
-  onClose,
   setShow,
   getList,
 }) => {
@@ -25,7 +25,6 @@ const EditMedicines: React.FC<EditProps> = ({
     handleSubmit,
     setValue,
     getValues,
-    reset,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -48,11 +47,12 @@ const EditMedicines: React.FC<EditProps> = ({
   const [status, setStatus] = useState<string>('');
   const [fetching, setFetching] = useState(false);
   const [loading, setLoading] = useState(true);
+    const dispatch = useAppDispatch();
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('http://localhost:4000/manager/category');
+        const response = await fetch('http://localhost:4000/src/manager/category');
         const data = await response.json();
         if (response.ok) {
           setCategories(data.data);
@@ -75,7 +75,7 @@ const EditMedicines: React.FC<EditProps> = ({
     const fetchMedicine = async () => {
       try {
         const response = await fetch(
-          `http://localhost:4000/manager/medicines/${id}`,
+          `http://localhost:4000/src/manager/medicines/${id}`,
         );
         const data = await response.json();
        
@@ -110,7 +110,7 @@ const EditMedicines: React.FC<EditProps> = ({
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:4000/manager/medicines/${id}`,
+        `http://localhost:4000/src/manager/medicines/${id}`,
         {
           method: 'PUT',
           headers: {
@@ -127,24 +127,31 @@ const EditMedicines: React.FC<EditProps> = ({
           }),
         },
       );
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || `Status ${response.status}`);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
 
-      if (getList) {
-        getList();
-      }
+      dispatch(openAlert({
+        type: 'success',
+        title: 'ແກ້ໄຂສຳເລັດ',
+        message: 'ແກ້ໄຂຂໍ້ມູນອັດຕາແລກປ່ຽນສຳເລັດແລ້ວ'
+      }));
 
-      setFetching(!fetching);
-      onClose();
-    } catch (error) {
-      console.error('Error saving disease:', error);
+      if (getList) getList();
+      setShow(false);
+    } catch (err: any) {
+      console.error(err);
+     dispatch(openAlert({
+       type: 'error',
+       title: 'ແກ້ໄຂຂໍ້ມູນບໍ່ສຳເລັດ',
+       message:  'ເກີດຂໍ້ຜຶດພາດໃນການບັນທືກຂໍ້ມູນ'
+     }));
     } finally {
       setLoading(false);
     }
   };
 
+ if (loading) return <Loader/>
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
       <div className="flex items-center border-b border-stroke  dark:border-strokedark pb-4">

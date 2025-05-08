@@ -14,7 +14,7 @@ const DetailCategory: React.FC = () => {
       const fetchCategoryById = async () => {
         try {
           setLoading(true);
-          const response = await fetch(`http://localhost:4000/manager/category/${id}`);
+          const response = await fetch(`http://localhost:4000/src/manager/category/${id}`);
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }

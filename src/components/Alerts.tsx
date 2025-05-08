@@ -68,7 +68,7 @@ const TYPE: Record<AlertType, {
   warning: {
     icon: warningIcon,
     containerStyle:
-      'bg-amber-50 border-amber-200 dark:bg-amber-900/30 dark:border-amber-700',
+      'bg-amber-50 border-amber-200 dark:bg-amber-900 dark:border-amber-700',
     iconStyle:
       'bg-amber-100 text-amber-500 dark:bg-amber-800 dark:text-amber-200',
     titleStyle: 'text-amber-800 dark:text-amber-200',
@@ -79,7 +79,7 @@ const TYPE: Record<AlertType, {
   success: {
     icon: successIcon,
     containerStyle:
-      'bg-green-50 border-green-200 dark:bg-green-900/30 dark:border-green-700',
+      'bg-green-50 border-green-200 dark:bg-green-900 dark:border-green-700',
     iconStyle:
       'bg-green-100 text-green-500 dark:bg-green-800 dark:text-green-200',
     titleStyle: 'text-green-800 dark:text-green-200',
@@ -89,7 +89,7 @@ const TYPE: Record<AlertType, {
   },
   error: {
     icon: errorIcon,
-    containerStyle: 'bg-red-50 border-red-200 dark:bg-red-900/30 dark:border-red-700',
+    containerStyle: 'bg-red-50 border-red-200 dark:bg-red-900 dark:border-red-700',
     iconStyle:
       'bg-red-100 text-red-500 dark:bg-red-800 dark:text-red-200',
     titleStyle: 'text-red-800 dark:text-red-200',

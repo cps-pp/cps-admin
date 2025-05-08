@@ -3,6 +3,9 @@ import Button from "@/components/Button";
 import { useNavigate } from "react-router-dom";
 import Input from "@/components/Forms/Input_two";
 import React, { useState } from "react";
+import Loader from "@/common/Loader";
+import { useAppDispatch } from "@/redux/hook";
+import { openAlert } from "@/redux/reducer/alert";
 
 interface CreateProps {
   setShow: (value: boolean) => void;
@@ -12,8 +15,8 @@ interface CreateProps {
 
 
 const CreateServiceList: React.FC<CreateProps> = ({ setShow, getList }) => {
-  const navigate = useNavigate();
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
+  const dispatch = useAppDispatch();
 
     const [loading, setLoading] = useState(false);
   
@@ -22,7 +25,7 @@ const CreateServiceList: React.FC<CreateProps> = ({ setShow, getList }) => {
   const handleSave = async (formData: any) => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:4000/manager/servicelist', {
+      const response = await fetch('http://localhost:4000/src/manager/servicelist', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -42,13 +45,33 @@ const CreateServiceList: React.FC<CreateProps> = ({ setShow, getList }) => {
       setShow(false);
       await getList(); 
       reset();
-    } catch (error) {
-      console.error('Error saving disease:', error);
-      alert('ບໍ່ສາມາດເພີ່ມຂໍ້ມູນພະຍາດແຂວ້');
+      dispatch(
+        openAlert({
+          type: 'success',
+          title: 'ສຳເລັດ',
+          message: 'ບັນທຶກຂໍ້ມູນລາຍການສຳເລັດແລ້ວ',
+        })
+      );
+
+      setShow(false);
+
+      await getList();
+      reset();
+    } catch (error: any) {
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ເກີດຂໍ້ຜິດພາດ',
+          message: error.message || 'ມີຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
+        })
+      );
     } finally {
       setLoading(false);
     }
   };
+
+  if (loading) return <Loader />;
+
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">

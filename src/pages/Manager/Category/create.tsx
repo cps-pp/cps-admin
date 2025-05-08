@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import Button from '@/components/Button';
 import Input from '@/components/Forms/Input_two';
+import Loader from '@/common/Loader';
+import { useAppDispatch } from '@/redux/hook';
+import { openAlert } from '@/redux/reducer/alert';
 
 interface CreateCategoryProps {
   setShow: (value: boolean) => void;
@@ -20,11 +23,11 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
     formState: { errors },
   } = useForm();
   const [loading, setLoading] = useState(false);
-
+  const dispatch = useAppDispatch();
   const handleSave = async (formData: any) => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:4000/manager/category', {
+      const response = await fetch('http://localhost:4000/src/manager/category', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -36,17 +39,32 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-
+      dispatch(
+        openAlert({
+          type: 'success',
+          title: 'ສຳເລັດ',
+          message: 'ບັນທຶກຂໍ້ມູນປະເພດຢາສຳເລັດແລ້ວ',
+        }),
+      );
       setShow(false);
       await getListCategory(); //Fetching Latest Data from the Server
       reset();
-    } catch (error) {
-      console.error('Error saving category:', error);
-      alert('ບໍ່ສາມາດເພີ່ມຂໍ້ມູນປະເພດຢາ');
+    } catch (error: any) {
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ເກີດຂໍ້ຜິດພາດ',
+          message: error.message || 'ມີຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
+        }),
+      );
     } finally {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-strokedark">

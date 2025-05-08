@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import CardDataStats from '../components/CardDataStats';
 import MonthChart from '../components/Charts/MonthChart';
-import BarChart from '../components/Charts/BarChart';
-import WeekChart from '../components/Charts/WeekChart';
 import { getAppointments } from '@/api/getAppointments';
 import { FollowHeaders } from './Follow/column/follow';
-import { TableAction } from '@/components/Tables/TableAction';
 
 const Dashboard: React.FC = () => {
   const [patients, setPatients] = useState<number | null>(null);
@@ -24,7 +21,7 @@ const Dashboard: React.FC = () => {
     const fetchPatients = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:4000/manager/patient`, {
+        const response = await fetch(`http://localhost:4000/src/manager/patient`, {
           method: 'GET',
         });
 
@@ -47,7 +44,7 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const response = await fetch('http://localhost:4000/manager/emp');
+        const response = await fetch('http://localhost:4000/src/manager/emp');
         const data = await response.json();
         setDoctorCount(data.data.length);
       } catch (error) {
@@ -83,7 +80,7 @@ const Dashboard: React.FC = () => {
     const fetchPatient = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:4000/manager/patient', {
+        const response = await fetch('http://localhost:4000/src/manager/patient', {
           method: 'GET',
         });
 
@@ -106,7 +103,7 @@ const Dashboard: React.FC = () => {
     const fetchDoctor = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:4000/manager/emp', {
+        const response = await fetch('http://localhost:4000/src/manager/emp', {
           method: 'GET',
         });
 
@@ -142,7 +139,7 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
         <CardDataStats title="ລາຍຮັບທັງໝົດ" total="60,000,000 ກີບ">
           <svg
-            className="w-6 h-6 text-blue-500 dark:text-white"
+            className="w-6 h-6 text-primary dark:text-white"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -161,7 +158,7 @@ const Dashboard: React.FC = () => {
         </CardDataStats>
         <CardDataStats title="ນັດໝາຍທັງໝົດ" total="30 ນັດໝາຍ">
           <svg
-            className="w-9 h-6 text-blue-500 dark:text-white"
+            className="w-9 h-6 text-primary dark:text-white"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             width="1.7em"
@@ -187,7 +184,7 @@ const Dashboard: React.FC = () => {
             width="1.7em"
             height="1.7em"
             viewBox="0 0 24 24"
-            className="text-blue-500 dark:text-white"
+            className="text-primary dark:text-white"
           >
             <g
               fill="none"
@@ -207,7 +204,7 @@ const Dashboard: React.FC = () => {
           total={loading ? 'ກຳລັງໂຫຼດ...' : `${doctorCount} ຄົນ`}
         >
           <svg
-            className="w-9 h-6 text-blue-500 dark:text-white"
+            className="w-9 h-6 text-primary dark:text-white"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             width="24"

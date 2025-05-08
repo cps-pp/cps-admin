@@ -14,7 +14,7 @@ const DetailServiceList: React.FC = () => {
       const fetchListById = async () => {
         try {
           setLoading(true);
-          const response = await fetch(`http://localhost:4000/manager/servicelist/${id}`);
+          const response = await fetch(`http://localhost:4000/src/manager/servicelist/${id}`);
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }

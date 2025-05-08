@@ -9,6 +9,9 @@ import Alerts from '@/components/Alerts';
 import { ServiceHeaders } from './column/service';
 import EditServicerList from './edit';
 import CreateServiceList from './create';
+import { useAppDispatch } from '@/redux/hook';
+import { openAlert } from '@/redux/reducer/alert';
+import TablePaginationDemo from '@/components/Tables/Pagination_two';
 
 const ServicePage: React.FC = () => {
   const [services, setServices] = useState<any[]>([]);
@@ -22,11 +25,14 @@ const ServicePage: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10); 
+    const dispatch = useAppDispatch();
+    
   const fetchServiceList = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:4000/manager/servicelist`);
+      const response = await fetch(`http://localhost:4000/src/manager/servicelist`);
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -67,7 +73,7 @@ const ServicePage: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:4000/manager/servicelist/${selectedServiceId}`,
+        `http://localhost:4000/manager/src/servicelist/${selectedServiceId}`,
         {
           method: 'DELETE',
         },
@@ -82,18 +88,51 @@ const ServicePage: React.FC = () => {
 
       setShowModal(false);
       setSelectedServiceId(null);
-    } catch (error) {
-      console.error('Error deleting service:', error);
+     dispatch(openAlert({
+       type: 'success',
+       title: 'ລົບຂໍ້ມູນສຳເລັດ',
+       message: 'ລົບຂໍ້ມູນລາຍການສຳເລັດແລ້ວ',
+     }));
+    } catch (error: any) {
+     dispatch(openAlert({
+       type: 'error',
+       title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
+       message: 'ເກີດຂໍ້ຜິດພາດໃນການລົບຂໍ້ມູນ',
+     }));
     }
   };
+
+
+
+
 
   const handleEdit = (id: string) => {
     setSelectedId(id);
     setShowEditModal(true);
   };
+  const handlePageChange = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number,
+  ) => {
+    setPage(newPage);
+  };
 
+  const handleRowsPerPageChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); 
+  };
+
+  const paginatedList = filteredServices.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage,
+  );
   return (
+    <>
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
+      <Alerts />
+
       <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
           ຈັດການຂໍ້ມູນລາຍງານບໍລິການ
@@ -122,11 +161,10 @@ const ServicePage: React.FC = () => {
         />
       </div>
 
-      <div className="text-md text-strokedark dark:text-bodydark3">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-max table-auto border-collapse ">
+      <div className="overflow-x-auto rounded-lg shadow-md">
+          <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
             <thead>
-              <tr className="border-b border-gray-300 bg-gray-100 text-left dark:bg-meta-4 bg-blue-100">
+              <tr className="text-left bg-secondary2 text-white">
                 {ServiceHeaders.map((header, index) => (
                   <th
                     key={index}
@@ -138,8 +176,8 @@ const ServicePage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredServices.length > 0 ? (
-                filteredServices.map((service, index) => (
+              {paginatedList.length > 0 ? (
+                paginatedList.map((service, index) => (
                   <tr
                     key={index}
                     className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -170,7 +208,6 @@ const ServicePage: React.FC = () => {
             </tbody>
           </table>
         </div>
-      </div>
 
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -235,6 +272,14 @@ const ServicePage: React.FC = () => {
           </div>
         </div>
       )}
+    </div>
+   <TablePaginationDemo
+        count={paginatedList.length}
+        page={page}
+        onPageChange={handlePageChange}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleRowsPerPageChange}
+      />
 
       <ConfirmModal
         show={showModal}
@@ -242,7 +287,7 @@ const ServicePage: React.FC = () => {
         message="ທ່ານຕ້ອງການລົບລາຍການນີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteService}
       />
-    </div>
+    </>
   );
 };
 

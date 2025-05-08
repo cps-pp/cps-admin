@@ -20,13 +20,13 @@ const PatientStatsCard: React.FC<PatientStatsProps> = ({ patients }) => {
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 2xl:gap-7.5 w-f">
       <div className="rounded-sm border border-stroke bg-white p-4  dark:border-strokedark dark:bg-boxdark">
         <div className="flex items-center">
-          <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
+          <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-Third dark:bg-secondary">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="1.7em"
               height="1.7em"
               viewBox="0 0 24 24"
-              className="text-blue-500 dark:text-blue-300"
+              className="text-primary dark:text-white"
             >
               <g
                 fill="none"
@@ -55,13 +55,13 @@ const PatientStatsCard: React.FC<PatientStatsProps> = ({ patients }) => {
       {/* Male Patients Card */}
       <div className="rounded-sm border border-stroke bg-white p-4  dark:border-strokedark dark:bg-boxdark">
         <div className="flex items-center">
-          <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
+          <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full  bg-Third dark:bg-secondary">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="1.7em"
               height="1.7em"
               viewBox="0 0 24 24"
-              className="text-primary dark:text-blue-300"
+              className="text-primary dark:text-white"
             >
               <path
                 fill="currentColor"
@@ -83,12 +83,12 @@ const PatientStatsCard: React.FC<PatientStatsProps> = ({ patients }) => {
       {/* Female Patients Card */}
       <div className="rounded-sm border border-stroke bg-white p-4  dark:border-strokedark dark:bg-boxdark">
         <div className="flex items-center">
-          <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
+          <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full  bg-Third dark:bg-secondary">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="1.9em"
               height="1.9em"
-              className="fill-current text-blue-500 dark:text-blue-300"
+              className="fill-current text-primary dark:text-white"
               viewBox="0 0 24 24"
             >
               <title>gender-female</title>

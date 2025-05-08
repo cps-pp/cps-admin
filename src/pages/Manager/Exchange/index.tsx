@@ -10,6 +10,9 @@ import { ExchangeHeaders } from './column/exchange';
 import CreateServiceList from '../ServiceList/create';
 import CreateExChange from './create';
 import EditExChange from './edit';
+import { useAppDispatch } from '@/redux/hook';
+import { openAlert } from '@/redux/reducer/alert';
+import TablePaginationDemo from '@/components/Tables/Pagination_two';
 
 const ExchangePage: React.FC = () => {
   const [exchanges, setExchanges] = useState<any[]>([]);
@@ -24,11 +27,13 @@ const ExchangePage: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-
+  const dispatch = useAppDispatch();
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const fetchExchanges = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:4000/manager/exchange`);
+      const response = await fetch(`http://localhost:4000/src/manager/exchange`);
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -69,7 +74,7 @@ const ExchangePage: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:4000/manager/exchange/${selectedExchangeId}`,
+        `http://localhost:4000/src/manager/exchange/${selectedExchangeId}`,
         {
           method: 'DELETE',
         },
@@ -87,8 +92,21 @@ const ExchangePage: React.FC = () => {
 
       setShowModal(false);
       setSelectedExchangeId(null);
-    } catch (error) {
-      console.error('Error deleting exchange:', error);
+      dispatch(
+        openAlert({
+          type: 'success',
+          title: 'ລົບຂໍ້ມູນສຳເລັດ',
+          message: 'ລົບຂໍ້ມູນອັດຕາແລກປ່ຽນສຳເລັດແລ້ວ',
+        }),
+      );
+    } catch (error: any) {
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
+          message:'ເກີດຂໍ້ຜິດພາດໃນການລົບຂໍ້ມູນ',
+        }),
+      );
     }
   };
 
@@ -97,9 +115,30 @@ const ExchangePage: React.FC = () => {
     setShowEditModal(true);
   };
 
+  const handlePageChange = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number,
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleRowsPerPageChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const paginatedEx = filteredExchanges.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage,
+  );
 
   return (
+    <>
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
+      <Alerts />
+
       <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
           ຈັດການຂໍ້ມູນອັດຕາແລກປ່ຽນ
@@ -128,11 +167,10 @@ const ExchangePage: React.FC = () => {
         />
       </div>
 
-      <div className="text-md text-strokedark dark:text-bodydark3">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-max table-auto border-collapse ">
+      <div className="overflow-x-auto rounded-lg shadow-md">
+          <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
             <thead>
-              <tr className="border-b border-gray-300 bg-gray-100 text-left dark:bg-meta-4 bg-blue-100">
+              <tr className="text-left bg-secondary2 text-white">
                 {ExchangeHeaders.map((header, index) => (
                   <th
                     key={index}
@@ -144,8 +182,8 @@ const ExchangePage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredExchanges.length > 0 ? (
-                filteredExchanges.map((exchange, index) => (
+              {paginatedEx.length > 0 ? (
+                paginatedEx.map((exchange, index) => (
                   <tr
                     key={index}
                     className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -175,7 +213,6 @@ const ExchangePage: React.FC = () => {
             </tbody>
           </table>
         </div>
-      </div>
 
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -207,7 +244,7 @@ const ExchangePage: React.FC = () => {
           </div>
         </div>
       )}
-      
+
       {showEditModal && selectedId && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
           <div className="rounded-lg w-full max-w-2xl bg-white relative ">
@@ -240,14 +277,21 @@ const ExchangePage: React.FC = () => {
           </div>
         </div>
       )}
-
+    </div>
+      <TablePaginationDemo
+        count={filteredExchanges.length}
+        page={page}
+        onPageChange={handlePageChange}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleRowsPerPageChange}
+      />
       <ConfirmModal
         show={showModal}
         setShow={setShowModal}
         message="ທ່ານຕ້ອງການລົບອັດຕາແລກປ່ຽນນີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteExchange}
       />
-    </div>
+ </>
   );
 };
 

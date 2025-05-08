@@ -4,25 +4,32 @@ import { useForm } from 'react-hook-form';
 import Button from '@/components/Button';
 import Input from '@/components/Forms/Input_two';
 import BackButton from '@/components/BackButton';
+import Loader from '@/common/Loader';
+import { useAppDispatch } from '@/redux/hook';
+import { openAlert } from '@/redux/reducer/alert';
+import Alerts from '@/components/Alerts';
+import Select from '@/components/Forms/Select';
 interface CreateProps {
   setShow: (value: boolean) => void;
   getList: any;
 }
 
 const CreateSupplier: React.FC<CreateProps> = ({ setShow, getList }) => {
-  const navigate = useNavigate();
   const {
     register,
+    setValue,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm();
   const [loading, setLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const [status, setStatus] = useState<string>('');
 
   const handleSave = async (formData: any) => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:4000/manager/supplier', {
+      const response = await fetch('http://localhost:4000/src/manager/supplier', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -40,22 +47,38 @@ const CreateSupplier: React.FC<CreateProps> = ({ setShow, getList }) => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      setShow(false);
+        dispatch(
+              openAlert({
+                type: 'success',
+                title: 'ສຳເລັດ',
+                message: 'ບັນທຶກຂໍ້ມູນຜູ້ສະໜອງສຳເລັດແລ້ວ',
+              })
+            );
+      
+            setShow(false);
       await getList();
       reset();
-    } catch (error) {
-      console.error('Error saving :', error);
-      alert('ບໍ່ສາມາດເພີ່ມຂໍ້ມູນ');
+    } catch (error: any) {
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ເກີດຂໍ້ຜິດພາດ',
+          message: 'ມີຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
+        }),
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  if (loading) return <Loader />;
+
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
+      <Alerts />
       <div className="flex items-center border-b border-stroke  dark:border-strokedark pb-4">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
-          ເພີ່ມຂໍ້ມູນ Supplier
+          ເພີ່ມຂໍ້ມູນ
         </h1>
       </div>
 
@@ -87,33 +110,41 @@ const CreateSupplier: React.FC<CreateProps> = ({ setShow, getList }) => {
           formOptions={{ required: 'ກະລຸນາປ້ອນທີ່ຢູ່ກ່ອນ' }}
           errors={errors}
         />
-        <Input
-          label="ເບີໂທ"
+       <Input
+          label="ເບີຕິດຕໍ່"
           name="phone"
-          type="text"
-          placeholder="ປ້ອນເບີໂທ"
+          type="tel"
+          placeholder="ປ້ອນເບີຕິດຕໍ່"
           register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນເບີໂທກ່ອນ' }}
-          errors={errors}
-        />
-        <Input
-          label="ສະຖານະ"
-          name="status"
-          type="text"
-          placeholder="ປ້ອນສະຖານະ"
-          register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນສະຖານະກ່ອນ' }}
+          formOptions={{
+            required: 'ກະລຸນາປ້ອນເບີຕິດຕໍ່ກ່ອນ',
+            pattern: {
+              value: /^[0-9]+$/,
+              message: 'ເບີຕິດຕໍ່ຕ້ອງເປັນຕົວເລກເທົ່ານັ້ນ',
+            },
+            minLength: {
+              value: 8,
+              message: 'ເບີຕິດຕໍ່ຕ້ອງມີຢ່າງໜ້ອຍ 8 ຕົວເລກ',
+            },
+          }}
           errors={errors}
         />
 
-        <div className="mt-8 flex justify-end space-x-4 col-span-full px-4 py-4">
-          {/* <button
-            className="px-6 py-2 text-md font-medium uppercase text-red-500"
-            type="button"
-            onClick={() => navigate('/manager/supplier')}
-          >
-            ຍົກເລິກ
-          </button> */}
+<Select
+  label="ສະຖານນະ"
+  name="status"
+  options={['ເປີດ', 'ປິດ']}
+  register={register}
+  errors={errors}
+  value={status}
+  onSelect={(e) => {
+    setStatus(e.target.value);
+    setValue('status', e.target.value); 
+  }}
+/>
+
+        <div className="mt-8 flex justify-end space-x-4 col-span-full py-4">
+         
           <Button variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </Button>

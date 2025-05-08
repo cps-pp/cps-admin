@@ -3,36 +3,44 @@ import { useForm } from 'react-hook-form';
 import Button from '@/components/Button';
 import Input from '@/components/Forms/Input_two';
 import BackButton from '@/components/BackButton';
+import { openAlert } from '@/redux/reducer/alert';
+import { useAppDispatch } from '@/redux/hook';
 
 interface EditCateProps {
   id: string;
   onClose: () => void;
   setShow: (value: boolean) => void;
+  getList?: () => void;
+
 }
 
-const EditCate: React.FC<EditCateProps> = ({
-  id,
-  onClose,
-  setShow,
-}) => {
-  const { register, handleSubmit, formState: { errors }, setValue } = useForm();
-  const [loading, setLoading] = useState(false);  
-  const [fetching, setFetching] = useState(false); 
+const EditCate: React.FC<EditCateProps> = ({ id, onClose, setShow ,getList }) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+  } = useForm();
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(false);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const fetchCategoryData = async () => {
-      setLoading(true);  
+      setLoading(true);
       try {
-        const response = await fetch(`http://localhost:4000/manager/category/${id}`);
+        const response = await fetch(
+          `http://localhost:4000/manager/category/${id}`,
+        );
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
-        setValue('type_name', data.data.type_name);  
-        setLoading(false);  
+        setValue('type_name', data.data.type_name);
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching category data:', error);
-        setLoading(false);  
+        setLoading(false);
       }
     };
 
@@ -40,26 +48,46 @@ const EditCate: React.FC<EditCateProps> = ({
   }, [id, setValue, fetching]);
 
   const handleSave = async (formData: any) => {
-    setLoading(true);  
+    setLoading(true);
     try {
-      const response = await fetch(`http://localhost:4000/manager/category/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `http://localhost:4000/src/manager/category/${id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ type_name: formData.type_name }),
         },
-        body: JSON.stringify({ type_name: formData.type_name }),
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-
+      dispatch(
+        openAlert({
+          type: 'success',
+          title: 'ແກ້ໄຂສຳເລັດ',
+          message: 'ແກ້ໄຂຂໍ້ມູນຄົນເຈັບສຳເລັດແລ້ວ',
+        }),
+      );
+      if (getList) {
+        getList();
+      }
+      
       setFetching(!fetching);  
-      onClose(); 
-    } catch (error) {
-      console.error('Error saving category:', error);
+      onClose();
+    } catch (err: any) {
+      console.error(err);
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ແກ້ໄຂຂໍ້ມູນບໍ່ສຳເລັດ',
+          message: 'ເກີດຂໍ້ຜຶດພາດໃນການບັນທືກຂໍ້ມູນ',
+        }),
+      );
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 

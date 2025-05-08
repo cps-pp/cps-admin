@@ -8,6 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import Alerts from '@/components/Alerts';
+import Loader from '@/common/Loader';
 
 interface EditProps {
   id: string;
@@ -17,7 +18,6 @@ interface EditProps {
 }
 
 const EditPatient: React.FC<EditProps> = ({ id, onClose, setShow, getList }) => {
-  const navigate = useNavigate();
 
   const {
     register,
@@ -54,7 +54,7 @@ const EditPatient: React.FC<EditProps> = ({ id, onClose, setShow, getList }) => 
       }
 
       try {
-        const response = await fetch(`http://localhost:4000/manager/patient/${id}`);
+        const response = await fetch(`http://localhost:4000/src/manager/patient/${id}`);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -87,7 +87,7 @@ const EditPatient: React.FC<EditProps> = ({ id, onClose, setShow, getList }) => 
   const handleSave = async (formData: any) => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:4000/manager/patient/${id}`, {
+      const res = await fetch(`http://localhost:4000/src/manager/patient/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -108,7 +108,7 @@ const EditPatient: React.FC<EditProps> = ({ id, onClose, setShow, getList }) => 
      dispatch(openAlert({
        type: 'error',
        title: 'ແກ້ໄຂຂໍ້ມູນບໍ່ສຳເລັດ',
-       message: err.message || 'ເກີດຂໍ້ຜຶດພາດໃນການບັນທືກຂໍ້ມູນ'
+       message:  'ເກີດຂໍ້ຜຶດພາດໃນການບັນທືກຂໍ້ມູນ'
      }));
     } finally {
       setLoading(false);
@@ -116,6 +116,7 @@ const EditPatient: React.FC<EditProps> = ({ id, onClose, setShow, getList }) => 
   };
 
   
+  if (loading) return <Loader />;
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
@@ -175,25 +176,43 @@ const EditPatient: React.FC<EditProps> = ({ id, onClose, setShow, getList }) => 
 
         />
 
-        <Input
+<Input
           label="ເບີຕິດຕໍ່"
           name="phone1"
-          type="text"
-          placeholder="ເບີຕິດຕໍ່"
+          type="tel"
+          placeholder="ປ້ອນເບີຕິດຕໍ່"
           register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນເບີຕິດຕໍ່ກ່ອນ' }}
-
+          formOptions={{
+            required: 'ກະລຸນາປ້ອນເບີຕິດຕໍ່ກ່ອນ',
+            pattern: {
+              value: /^[0-9]+$/,
+              message: 'ເບີຕິດຕໍ່ຕ້ອງເປັນຕົວເລກເທົ່ານັ້ນ',
+            },
+            minLength: {
+              value: 8,
+              message: 'ເບີຕິດຕໍ່ຕ້ອງມີຢ່າງໜ້ອຍ 8 ຕົວເລກ',
+            },
+          }}
           errors={errors}
         />
-        <Input
-          label="ເບີຕິດຕໍ່ສຳຮອງ"
+         <Input
+          label="ເບີຕິດຕໍ່"
           name="phone2"
-          type="text"
-          placeholder="ເບີຕິດຕໍ່ສຳຮອງ"
+          type="tel"
+          placeholder="ປ້ອນເບີຕິດຕໍ່"
           register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນເບີຕິດຕໍ່ສຳຮອງກ່ອນ' }}
+          formOptions={{
+            required: 'ກະລຸນາປ້ອນເບີຕິດຕໍ່ກ່ອນ',
+            pattern: {
+              value: /^[0-9]+$/,
+              message: 'ເບີຕິດຕໍ່ຕ້ອງເປັນຕົວເລກເທົ່ານັ້ນ',
+            },
+            minLength: {
+              value: 8,
+              message: 'ເບີຕິດຕໍ່ຕ້ອງມີຢ່າງໜ້ອຍ 8 ຕົວເລກ',
+            },
+          }}
           errors={errors}
-
         />
         <Input
           label="ບ້ານ"

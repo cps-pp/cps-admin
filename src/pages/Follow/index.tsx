@@ -8,6 +8,7 @@ import { TableAction } from '@/components/Tables/TableAction';
 import ConfirmModal from '@/components/Modal';
 import Alerts from '@/components/Alerts';
 import { FollowHeaders } from './column/follow';
+import TablePaginationDemo from '@/components/Tables/Pagination_two';
 
 const FollowPage: React.FC = () => {
   const [appointments, setAppointments] = useState<any[]>([]);
@@ -24,13 +25,15 @@ const FollowPage: React.FC = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [doneCount, setDoneCount] = useState(0);
   const [waitingCount, setWaitingCount] = useState(0);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
         setLoading(true);
         const response = await fetch(
-          'http://localhost:4000/appoint/appointment',
+          'http://localhost:4000/src/appoint/appointment',
           {
             method: 'GET',
           },
@@ -79,7 +82,7 @@ const FollowPage: React.FC = () => {
     const fetchPatient = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:4000/manager/patient', {
+        const response = await fetch('http://localhost:4000/src/manager/patient', {
           method: 'GET',
         });
 
@@ -103,7 +106,7 @@ const FollowPage: React.FC = () => {
     const fetchDoctor = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:4000/manager/emp', {
+        const response = await fetch('http://localhost:4000/src/manager/emp', {
           method: 'GET',
         });
 
@@ -145,7 +148,7 @@ const FollowPage: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:4000/appoint/appointment/${selectedAppointmentId}`,
+        `http://localhost:4000/src/appoint/appointment/${selectedAppointmentId}`,
         {
           method: 'DELETE',
         },
@@ -174,7 +177,7 @@ const FollowPage: React.FC = () => {
   const handleSearch = async (query: string) => {
     try {
       const response = await fetch(
-        `http://localhost:4000/appoint/search?query=${query}`,
+        `http://localhost:4000/src/appoint/search?query=${query}`,
         {
           method: 'GET',
         },
@@ -195,6 +198,26 @@ const FollowPage: React.FC = () => {
     navigate(`/follow/edit/${id}`);
   };
 
+ // Handle page change in pagination
+  const handlePageChange = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number,
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleRowsPerPageChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const paginated = filteredAppointments.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage,
+  );
+
   return (
     <>
       {/* <AppointmentCard appointments={appointments} /> */}
@@ -204,7 +227,7 @@ const FollowPage: React.FC = () => {
           <div className="flex items-center">
             <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
               <svg
-                className="w-6 h-6 text-primary dark:text-white"
+                className="w-6 h-6 text-blue-600 dark:text-white"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -330,11 +353,10 @@ const FollowPage: React.FC = () => {
           />
         </div>
 
-        <div className="text-md text-strokedark dark:text-bodydark3">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-max table-auto border-collapse ">
-              <thead>
-                <tr className="border-b border-gray-300 bg-gray-100 text-left dark:bg-meta-4 bg-blue-100">
+        <div className="overflow-x-auto rounded-lg shadow-md">
+          <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
+            <thead>
+              <tr className="text-left bg-secondary2 text-white">
                   {FollowHeaders.map((header, index) => (
                     <th
                       key={index}
@@ -346,8 +368,8 @@ const FollowPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredAppointments.length > 0 ? (
-                  filteredAppointments.map((appointment, index) => (
+                {paginated.length > 0 ? (
+                  paginated.map((appointment, index) => (
                     <tr
                       key={index}
                       className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -407,8 +429,15 @@ const FollowPage: React.FC = () => {
               </tbody>
             </table>
           </div>
-        </div>
-
+        
+      </div>
+      <TablePaginationDemo
+        count={paginated.length}
+        page={page}
+        onPageChange={handlePageChange}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleRowsPerPageChange}
+      />
         {/* Confirm Delete Modal */}
         <ConfirmModal
           show={showModal}
@@ -416,7 +445,6 @@ const FollowPage: React.FC = () => {
           message="ທ່ານຕ້ອງການລົບນັດໝາຍນີ້ອອກຈາກລະບົບບໍ່？"
           handleConfirm={handleDeleteAppointment} // Handle deletion on confirm
         />
-      </div>
     </>
   );
 };

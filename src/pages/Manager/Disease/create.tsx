@@ -4,13 +4,17 @@ import { useForm } from 'react-hook-form';
 import Button from '@/components/Button';
 import Input from '@/components/Forms/Input_two';
 import BackButton from '@/components/BackButton';
+import Loader from '@/common/Loader';
+import { useAppDispatch } from '@/redux/hook';
+import { openAlert } from '@/redux/reducer/alert';
+import Alerts from '@/components/Alerts';
 
 interface CreateProps {
   setShow: (value: boolean) => void;
-  getListDisease: any;
+  getList: any;
 }
 
-const CreateDisease: React.FC<CreateProps> = ({ setShow, getListDisease }) => {
+const CreateDisease: React.FC<CreateProps> = ({ setShow, getList }) => {
   const {
     register,
     handleSubmit,
@@ -18,12 +22,13 @@ const CreateDisease: React.FC<CreateProps> = ({ setShow, getListDisease }) => {
     formState: { errors },
   } = useForm();
   const [loading, setLoading] = useState(false);
+  const dispatch = useAppDispatch();
 
   
   const handleSave = async (formData: any) => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:4000/manager/disease', {
+      const response = await fetch('http://localhost:4000/src/manager/disease', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,19 +43,35 @@ const CreateDisease: React.FC<CreateProps> = ({ setShow, getListDisease }) => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      setShow(false);
-      await getListDisease(); //Fetching Latest Data from the Server
-      reset();
-    } catch (error) {
-      console.error('Error saving disease:', error);
-      alert('ບໍ່ສາມາດເພີ່ມຂໍ້ມູນພະຍາດແຂວ້');
-    } finally {
-      setLoading(false);
-    }
-  };
+      dispatch(
+             openAlert({
+               type: 'success',
+               title: 'ສຳເລັດ',
+               message: 'ບັນທຶກຂໍ້ມູນພະຍາດແຂ້ວສຳເລັດແລ້ວ',
+             })
+           );
+     
+           await getList();
+           reset();
+           setShow(false);
+         } catch (error: any) {
+           dispatch(
+             openAlert({
+               type: 'error',
+               title: 'ເກີດຂໍ້ຜິດພາດ',
+               message: 'ມີຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
+             })
+           );
+         } finally {
+           setLoading(false);
+         }
+       };
+  if (loading) return <Loader />;
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
+           <Alerts/>
+
       <div className="flex items-center  border-b border-stroke  dark:border-strokedark pb-4">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
           ເພີ່ມຂໍ້ມູນ

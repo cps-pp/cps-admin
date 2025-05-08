@@ -26,8 +26,12 @@ module.exports = {
         bodydark1: '#DEE4EE',
         bodydark2: '#8A99AF',
         bodydark3: '#C7CDD4',
-        primary: '#3C50E0',
-        secondary: '#80CAEE',
+        primary: '#7C67DE',
+        secondary: '#51419B',
+        secondary2: '#51416B',
+        
+        Third: '#EEEBFF',
+
         stroke: '#E2E8F0',
         gray: '#EFF4FB',
         graydark: '#333A48',

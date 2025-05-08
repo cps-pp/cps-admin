@@ -1,5 +1,11 @@
-import React from "react";
-import { iconAddRounded, iconEdit, iconSearch, iconTrash, iconView } from "@/configs/icon";
+import React from 'react';
+import {
+  iconAddRounded,
+  iconEdit,
+  iconSearch,
+  iconTrash,
+  iconView,
+} from '@/configs/icon';
 
 interface TableActionProps {
   id?: string;
@@ -7,12 +13,20 @@ interface TableActionProps {
   onDelete?: () => void;
   onAdd?: () => void;
   onSearch?: () => void;
-  onView?: () => void; 
+  onView?: () => void;
 }
 
-export const TableAction: React.FC<TableActionProps> = ({ onEdit, onDelete, onAdd, onSearch, onView }) => {
-  const buttonCount = [onAdd, onSearch, onView, onEdit, onDelete].filter(Boolean).length;
-  const gapClass = buttonCount >= 4 ? "gap-2" : "gap-4";
+export const TableAction: React.FC<TableActionProps> = ({
+  onEdit,
+  onDelete,
+  onAdd,
+  onSearch,
+  onView,
+}) => {
+  const buttonCount = [onAdd, onSearch, onView, onEdit, onDelete].filter(
+    Boolean,
+  ).length;
+  const gapClass = buttonCount >= 4 ? 'gap-2' : 'gap-4';
 
   return (
     <div className={`grid w-[60px] grid-cols-3 ${gapClass}`}>
@@ -22,8 +36,16 @@ export const TableAction: React.FC<TableActionProps> = ({ onEdit, onDelete, onAd
         </button>
       )}
       {onSearch && <button onClick={onSearch}>{iconSearch}</button>}
-      {onView && <button onClick={onView}>{iconView}</button>} 
-      {onEdit && <button onClick={onEdit}>{iconEdit}</button>}
+      {onView && <button onClick={onView}>{iconView}</button>}
+      {onEdit && (
+        <button
+          onClick={onEdit}
+          className="text-purple-600 hover:text-purple-800"
+        >
+          {iconEdit}
+        </button>
+      )}
+
       {onDelete && (
         <button onClick={onDelete} className="text-red-600 hover:text-red-800">
           {iconTrash}

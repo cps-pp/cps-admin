@@ -22,20 +22,18 @@ const PatientPage: React.FC = () => {
     null,
   );
   const [searchQuery, setSearchQuery] = useState('');
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const dispatch = useAppDispatch();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10); // Default to 10 rows per page
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const fetchPatients = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:4000/manager/patient`);
+      const response = await fetch(`http://localhost:4000/src/manager/patient`);
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -94,7 +92,7 @@ const PatientPage: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:4000/manager/patient/${selectedPatientId}`,
+        `http://localhost:4000/src/manager/patient/${selectedPatientId}`,
         { method: 'DELETE' },
       );
 
@@ -102,33 +100,30 @@ const PatientPage: React.FC = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      setPatients(prev =>
-        prev.filter(p => p.patient_id !== selectedPatientId)
+      setPatients((prev) =>
+        prev.filter((p) => p.patient_id !== selectedPatientId),
       );
-      setFilteredPatients(prev =>
-        prev.filter(p => p.patient_id !== selectedPatientId)
+      setFilteredPatients((prev) =>
+        prev.filter((p) => p.patient_id !== selectedPatientId),
       );
       setShowModal(false);
 
-     dispatch(openAlert({
-       type: 'success',
-       title: 'ລົບຂໍ້ມູນສຳເລັດ',
-       message: 'ລົບຂໍ້ມູນຄົນເຈັບສຳເລັດແລ້ວ',
-     }));
+      dispatch(
+        openAlert({
+          type: 'success',
+          title: 'ລົບຂໍ້ມູນສຳເລັດ',
+          message: 'ລົບຂໍ້ມູນຄົນເຈັບສຳເລັດແລ້ວ',
+        }),
+      );
     } catch (error: any) {
-      console.error('Error deleting patient:', error);
-     dispatch(openAlert({
-       type: 'error',
-       title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
-       message: error.message || 'ເກີດຂໍ້ຜິດພາດໃນການລົບຂໍ້ມູນ',
-     }));
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
+          message: 'ເກີດຂໍ້ຜິດພາດໃນການລົບຂໍ້ມູນ',
+        }),
+      );
     }
-  };
-
- 
-
-  const handleViewPatient = (id: string) => {
-    navigate(`/patient/detail/${id}`);
   };
 
   const handleEdit = (id: string) => {
@@ -148,7 +143,7 @@ const PatientPage: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); 
+    setPage(0);
   };
 
   const paginatedPatients = filteredPatients.slice(
@@ -159,7 +154,7 @@ const PatientPage: React.FC = () => {
   return (
     <>
       <div className="pb-4">
-      <Alerts />
+        <Alerts />
         <PatientStatsCard patients={filteredPatients} />
       </div>
       <div className="rounded bg-white pt-4 dark:bg-boxdark">
@@ -190,62 +185,68 @@ const PatientPage: React.FC = () => {
           />
         </div>
 
-        <div className="text-md text-strokedark dark:text-bodydark3">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-max table-auto border-collapse">
-              <thead>
-                <tr className="border-b border-gray-300 bg-gray-100 text-left dark:bg-meta-4 bg-blue-100">
-                  {PatientHeaders.map((header, index) => (
-                    <th
-                      key={index}
-                      className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300"
-                    >
-                      {header.name}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedPatients.length > 0 ? (
-                  paginatedPatients.map((patient, index) => (
-                    <tr
-                      key={index}
-                      className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
-                    >
-                      <td className="px-4 py-4">{patient.patient_id}</td>
-                      <td className="px-4 py-4">{patient.patient_name}</td>
-                      <td className="px-4 py-4">{patient.patient_surname}</td>
-                      <td className="px-4 py-4">{patient.gender}</td>
-                      <td className="px-4 py-4">
-                        {new Date(patient.dob).toLocaleDateString('th-TH', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                        })}
-                      </td>
-                      <td className="px-4 py-4">{patient.village}</td>
-                      <td className="px-4 py-4">{patient.district}</td>
-                      <td className="px-4 py-4">{patient.province}</td>
-                      <td className="px-4 py-4">{patient.phone1}</td>
-                      <td className="px-4 py-4">{patient.phone2}</td>
-                      <td className="px-3 py-4 text-center">
-                        <TableAction
-                          onDelete={openDeleteModal(patient.patient_id)}
-                          onEdit={() => handleEdit(patient.patient_id)}
-                        />
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="py-4 text-center text-gray-500">
-                      ບໍ່ມີຂໍ້ມູນ
+        <div className="overflow-x-auto rounded-lg shadow-md">
+          <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
+            <thead>
+              <tr className="text-left bg-secondary2 text-white">
+                {PatientHeaders.map((header, index) => (
+                  <th
+                    key={index}
+                    className="px-4 py-3  font-medium tracking-wide text-white"
+                  >
+                    {header.name}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedPatients.length > 0 ? (
+                paginatedPatients.map((patient, index) => (
+                  <tr key={index} className='text-left'>
+                    <td className="px-4 py-3  ">
+                      {patient.patient_id}
+                    </td>
+                    <td className="px-4 py-3 ">
+                      {patient.patient_name}
+                    </td>
+                    <td className="px-4 py-3 ">
+                      {patient.patient_surname}
+                    </td>
+                    <td className="px-4 py-3  ">
+                      {patient.gender}
+                    </td>
+                    <td className="px-4 py-3  ">
+                      {new Date(patient.dob).toLocaleDateString('th-TH', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                      })}
+                    </td>
+                    <td className="px-4 py-3 ">{patient.village}</td>
+                    <td className="px-4 py-3 ">{patient.district}</td>
+                    <td className="px-4 py-3 ">{patient.province}</td>
+                    <td className="px-4 py-3 ">{patient.phone1}</td>
+                    <td className="px-4 py-3 ">{patient.phone2}</td>
+                    <td className="px-4 py-3  ">
+                      <TableAction
+                        onDelete={openDeleteModal(patient.patient_id)}
+                        onEdit={() => handleEdit(patient.patient_id)}
+                      />
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={11}
+                    className="px-4 py-6  text-gray-500"
+                  >
+                    ບໍ່ມີຂໍ້ມູນ
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
         {showAddModal && (
@@ -311,21 +312,20 @@ const PatientPage: React.FC = () => {
             </div>
           </div>
         )}
-
       </div>
-        <TablePaginationDemo
-          count={filteredPatients.length}
-          page={page}
-          onPageChange={handlePageChange}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleRowsPerPageChange}
-        />
-        <ConfirmModal
-          show={showModal}
-          setShow={setShowModal}
-          message="ທ່ານຕ້ອງການລົບຄົນເຈັບນີ້ອອກຈາກລະບົບບໍ່？"
-          handleConfirm={handleDeletePatient} // Handle deletion on confirm
-        />
+      <TablePaginationDemo
+        count={filteredPatients.length}
+        page={page}
+        onPageChange={handlePageChange}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleRowsPerPageChange}
+      />
+      <ConfirmModal
+        show={showModal}
+        setShow={setShowModal}
+        message="ທ່ານຕ້ອງການລົບຄົນເຈັບນີ້ອອກຈາກລະບົບບໍ່？"
+        handleConfirm={handleDeletePatient} // Handle deletion on confirm
+      />
     </>
   );
 };
@@ -534,7 +534,7 @@ export default PatientPage;
 //                       <td className="px-4 py-4">{patient.province}</td>
 //                       <td className="px-4 py-4">{patient.phone1}</td>
 //                       <td className="px-4 py-4">{patient.phone2}</td>
-//                       <td className="px-3 py-4 text-center">
+//                       <td className="px-3 py-4 ">
 //                         <TableAction
 //                           // onView={() => handleViewPatient(patient.patient_id)}
 //                           onDelete={openDeleteModal(patient.patient_id)}
