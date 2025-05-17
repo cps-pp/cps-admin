@@ -4,7 +4,7 @@ import Button from '@/components/Button';
 import Search from '@/components/Forms/Search';
 import { TableAction } from '@/components/Tables/TableAction';
 import ConfirmModal from '@/components/Modal';
-import { iconAdd } from '@/configs/icon';
+import { iconAdd, PDF } from '@/configs/icon';
 import { OrderHeaders } from './column/order';
 
 const OrderPage: React.FC = () => {
@@ -60,7 +60,7 @@ const OrderPage: React.FC = () => {
     if (!selectedOrderId) return;
     try {
       const response = await fetch(
-        `http://localhost:4000/manager/order/${selectedOrderId}`,
+        `http://localhost:4000/src/manager/order/${selectedOrderId}`,
         { method: 'DELETE' },
       );
       if (!response.ok) throw new Error('Failed to delete order');
@@ -87,6 +87,13 @@ const OrderPage: React.FC = () => {
         </h1>
         <div className="flex items-center gap-2">
           <Button
+            onClick={() => navigate('/order/create')}
+            icon={PDF}
+            className="bg-primary"
+          >
+            Export
+          </Button>
+           <Button
             onClick={() => navigate('/order/create')}
             icon={iconAdd}
             className="bg-primary"

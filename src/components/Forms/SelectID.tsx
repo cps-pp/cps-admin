@@ -14,6 +14,7 @@ type SelectProps = {
   errors?: FieldErrors;
   value?: string;
   onSelect?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  isRequired?: boolean;
 };
 
 const Select: React.FC<SelectProps> = ({
@@ -24,29 +25,27 @@ const Select: React.FC<SelectProps> = ({
   errors,
   value = '',
   onSelect,
+  isRequired
 }) => {
   // Check if there's a value to determine error display
   const hasValue = Boolean(value);
 
   return (
     <div className="mb-5.5">
-      <label 
-        htmlFor={name} 
+      <label
+        htmlFor={name}
         className="mb-1 block text-sm font-medium text-strokedark dark:text-bodydark3"
       >
         {label}
       </label>
-      
+
       <div className="relative z-20 bg-transparent dark:bg-form-input ">
         <select
-          id={name}
-          {...register(name, { 
-            required: {
-              value: !hasValue,
-              message: `ກະລຸນາເລືອກ${label}`
-            },
-            onChange: onSelect
-          })}
+         id={name}
+      {...register(name, {
+        required: isRequired ? `ກະລຸນາເລືອກ${label}` : false,
+        onChange: onSelect,
+      })}
           value={value}
           className=" text-strokedark dark:text-stroke relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:disabled:bg-meta-4 dark:focus:border-primary capitalize"
         >
@@ -59,7 +58,7 @@ const Select: React.FC<SelectProps> = ({
             </option>
           ))}
         </select>
-        
+
         {/* Dropdown arrow icon */}
         <span className="absolute top-1/2 right-4 z-30 -translate-y-1/2">
           <svg
@@ -81,7 +80,7 @@ const Select: React.FC<SelectProps> = ({
           </svg>
         </span>
       </div>
-      
+
       {/* Error message */}
       {errors?.[name] && (
         <span className="text-red-500 text-xs mt-1">

@@ -6,6 +6,8 @@ import Input from '@/components/Forms/Input_two';
 import Loader from '@/common/Loader';
 import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
+import SelectID from '@/components/Forms/SelectID';
+import DatePicker from '@/components/DatePicker_two';
 
 interface CreateCategoryProps {
   setShow: (value: boolean) => void;
@@ -20,10 +22,12 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
     register,
     handleSubmit,
     reset,
+
     formState: { errors },
   } = useForm();
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
+
   const handleSave = async (formData: any) => {
     setLoading(true);
     try {
@@ -94,14 +98,9 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
           errors={errors}
         />
 
+   
         <div className="mt-8 flex justify-end space-x-4  py-4">
-          {/* <button
-            className="px-6 py-2 text-md font-medium uppercase text-red-500"
-            type="button"
-            onClick={() => setShow(false)}
-          >
-            ຍົກເລິກ
-          </button> */}
+        
           <Button variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </Button>

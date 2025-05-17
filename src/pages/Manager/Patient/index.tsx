@@ -250,8 +250,15 @@ const PatientPage: React.FC = () => {
         </div>
 
         {showAddModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="rounded-lg w-full max-w-2xl relative px-4 ">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
+                 <div className="    rounded
+        w-full max-w-lg     
+        md:max-w-2xl        
+        lg:max-w-4xl 
+        xl:max-w-5xl      
+        relative
+        overflow-auto
+        max-h-[90vh]">
               <button
                 onClick={() => setShowAddModal(false)}
                 className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700"
@@ -282,7 +289,14 @@ const PatientPage: React.FC = () => {
 
         {showEditModal && selectedId && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
-            <div className="rounded-lg w-full max-w-2xl bg-white relative ">
+          <div className="    rounded
+        w-full max-w-lg     
+        md:max-w-2xl        
+       lg:max-w-4xl 
+        xl:max-w-5xl      
+        relative
+        overflow-auto
+        max-h-[90vh]">
               <button
                 onClick={() => setShowEditModal(false)}
                 className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"

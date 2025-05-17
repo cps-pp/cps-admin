@@ -68,7 +68,7 @@ const CategoryPage: React.FC<{}> = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:4000/src/${selectedCategoryId}`,
+        `http://localhost:4000/src/manager/category/${selectedCategoryId}`,
         {
           method: 'DELETE',
         },

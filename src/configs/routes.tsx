@@ -36,6 +36,7 @@ import CreateFollow from '@/pages/Follow/create';
 import Order from '@/pages/Order';
 import Import from '@/pages/Import';
 import Treatment from '@/pages/Service/Treatment';
+import ImportPage from '@/pages/im/import.tsx';
 
 export interface IRoute {
   path: string;
@@ -168,8 +169,9 @@ export const ROUTES: IRoute[] = [
 {
   path: '/import',
   title: 'Import | CPS Admin',
-  component: < Import />,
+  component: < ImportPage />,
 },
+
 
 
 // -------------------------- Follow Path --------------------------------

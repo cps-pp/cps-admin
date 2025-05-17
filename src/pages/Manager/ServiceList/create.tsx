@@ -6,6 +6,7 @@ import React, { useState } from "react";
 import Loader from "@/common/Loader";
 import { useAppDispatch } from "@/redux/hook";
 import { openAlert } from "@/redux/reducer/alert";
+import PriceInput from "@/components/Forms/PriceInput";
 
 interface CreateProps {
   setShow: (value: boolean) => void;
@@ -99,15 +100,17 @@ const CreateServiceList: React.FC<CreateProps> = ({ setShow, getList }) => {
         formOptions={{ required: "ກະລຸນາປ້ອນຊື່ລາຍການກ່ອນ" }}
         errors={errors}
       />
-      <Input
-        label="ລາຄາ"
-        name="price"
-        type="text"
-        placeholder="ປ້ອນລາຄາ"
-        register={register}
-        formOptions={{ required: "ກະລຸນາປ້ອນລາຄາກ່ອນ" }}
-        errors={errors}
-      />
+        <PriceInput
+          label="ລາຄາ"
+          name="price"
+          placeholder="ປ້ອນລາຄາ"
+          register={register}
+          formOptions={{
+            required: 'ກະລຸນາປ້ອນລາຄາ',
+            min: { value: 0, message: 'ລາຄາຕ້ອງຫຼາຍກວ່າ 0' },
+          }}
+          errors={errors}
+        />
       
       
         <div className="mt-8 flex justify-end space-x-4 col-span-full px-4 py-4">

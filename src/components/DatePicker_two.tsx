@@ -1,8 +1,6 @@
 import React, { useEffect } from "react";
 import Flatpickr from "react-flatpickr";
-import { CalendarIcon } from "@heroicons/react/24/solid";
 import { RegisterOptions, UseFormSetValue } from "react-hook-form";
-// import "flatpickr/dist/flatpickr.min.css"; // ปลดคอมเมนต์ถ้ายังไม่ได้โหลดผ่าน global styles
 
 type DatePickerProps = {
   label?: string;
@@ -44,14 +42,14 @@ const DatePicker: React.FC<DatePickerProps> = ({
           className={`relative z-20 w-full mb-2 appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:disabled:bg-meta-4 dark:focus:border-primary text-black dark:text-white capitalize ${className}`}
           placeholder={
             withTime
-              ? "ເລືອກວັນ/ເວລາ (ວ/ດ/ປ H:i)"
+              ? "ເລືອກວັນ/ເວລາ (ວ/ດ/ປ)"
               : "ເລືອກວັນເດືອນປີ (ວ/ດ/ປ)"
           }
           value={select}
           options={{
             enableTime: withTime,
             time_24hr: true,
-            dateFormat: withTime ? "d/m/Y H:i" : "d/m/Y",
+            dateFormat: withTime ? "d/m/Y H:i" : "d/m/Y", 
             allowInput: true,
             defaultHour: 0,
             defaultMinute: 0,
@@ -68,11 +66,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
           }}
         />
 
-        {/* ไอคอนปฏิทิน */}
-        <CalendarIcon className="absolute right-3 top-4.5 h-5 w-5 text-gray-500 dark:text-gray-400 pointer-events-none" />
       </div>
 
-      {/* แสดง error message */}
       {errors?.[name] && (
         <span className="mt-1 text-sm text-red-500">{errors[name]?.message}</span>
       )}

@@ -23,8 +23,6 @@ function AppRoutes() {
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  // สำหรับทดสอบ: บังคับแสดงหน้า login
-  // ลบบรรทัดนี้ออกหากต้องการให้ระบบเช็คตามปกติ
   // return <SignIn />; 
 
   return (

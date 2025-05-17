@@ -7,6 +7,7 @@ import Loader from '@/common/Loader';
 import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import Alerts from '@/components/Alerts';
+import PriceInput from '@/components/Forms/PriceInput';
 
 interface EditProps {
   id: string;
@@ -25,6 +26,7 @@ const EditExChange: React.FC<EditProps> = ({
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
     setValue,
   } = useForm();
@@ -36,7 +38,7 @@ const EditExChange: React.FC<EditProps> = ({
     const fetchListData = async () => {
       try {
         const response = await fetch(
-          `http://localhost:4000/manager/exchange/${id}`,
+          `http://localhost:4000/src/manager/exchange/${id}`,
         );
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -123,24 +125,21 @@ const EditExChange: React.FC<EditProps> = ({
           formOptions={{ required: 'ກະລຸນາປ້ອນສະກຸນເງິນກ່ອນ' }}
           errors={errors}
         />
-        <Input
-          label="ຈຳນວນເລດ"
-          name="ex_rate"
-          type="text"
-          placeholder="ປ້ອນເລດ"
+       
+   <PriceInput
+          label="ລາຄາ"
+          name="price"
           register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນຈຳນວນກ່ອນ' }}
+          defaultValue={getValues('ex_rate')}
+          formOptions={{
+            required: 'ກະລຸນາປ້ອນລາຄາ',
+            min: { value: 0, message: 'ລາຄາຕ້ອງຫຼາຍກວ່າ 0' },
+          }}
           errors={errors}
         />
 
         <div className="mt-8 flex justify-end space-x-4 col-span-full py-4">
-          <button
-            className="px-6 py-2 text-md font-medium text-red-500"
-            type="button"
-            onClick={() => navigate('/manager/exchange')}
-          >
-            ຍົກເລິກ
-          </button>
+       
           <Button variant="save" type="submit">
             ບັນທຶກ
           </Button>

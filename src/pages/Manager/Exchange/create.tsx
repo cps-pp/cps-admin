@@ -7,6 +7,7 @@ import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import Loader from '@/common/Loader';
 import Alerts from '@/components/Alerts';
+import PriceInput from '@/components/Forms/PriceInput';
 
 interface CreateProps {
   setShow: (value: boolean) => void;
@@ -24,42 +25,43 @@ const CreateExChange: React.FC<CreateProps> = ({ setShow, getList }) => {
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
 
- 
-
   const handleSave = async (formData: any) => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:4000/src/manager/exchange', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        'http://localhost:4000/src/manager/exchange',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ex_id: formData.ex_id,
+            ex_type: formData.ex_type,
+            ex_rate: formData.ex_rate,
+          }),
         },
-        body: JSON.stringify({
-          ex_id: formData.ex_id,
-          ex_type: formData.ex_type,
-          ex_rate: formData.ex_rate,
-        }),
-      });
-  
+      );
+
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-  
+
       setTimeout(async () => {
         setShow(false);
         await getList();
         reset();
-  
+
         dispatch(
           openAlert({
             type: 'success',
             title: 'ສຳເລັດ',
             message: 'ບັນທຶກຂໍ້ມູນສຳເລັດແລ້ວ',
-          })
+          }),
         );
-  
+
         setLoading(false);
-      }, 1000);
+      }, 500);
     } catch (error: any) {
       setLoading(false);
       dispatch(
@@ -67,17 +69,16 @@ const CreateExChange: React.FC<CreateProps> = ({ setShow, getList }) => {
           type: 'error',
           title: 'ເກີດຂໍ້ຜິດພາດ',
           message: error.message || 'ມີຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
-        })
+        }),
       );
     }
   };
-  
 
   if (loading) return <Loader />;
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
-      <Alerts/>
+      <Alerts />
       <div className="flex items-center  border-b border-stroke  dark:border-strokedark pb-4">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
           ເພີ່ມຂໍ້ມູນ
@@ -105,13 +106,16 @@ const CreateExChange: React.FC<CreateProps> = ({ setShow, getList }) => {
           formOptions={{ required: 'ກະລຸນາປ້ອນສະກຸນເງິນກ່ອນ' }}
           errors={errors}
         />
-        <Input
+
+        <PriceInput
           label="ຈຳນວນເລດ"
           name="ex_rate"
-          type="text"
           placeholder="ປ້ອນເລດ"
           register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນເລດຫກ່ອນ' }}
+          formOptions={{
+            required: 'ກະລຸນາປ້ອນລາຄາ',
+            min: { value: 0, message: 'ກະລຸນາປ້ອນເລດກ່ອນ 0' },
+          }}
           errors={errors}
         />
 

@@ -22,6 +22,8 @@
     "aieditor": "^1.1.7",
     "apexcharts": "^3.41.0",
     "axios": "^1.7.2",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
     "light-date": "^1.2.0",
     "lodash": "^4.17.21",
     "react": "^18.3.1",
@@ -36,6 +38,7 @@
     "tinymce": "^7.3.0"
   },
   "devDependencies": {
+    "@types/jspdf": "^2.0.0",
     "@types/lodash": "^4.17.7",
     "@types/react": "^18.2.17",
     "@types/react-dom": "^18.2.7",

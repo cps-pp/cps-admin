@@ -16,7 +16,7 @@ interface CreateProps {
 
 const CreatePatient: React.FC<CreateProps> = ({ setShow, getList }) => {
   const [loading, setLoading] = useState(false);
-  const dispatch = useAppDispatch(); 
+  const dispatch = useAppDispatch();
 
   const {
     register,
@@ -48,39 +48,64 @@ const CreatePatient: React.FC<CreateProps> = ({ setShow, getList }) => {
 
   const handleSave = async (data: any) => {
     setLoading(true);
+
+    if (data.patient_id === data.patient_id) {
+      dispatch(
+        openAlert({
+          type: 'warning',
+          title: 'ຄຳເຕືອນ',
+          message: 'ລະຫັດຄົນເຈັບຊ້ຳກັນ ກະລຸນາປ່ຽນໃຫ່ມ',
+        }),
+      );
+      setLoading(false);
+      return;
+    }
+
+    if (data.phone1 === data.phone2) {
+      dispatch(
+        openAlert({
+          type: 'warning',
+          title: 'ຄຳເຕືອນ',
+          message: 'ເບີຕິດຕໍ່ນີ້ມີຢູ່ແລ້ວ',
+        }),
+      );
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch('http://localhost:4000/src/manager/patient', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        'http://localhost:4000/src/manager/patient',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...data, gender }),
         },
-        body: JSON.stringify({ ...data, gender }),
-      });
+      );
 
       const result = await response.json();
+
       if (!response.ok) {
-        throw new Error(result.error || 'ບັນທຶກບໍ່ສຳເລັດ');
+        throw new Error(result.error || 'บันทึกไม่สำเร็จ');
       }
-    
+
       dispatch(
         openAlert({
           type: 'success',
-          title: 'ສຳເລັດ',
-          message: 'ບັນທຶກຂໍ້ມູນຄົນເຈັບສຳເລັດແລ້ວ',
-        })
+          title: 'สำเร็จ',
+          message: 'บันทึกข้อมูลคนเจ็บสำเร็จแล้ว',
+        }),
       );
-
       setShow(false);
-
       await getList();
       reset();
     } catch (error: any) {
       dispatch(
         openAlert({
           type: 'error',
-          title: 'ເກີດຂໍ້ຜິດພາດ',
-          message: error.message || 'ມີຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
-        })
+          title: 'เกิดข้อผิดพลาด',
+          message: 'มีข้อผิดพลาดในการบันทึกข้อมูล',
+        }),
       );
     } finally {
       setLoading(false);
@@ -89,11 +114,10 @@ const CreatePatient: React.FC<CreateProps> = ({ setShow, getList }) => {
 
   if (loading) return <Loader />;
 
-
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
       <Alerts />
-      
+
       <div className="flex items-center border-b border-stroke dark:border-strokedark pb-4">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
           ເພີ່ມຂໍ້ມູນ
@@ -102,7 +126,7 @@ const CreatePatient: React.FC<CreateProps> = ({ setShow, getList }) => {
 
       <form
         onSubmit={handleSubmit(handleSave)}
-        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4 mt-4 px-4"
+        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 px-4"
       >
         <Input
           label="ລະຫັດຄົນເຈັບ"
@@ -151,7 +175,7 @@ const CreatePatient: React.FC<CreateProps> = ({ setShow, getList }) => {
           formOptions={{ required: 'ກະລຸນາໃສ່ວັນເດືອນປີເກີດ' }}
           setValue={setValue}
         />
-          <Input
+        <Input
           label="ເບີຕິດຕໍ່"
           name="phone1"
           type="tel"
@@ -170,7 +194,7 @@ const CreatePatient: React.FC<CreateProps> = ({ setShow, getList }) => {
           }}
           errors={errors}
         />
-         <Input
+        <Input
           label="ເບີຕິດຕໍ່"
           name="phone2"
           type="tel"
@@ -218,11 +242,7 @@ const CreatePatient: React.FC<CreateProps> = ({ setShow, getList }) => {
         />
 
         <div className="mt-4 flex justify-end space-x-4 col-span-full py-4">
-          <Button 
-            variant="save" 
-            type="submit" 
-            disabled={loading}
-          >
+          <Button variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </Button>
         </div>
