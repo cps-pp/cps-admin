@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Logo from '../images/logo/cps-logo.png';
+import Logo from '../images/logo/cps.png';
 import { useAuth } from '@/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -49,14 +49,13 @@ const LoginForm: React.FC = () => {
 
       {/* Card container */}
       <div className="relative  bg-white p-8 rounded-lg shadow-xl w-full max-w-md z-10">
-        {/* Header */}
-        <div className="mb-8 ">
-          <img src={Logo} alt="Logo" width={300} />
+        <div className="mb-8 flex justify-center">
+          <img src={Logo} alt="Logo" width={220} className="mx-auto" />
         </div>
 
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">ຍິນດີຕ້ອນຮັບ</h1>
-          <p className="text-gray-500 mt-1">ກະລຸນາລ໋ອກອິນເພື່ອເຂົ້າສູ່ລະບົບ</p>
+          <h1 className="text-3xl font-bold text-gray-900">ຍິນດີຕ້ອນຮັບ</h1>
+          <p className="text-gray-700 mt-1">ກະລຸນາລ໋ອກອິນເພື່ອເຂົ້າສູ່ລະບົບ</p>
         </div>
 
         {/* Form */}
@@ -100,7 +99,7 @@ const LoginForm: React.FC = () => {
 
           <button
             type="submit"
-            className="bg-purple-500 hover:bg-purple-600 text-white font-medium p-4 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg"
+            className="bg-purple-700 hover:bg-purple-800 text-white font-medium p-4 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg"
           >
             ເຂົ້າສູ່ລະບົບ
           </button>

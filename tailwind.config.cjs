@@ -6,7 +6,7 @@ module.exports = {
   darkMode: 'class',
   theme: {
     fontFamily: {
-      notoLaoLooped: ['"Noto Sans Lao "', 'sans-serif'],
+      lao: ['"Noto Sans Lao"', 'sans-serif'],
     },
     screens: {
       '2xsm': '375px',
@@ -29,7 +29,7 @@ module.exports = {
         primary: '#7C67DE',
         secondary: '#51419B',
         secondary2: '#51416B',
-        
+
         Third: '#EEEBFF',
 
         stroke: '#E2E8F0',

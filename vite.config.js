@@ -9,7 +9,7 @@ export default defineConfig({
     },
     server: {
       host: 'localhost', //  localhost
-      port: 8999, 
+      port: 8090, 
       strictPort: true 
     },
 });

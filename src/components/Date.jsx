@@ -1,24 +1,12 @@
 import React, { useEffect } from "react";
 import Flatpickr from "react-flatpickr";
-import "flatpickr/dist/themes/material_blue.css"; 
+import "flatpickr/dist/themes/material_blue.css";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 
+dayjs.extend(utc);
 
-
-
-import { RegisterOptions, UseFormSetValue } from "react-hook-form";
-type DatePickerProps = {
-  label?: string;
-  name: string;
-  select: string | any;
-  register: any;
-  setValue: UseFormSetValue<any>;
-  formOptions?: RegisterOptions;
-  errors?: Record<string, any>;
-  className?: string;
-  withTime?: boolean;
-};
-
-const DatePicker: React.FC<DatePickerProps> = ({
+const BoxDate = ({
   label,
   name,
   select,
@@ -30,8 +18,11 @@ const DatePicker: React.FC<DatePickerProps> = ({
   withTime = false,
 }) => {
   useEffect(() => {
-    register(name, formOptions);
+    if (register && name) {
+      register(name, formOptions);
+    }
   }, [name, register, formOptions]);
+
 
   return (
     <div className="w-full">
@@ -53,14 +44,14 @@ const DatePicker: React.FC<DatePickerProps> = ({
           options={{
             enableTime: withTime,
             time_24hr: true,
-            dateFormat: withTime ? "d/m/Y H:i" : "d/m/Y", 
+            dateFormat: withTime ? "d/m/Y H:i" : "d/m/Y",
             allowInput: true,
             defaultHour: 0,
             defaultMinute: 0,
             prevArrow: '<span class="text-gray-600 dark:text-white">‹</span>',
             nextArrow: '<span class="text-gray-600 dark:text-white">›</span>',
           }}
-          onChange={(dates: Date[]) => {
+          onChange={(dates) => {
             if (dates.length > 0) {
               const isoDate = dates[0].toISOString();
               setValue(name, isoDate);
@@ -69,14 +60,13 @@ const DatePicker: React.FC<DatePickerProps> = ({
             }
           }}
         />
-
       </div>
 
-      {errors?.[name] && (
+      {errors && errors[name] && (
         <span className="mt-1 text-sm text-red-500">{errors[name]?.message}</span>
       )}
     </div>
   );
 };
 
-export default DatePicker;
+export default BoxDate;
