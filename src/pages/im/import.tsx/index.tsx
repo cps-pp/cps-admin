@@ -13,6 +13,7 @@ import Alerts from '@/components/Alerts';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import EditImport from './edit';
+import autoTable from 'jspdf-autotable';
 // Fix TypeScript error by extending jsPDF type with autoTable
 declare module 'jspdf' {
   interface jsPDF {
@@ -165,6 +166,7 @@ const ImportPage: React.FC = () => {
     setShowEditModal(true);
   };
 const handleDownloadFile = async (fileName: string) => {
+   console.log('exportPDF clicked');
   try {
     const response = await fetch(`http://localhost:4000/im/import/download/${fileName}`, {
       method: 'GET',

@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import Button from '@/components/Button';
 import { useEffect, useState } from 'react';
 import SelectID from '@/components/Forms/SelectID';
-import Input from '@/components/Forms/Input_two';
+import Input from '@/components/Forms/Input';
 import DatePicker from '@/components/DatePicker_two';
 import Loader from '@/common/Loader';
 import Alerts from '@/components/Alerts';
