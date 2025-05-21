@@ -8,7 +8,10 @@ import DatePicker from '@/components/DatePicker_two';
 import InputBox from '../../../components/Forms/Input_new';
 import SelectBox from '../../../components/Forms/Select';
 import ButtonBox from '../../../components/Button';
+<<<<<<< HEAD
 import BoxDate from '../../../components/Date';
+=======
+>>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
 
 const CreateEmployee = ({ setShow, getList }) => {
   const {

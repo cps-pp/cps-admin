@@ -53,10 +53,21 @@ const FollowPage = () => {
 
       setTotalCount(allAppointments.length);
       setDoneCount(
+<<<<<<< HEAD
         allAppointments.filter((item) => item.status === 'ກວດແລ້ວ').length,
       );
       setWaitingCount(
         allAppointments.filter((item) => item.status === 'ລໍຖ້າ').length,
+=======
+        allAppointments.filter(
+          (item) => item.status === 'ກວດແລ້ວ',
+        ).length,
+      );
+      setWaitingCount(
+        allAppointments.filter(
+          (item) => item.status === 'ລໍຖ້າ',
+        ).length,
+>>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
       );
     } catch (error) {
       console.error('Error fetching appointments:', error);

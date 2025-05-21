@@ -1,6 +1,10 @@
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+<<<<<<< HEAD
+=======
+// import DatePicker from '@/components/DatePicker_two';
+>>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
 import Alerts from '@/components/Alerts';
 import Loader from '@/common/Loader';
 import { openAlert } from '@/redux/reducer/alert';
@@ -9,7 +13,11 @@ import InputBox from '../../components/Forms/Input_new';
 import SelectBox from '../../components/Forms/Select';
 import SelectBoxId from '../../components/Forms/SelectID';
 import ButtonBox from '../../components/Button';
+<<<<<<< HEAD
 import BoxDate from '../../components/Date';
+=======
+import DatePickerBox from '../../components/DatePicker_New';
+>>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
 
 const CreateFollow = ({ setShow, getList }) => {
   const navigate = useNavigate();
@@ -30,8 +38,12 @@ const CreateFollow = ({ setShow, getList }) => {
   const [selectedEmp, setSelectedEmp] = useState('');
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
+<<<<<<< HEAD
   const selectedDate = watch('date_addmintted');
 
+=======
+const selectedDate = watch('date_addmitted');
+>>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
   useEffect(() => {
     const fetchPatients = async () => {
       try {
@@ -148,6 +160,7 @@ const CreateFollow = ({ setShow, getList }) => {
           formOptions={{ required: 'ກະລຸນາປ້ອນລະຫັດນັດໝາຍ' }}
           errors={errors}
         />
+<<<<<<< HEAD
 
         <BoxDate
           name="date_addmintted"
@@ -160,6 +173,20 @@ const CreateFollow = ({ setShow, getList }) => {
           withTime={true}
         />
          
+=======
+        
+       <DatePickerBox
+  name="date_addmitted"
+  label="ວັນທີນັດໝາຍ"
+  register={register}
+  errors={errors}
+  select={selectedDate}
+  formOptions={{ required: 'ກະລຸນາເລືອກວັນທີນັດໝາຍ' }}
+  setValue={setValue}
+  withTime={true}
+/>
+
+>>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
         <SelectBox
           label="ສະຖານະ"
           name="status"
@@ -198,9 +225,14 @@ const CreateFollow = ({ setShow, getList }) => {
           value={selectedPat}
           options={patients.map((patient) => ({
             value: patient.patient_id,
+<<<<<<< HEAD
             label:
               `${patient.patient_id} ${patient.patient_name}` +
               (patient.patient_surname ? ` ${patient.patient_surname}` : ''),
+=======
+          label: `${patient.patient_id} ${patient.patient_name}` + (patient.patient_surname ? ` ${patient.patient_surname}` : '')
+
+>>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
           }))}
           register={register}
           errors={errors}

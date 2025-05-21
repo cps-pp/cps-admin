@@ -19,11 +19,14 @@ import EmployeePage from '../pages/Manager/Employee';
 import CategoryPage from '../pages/Manager/Category';
 import Dashboard from '../pages/Dashboard';
 import FollowPage from '../pages/Follow';
+<<<<<<< HEAD
 import ReportMed from '../pages/report/ReportMed';
 import ReportPay from '../pages/report/ReportPayment';
 import ReportPer from '../pages/report/ReportPer';
 import ReportImport from '../pages/report/ReportImport';
 import ReportOrder from '../pages/report/ReportOrder';
+=======
+>>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
 
 export const ROUTES = [
   {
@@ -135,6 +138,7 @@ export const ROUTES = [
     title: 'Report Appointment | CPS Admin',
     component: <ReportAppointment />,
   },
+<<<<<<< HEAD
   {
     path: '/report/medicines',
     title: 'Report Medicines | CPS Admin',
@@ -161,6 +165,8 @@ export const ROUTES = [
     title: 'Report Pre order | CPS Admin',
     component: <ReportOrder />,
   },
+=======
+>>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
 
   {
     path: '/profile',
