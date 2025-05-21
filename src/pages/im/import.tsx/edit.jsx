@@ -3,10 +3,6 @@ import Button from '@/components/Button';
 import { useEffect, useState } from 'react';
 import SelectID from '@/components/Forms/SelectID';
 import Input from '@/components/Forms/Input';
-<<<<<<< HEAD:src/pages/im/import.tsx/edit.jsx
-=======
-import DatePicker from '@/components/DatePicker_two';
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b:src/pages/im/import.tsx/edit.tsx
 import Loader from '@/common/Loader';
 import Alerts from '@/components/Alerts';
 import { useAppDispatch } from '@/redux/hook';

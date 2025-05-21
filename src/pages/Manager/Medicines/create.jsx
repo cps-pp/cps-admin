@@ -15,10 +15,7 @@ import PriceInputBox from '../../../components/Forms/PriceInput';
 import SelectBox from '../../../components/Forms/Select';
 import SelectBoxId from '../../../components/Forms/SelectID';
 import ButtonBox from '../../../components/Button';
-<<<<<<< HEAD
 import BoxDate from '../../../components/Date';
-=======
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
 
 
 const CreateMedicines = ({ setShow, getList }) => {
@@ -207,11 +204,7 @@ const CreateMedicines = ({ setShow, getList }) => {
           errors={errors}
         />
      
-<<<<<<< HEAD
         <BoxDate
-=======
-        <DatePicker
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
           select=""
           register={register}
           errors={errors}

@@ -14,29 +14,6 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import EditImport from './edit';
 import autoTable from 'jspdf-autotable';
-<<<<<<< HEAD:src/pages/im/import.tsx/index.jsx
-=======
-// Fix TypeScript error by extending jsPDF type with autoTable
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-  }
-}
-interface ImportData {
-  im_id: string;
-  im_date: string;
-  qty: number;
-  expired: string;
-  lot: string;
-  file: string;
-  sup_id: string;
-  med_id: string;
-  emp_id_create: number;
-  emp_id_updated: number;
-  created_at: string;
-  update_by: string;
-}
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b:src/pages/im/import.tsx/index.tsx
 
 const ImportPage = () => {
   const [filterIm, setFilterIm] = useState([]);
@@ -163,7 +140,6 @@ const ImportPage = () => {
     setSelectedId(id);
     setShowEditModal(true);
   };
-<<<<<<< HEAD:src/pages/im/import.tsx/index.jsx
 
   const handleDownloadFile = async (fileName) => {
     console.log('exportPDF clicked');
@@ -216,13 +192,6 @@ const ImportPage = () => {
       head: [tableColumn],
       body: tableRows,
       startY: 20,
-=======
-const handleDownloadFile = async (fileName: string) => {
-   console.log('exportPDF clicked');
-  try {
-    const response = await fetch(`http://localhost:4000/im/import/download/${fileName}`, {
-      method: 'GET',
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b:src/pages/im/import.tsx/index.tsx
     });
 
     doc.text('ລາຍການນຳເຂົ້າ', 14, 15);

@@ -9,10 +9,7 @@ import Alerts from '@/components/Alerts';
 import InputBox from '../../../components/Forms/Input_new';
 import PriceInputBox from '../../../components/Forms/PriceInput';
 import SelectBoxId from '../../../components/Forms/SelectID';
-<<<<<<< HEAD
 import BoxDate from '../../../components/Date';
-=======
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
 
 
 const EditMedicines = ({ id, setShow, getList }) => {

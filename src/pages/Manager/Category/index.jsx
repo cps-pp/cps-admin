@@ -5,10 +5,6 @@ import Button from '@/components/Button';
 import Search from '@/components/Forms/Search';
 import { TableAction } from '@/components/Tables/TableAction';
 import ConfirmModal from '@/components/Modal';
-<<<<<<< HEAD
-=======
-import { Cates } from './column/cate';
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
 import CreateCategory from './create';
 import EditCate from './edit';
 import { useAppDispatch } from '@/redux/hook';

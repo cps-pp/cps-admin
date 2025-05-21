@@ -48,23 +48,21 @@ const PatientPage = () => {
   useEffect(() => {
     fetchPatients();
   }, []);
+useEffect(() => {
+  if (searchQuery.trim() === '') {
+    setFilteredPatients(patients);
+  } else {
+    const filtered = patients.filter((patient) => {
+      const patientDataString = Object.values(patient)
+        .filter(v => v !== null && v !== undefined) 
+        .map(v => String(v).toLowerCase()) 
+        .join(' '); 
 
-  useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredPatients(patients);
-    } else {
-      const filtered = patients.filter((patient) =>
-        patient.patient_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        patient.patient_surname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (patient.village && patient.village.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (patient.district && patient.district.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (patient.province && patient.province.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (patient.phone1 && patient.phone1.includes(searchQuery)) ||
-        (patient.phone2 && patient.phone2.includes(searchQuery))
-      );
-      setFilteredPatients(filtered);
-    }
-  }, [searchQuery, patients]);
+      return patientDataString.includes(searchQuery.toLowerCase());
+    });
+    setFilteredPatients(filtered);
+  }
+}, [searchQuery, patients]);
 
   const openDeleteModal = (id) => () => {
     setSelectedPatientId(id);
