@@ -10,11 +10,8 @@ import SelectBoxId from '../../components/Forms/SelectID';
 import ButtonBox from '../../components/Button';
 import DatePickerBox from '../../components/DatePicker_New';
 // import DatePicker from '@/components/DatePicker_two';
-<<<<<<< HEAD
 import moment from 'moment';
 import DateBox from '../../components/Date';
-=======
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
 
 const EditFollow = ({ setShow, getList, id }) => {
   const {
@@ -25,11 +22,7 @@ const EditFollow = ({ setShow, getList, id }) => {
     watch,
     formState: { errors },
   } = useForm();
-<<<<<<< HEAD
   const [originalDate, setOriginalDate] = useState('');
-=======
-
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
   const [status, setStatus] = useState('');
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -102,10 +95,6 @@ const EditFollow = ({ setShow, getList, id }) => {
     };
     fetchDoctors();
   }, []);
-<<<<<<< HEAD
-=======
-
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
   const onSubmit = async (data) => {
     try {
       setLoading(true);
@@ -181,16 +170,11 @@ const EditFollow = ({ setShow, getList, id }) => {
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 md:lg:grid-cols-2 lg:grid-cols-2 gap-4 px-4 pt-4"
       >
-<<<<<<< HEAD
         {/* <DatePickerBox
-=======
-        <DatePickerBox
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
           name="date_addmintted"
           label="ວັນທີນັດໝາຍ"
           register={register}
           errors={errors}
-<<<<<<< HEAD
           select={getValues('date_addmintted')}
           formOptions={{ required: 'ກະລຸນາເລືອກວັນທີນັດໝາຍ' }}
           setValue={setValue}
@@ -201,8 +185,6 @@ const EditFollow = ({ setShow, getList, id }) => {
           label="ວັນທີນັດໝາຍ"
           register={register}
           errors={errors}
-=======
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
           select={getValues('date_addmintted')}
           formOptions={{ required: 'ກະລຸນາເລືອກວັນທີນັດໝາຍ' }}
           setValue={setValue}

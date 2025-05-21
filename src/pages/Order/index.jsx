@@ -6,11 +6,8 @@ import { TableAction } from '@/components/Tables/TableAction';
 import ConfirmModal from '@/components/Modal';
 import { iconAdd, PDF } from '@/configs/icon';
 import { OrderHeaders } from './column/order';
-<<<<<<< HEAD
 import OrderCreate from './create';
 import { useAppDispatch } from '@/redux/hook';
-=======
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
 
 const OrderPage = () => {
   const [orders, setOrders] = useState([]);
@@ -20,26 +17,19 @@ const OrderPage = () => {
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-<<<<<<< HEAD
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const dispatch = useAppDispatch();
-=======
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
-<<<<<<< HEAD
       const response = await fetch(
         'http://localhost:4000/src/preorder/preorder',
       );
-=======
-      const response = await fetch('http://localhost:4000/src/preorder/preorder');
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -64,11 +54,7 @@ const OrderPage = () => {
       setFilteredOrder(orders);
     } else {
       const filtered = orders.filter((order) =>
-<<<<<<< HEAD
         order.preorder_id.toLowerCase().includes(searchQuery.toLowerCase()),
-=======
-        order.preorder_id.toLowerCase().includes(searchQuery.toLowerCase())
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
       );
       setFilteredOrder(filtered);
     }
@@ -83,22 +69,13 @@ const OrderPage = () => {
     if (!selectedOrderId) return;
     try {
       const response = await fetch(
-<<<<<<< HEAD
         `http://localhost:4000/src/preorder/preorder/${selectedOrderId}`,
         { method: 'DELETE' },
-=======
-        `http://localhost:4000/src/manager/order/${selectedOrderId}`,
-        { method: 'DELETE' }
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
       );
       if (!response.ok) throw new Error('Failed to delete order');
 
       setOrders((prev) =>
-<<<<<<< HEAD
         prev.filter((o) => o.preorder_id !== selectedOrderId),
-=======
-        prev.filter((o) => o.preorder_id !== selectedOrderId)
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
       );
       setShowModal(false);
       setSelectedOrderId(null);
@@ -126,11 +103,7 @@ const OrderPage = () => {
             Export
           </Button>
           <Button
-<<<<<<< HEAD
             onClick={() => setShowAddModal(true)}
-=======
-            onClick={() => navigate('/order/create')}
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
             icon={iconAdd}
             className="bg-primary"
           >
@@ -172,20 +145,12 @@ const OrderPage = () => {
                 >
                   <td className="px-4 py-4">{order.preorder_id}</td>
                   <td className="px-4 py-4">
-<<<<<<< HEAD
                     {new Date(order.preorder_date).toLocaleDateString('en-US', {
-=======
-                    {new Date(order.preorder_date).toLocaleDateString('th-TH', {
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
                       day: '2-digit',
                       month: '2-digit',
                       year: 'numeric',
                     })}
                   </td>
-<<<<<<< HEAD
-
-=======
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
                   <td className="px-4 py-4">{order.qty}</td>
                   <td className="px-4 py-4">{order.status}</td>
                   <td className="px-4 py-4">{order.lot}</td>
@@ -193,13 +158,8 @@ const OrderPage = () => {
                   <td className="px-4 py-4">{order.med_id}</td>
                   <td className="px-3 py-4 text-center">
                     <TableAction
-<<<<<<< HEAD
                       onDelete={openDeleteModal(order.preorder_id)}
                       onEdit={() => handleEdit(order.preorder_id)}
-=======
-                      onDelete={openDeleteModal(order.emp_id)}
-                      onEdit={() => handleEdit(order.emp_id)}
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
                     />
                   </td>
                 </tr>
@@ -213,7 +173,6 @@ const OrderPage = () => {
             )}
           </tbody>
         </table>
-<<<<<<< HEAD
 
         {showAddModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4 ">
@@ -251,8 +210,6 @@ const OrderPage = () => {
             </div>
           </div>
         )}
-=======
->>>>>>> 04c0b8aa93908363f1af5f8ef9006db261d3577b
       </div>
 
       <ConfirmModal
