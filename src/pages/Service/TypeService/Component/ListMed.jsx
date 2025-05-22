@@ -23,7 +23,7 @@ export default function ListMed({ selectService, dataValue, tapService }) {
 
   const columns = [
     {
-      title: 'Services',
+      title: 'Med id',
       dataIndex: 'med_id',
       key: 'med_id',
     },

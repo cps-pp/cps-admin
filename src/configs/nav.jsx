@@ -216,6 +216,11 @@ export const SERVICE = [
     path: 'treatment',
     icon: iconVolunteers,
   },
+  {
+    name: 'ລາຍລະອຽດ',
+    path: 'detail',
+    icon: iconResume,
+  },
 ];
 export const FOLLOW = [
   {

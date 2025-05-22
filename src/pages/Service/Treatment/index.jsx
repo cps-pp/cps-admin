@@ -5,15 +5,25 @@ import TypeService from '../TypeService/TypeService';
 import { useForm } from 'react-hook-form';
 import SelectPatientPopup from '../TypeService/Component/SelectPatientPopup';
 import AntdTextArea from '../../../components/Forms/AntdTextArea';
-import Summary from '../TypeService/Summary';
+import BoxDate from '../../../components/Date';
+import InputBox from '../../../components/Forms/Input_new';
 
 const Treatment = ({ setShow, getList }) => {
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm();
+  
+
+  // ฟังก์ชันลบบริการที่เลือก
+  const handleRemoveService = (service) => {
+    setSelectedServices(
+      selectedServices.filter((selected) => selected.ser_id !== service.ser_id)
+    );
+  };
 
   const [patients, setPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -27,6 +37,7 @@ const Treatment = ({ setShow, getList }) => {
   const getDob = (dob) => {
     return dob ? dob : '';
   };
+  const selectedDate = watch('date_addmintted');
 
   useEffect(() => {
     fetchPatients();
@@ -66,7 +77,7 @@ const Treatment = ({ setShow, getList }) => {
           <input
             type="text"
             readOnly
-            className="w-full rounded border text-purple-700  font-medium border-stroke bg-transparent py-8 px-4 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:disabled:bg-meta-4 dark:focus:border-primary  dark:text-white capitalize cursor-pointer"
+            className="w-full rounded border text-purple-700  font-medium border-stroke bg-transparent py-3 px-4 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:disabled:bg-meta-4 dark:focus:border-primary  dark:text-white capitalize cursor-pointer"
             placeholder="ປ້ອນຄົນເຈັບ"
             value={
               selectedPatient
@@ -92,7 +103,7 @@ const Treatment = ({ setShow, getList }) => {
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="w-7 h-7 text-purple-800"
+              className="w-5 h-5 text-purple-800"
               viewBox="0 0 24 24"
             >
               <path
@@ -113,11 +124,30 @@ const Treatment = ({ setShow, getList }) => {
             />
           )}
         </div>
+        <InputBox
+          label="ລະຫັດນັດໝາຍ"
+          name="in_id"
+          type="text"
+          placeholder="ປ້ອນລະຫັດ"
+          register={register}
+          formOptions={{ required: 'ກະລຸນາປ້ອນລະຫັດນັດໝາຍ' }}
+          errors={errors}
+        />
 
-        <AntdTextArea
-          label="ອາການເບື່ອງຕົ້ນ"
+        <BoxDate
+          name="date"
+          label="ວັນທີນັດໝາຍ"
+          register={register}
+          errors={errors}
+          select={selectedDate}
+          formOptions={{ required: 'ກະລຸນາເລືອກວັນທີນັດໝາຍ' }}
+          setValue={setValue}
+          withTime={true}
+        />
+        <AntdTextArea 
+          label="ອາການເບື່ອງຕົ້ນ (Symptom)"
           name="symptom"
-          rows={3}
+          rows={2}
           placeholder="ປ້ອນອາການ"
           register={register}
           formOptions={{ required: 'ກະລຸນາປ້ອນອາການກ່ອນ' }}
@@ -125,32 +155,32 @@ const Treatment = ({ setShow, getList }) => {
         />
 
         <AntdTextArea
-          label="ບົ່ງມະຕິ"
+          label="ບົ່ງມະຕິ (Checkup)"
           name="checkup"
-          rows={3}
+          rows={2}
           placeholder="ປ້ອນຜົນກວດ"
           register={register}
           formOptions={{ required: 'ກະລຸນາປ້ອນຜົນກວດ' }}
           errors={errors}
         />
+        <AntdTextArea
+          label="ໝາຍເຫດ"
+          name="note"
+          rows={2}
+          placeholder="ປ້ອນລາຍລະອຽດເພີ່ມເຕີມຖ້າມີ"
+          register={register}
+          formOptions={{ required: false }}
+          errors={errors}
+        />
       </div>
-      <AntdTextArea
-        label="ໝາຍເຫດ"
-        name="note"
-        rows={2}
-        placeholder="ປ້ອນລາຍລະອຽດເພີ່ມເຕີມຖ້າມີ"
-        register={register}
-        formOptions={{ required: false }}
-        errors={errors}
-      />
 
       <div className="overflow-x-auto shadow mb-8">
         <TypeService />
       </div>
-
+{/* 
       <div className="overflow-x-auto shadow mb-8">
         <Summary />
-      </div>
+      </div> */}
 
       <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="flex space-x-4">

@@ -1,4 +1,3 @@
-import React from "react";
 
 const ButtonBox = ({ variant, icon, children, className, ...props }) => {
   const getButtonClasses = () => {

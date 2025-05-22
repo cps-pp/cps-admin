@@ -11,6 +11,8 @@ import DiseasePage from '@/pages/Manager/Disease';
 import CreateFollow from '@/pages/Follow/create';
 import Order from '@/pages/Order';
 import Treatment from '@/pages/Service/Treatment';
+
+
 import ImportPage from '@/pages/im/import.tsx';
 import MedicinesPage from '../pages/Manager/Medicines';
 import ExchangePage from '../pages/Manager/Exchange';
@@ -24,6 +26,7 @@ import ReportPay from '../pages/report/ReportPayment';
 import ReportPer from '../pages/report/ReportPer';
 import ReportImport from '../pages/report/ReportImport';
 import ReportOrder from '../pages/report/ReportOrder';
+import DetailPatientService from '../pages/Service/Detail';
 
 export const ROUTES = [
   {
@@ -105,6 +108,12 @@ export const ROUTES = [
     title: 'Service Treatment Create | CPS Admin',
     component: <Treatment />,
   },
+  {
+    path: '/detail',
+    title: 'DetailPatientService | CPS Admin',
+    component: <DetailPatientService />,
+  },
+  // ---------------------------
   {
     path: '/perorder',
     title: 'Order | CPS Admin',

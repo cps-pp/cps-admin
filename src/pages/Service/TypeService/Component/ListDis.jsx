@@ -22,7 +22,7 @@ export default function ListDis({ selectService, tapService }) {
 
   const columns = [
     {
-      title: 'Services',
+      title: 'Disease ID',
       dataIndex: 'disease_id',
       key: 'disease_id',
     },

@@ -9,6 +9,7 @@ import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import FileUploadInput from '@/components/Forms/FileUploadInput';
 import BoxDate from '../../../components/Date';
+import InputBox from '../../../components/Forms/Input_new';
 
 
 const EditImport = ({ setShow, getList, id, onClose }) => {
@@ -208,7 +209,7 @@ const EditImport = ({ setShow, getList, id, onClose }) => {
           errors={errors}
           formOptions={{ required: 'ກະລຸນາເລືອກວັນທີ່' }}
         />
-        <Input
+        <InputBox
           label="ຈຳນວນ"
           name="qty"
           type="text"
@@ -226,7 +227,7 @@ const EditImport = ({ setShow, getList, id, onClose }) => {
           formOptions={{ required: 'ກະລຸນາປ້ອນລ໋ອດນຳເຂົ້າ' }}
           errors={errors}
         />
-        <DatePicker
+        <BoxDate
           register={register}
           errors={errors}
           select={getValues('expired')}

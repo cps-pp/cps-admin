@@ -7,25 +7,14 @@ import {
   iconView,
 } from '@/configs/icon';
 
-interface TableActionProps {
-  id?: string;
-  onEdit?: () => void;
-  onDelete?: () => void;
-  onAdd?: () => void;
-  onSearch?: () => void;
-  onView?: () => void;
-}
-
-export const TableAction: React.FC<TableActionProps> = ({
+export const TableAction = ({
   onEdit,
   onDelete,
   onAdd,
   onSearch,
   onView,
 }) => {
-  const buttonCount = [onAdd, onSearch, onView, onEdit, onDelete].filter(
-    Boolean,
-  ).length;
+  const buttonCount = [onAdd, onSearch, onView, onEdit, onDelete].filter(Boolean).length;
   const gapClass = buttonCount >= 4 ? 'gap-2' : 'gap-4';
 
   return (
@@ -38,14 +27,10 @@ export const TableAction: React.FC<TableActionProps> = ({
       {onSearch && <button onClick={onSearch}>{iconSearch}</button>}
       {onView && <button onClick={onView}>{iconView}</button>}
       {onEdit && (
-        <button
-          onClick={onEdit}
-          className="text-purple-600 hover:text-purple-800"
-        >
+        <button onClick={onEdit} className="text-purple-600 hover:text-purple-800">
           {iconEdit}
         </button>
       )}
-
       {onDelete && (
         <button onClick={onDelete} className="text-red-600 hover:text-red-800">
           {iconTrash}
