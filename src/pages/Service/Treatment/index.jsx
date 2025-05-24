@@ -9,21 +9,21 @@ import BoxDate from '../../../components/Date';
 import InputBox from '../../../components/Forms/Input_new';
 
 const Treatment = () => {
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm();
-
   const [patients, setPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [inspectionId, setInspectionId] = useState(null);
+
   const [detailed, setDetailed] = useState([]);
-const [medicineData, setMedicineData] = useState([]);
+
+  const [intivalue, setIntivalue] = useState({
+    diseases_now: '',
+    symptom: '',
+    note: '',
+    checkup: '',
+  });
+
   const getGenderLabel = (gender) => {
     if (gender === 'male') return 'ຊາຍ';
     if (gender === 'female') return 'ຍິງ';
@@ -34,8 +34,6 @@ const [medicineData, setMedicineData] = useState([]);
     return dob ? dob : '';
   };
 
-  const selectedDate = watch('date');
-
   useEffect(() => {
     fetchPatients();
   }, []);
@@ -44,7 +42,7 @@ const [medicineData, setMedicineData] = useState([]);
     try {
       const res = await fetch('http://localhost:4000/src/manager/patient');
       const data = await res.json();
-      console.log(data);
+      // console.log(data);
       setPatients(data.data);
     } catch (err) {
       console.error('Error fetching patients:', err);
@@ -86,53 +84,75 @@ const [medicineData, setMedicineData] = useState([]);
     }
   };
 
-  const onSubmit = async (data) => {
-  setLoading(true);
+  const [idPatient, setIdPatient] = useState('');
+  const [test, setTest] = useState('');
+  const [checkID, setCheckID] = useState(false);
 
-  try {
-    const payload = {
-      diseases_now: detailed.diseases_now || '',
-      checkup: detailed.checkup || '',
-      symptom: detailed.symptom || '',
-      note: detailed.note || '',
-      detailed: detailed || [],
+  useEffect(() => {
+    if (checkID) {
+      setIdPatient(idPatient);
+    }
+  }, [checkID]);
+  // console.log(test)
+
+  const HandlenSubmit = async () => {
+    // console.log('dddd');
+
+    const sendData = {
+      diseases_now: intivalue.diseases_now || '',
+      symptom: intivalue.symptom || '',
+      note: intivalue.note || '',
+      checkup: intivalue.checkup || '',
     };
 
-    await fetch(`http://localhost:4000/src/in/inspection/${inspectionId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    console.log(sendData);
+    // try {
+    //   const payload = {
+    //     diseases_now: detailed.diseases_now || '',
+    //     symptom: detailed.symptom || '',
+    //     note: detailed.note || '',
+    //     checkup: detailed.checkup || '',
+    //     detailed: detailed || [],
+    //   };
+    //   console.log(payload);
 
-    if (medicineData && medicineData.length > 0) {
-      const medicinePayload = {
-        med_id: data.med_id || '',
-        qty: data.qty || '',
-        price: data.price || '',
-      };
+    //   // await fetch(`http://localhost:4000/src/in/inspection/${inspectionId}`, {
+    //   //   method: 'PUT',
+    //   //   headers: { 'Content-Type': 'application/json' },
+    //   //   body: JSON.stringify(payload),
+    //   // });
 
-      await fetch(`http://localhost:4000/src/in/inspectionmed/${inspectionId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(medicinePayload),
-      });
-    }
+    //   if (medicineData && medicineData.length > 0) {
+    //     const medicinePayload = {
+    //       med_id: data.med_id || '',
+    //       qty: data.qty || '',
+    //       price: data.price || '',
+    //     };
+    //     console.log(medicinePayload);
 
-    alert("ບັນທຶກສຳເລັດ");
+    //     // await fetch(
+    //     //   `http://localhost:4000/src/in/inspectionmedicines/${inspectionId}`,
+    //     //   {
+    //     //     method: 'PUT',
+    //     //     headers: { 'Content-Type': 'application/json' },
+    //     //     body: JSON.stringify(medicinePayload),
+    //     //   },
+    //     // );
+    //   }
 
-  } catch (error) {
-    console.error("Error submitting form:", error);
-    alert("ມີຂໍ້ຜິດພາດ: " + error.message);
-  } finally {
-    setLoading(false);
-  }
-};
+    //   alert('ບັນທຶກສຳເລັດ');
+    // } catch (error) {
+    //   console.error('Error submitting form:', error);
+    //   alert('ມີຂໍ້ຜິດພາດ: ' + error.message);
+    // } finally {
+    //   setLoading(false);
+    // }
+  };
+
+  // console.log(idPatient?.in_id)
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="rounded-lg bg-white pt-4 p-4 dark:bg-boxdark shadow-md"
-    >
+    <div className="rounded-lg bg-white pt-4 p-4 dark:bg-boxdark shadow-md">
       <div className="mb-6 border-b border-stroke dark:border-strokedark pb-4">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
           ບໍລິການ
@@ -157,14 +177,9 @@ const [medicineData, setMedicineData] = useState([]);
           />
           <input
             type="hidden"
-            {...register('patient_id', { required: 'ກະລຸນາເລືອກຄົນເຈັບ' })}
+            // {...register('patient_id', { required: 'ກະລຸນາເລືອກຄົນເຈັບ' })}
             value={selectedPatient ? selectedPatient.patient_id : ''}
           />
-          {errors.patient_id && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.patient_id.message}
-            </p>
-          )}
 
           <div
             className="absolute top-8 right-2 cursor-pointer text-gray-600 hover:text-primary"
@@ -187,30 +202,29 @@ const [medicineData, setMedicineData] = useState([]);
               patients={patients}
               onSelect={handlePatientSelect}
               onClose={() => setShowPopup(false)}
+              callback={(x) => {
+                if (x) {
+                  setIdPatient(x);
+                  setCheckID(true);
+                }
+              }}
             />
           )}
         </div>
-
-        <InputBox
+        <p>{idPatient?.in_id}</p>
+        {/* <InputBox
           label="ເລກທີປິ່ນປົວ"
-          name="in_id"
           type="text"
           placeholder="ປ້ອນລະຫັດ"
-          register={register}
-          formOptions={false}
-          errors={errors}
-          value={inspectionId}
+          value={test?.in_id}
           readOnly={true}
-        />
+        /> */}
 
         <BoxDate
           name="date"
           label="ວັນທີປິ່ນປົວ"
-          register={register}
-          errors={errors}
-          select={selectedDate}
+          select="date_addmintted"
           formOptions={false}
-          setValue={setValue}
           withTime={true}
         />
 
@@ -219,42 +233,44 @@ const [medicineData, setMedicineData] = useState([]);
           name="symptom"
           rows={2}
           placeholder="ປ້ອນອາການ"
-          register={register}
-          formOptions={false}
-          errors={errors}
+          onChange={(e) =>
+            setIntivalue({ ...intivalue, symptom: e.target.value })
+          }
+          value={intivalue.symptom}
         />
 
         <InputBox
-  label="ການກວດຮ່າງກາຍ (Checkup)"
-  name="checkup"
-  type="text"
-  placeholder="ປ້ອນຂໍ້ມູນ"
-  register={register}
-  formOptions={false}
-  errors={errors}
-/>
+          label="ບົ່ງມະຕິ (Checkup)"
+          name="checkup"
+          type="text"
+          placeholder="ປ້ອນຂໍ້ມູນ"
+          onChange={(e) =>
+            setIntivalue({ ...intivalue, checkup: e.target.value })
+          }
+          value={intivalue.checkup}
+        />
         <AntdTextArea
           label="ພະຍາດ (diseases Now)"
           name="diseases_now"
           rows={2}
           placeholder="ປ້ອນຜົນກວດ"
-          register={register}
-          formOptions={false}
-          errors={errors}
+          onChange={(e) =>
+            setIntivalue({ ...intivalue, diseases_now: e.target.value })
+          }
+          value={intivalue.diseases_now}
         />
         <AntdTextArea
           label="ໝາຍເຫດ"
           name="note"
           rows={2}
           placeholder="ປ້ອນລາຍລະອຽດເພີ່ມເຕີມຖ້າມີ"
-          register={register}
-          formOptions={{ required: false }}
-          errors={errors}
+          onChange={(e) => setIntivalue({ ...intivalue, note: e.target.value })}
+          value={intivalue.note}
         />
       </div>
 
       <div className="overflow-x-auto shadow mb-8">
-        <TypeService onDetailChange={setDetailed} />
+        <TypeService />
       </div>
 
       <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -267,12 +283,13 @@ const [medicineData, setMedicineData] = useState([]);
             Bill
           </button>
 
-          <Button variant="save" type="submit" disabled={loading}>
-            {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
+          <Button variant="save" onClick={HandlenSubmit} disabled={loading}>
+            {/* {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'} */}
+            kkk
           </Button>
         </div>
       </div>
-    </form>
+    </div>
   );
 };
 

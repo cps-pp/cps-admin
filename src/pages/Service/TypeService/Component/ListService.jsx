@@ -1,8 +1,14 @@
 import { Table } from 'antd';
 import React, { useState, useEffect } from 'react';
+import useStoreServices from '../../../../store/selectServices';
 
 export default function ListService({ selectService, tapService }) {
   const [dataService, setDataService] = useState([]);
+
+  const { addService, services: listSelect } = useStoreServices((state) => ({
+    addService: state.addService,
+    services: state.services,
+  }));
 
   const fetchServiceList = async () => {
     try {
@@ -19,6 +25,10 @@ export default function ListService({ selectService, tapService }) {
       fetchServiceList();
     }
   }, [tapService]);
+
+  const selectionService = async (record) => {
+    // await addService(record);
+  };
 
   const columns = [
     { title: 'Services', dataIndex: 'ser_id', key: 'ser_id' },
@@ -38,8 +48,9 @@ export default function ListService({ selectService, tapService }) {
         <button
           type="button"
           onClick={() => {
-            console.log('Selecting:', record);
+            // console.log('Selecting:', record);
             selectService(record);
+            selectionService(record);
           }}
           className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
         >

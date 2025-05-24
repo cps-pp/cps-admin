@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import SearchBox from '../../../../components/Forms/Search_New';
 
-const SelectPatientPopup = ({ patients, onClose, onSelect }) => {
+const SelectPatientPopup = ({ patients, onClose, onSelect, callback }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -60,13 +60,14 @@ const SelectPatientPopup = ({ patients, onClose, onSelect }) => {
 
       const data = await response.json();
       console.log('Inspection created:', data);
+      callback(data?.data);
 
       // ส่งข้อมูลคนเจ็บพร้อมกับ inspection ID และวันที่กลับไป
       if (onSelect) {
         onSelect({
           ...selectedPatient,
           inspectionId: data.in_id || data.id, // ส่ง inspection ID ที่ได้จาก API
-          inspectionDate: new Date().toISOString().split('T')[0] // ส่งวันที่ปัจจุบัน
+          inspectionDate: new Date().toISOString().split('T')[0], // ส่งวันที่ปัจจุบัน
         });
       }
 

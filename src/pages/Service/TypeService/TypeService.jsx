@@ -86,8 +86,8 @@ export default function TypeService({ selectService, value, onChange }) {
 
   const handleSelectQi = (service) => {
     const isExist = selectedQi.find((item) => 
-      item.qi_id === service.qi_id || 
-      item.equipment_id === service.equipment_id ||
+      item.med_id === service.med_id || 
+      item.med_id === service.med_id ||
       item.id === service.id 
     );
 
@@ -108,14 +108,14 @@ export default function TypeService({ selectService, value, onChange }) {
   const handleRemoveQi = (service) => {
     setSelectedQi((prev) =>
       prev.filter((item) => 
-        item.qi_id !== service.qi_id && 
-        item.equipment_id !== service.equipment_id &&
+        item.med_id !== service.med_id && 
+        item.med_id !== service.med_id &&
         item.id !== service.id 
       ),
     );
     setAllSelectedItems((prev) =>
       prev.filter((item) => !(
-        (item.qi_id === service.qi_id || item.equipment_id === service.equipment_id || item.id === service.id) 
+        (item.med_id === service.med_id || item.med_id === service.med_id || item.id === service.id) 
         && item.itemType === 'equipment'
       )),
     );
@@ -353,7 +353,7 @@ export default function TypeService({ selectService, value, onChange }) {
 
 //   const handleSelectQi = (service) => {
 //     const isExist = selectedQi.find((item) => 
-//       item.qi_id === service.qi_id || 
+//       item.med_id === service.qi_id || 
 //       item.equipment_id === service.equipment_id ||
 //       item.id === service.id
 //     );
