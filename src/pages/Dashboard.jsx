@@ -133,6 +133,17 @@ const Dashboard = () => {
             </g>
           </svg>
         </CardDataStats>
+
+        <CardDataStats
+          title="ຄົນເຈັບທັງໝົດ"
+          total={patients !== null ? `${patients} ຄົນ` : 'ກຳລັງໂຫຼດ...'}
+        >
+          <svg className="text-primary dark:text-white" width="1.7em" height="1.7em" viewBox="0 0 24 24">
+            <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5">
+              <path d="M14 3.5c3.771 0 5.657 0 6.828 1.245S22 7.993 22 12s0 6.01-1.172 7.255S17.771 20.5 14 20.5h-4c-3.771 0-5.657 0-6.828-1.245S2 16.007 2 12s..." />
+            </g>
+          </svg>
+        </CardDataStats>
       </div>
 
       <MonthChart appointments={filteredAppointments} getPatientName={getPatientName} getDoctorName={getDoctorName} />

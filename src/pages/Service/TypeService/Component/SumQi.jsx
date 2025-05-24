@@ -54,11 +54,7 @@ export default function SumQil({
         pagination={{ pageSize: 3, size: 'middle' }}
       />
 
-      {/* <div className="mt-4 p-3 bg-gray-100 rounded">
-        <div className="text-right">
-          <strong>Total: {totalPrice.toLocaleString()} Kip</strong>
-        </div>
-      </div> */}
+     
     </div>
   );
 }

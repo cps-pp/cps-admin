@@ -169,7 +169,7 @@ const EmployeePage = () => {
                     <td className="px-4 py-4">{emp.emp_surname}</td>
                     <td className="px-4 py-4">{emp.gender}</td>
                     <td className="px-4 py-4">
-                      {new Date(emp.dob).toLocaleDateString('th-TH', {
+                      {new Date(emp.dob).toLocaleDateString('en-US', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',

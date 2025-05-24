@@ -48,7 +48,7 @@ export default function ListMed({ selectService, dataValue, tapService }) {
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <button onClick={() => selectService(record)}>Select</button>
+          <button type="button" onClick={() => selectService(record)}>Select</button>
         </Space>
       ),
     },

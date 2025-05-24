@@ -36,6 +36,7 @@ export default function ListService({ selectService, tapService }) {
       key: 'action',
       render: (_, record) => (
         <button
+          type="button"
           onClick={() => {
             console.log('Selecting:', record);
             selectService(record);

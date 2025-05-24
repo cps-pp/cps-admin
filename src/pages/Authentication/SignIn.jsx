@@ -3,9 +3,9 @@
 import React from 'react';
 import LoginForm from '@/components/LoginForm';
 
-const SignIn: React.FC = () => {
+const SignIn = () => {
   return (
-    <div className=" ">
+    <div className="">
       <LoginForm />
     </div>
   );

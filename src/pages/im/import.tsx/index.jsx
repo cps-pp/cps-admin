@@ -252,7 +252,7 @@ const ImportPage = () => {
                 >
                   <td className="px-4 py-4">{im.im_id}</td>
                   <td className="px-4 py-4">
-                    {new Date(im.im_date).toLocaleDateString('th-TH', {
+                    {new Date(im.im_date).toLocaleDateString('en-US', {
                       day: '2-digit',
                       month: '2-digit',
                       year: 'numeric',
@@ -261,7 +261,7 @@ const ImportPage = () => {
 
                   <td className="px-4 py-4">{im.qty}</td>
                   <td className="px-4 py-4">
-                    {new Date(im.expired).toLocaleDateString('th-TH', {
+                    {new Date(im.expired).toLocaleDateString('en-US', {
                       day: '2-digit',
                       month: '2-digit',
                       year: 'numeric',
@@ -289,7 +289,7 @@ const ImportPage = () => {
                     {getDoctorName(im.emp_id_create)}{' '}
                   </td>
                   <td className="px-4 py-4">
-                    {new Date(im.created_at).toLocaleDateString('th-TH', {
+                    {new Date(im.created_at).toLocaleDateString('en-US', {
                       day: '2-digit',
                       month: '2-digit',
                       year: 'numeric',
@@ -302,7 +302,7 @@ const ImportPage = () => {
                   <td className="px-4 py-4">
                     {im?.update_by &&
                     !isNaN(new Date(im.update_by).getTime()) ? (
-                      new Date(im.update_by).toLocaleDateString('th-TH', {
+                      new Date(im.update_by).toLocaleDateString('en-US', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
