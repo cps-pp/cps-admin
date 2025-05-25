@@ -1,15 +1,7 @@
 import React from 'react';
 import TablePagination from '@mui/material/TablePagination';
 
-interface TablePaginationDemoProps {
-  count: number;
-  page: number;
-  onPageChange: (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => void;
-  rowsPerPage: number;
-  onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-}
-
-const TablePaginationDemo: React.FC<TablePaginationDemoProps> = ({
+const TablePaginationDemo = ({
   count,
   page,
   onPageChange,
@@ -30,18 +22,17 @@ const TablePaginationDemo: React.FC<TablePaginationDemoProps> = ({
         '& .MuiTablePagination-displayedRows': {
           textAlign: 'left',
           color: 'var(--primarySecond)',
-          fontFamily: 'Noto Sans Lao, sans-serif', 
+          fontFamily: 'Noto Sans Lao, sans-serif',
         },
         '& .MuiTablePagination-actions button': {
           borderRadius: '6px',
           color: 'var(--primarySecond)',
-          
         },
         '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows, & .MuiTablePagination-actions': {
-          color: 'var(--primarySecond)', 
+          color: 'var(--primarySecond)',
         },
         '& .MuiTablePagination-selectLabel.dark, & .MuiTablePagination-displayedRows.dark, & .MuiTablePagination-actions.dark': {
-          color: 'white', 
+          color: 'white',
         },
       }}
       className="text-primarySecond dark:text-white"

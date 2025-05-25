@@ -2,24 +2,12 @@ import React from 'react';
 import SidebarLinkGroup from './SidebarLinkGroup';
 import { NavLink } from 'react-router-dom';
 
-interface SidebarTemplateProps {
-  menu: {
-    name: string;
-    path: string;
-    icon: any;
-    subs?: Array<{ name: string; path: string }>;
-  };
-  pathname: string;
-  sidebarExpanded: boolean;
-  setSidebarExpanded: (x: boolean) => void;
-}
-
 const SidebarTemplate = ({
   menu,
   pathname,
   sidebarExpanded,
   setSidebarExpanded,
-}: SidebarTemplateProps) => {
+}) => {
   if (menu.subs?.length) {
     return (
       <SidebarLinkGroup
@@ -29,7 +17,7 @@ const SidebarTemplate = ({
       >
         {(handleClick, open) => {
           return (
-            <React.Fragment>
+            <>
               <NavLink
                 to="#"
                 className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
@@ -62,20 +50,20 @@ const SidebarTemplate = ({
                 </svg>
               </NavLink>
 
-              {/* <!-- Dropdown Menu Start --> */}
+              {/* Dropdown Menu */}
               <div
                 className={`translate transform overflow-hidden ${
                   !open && 'hidden'
                 }`}
               >
                 <ul className="mt-4 mb-5.5 flex flex-col gap-2.5 pl-6 list-none">
-                  {menu.subs?.map((sub) => (
+                  {menu.subs.map((sub) => (
                     <li key={sub.path}>
                       <NavLink
                         to={sub.path}
                         className={({ isActive }) =>
                           'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
-                          (isActive && '!text-white')
+                          (isActive ? '!text-white' : '')
                         }
                       >
                         {sub.name}
@@ -84,13 +72,13 @@ const SidebarTemplate = ({
                   ))}
                 </ul>
               </div>
-              {/* <!-- Dropdown Menu End --> */}
-            </React.Fragment>
+            </>
           );
         }}
       </SidebarLinkGroup>
     );
   }
+
   return (
     <li>
       <NavLink

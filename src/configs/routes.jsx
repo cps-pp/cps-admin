@@ -1,12 +1,11 @@
 // import Account from '@/pages/Admin';
 import SignIn from '@/pages/Authentication/SignIn';
 import NotFound from '@/pages/NotFound';
-import Profile from '@/pages/Profile';
 
 import PatientPage from '@/pages/Manager/Patient';
 import ServcicePage from '@/pages/Manager/ServiceList';
 import SupplierPage from '@/pages/Manager/Supplier';
-import DetailPatient from '@/pages/Manager/Patient/detail';
+// import DetailPatient from '@/pages/Manager/Patient/detail';
 import DiseasePage from '@/pages/Manager/Disease';
 import CreateFollow from '@/pages/Follow/create';
 import Order from '@/pages/Order';
@@ -46,11 +45,11 @@ export const ROUTES = [
     component: <PatientPage />,
   },
  
-  {
-    path: '/patient/detail/:id',
-    title: 'Patient Detail | CPS Admin',
-    component: <DetailPatient />,
-  },
+  // {
+  //   path: '/patient/detail/:id',
+  //   title: 'Patient Detail | CPS Admin',
+  //   component: <DetailPatient />,
+  // },
   //  -------------------------- Employee Path --------------------------------
   {
     path: '/manager/employee',
@@ -171,12 +170,8 @@ export const ROUTES = [
     component: <ReportOrder />,
   },
 
-  {
-    path: '/profile',
-    title: 'Profile | CPS Admin',
-    component: <Profile />,
-  },
-  // {
+ 
+  // {  
   //   path: '/admin/account',
   //   title: 'Accounts | CPS Admin',
   //   component: <Account />,

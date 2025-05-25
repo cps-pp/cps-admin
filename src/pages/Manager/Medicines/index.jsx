@@ -442,12 +442,12 @@ const MedicinesPage = () => {
         onRowsPerPageChange={handleRowsPerPageChange}
       />
 
-      <ConfirmModal
+      {/* <ConfirmModal
         show={showModal}
         setShow={setShowModal}
         message="ທ່ານຕ້ອງການລົບຢານີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteMedicine}
-      />
+      /> */}
     </>
   );
 };

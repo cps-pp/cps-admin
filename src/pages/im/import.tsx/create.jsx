@@ -2,13 +2,14 @@ import { useForm } from 'react-hook-form';
 import Button from '@/components/Button';
 import { useEffect, useState } from 'react';
 import SelectID from '@/components/Forms/SelectID';
-import Input from '@/components/Forms/Input';
 import Loader from '@/common/Loader';
 import Alerts from '@/components/Alerts';
 import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import FileUploadInput from '@/components/Forms/FileUploadInput';
 import BoxDate from '../../../components/Date';
+import InputBox from '../../../components/Forms/Input_new';
+import SelectBoxId from '../../../components/Forms/SelectID';
 
 const CreateImport = ({ setShow, getList }) => {
   const {
@@ -179,7 +180,7 @@ const CreateImport = ({ setShow, getList }) => {
         onSubmit={handleSubmit(handleSave)}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 pt-4"
       >
-        <Input
+        <InputBox
           label="ລະຫັດ"
           name="im_id"
           type="text"
@@ -197,7 +198,7 @@ const CreateImport = ({ setShow, getList }) => {
           errors={errors}
           formOptions={{ required: 'ກະລຸນາເລືອກວັນທີ' }}
         />
-        <Input
+        <InputBox
           label="ຈຳນວນ"
           name="qty"
           type="text"
@@ -206,7 +207,7 @@ const CreateImport = ({ setShow, getList }) => {
           formOptions={{ required: 'ກະລຸນາປ້ອນຈຳນວນ' }}
           errors={errors}
         />
-         <Input
+         <InputBox
           label="ລ໋ອດການນຳເຂົ້າ"
           name="lot"
           type="number"
@@ -233,7 +234,7 @@ const CreateImport = ({ setShow, getList }) => {
           formOptions={{ required:  false}}
         />
 
-        <SelectID
+        <SelectBoxId
           label="ຜູ້ສະໜອງ"
           name="supplier"
           value={selectSup}
@@ -248,7 +249,7 @@ const CreateImport = ({ setShow, getList }) => {
             setSup(e.target.value);
           }}
         />
-        <SelectID
+        <SelectBoxId
           label="ຢາ"
           name="medicine"
           value={selectMed}
@@ -264,7 +265,7 @@ const CreateImport = ({ setShow, getList }) => {
           }}
         />
 
-        <SelectID
+        <SelectBoxId
           label="ພະນັກງານ (ຜູ້ສ້າງ)"
           name="emp_id_create"
           value={selectEmpCreate}

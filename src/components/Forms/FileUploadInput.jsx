@@ -1,20 +1,6 @@
-import { FC, useState, ChangeEvent } from "react";
-import { RegisterOptions, UseFormRegister } from "react-hook-form";
+import { useState } from "react";
 
-interface InputProps {
-  type?: string;
-  label?: string;
-  name: string;
-  placeholder?: string;
-  value?: any;
-  disabled?: boolean;
-  register?: UseFormRegister<any>;
-  errors?: any;
-  formOptions?: RegisterOptions;
-  className?: string;
-}
-
-const FileUploadInput: FC<InputProps> = ({
+const FileUploadInput = ({
   label,
   type = "text",
   placeholder,
@@ -27,7 +13,7 @@ const FileUploadInput: FC<InputProps> = ({
 }) => {
   const [fileName, setFileName] = useState("");
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       setFileName(e.target.files[0].name);
     } else {
@@ -53,13 +39,15 @@ const FileUploadInput: FC<InputProps> = ({
             value={fileName}
             placeholder={placeholder || "ເລືອກໄຟລ..."}
             disabled={disabled}
-            className={`w-full rounded border border-stroke bg-transparent py-3 px-4 pr-28 text-black dark:border-form-strokedark dark:bg-form-input dark:text-white outline-none focus:border-primary dark:focus:border-primary ${errors?.[name] ? "border-red-500" : ""} ${className}`}
+            className={`w-full rounded border border-stroke bg-transparent py-3 px-4 pr-28 text-black dark:border-form-strokedark dark:bg-form-input dark:text-white outline-none focus:border-primary dark:focus:border-primary ${
+              errors?.[name] ? "border-red-500" : ""
+            } ${className}`}
           />
           <label
             htmlFor={name}
             className="text-sm absolute right-1 rounded bg-primary px-2 py-2 text-white cursor-pointer hover:bg-primary-dark dark:bg-primary dark:hover:bg-primary-dark"
           >
-            ເລືອກ 
+            ເລືອກ
           </label>
           <input
             id={name}
@@ -68,7 +56,7 @@ const FileUploadInput: FC<InputProps> = ({
             className="absolute opacity-0 w-0 h-0"
             onChange={(e) => {
               handleFileChange(e);
-              if (register) register(name, formOptions)?.onChange?.(e); // trigger react-hook-form onChange
+              if (register) register(name, formOptions)?.onChange?.(e);
             }}
             disabled={disabled}
             accept=".doc,.docx,.pdf"
@@ -81,7 +69,6 @@ const FileUploadInput: FC<InputProps> = ({
     );
   }
 
-  // Input ปกติ (text, email, password ฯลฯ)
   return (
     <div className="mb-4">
       {label && (
@@ -108,6 +95,5 @@ const FileUploadInput: FC<InputProps> = ({
     </div>
   );
 };
-
 
 export default FileUploadInput;

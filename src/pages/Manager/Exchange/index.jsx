@@ -276,12 +276,12 @@ const ExchangePage = () => {
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleRowsPerPageChange}
       />
-      <ConfirmModal
+      {/* <ConfirmModal
         show={showModal}
         setShow={setShowModal}
         message="ທ່ານຕ້ອງການລົບອັດຕາແລກປ່ຽນນີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteExchange}
-      />
+      /> */}
  </>
   );
 };

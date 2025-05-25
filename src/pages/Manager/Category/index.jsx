@@ -276,12 +276,12 @@ const CategoryPage = () => {
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleRowsPerPageChange}
       />
-      <ConfirmModal
+      {/* <ConfirmModal
         show={showDeleteModal}
         setShow={setShowDeleteModal}
         message="ທ່ານຕ້ອງການລົບປະເພດຢານີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteCategory}
-      />
+      /> */}
       </>
   );
 };

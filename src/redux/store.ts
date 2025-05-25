@@ -3,9 +3,8 @@ import { combineSlices, configureStore } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query'
 
 import alertSlice from './reducer/alert'
-import userSlice from './reducer/user'
 
-const rootReducer = combineSlices(alertSlice, userSlice)
+const rootReducer = combineSlices(alertSlice)
 
 export type RootState = ReturnType<typeof rootReducer>
 

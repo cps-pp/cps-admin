@@ -287,12 +287,12 @@ const EmployeePage = () => {
         onRowsPerPageChange={handleRowsPerPageChange}
       />
 
-      <ConfirmModal
+      {/* <ConfirmModal
         show={showModal}
         setShow={setShowModal}
         message="ທ່ານຕ້ອງການລົບລາຍການນີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteEmployee}
-      />
+      /> */}
   </>
   );
 };

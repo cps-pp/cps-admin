@@ -255,12 +255,12 @@ const DiseasePage = () => {
         onRowsPerPageChange={handleRowsPerPageChange}
       />
 
-      <ConfirmModal
+      {/* <ConfirmModal
         show={showModal}
         setShow={setShowModal}
         message="ທ່ານຕ້ອງການລົບພະນັກງານອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteDisease}
-      />
+      /> */}
     </>
   );
 };
