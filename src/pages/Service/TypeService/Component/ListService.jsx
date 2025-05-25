@@ -1,20 +1,22 @@
 import { Table } from 'antd';
 import React, { useState, useEffect } from 'react';
-import useStoreServices from '../../../../store/selectServices';
+import useStoreServices from '../../../../store/selectServices'
 
 export default function ListService({ selectService, tapService }) {
   const [dataService, setDataService] = useState([]);
 
-  const { addService, services: listSelect } = useStoreServices((state) => ({
-    addService: state.addService,
-    services: state.services,
-  }));
+  const { addService, services } = useStoreServices();
+
+  const [loading, setLoading] = useState(false);
 
   const fetchServiceList = async () => {
+    setLoading(true);
     try {
-      const res = await fetch('http://localhost:4000/src/manager/servicelist');
+      const res = await fetch('https://zkk8zxq6-4000.asse.devtunnels.ms/src/manager/servicelist');
+      // const res = await fetch('http://localhost:4000/src/manager/servicelist');
       const data = await res.json();
       setDataService(data.data);
+      setLoading(false);
     } catch (err) {
       console.error('Error fetching service list:', err);
     }
@@ -27,7 +29,7 @@ export default function ListService({ selectService, tapService }) {
   }, [tapService]);
 
   const selectionService = async (record) => {
-    // await addService(record);
+    await addService(record);
   };
 
   const columns = [
@@ -60,13 +62,19 @@ export default function ListService({ selectService, tapService }) {
     },
   ];
 
+  console.log(services)
+
   return (
-    <Table
-      columns={columns}
-      dataSource={dataService}
-      pagination={{ pageSize: 5, size: 'middle' }}
-      rowKey="ser_id"
-      size="small"
-    />
+    <div>
+      <Table
+        columns={columns}
+        loading={loading}
+        dataSource={dataService || []}
+        pagination={{ pageSize: 5, size: 'middle' }}
+        rowKey="ser_id"
+        size="small"
+      />
+
+    </div>
   );
 }
