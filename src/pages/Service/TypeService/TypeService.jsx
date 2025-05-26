@@ -14,7 +14,7 @@ const onChange = (key) => {
 };
 
 const TabService = 1;
-const TabMed = 2;
+const TabMed = '2';
 const TabQi = 3;
 const TabDis = 4;
 const TabServiceSum = 5;
@@ -27,7 +27,7 @@ export default function TypeService({ selectService, value, onChange }) {
   const [selectedMedicin, setSelectedMedicin] = useState([]);
   const [selectedQi, setSelectedQi] = useState([]);
   const [selectedDis, setSelectedDis] = useState([]);
-  
+
   const [allSelectedItems, setAllSelectedItems] = useState([]);
 
   const handleSelectService = (service) => {
@@ -40,7 +40,7 @@ export default function TypeService({ selectService, value, onChange }) {
       setSelectedServices((prev) => [...prev, service]);
       setAllSelectedItems((prev) => [...prev, serviceWithType]);
     } else {
-      console.log('Service already selected');
+      // console.log('Service already selected');
     }
 
     if (selectService) {
@@ -85,17 +85,17 @@ export default function TypeService({ selectService, value, onChange }) {
   };
 
   const handleSelectQi = (service) => {
-    const isExist = selectedQi.find((item) => 
-      item.med_id === service.med_id || 
+    const isExist = selectedQi.find((item) =>
       item.med_id === service.med_id ||
-      item.id === service.id 
+      item.med_id === service.med_id ||
+      item.id === service.id
     );
 
     if (!isExist) {
       const equipmentWithType = { ...service, itemType: 'equipment' };
       setSelectedQi((prev) => [...prev, service]);
       setAllSelectedItems((prev) => [...prev, equipmentWithType]);
-      console.log('Equipment selected:', service); 
+      console.log('Equipment selected:', service);
     } else {
       console.log('Equipment already selected');
     }
@@ -107,15 +107,15 @@ export default function TypeService({ selectService, value, onChange }) {
 
   const handleRemoveQi = (service) => {
     setSelectedQi((prev) =>
-      prev.filter((item) => 
-        item.med_id !== service.med_id && 
+      prev.filter((item) =>
         item.med_id !== service.med_id &&
-        item.id !== service.id 
+        item.med_id !== service.med_id &&
+        item.id !== service.id
       ),
     );
     setAllSelectedItems((prev) =>
       prev.filter((item) => !(
-        (item.med_id === service.med_id || item.med_id === service.med_id || item.id === service.id) 
+        (item.med_id === service.med_id || item.med_id === service.med_id || item.id === service.id)
         && item.itemType === 'equipment'
       )),
     );
@@ -141,14 +141,14 @@ export default function TypeService({ selectService, value, onChange }) {
 
   const handleRemoveDis = (service) => {
     setSelectedDis((prev) =>
-      prev.filter((item) => 
-        item.dis_id !== service.dis_id && 
+      prev.filter((item) =>
+        item.dis_id !== service.dis_id &&
         item.disease_id !== service.disease_id
       ),
     );
     setAllSelectedItems((prev) =>
       prev.filter((item) => !(
-        (item.dis_id === service.dis_id || item.disease_id === service.disease_id) 
+        (item.dis_id === service.dis_id || item.disease_id === service.disease_id)
         && item.itemType === 'disease'
       )),
     );
@@ -195,7 +195,7 @@ export default function TypeService({ selectService, value, onChange }) {
       children: (
         <ListQi
           dataValue={value}
-          selectService={handleSelectQi} 
+          selectService={handleSelectQi}
           tapService={TabQi}
         />
       ),
@@ -206,9 +206,9 @@ export default function TypeService({ selectService, value, onChange }) {
       children: (
         <ListDis
           dataValue={value}
-          selectService={handleSelectDis} 
+          selectService={handleSelectDis}
           tapService={TabDis}
-          
+
         />
       ),
     },
@@ -221,7 +221,7 @@ export default function TypeService({ selectService, value, onChange }) {
       children: (
         <SumService
           selectedServices={allSelectedItems}
-          removeService={handleRemoveFromSummary} 
+          removeService={handleRemoveFromSummary}
           tapDetail={TabServiceSum}
         />
       ),
@@ -256,7 +256,7 @@ export default function TypeService({ selectService, value, onChange }) {
       label: 'ສະຫຼຸບພະຍາດ',
       children: (
         <SumDiseases
-          selectedServices={selectedDis} 
+          selectedServices={selectedDis}
           removeService={handleRemoveDis}
           tapService={TabDiseaseSum}
         />

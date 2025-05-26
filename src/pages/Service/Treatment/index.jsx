@@ -18,8 +18,6 @@ const Treatment = () => {
 
   const { services } = useStoreServices();
 
-  const [detailed, setDetailed] = useState([]);
-
   const [intivalue, setIntivalue] = useState({
     diseases_now: '',
     symptom: '',
@@ -101,14 +99,20 @@ const Treatment = () => {
   const HandlenSubmit = async () => {
     // console.log('dddd');
 
-
+    let newService = services.map((item) => {
+      return {
+        ser_id: item.ser_id,
+        qty: item.qty,
+        price: item.price,
+      }
+    })
 
     const sendData = {
       diseases_now: intivalue.diseases_now || '',
       symptom: intivalue.symptom || '',
       note: intivalue.note || '',
       checkup: intivalue.checkup || '',
-      detailed: services
+      detailed: newService
     };
 
     console.log(sendData);
