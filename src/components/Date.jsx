@@ -6,7 +6,7 @@ import utc from "dayjs/plugin/utc";
 
 dayjs.extend(utc);
 
-const BoxDate = ({
+const  BoxDate = ({
   label,
   name,
   select,

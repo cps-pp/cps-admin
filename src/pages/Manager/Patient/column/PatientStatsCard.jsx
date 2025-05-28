@@ -39,11 +39,12 @@ const PatientStatsCard = ({ patients }) => {
               </g>
             </svg>
           </div>
+     
           <div className="ml-4">
-            <h6 className="text-md font-medium text-gray-500 dark:text-gray-400">
+            <h6 className="text-lg font-semibold text-strokedark">
               ຄົນເຈັບທັງໝົດ
             </h6>
-            <p className="text-lg font-bold text-strokedark dark:text-white">
+            <p className="text-xl font-bold text-primary">
               {totalPatients} ຄົນ
             </p>
           </div>
@@ -68,10 +69,10 @@ const PatientStatsCard = ({ patients }) => {
             </svg>
           </div>
           <div className="ml-4">
-            <h6 className="text-md font-medium text-gray-500 dark:text-gray-400">
+             <h6 className="text-lg font-semibold text-strokedark">
               ຄົນເຈັບເພດຊາຍ
             </h6>
-            <p className="text-lg font-bold text-strokedark dark:text-white">
+            <p className="text-xl font-bold text-primary">
               {malePatients} ຄົນ
             </p>
           </div>
@@ -94,10 +95,10 @@ const PatientStatsCard = ({ patients }) => {
             </svg>
           </div>
           <div className="ml-4">
-            <h6 className="text-md font-medium text-gray-500 dark:text-gray-400">
+             <h6 className="text-lg font-semibold text-strokedark">
               ຄົນເຈັບເພດຍິງ
             </h6>
-            <p className="text-lg font-bold text-strokedark dark:text-white">
+            <p className="text-xl font-bold text-primary">
               {femalePatients} ຄົນ
             </p>
           </div>

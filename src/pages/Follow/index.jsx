@@ -250,7 +250,7 @@ const FollowPage = () => {
               <h4 className="text-lg font-semibold text-strokedark dark:text-white">
                 ຈຳນວນນັດໝາຍທັງໝົດ
               </h4>
-              <p className="text-2xl font-bold text-primary">{totalCount}</p>
+              <p className="text-xl font-bold text-primary">{totalCount}</p>
             </div>
           </div>
         </div>
@@ -281,7 +281,7 @@ const FollowPage = () => {
               <h4 className="text-lg font-semibold text-strokedark dark:text-white">
                 ນັດໝາຍມື້ນີ້
               </h4>
-              <p className="text-2xl font-bold text-yellow-500 dark:text-yellow-300">
+              <p className="text-xl font-bold text-yellow-500 dark:text-yellow-300">
                 {waitingCount}
               </p>
             </div>
@@ -313,7 +313,7 @@ const FollowPage = () => {
               <h4 className="text-lg font-semibold text-strokedark dark:text-white">
                 ນັດໝາຍກວດສຳເລັດແລ້ວ
               </h4>
-              <p className="text-2xl font-bold text-green-500 dark:text-green-300">
+              <p className="text-xl font-bold text-green-500 dark:text-green-300">
                 {doneCount}
               </p>
             </div>
@@ -507,7 +507,6 @@ const FollowPage = () => {
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleRowsPerPageChange}
       />
-      {/* Confirm Delete Modal */}
       <ConfirmModal
         show={showModal}
         setShow={setShowModal}
