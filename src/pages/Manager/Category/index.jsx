@@ -303,9 +303,12 @@ const CategoryPage = () => {
         message="ທ່ານຕ້ອງການລົບປະເພດຢານີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteCategory}
 <<<<<<< HEAD
+<<<<<<< HEAD
       />
     </>
 =======
+=======
+>>>>>>> cce206a1a4e69f0cb21f171e1a876e2ae91ed2e6
       /> */}
       </>
 >>>>>>> cce206a1a4e69f0cb21f171e1a876e2ae91ed2e6

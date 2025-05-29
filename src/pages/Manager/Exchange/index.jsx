@@ -303,7 +303,7 @@ const ExchangePage = () => {
         setShow={setShowModal}
         message="ທ່ານຕ້ອງການລົບອັດຕາແລກປ່ຽນນີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteExchange}
-      />
+      /> */}
  </>
   );
 };

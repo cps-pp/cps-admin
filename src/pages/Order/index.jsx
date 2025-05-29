@@ -384,6 +384,7 @@ const OrderPage = () => {
         </table>
       </div>
 
+<<<<<<< HEAD
       {/* Add Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
@@ -461,6 +462,8 @@ const OrderPage = () => {
         onRowsPerPageChange={handleRowsPerPageChange}
       />
 
+=======
+>>>>>>> cce206a1a4e69f0cb21f171e1a876e2ae91ed2e6
       {/* <ConfirmModal
         show={showModal}
         setShow={setShowModal}

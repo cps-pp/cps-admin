@@ -8,6 +8,8 @@ import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import FileUploadInput from '@/components/Forms/FileUploadInput';
 import BoxDate from '../../../components/Date';
+import InputBox from '../../../components/Forms/Input_new';
+import SelectBoxId from '../../../components/Forms/SelectID';
 
 const CreateImport = ({ setShow, getList, onCloseCallback }) => {
   const {

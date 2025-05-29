@@ -546,6 +546,9 @@ const ImportPage = () => {
                       !isNaN(new Date(im.update_by).getTime()) ? (
 =======
                     !isNaN(new Date(im.update_by).getTime()) ? (
+<<<<<<< HEAD
+>>>>>>> cce206a1a4e69f0cb21f171e1a876e2ae91ed2e6
+=======
 >>>>>>> cce206a1a4e69f0cb21f171e1a876e2ae91ed2e6
                       new Date(im.update_by).toLocaleDateString('en-US', {
                         day: '2-digit',
