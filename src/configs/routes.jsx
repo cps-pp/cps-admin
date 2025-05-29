@@ -1,16 +1,17 @@
 // import Account from '@/pages/Admin';
 import SignIn from '@/pages/Authentication/SignIn';
 import NotFound from '@/pages/NotFound';
-import Profile from '@/pages/Profile';
 
 import PatientPage from '@/pages/Manager/Patient';
 import ServcicePage from '@/pages/Manager/ServiceList';
 import SupplierPage from '@/pages/Manager/Supplier';
-import DetailPatient from '@/pages/Manager/Patient/detail';
+// import DetailPatient from '@/pages/Manager/Patient/detail';
 import DiseasePage from '@/pages/Manager/Disease';
 import CreateFollow from '@/pages/Follow/create';
 import Order from '@/pages/Order';
 import Treatment from '@/pages/Service/Treatment';
+
+
 import ImportPage from '@/pages/im/import.tsx';
 import MedicinesPage from '../pages/Manager/Medicines';
 import ExchangePage from '../pages/Manager/Exchange';
@@ -24,6 +25,7 @@ import ReportPay from '../pages/report/ReportPayment';
 import ReportPer from '../pages/report/ReportPer';
 import ReportImport from '../pages/report/ReportImport';
 import ReportOrder from '../pages/report/ReportOrder';
+import DetailPatientService from '../pages/Service/Detail';
 
 export const ROUTES = [
   {
@@ -43,11 +45,11 @@ export const ROUTES = [
     component: <PatientPage />,
   },
  
-  {
-    path: '/patient/detail/:id',
-    title: 'Patient Detail | CPS Admin',
-    component: <DetailPatient />,
-  },
+  // {
+  //   path: '/patient/detail/:id',
+  //   title: 'Patient Detail | CPS Admin',
+  //   component: <DetailPatient />,
+  // },
   //  -------------------------- Employee Path --------------------------------
   {
     path: '/manager/employee',
@@ -106,6 +108,12 @@ export const ROUTES = [
     component: <Treatment />,
   },
   {
+    path: '/detail',
+    title: 'DetailPatientService | CPS Admin',
+    component: <DetailPatientService />,
+  },
+  // ---------------------------
+  {
     path: '/perorder',
     title: 'Order | CPS Admin',
     component: <Order />,
@@ -162,12 +170,8 @@ export const ROUTES = [
     component: <ReportOrder />,
   },
 
-  {
-    path: '/profile',
-    title: 'Profile | CPS Admin',
-    component: <Profile />,
-  },
-  // {
+ 
+  // {  
   //   path: '/admin/account',
   //   title: 'Accounts | CPS Admin',
   //   component: <Account />,

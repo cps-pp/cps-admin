@@ -22,7 +22,7 @@ export default function ListDis({ selectService, tapService }) {
 
   const columns = [
     {
-      title: 'Services',
+      title: 'Disease ID',
       dataIndex: 'disease_id',
       key: 'disease_id',
     },
@@ -37,7 +37,7 @@ export default function ListDis({ selectService, tapService }) {
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <button onClick={() => selectService(record)}>Select</button>
+          <button type="button" onClick={() => selectService(record)}>Select</button>
         </Space>
       ),
     },

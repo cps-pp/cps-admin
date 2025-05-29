@@ -22,7 +22,7 @@ export default function ListQi({ selectService, tapService }) {
 
   const columns = [
     {
-      title: 'Services',
+      title: 'ID',
       dataIndex: 'med_id',
       key: 'med_id',
     },
@@ -47,7 +47,7 @@ export default function ListQi({ selectService, tapService }) {
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <button onClick={() => selectService(record)}>Select</button>
+          <button type="button" onClick={() => selectService(record)}>Select</button>
         </Space>
       ),
     },

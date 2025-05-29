@@ -1,8 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { Space, Table } from 'antd';
+import { Table } from 'antd';
+import React, { useState, useEffect } from 'react';
+import useStoreServices from '../../../../store/selectServices';
 
-export default function ListService({ selectService, dataValue, tapService }) {
+export default function ListService({ selectService, tapService }) {
   const [dataService, setDataService] = useState([]);
+
+  const { addService, services: listSelect } = useStoreServices((state) => ({
+    addService: state.addService,
+    services: state.services,
+  }));
 
   const fetchServiceList = async () => {
     try {
@@ -20,17 +26,15 @@ export default function ListService({ selectService, dataValue, tapService }) {
     }
   }, [tapService]);
 
+  const selectionService = async (record) => {
+    // await addService(record);
+  };
+
   const columns = [
-    {
-      title: 'Services',
-      dataIndex: 'ser_id',
-      key: 'ser_id',
-    },
-    {
-      title: 'Name',
-      dataIndex: 'ser_name',
-      key: 'ser_name',
-    },
+    { title: 'Services', dataIndex: 'ser_id', key: 'ser_id' },
+
+    { title: 'Name', dataIndex: 'ser_name', key: 'ser_name' },
+
     {
       title: 'Price',
       dataIndex: 'price',
@@ -41,21 +45,28 @@ export default function ListService({ selectService, dataValue, tapService }) {
       title: 'Action',
       key: 'action',
       render: (_, record) => (
-        <Space size="middle">
-          <button onClick={() => selectService(record)}>select</button>
-        </Space>
+        <button
+          type="button"
+          onClick={() => {
+            // console.log('Selecting:', record);
+            selectService(record);
+            selectionService(record);
+          }}
+          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+        >
+          select
+        </button>
       ),
     },
   ];
 
   return (
-    <div>
-       <Table 
-        columns={columns} 
-        dataSource={dataService} 
-        pagination={{ pageSize: 5 }} 
-        rowKey="ser_id" 
-      />
-    </div>
+    <Table
+      columns={columns}
+      dataSource={dataService}
+      pagination={{ pageSize: 5, size: 'middle' }}
+      rowKey="ser_id"
+      size="small"
+    />
   );
 }

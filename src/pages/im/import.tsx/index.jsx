@@ -542,7 +542,11 @@ const ImportPage = () => {
                   </td>
                   <td className="px-4 py-4">
                     {im?.update_by &&
+<<<<<<< HEAD
                       !isNaN(new Date(im.update_by).getTime()) ? (
+=======
+                    !isNaN(new Date(im.update_by).getTime()) ? (
+>>>>>>> cce206a1a4e69f0cb21f171e1a876e2ae91ed2e6
                       new Date(im.update_by).toLocaleDateString('en-US', {
                         day: '2-digit',
                         month: '2-digit',

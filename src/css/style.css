@@ -9,6 +9,7 @@
   }
 }
 
+
 @layer components {
 }
 
@@ -32,8 +33,14 @@
 }
 
 body {
-  font-family: 'Noto Sans Lao Looped', serif;
+  font-family: 'Noto Sans Lao', serif !important;
 }
+.ant-tabs-nav-list{
+  font-family: 'Noto Sans Lao', serif !important; 
+}
+.ant-table-cell{
+  font-family: 'Noto Sans Lao', serif !important; 
+}  
 
 /* third-party libraries CSS */
 
@@ -309,3 +316,7 @@ span.flatpickr-weekday,
   font-family: 'NotoSansLao_Condensed', sans-serif;
 }
 
+@font-face {
+  font-family: 'NotoSansLao';
+  src: url('/fonts/NotoSansLao_Condensed-Regular.ttf') format('truetype');
+}

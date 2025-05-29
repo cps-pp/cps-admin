@@ -304,12 +304,12 @@ const SupplierPage = () => {
         onRowsPerPageChange={handleRowsPerPageChange}
       />
 
-      <ConfirmModal
+      {/* <ConfirmModal
         show={showModal}
         setShow={setShowModal}
         message="ທ່ານຕ້ອງການລົບຜູ້ສະໜອງນີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteSupplier}
-      />
+      /> */}
     </>
   );
 };

@@ -188,7 +188,7 @@ const EmployeePage = () => {
                     <td className="px-4 py-4">{emp.emp_surname}</td>
                     <td className="px-4 py-4">{emp.gender}</td>
                     <td className="px-4 py-4">
-                      {new Date(emp.dob).toLocaleDateString('en-GB', {
+                      {new Date(emp.dob).toLocaleDateString('th-TH', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
@@ -309,12 +309,12 @@ const EmployeePage = () => {
         onRowsPerPageChange={handleRowsPerPageChange}
       />
 
-      <ConfirmModal
+      {/* <ConfirmModal
         show={showModal}
         setShow={setShowModal}
         message="ທ່ານຕ້ອງການລົບລາຍການນີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteEmployee}
-      />
+      /> */}
   </>
   );
 };

@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { PatientHeaders } from './column/patient';
 import { iconAdd } from '@/configs/icon';
 import Button from '@/components/Button';
-import Search from '@/components/Forms/Search';
-import axiosCreate from '@/api/axios';
 import { TableAction } from '@/components/Tables/TableAction';
 import ConfirmModal from '@/components/Modal';
 import Alerts from '@/components/Alerts';
@@ -14,6 +12,8 @@ import EditPatient from './edit';
 import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
+import SearchBox from '../../../components/Forms/Search_New';
+
 const PatientPage = () => {
   const [patients, setPatients] = useState([]);
   const [filteredPatients, setFilteredPatients] = useState([]);
@@ -172,7 +172,7 @@ useEffect(() => {
         </div>
 
         <div className="grid w-full gap-4 p-4">
-          <Search
+          <SearchBox
             type="text"
             name="search"
             placeholder="ຄົ້ນຫາຊື່..."
@@ -214,7 +214,7 @@ useEffect(() => {
                       {patient.gender}
                     </td>
                     <td className="px-4 py-3  ">
-                      {new Date(patient.dob).toLocaleDateString('th-TH', {
+                      {new Date(patient.dob).toLocaleDateString('en-US', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
