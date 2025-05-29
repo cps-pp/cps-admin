@@ -28,6 +28,13 @@ const PatientPage = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  const [existingIds, setExistingIds] = useState([]);
+  const [existingPhones1, setExistingPhones1] = useState([]);
+  const [existingPhones2, setExistingPhones2] = useState([]);
+     // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
+    const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
+
+
   const fetchPatients = async () => {
     try {
       setLoading(true);
@@ -38,6 +45,14 @@ const PatientPage = () => {
       const data = await response.json();
       setPatients(data.data);
       setFilteredPatients(data.data);
+      // ✅ เก็บรหัสทั้งหมดไว้
+      const ids = data.data.map((patient) => patient.patient_id);
+      const phones1 = data.data.map((patient) => patient.phone1); // เพิ่มตรงนี้
+      const phones2 = data.data.map((patient) => patient.phone2); // เพิ่มตรงนี้
+      setExistingIds(ids);
+      setExistingPhones1(phones1); // <- ต้องเพิ่ม state นี้ด้วย
+      setExistingPhones2(phones2); // <- ต้องเพิ่ม state นี้ด้วย
+
     } catch (error) {
       console.error('Error fetching patients:', error);
     } finally {
@@ -116,6 +131,17 @@ useEffect(() => {
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+  };
+
+  // ✅ Handler สำหรับปุ่ม X ที่จะใช้ฟังก์ชันจาก CreateCategory
+  const handleCloseAddModal = () => {
+    if (createFormCloseHandler) {
+      // เรียกใช้ฟังก์ชันที่ได้รับมาจาก CreateCategory
+      createFormCloseHandler();
+    } else {
+      // fallback ถ้าไม่มี handler
+      setShowAddModal(false); // ✅ แก้ไขชื่อตัวแปรให้ถูกต้อง
+    }
   };
 
   const paginatedPatients = filteredPatients.slice(
@@ -231,9 +257,10 @@ useEffect(() => {
         relative
         overflow-auto
         max-h-[90vh]">
+              {/* ✅ ปุ่ม X ที่ใช้ฟังก์ชันป้องกันจาก CreateCategory */}
               <button
-                onClick={() => setShowAddModal(false)}
-                className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700"
+                onClick={handleCloseAddModal}
+                className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700 z-10"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -254,6 +281,10 @@ useEffect(() => {
               <CreatePatient
                 setShow={setShowAddModal}
                 getList={fetchPatients}
+                existingIds={existingIds} // ✅ เพิ่มบรรทัดน
+                existingPhones1={existingPhones1}
+                existingPhones2={existingPhones2}
+                onCloseCallback={setCreateFormCloseHandler} // ✅ ส่ง callback function
               />
             </div>
           </div>

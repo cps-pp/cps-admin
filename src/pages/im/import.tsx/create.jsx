@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import Button from '@/components/Button';
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react'; // ✅ เพิ่ม useRef
 import SelectID from '@/components/Forms/SelectID';
 import Input from '@/components/Forms/Input';
 import Loader from '@/common/Loader';
@@ -9,8 +9,9 @@ import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import FileUploadInput from '@/components/Forms/FileUploadInput';
 import BoxDate from '../../../components/Date';
+import { usePrompt } from '@/hooks/usePrompt';
 
-const CreateImport = ({ setShow, getList }) => {
+const CreateImport = ({ setShow, getList, onCloseCallback }) => {
   const {
     register,
     handleSubmit,
@@ -34,17 +35,46 @@ const CreateImport = ({ setShow, getList }) => {
   const [supplier, setSupplier] = useState([]);
   const [employees, setEmployees] = useState([]);
 
+  // ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
+  const isDirtyRef = useRef(isDirty);
+  
+  // ✅ อัพเดต ref ทุกครั้งที่ isDirty เปลี่ยน
+  useEffect(() => {
+    isDirtyRef.current = isDirty;
+  }, [isDirty]);
+  
+  // ✅ เตือนเมื่อมีการพยายามออกจากหน้าด้วย navigation (Back / เปลี่ยน route)
+  usePrompt('ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.', isDirty);
+
+  // ✅ เตือนเมื่อจะรีเฟรช / ปิดแท็บ
   useEffect(() => {
     const handleBeforeUnload = (event) => {
-      if (isDirty) {
-        const message = 'ທ່ານຍັງບໍ່ໄດ້ບັນທຶກຂໍ້ມູນ. ຢືນຢັນວ່າຈະອອກຈາກໜ້ານີ້ຫຼືບໍ?';
-        event.preventDefault();
-        event.returnValue = message;
-      }
+      if (!isDirtyRef.current) return;
+      event.preventDefault();
+      event.returnValue = '';
     };
+
     window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [isDirty]);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
+  // ✅ เตือนเมื่อคลิกปิดฟอร์ม - ใช้ current value จาก ref
+  const handleCloseForm = () => {
+    if (isDirtyRef.current) {
+      const confirmLeave = window.confirm('ທ່ານຕ້ອງການປິດຟອມແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ປ້ອນຈະສູນເສຍ');
+      if (!confirmLeave) return;
+    }
+    setShow(false);
+  };
+
+  // ✅ ส่ง handleCloseForm ไปให้ parent component แค่ครั้งเดียว
+  useEffect(() => {
+    if (onCloseCallback) {
+      onCloseCallback(() => handleCloseForm);
+    }
+  }, [onCloseCallback]);
 
   useEffect(() => {
     const fetchMed = async () => {
@@ -277,7 +307,8 @@ const CreateImport = ({ setShow, getList }) => {
           onSelect={(e) => setSelectEmpCreate(e.target.value)}
         />
 
-        <DatePicker
+        {/* ✅ เปลี่ยนจาก DatePicker เป็น BoxDate */}
+        <BoxDate
           register={register}
           errors={errors}
           name="created_at"
@@ -288,8 +319,7 @@ const CreateImport = ({ setShow, getList }) => {
         />
 
        
-           <div className="mt-4 flex justify-end space-x-4  py-4">
-        
+        <div className="mt-4 flex justify-end space-x-4 py-4">
           <Button variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </Button>
@@ -300,3 +330,4 @@ const CreateImport = ({ setShow, getList }) => {
 };
 
 export default CreateImport;
+

@@ -27,6 +27,10 @@ const ExchangePage = () => {
   const dispatch = useAppDispatch();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [existingIds, setExistingIds] = useState([]);
+
+  // ✅ เก็บ reference ของ handleCloseForm จาก CreateExChange
+  const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
 
   const fetchExchanges = async () => {
     try {
@@ -40,6 +44,10 @@ const ExchangePage = () => {
       const data = await response.json();
       setExchanges(data.data);
       setFilteredExchanges(data.data);
+      // ✅ เก็บรหัสทั้งหมดไว้
+      const ids = data.data.map((exchange) => exchange.ex_id);
+      setExistingIds(ids);
+
     } catch (error) {
       console.error('Error fetching categories:', error);
     } finally {
@@ -120,6 +128,17 @@ const ExchangePage = () => {
     setPage(0);
   };
 
+  // ✅ Handler สำหรับปุ่ม X ที่จะใช้ฟังก์ชันจาก CreateExChange
+  const handleCloseAddModal = () => {
+    if (createFormCloseHandler) {
+      // เรียกใช้ฟังก์ชันที่ได้รับมาจาก CreateExChange
+      createFormCloseHandler();
+    } else {
+      // fallback ถ้าไม่มี handler
+      setShowAddModal(false);
+    }
+  };
+
   const paginatedEx = filteredExchanges.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
@@ -127,38 +146,38 @@ const ExchangePage = () => {
 
   return (
     <>
-    <div className="rounded bg-white pt-4 dark:bg-boxdark">
-      <Alerts />
+      <div className="rounded bg-white pt-4 dark:bg-boxdark">
+        <Alerts />
 
-      <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
-          ຈັດການຂໍ້ມູນອັດຕາແລກປ່ຽນ
-        </h1>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => setShowAddModal(true)}
-            icon={iconAdd}
-            className="bg-primary"
-          >
-            ເພີ່ມອັດຕາແລກປ່ຽນ
-          </Button>
+        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
+          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+            ຈັດການຂໍ້ມູນອັດຕາແລກປ່ຽນ
+          </h1>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => setShowAddModal(true)}
+              icon={iconAdd}
+              className="bg-primary"
+            >
+              ເພີ່ມອັດຕາແລກປ່ຽນ
+            </Button>
+          </div>
         </div>
-      </div>
 
-      <div className="grid w-full gap-4 p-4">
-        <Search
-          type="text"
-          name="search"
-          placeholder="ຄົ້ນຫາຊື່..."
-          className="rounded border border-stroke dark:border-strokedark"
-          onChange={(e) => {
-            const query = e.target.value;
-            setSearchQuery(query);
-          }}
-        />
-      </div>
+        <div className="grid w-full gap-4 p-4">
+          <Search
+            type="text"
+            name="search"
+            placeholder="ຄົ້ນຫາຊື່..."
+            className="rounded border border-stroke dark:border-strokedark"
+            onChange={(e) => {
+              const query = e.target.value;
+              setSearchQuery(query);
+            }}
+          />
+        </div>
 
-      <div className="overflow-x-auto rounded-lg shadow-md">
+        <div className="overflow-x-auto rounded-lg shadow-md">
           <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
             <thead>
               <tr className="text-left bg-secondary2 text-white">
@@ -205,70 +224,73 @@ const ExchangePage = () => {
           </table>
         </div>
 
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="rounded-lg w-full max-w-2xl relative px-4 ">
-            <button
-              onClick={() => setShowAddModal(false)}
-              className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+        {showAddModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="rounded-lg w-full max-w-2xl relative px-4 ">
+              {/* ✅ ปุ่ม X ที่ใช้ฟังก์ชันป้องกันจาก CreateExChange */}
+              <button
+                onClick={handleCloseAddModal}
+                className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700 z-10"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
 
-            <CreateExChange
-              setShow={setShowAddModal}
-              getList={fetchExchanges}
-            />
+              <CreateExChange
+                setShow={setShowAddModal}
+                getList={fetchExchanges}
+                existingIds={existingIds}
+                onCloseCallback={setCreateFormCloseHandler} // ✅ ส่ง callback function
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {showEditModal && selectedId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
-          <div className="rounded-lg w-full max-w-2xl bg-white relative ">
-            <button
-              onClick={() => setShowEditModal(false)}
-              className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+        {showEditModal && selectedId && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
+            <div className="rounded-lg w-full max-w-2xl bg-white relative ">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
 
-            <EditExChange
-              id={selectedId}
-              onClose={() => setShowEditModal(false)}
-              setShow={setShowEditModal}
-              getList={fetchExchanges}
-            />
+              <EditExChange
+                id={selectedId}
+                onClose={() => setShowEditModal(false)}
+                setShow={setShowEditModal}
+                getList={fetchExchanges}
+              />
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
       <TablePaginationDemo
         count={filteredExchanges.length}
         page={page}
@@ -282,8 +304,10 @@ const ExchangePage = () => {
         message="ທ່ານຕ້ອງການລົບອັດຕາແລກປ່ຽນນີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteExchange}
       />
- </>
+    </>
   );
 };
 
 export default ExchangePage;
+
+

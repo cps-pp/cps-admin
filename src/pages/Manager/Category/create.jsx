@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react'; // ✅ เพิ่ม useRef
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import Loader from '@/common/Loader';
@@ -6,21 +6,78 @@ import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import InputBox from '../../../components/Forms/Input_new';
 import ButtonBox from '../../../components/Button';
+import { usePrompt } from '@/hooks/usePrompt';
 
-const CreateCategory = ({ setShow, getListCategory }) => {
+const CreateCategory = ({ setShow, getListCategory, existingIds, onCloseCallback }) => {
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
+    setFocus,
+    formState: { errors, isDirty },
   } = useForm();
 
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
+  // ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
+  const isDirtyRef = useRef(isDirty);
+  
+  // ✅ อัพเดต ref ทุกครั้งที่ isDirty เปลี่ยน
+  useEffect(() => {
+    isDirtyRef.current = isDirty;
+  }, [isDirty]);
+  
+  // ✅ เตือนเมื่อมีการพยายามออกจากหน้าด้วย navigation (Back / เปลี่ยน route)
+  usePrompt('ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.', isDirty);
+
+  // ✅ เตือนเมื่อจะรีเฟรช / ปิดแท็บ
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      if (!isDirtyRef.current) return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
+  // ✅ เตือนเมื่อคลิกปิดฟอร์ม - ใช้ current value จาก ref
+  const handleCloseForm = () => {
+    if (isDirtyRef.current) {
+      const confirmLeave = window.confirm('ທ່ານຕ້ອງການປິດຟອມແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ປ້ອນຈະສູນເສຍ');
+      if (!confirmLeave) return;
+    }
+    setShow(false);
+  };
+
+  // ✅ ส่ง handleCloseForm ไปให้ parent component แค่ครั้งเดียว
+  useEffect(() => {
+    if (onCloseCallback) {
+      onCloseCallback(() => handleCloseForm);
+    }
+  }, [onCloseCallback]);
+
   const handleSave = async (formData) => {
     setLoading(true);
+
+    if (existingIds.includes(formData.medtype_id)) {
+      setFocus('medtype_id');
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ຜິດພາດ',
+          message: 'ລະຫັດປະເພດຢາ ມີໃນລະບົບແລ້ວ',
+        }),
+      );
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch('http://localhost:4000/src/manager/category', {
         method: 'POST',
@@ -46,12 +103,13 @@ const CreateCategory = ({ setShow, getListCategory }) => {
       setShow(false);
       await getListCategory();
       reset();
+
     } catch (error) {
       dispatch(
         openAlert({
           type: 'error',
           title: 'ເກີດຂໍ້ຜິດພາດ',
-          message:  'ມີຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
+          message: 'ມີຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
         })
       );
     } finally {
@@ -91,9 +149,8 @@ const CreateCategory = ({ setShow, getListCategory }) => {
           errors={errors}
         />
 
-   
-        <div className="mt-8 flex justify-end space-x-4  py-4">
-        
+        <div className="mt-8 flex justify-end space-x-4 py-4">
+          
           <ButtonBox variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </ButtonBox>

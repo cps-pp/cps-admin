@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react'; // ✅ เพิ่ม useRef
 import Button from '@/components/Button';
 import Input from '@/components/Forms/Input';
 import DatePicker from '@/components/DatePicker_two';
@@ -16,14 +16,15 @@ import SelectBox from '../../../components/Forms/Select';
 import SelectBoxId from '../../../components/Forms/SelectID';
 import ButtonBox from '../../../components/Button';
 import BoxDate from '../../../components/Date';
+import { usePrompt } from '@/hooks/usePrompt';
 
-
-const CreateMedicines = ({ setShow, getList }) => {
+const CreateMedicines = ({ setShow, getList, existingIds, onCloseCallback }) => {
   const {
     register,
     handleSubmit,
     setValue,
     reset,
+    setFocus,
     formState: { errors, isDirty },
   } = useForm();
 
@@ -37,20 +38,46 @@ const CreateMedicines = ({ setShow, getList }) => {
   const [selectedMedType, setSelectedMedType] = useState('');
   const [status, setStatus] = useState('');
 
+// ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
+  const isDirtyRef = useRef(isDirty);
+  
+  // ✅ อัพเดต ref ทุกครั้งที่ isDirty เปลี่ยน
+  useEffect(() => {
+    isDirtyRef.current = isDirty;
+  }, [isDirty]);
+  
+  // ✅ เตือนเมื่อมีการพยายามออกจากหน้าด้วย navigation (Back / เปลี่ยน route)
+  usePrompt('ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.', isDirty);
+
+  // ✅ เตือนเมื่อจะรีเฟรช / ปิดแท็บ
   useEffect(() => {
     const handleBeforeUnload = (event) => {
-      if (isDirty) {
-        const message =
-          'ທ່ານຍັງບໍ່ໄດ້ບັນທຶກຂໍ້ມູນ. ຢືນຢັນວ່າຈະອອກຈາກໜ້ານີ້ຫຼືບໍ?';
-        event.preventDefault();
-        event.returnValue = message;
-        return message;
-      }
+      if (!isDirtyRef.current) return;
+      event.preventDefault();
+      event.returnValue = '';
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [isDirty]);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
+  // ✅ เตือนเมื่อคลิกปิดฟอร์ม - ใช้ current value จาก ref
+  const handleCloseForm = () => {
+    if (isDirtyRef.current) {
+      const confirmLeave = window.confirm('ທ່ານຕ້ອງການປິດຟອມແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ປ້ອນຈະສູນເສຍ');
+      if (!confirmLeave) return;
+    }
+    setShow(false);
+  };
+
+  // ✅ ส่ง handleCloseForm ไปให้ parent component แค่ครั้งเดียว
+  useEffect(() => {
+    if (onCloseCallback) {
+      onCloseCallback(() => handleCloseForm);
+    }
+  }, [onCloseCallback]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -109,6 +136,21 @@ const CreateMedicines = ({ setShow, getList }) => {
 
   const handleSave = async (formData) => {
     setLoading(true);
+
+    // เช็คว่ามี med_id ซ้ำไหม
+    if (existingIds.includes(formData.med_id)) {
+      setFocus('med_id');
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ຜິດພາດ',
+          message: 'ລະຫັດປະເພດຢາ ມີໃນລະບົບແລ້ວ',
+        }),
+      );
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch(
         'http://localhost:4000/src/manager/medicines',
@@ -260,6 +302,7 @@ const CreateMedicines = ({ setShow, getList }) => {
 
        
         <div className="flex justify-end space-x-4 col-span-full  py-4">
+
           <ButtonBox variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </ButtonBox>

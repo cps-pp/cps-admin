@@ -3,7 +3,7 @@ import Button from '@/components/Button';
 import Input from '@/components/Forms/Input';
 import DatePicker from '@/components/DatePicker_two';
 import Select from '@/components/Forms/Select';
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react'; // ✅ เพิ่ม useRef
 import { openAlert } from '@/redux/reducer/alert';
 import { useAppDispatch } from '@/redux/hook';
 import Alerts from '@/components/Alerts';
@@ -12,10 +12,11 @@ import InputBox from '../../../components/Forms/Input_new';
 import SelectBox from '../../../components/Forms/Select';
 import ButtonBox from '../../../components/Button';
 import BoxDate from '../../../components/Date';
+import { usePrompt } from '@/hooks/usePrompt';
 
 
 
-const CreatePatient = ({ setShow, getList }) => {
+const CreatePatient = ({ setShow, getList, existingIds, existingPhones1, existingPhones2, onCloseCallback }) => {
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
 
@@ -24,55 +25,104 @@ const CreatePatient = ({ setShow, getList }) => {
     handleSubmit,
     reset,
     setValue,
+    setFocus,
     formState: { isDirty, errors },
   } = useForm();
 
+  // ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
+  const isDirtyRef = useRef(isDirty);
+
+  // ✅ อัพเดต ref ทุกครั้งที่ isDirty เปลี่ยน
+  useEffect(() => {
+    isDirtyRef.current = isDirty;
+  }, [isDirty]);
+
+  // ✅ เตือนเมื่อมีการพยายามออกจากหน้าด้วย navigation (Back / เปลี่ยน route)
+  usePrompt('ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.', isDirty);
+
+  // ✅ เตือนเมื่อจะรีเฟรช / ปิดแท็บ
   useEffect(() => {
     const handleBeforeUnload = (event) => {
-      if (isDirty) {
-        const message =
-          'ທ່ານຍັງບໍ່ໄດ້ບັນທຶກຂໍ້ມູນ. ຢືນຢັນວ່າຈະອອກຈາກໜ້ານີ້ຫຼືບໍ?';
-        event.preventDefault();
-        event.returnValue = message;
-        return message;
-      }
+      if (!isDirtyRef.current) return;
+      event.preventDefault();
+      event.returnValue = '';
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
-
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [isDirty]);
+  }, []);
+
+  // ✅ เตือนเมื่อคลิกปิดฟอร์ม - ใช้ current value จาก ref
+  const handleCloseForm = () => {
+    if (isDirtyRef.current) {
+      const confirmLeave = window.confirm('ທ່ານຕ້ອງການປິດຟອມແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ປ້ອນຈະສູນເສຍ');
+      if (!confirmLeave) return;
+    }
+    setShow(false);
+  };
+
+  // ✅ ส่ง handleCloseForm ไปให้ parent component แค่ครั้งเดียว
+  useEffect(() => {
+    if (onCloseCallback) {
+      onCloseCallback(() => handleCloseForm);
+    }
+  }, [onCloseCallback]);
 
   const [gender, setGender] = useState('');
 
   const handleSave = async (data) => {
     setLoading(true);
 
-    // if (data.patient_id === data.patient_id) {
-    //   dispatch(
-    //     openAlert({
-    //       type: 'warning',
-    //       title: 'ຄຳເຕືອນ',
-    //       message: 'ລະຫັດຄົນເຈັບຊ້າມກັນ ກະລຸນາປ່ຽນໃໝ່',
-    //     }),
-    //   );
-    //   setLoading(false);
-    //   return;
-    // }
+    if (existingIds.includes(data.patient_id)) {
+      setFocus('patient_id');  // โฟกัสที่ช่องรหัสคนเจ็บ
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ຜິດພາດ',
+          message: 'ລະຫັດຄົນເຈັບ ມີໃນລະບົບແລ້ວ',
+        }),
+      );
+      setLoading(false);  // 🛑 เพิ่มตรงนี้ เพื่อให้โหลดหยุดและฟอร์มยังคงอยู่
+      return; // หยุดการดำเนินการ
 
-    // if (data.phone1 === data.phone2) {
-    //   dispatch(
-    //     openAlert({
-    //       type: 'warning',
-    //       title: 'ຄຳເຕືອນ',
-    //       message: 'ເບີຕິດຕໍ່ນີ້ມີຢູ່ແລ້ວ',
-    //     }),
-    //   );
-    //   setLoading(false);
-    //   return;
-    // }
+    } else if (existingPhones1.includes(data.phone1)) {
+      setFocus('phone1');  // โฟกัสที่ช่องรหัสคนเจ็บ
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ຜິດພາດ',
+          message: 'ເບີໂທນີ້ ມີໃນລະບົບແລ້ວ',
+        }),
+      );
+      setLoading(false);  // 🛑 เพิ่มตรงนี้ เพื่อให้โหลดหยุดและฟอร์มยังคงอยู่
+      return; // หยุดการดำเนินการ
+
+    } else if (existingPhones2.includes(data.phone2)) {
+      setFocus('phone2');  // โฟกัสที่ช่องรหัสคนเจ็บ
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ຜິດພາດ',
+          message: 'ເບີໂທນີ້ ມີໃນລະບົບແລ້ວ',
+        }),
+      );
+      setLoading(false);  // 🛑 เพิ่มตรงนี้ เพื่อให้โหลดหยุดและฟอร์มยังคงอยู่
+      return; // หยุดการดำเนินการ
+
+    } else if (data.phone1 === data.phone2) {
+      setFocus('phone2');  // โฟกัสที่ช่องรหัสคนเจ็บ
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ຜິດພາດ',
+          message: 'ກະລຸໃສເບີໂທບໍ່ໃຫ້ຊຳ້ກັນ',
+        }),
+      );
+      setLoading(false);  // 🛑 เพิ่มตรงนี้ เพื่อให้โหลดหยุดและฟอร์มยังคงอยู่
+      return; // หยุดการดำเนินการ
+    }
 
     try {
       const response = await fetch(
@@ -243,6 +293,7 @@ const CreatePatient = ({ setShow, getList }) => {
         />
 
         <div className="mt-4 flex justify-end space-x-4 col-span-full py-4">
+
           <ButtonBox variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </ButtonBox>

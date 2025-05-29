@@ -27,6 +27,10 @@ const ServicePage = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const dispatch = useAppDispatch();
 
+  const [existingIds, setExistingIds] = useState([]);
+     // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
+  const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
+
   const fetchServiceList = async () => {
     try {
       setLoading(true);
@@ -39,6 +43,10 @@ const ServicePage = () => {
       const data = await response.json();
       setServices(data.data);
       setFilteredServices(data.data);
+      // ✅ เก็บรหัสทั้งหมดไว้
+      const ids = data.data.map((service) => service.ser_id);
+      setExistingIds(ids);
+
     } catch (error) {
       console.error('Error fetching categories:', error);
     } finally {
@@ -116,6 +124,17 @@ const ServicePage = () => {
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+  };
+
+  // ✅ Handler สำหรับปุ่ม X ที่จะใช้ฟังก์ชันจาก CreateCategory
+  const handleCloseAddModal = () => {
+    if (createFormCloseHandler) {
+      // เรียกใช้ฟังก์ชันที่ได้รับมาจาก CreateCategory
+      createFormCloseHandler();
+    } else {
+      // fallback ถ้าไม่มี handler
+      setShowAddModal(false); // ✅ แก้ไขชื่อตัวแปรให้ถูกต้อง
+    }
   };
 
   const paginatedList = filteredServices.slice(
@@ -207,10 +226,11 @@ const ServicePage = () => {
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="rounded-lg w-full max-w-2xl relative px-4 ">
-            <button
-              onClick={() => setShowAddModal(false)}
-              className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700"
-            >
+            {/* ✅ ปุ่ม X ที่ใช้ฟังก์ชันป้องกันจาก CreateCategory */}
+              <button
+                onClick={handleCloseAddModal}
+                className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700 z-10"
+              >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-6 w-6"
@@ -230,6 +250,8 @@ const ServicePage = () => {
             <CreateServiceList
               setShow={setShowAddModal}
               getList={fetchServiceList}
+              existingIds={existingIds} // ✅ เพิ่มบรรทัดน
+              onCloseCallback={setCreateFormCloseHandler} // ✅ ส่ง callback function
             />
           </div>
         </div>

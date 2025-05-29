@@ -26,6 +26,10 @@ const CategoryPage = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [existingIds, setExistingIds] = useState([]);
+
+   // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
+  const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
 
   const fetchCategories = async () => {
     try {
@@ -39,6 +43,10 @@ const CategoryPage = () => {
       const data = await response.json();
       setCategory(data.data);
       setFilteredCategories(data.data);
+      // ✅ เก็บรหัสทั้งหมดไว้
+      const ids = data.data.map((category) => category.medtype_id);
+      setExistingIds(ids);
+
     } catch (error) {
       console.error('Error fetching categories:', error);
     } finally {
@@ -122,6 +130,17 @@ const CategoryPage = () => {
     setPage(0);
   };
 
+  // ✅ Handler สำหรับปุ่ม X ที่จะใช้ฟังก์ชันจาก CreateCategory
+  const handleCloseAddModal = () => {
+    if (createFormCloseHandler) {
+      // เรียกใช้ฟังก์ชันที่ได้รับมาจาก CreateCategory
+      createFormCloseHandler();
+    } else {
+      // fallback ถ้าไม่มี handler
+      setShowAddCategoryModal(false); // ✅ แก้ไขชื่อตัวแปรให้ถูกต้อง
+    }
+  };
+
   const paginatedCate = filteredCategories.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
@@ -129,38 +148,38 @@ const CategoryPage = () => {
 
   return (
     <>
-    <div className="rounded bg-white pt-4 dark:bg-boxdark">
-      <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
-          ຈັດການຂໍ້ມູນປະເພດຢາ
-        </h1>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => setShowAddCategoryModal(true)}
-            icon={iconAdd}
-            className="bg-primary"
-          >
-            ເພີ່ມຂໍ້ມູນຢາ
-          </Button>
+      <div className="rounded bg-white pt-4 dark:bg-boxdark">
+        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
+          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+            ຈັດການຂໍ້ມູນປະເພດຢາ
+          </h1>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => setShowAddCategoryModal(true)}
+              icon={iconAdd}
+              className="bg-primary"
+            >
+              ເພີ່ມຂໍ້ມູນຢາ
+            </Button>
+          </div>
         </div>
-      </div>
 
-      {/* Search */}
-      <div className="grid w-full gap-4 p-4">
-        <Search
-          type="text"
-          name="search"
-          placeholder="ຄົ້ນຫາຊື່ປະເພດ..."
-          className="rounded border border-stroke dark:border-strokedark"
-          onChange={(e) => {
-            const query = e.target.value;
-            setSearchQuery(query);
-          }}
-        />
-      </div>
+        {/* Search */}
+        <div className="grid w-full gap-4 p-4">
+          <Search
+            type="text"
+            name="search"
+            placeholder="ຄົ້ນຫາຊື່ປະເພດ..."
+            className="rounded border border-stroke dark:border-strokedark"
+            onChange={(e) => {
+              const query = e.target.value;
+              setSearchQuery(query);
+            }}
+          />
+        </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-lg shadow-md">
+        {/* Table */}
+        <div className="overflow-x-auto rounded-lg shadow-md">
           <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
             <thead>
               <tr className="text-left bg-secondary2 text-white">
@@ -200,75 +219,77 @@ const CategoryPage = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {showAddCategoryModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="rounded-lg w-full max-w-2xl  relative px-4">
+              {/* ✅ ปุ่ม X ที่ใช้ฟังก์ชันป้องกันจาก CreateCategory */}
+              <button
+                onClick={handleCloseAddModal}
+                className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700 z-10"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+
+              <CreateCategory
+                setShow={setShowAddCategoryModal}
+                getListCategory={fetchCategories}
+                existingIds={existingIds}
+                onCloseCallback={setCreateFormCloseHandler} // ✅ ส่ง callback function
+              />
+            </div>
+          </div>
+        )}
+
+        {showEditModal && selectedId && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
+            <div className="rounded-lg w-full max-w-2xl bg-white relative ">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+
+              <EditCate
+                id={selectedId}
+                onClose={() => setShowEditModal(false)}
+                setShow={setShowEditModal}
+                getList={fetchCategories}
+              />
+            </div>
+          </div>
+        )}
+
       </div>
 
-      {showAddCategoryModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="rounded-lg w-full max-w-2xl  relative px-4">
-            <button
-              onClick={() => setShowAddCategoryModal(false)}
-              className="absolute px-4 top-4 right-2 text-gray-500 hover:text-gray-700"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-
-            <CreateCategory
-              setShow={setShowAddCategoryModal}
-              getListCategory={fetchCategories}
-            />
-          </div>
-        </div>
-      )}
-
-      {showEditModal && selectedId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
-          <div className="rounded-lg w-full max-w-2xl bg-white relative ">
-            <button
-              onClick={() => setShowEditModal(false)}
-              className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-
-            <EditCate
-              id={selectedId}
-              onClose={() => setShowEditModal(false)}
-              setShow={setShowEditModal}
-              getList={fetchCategories}
-
-            />
-          </div>
-        </div>
-      )}
- 
-    </div>
-    
       <TablePaginationDemo
         count={filteredCategories.length}
         page={page}
@@ -282,8 +303,9 @@ const CategoryPage = () => {
         message="ທ່ານຕ້ອງການລົບປະເພດຢານີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteCategory}
       />
-      </>
+    </>
   );
 };
 
 export default CategoryPage;
+
