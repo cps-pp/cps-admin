@@ -3,11 +3,7 @@ import React from 'react';
 import { iconTrash } from '@/configs/icon';
 import useStoreMed from '../../../../store/selectMed';
 
-export default function SumMedicin({
-  selectedServices,
-  removeService,
-  tapDetail,
-}) {
+export default function SumMedicin() {
 
   const { removeMedicine, medicines, updateQty } = useStoreMed();
 
@@ -60,6 +56,7 @@ export default function SumMedicin({
     },
   ];
 
+  // console.log(medicines)
 
   return (
     <div>

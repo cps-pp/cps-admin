@@ -1,7 +1,7 @@
 import { Table } from 'antd';
 import { useState, useEffect } from 'react';
 import useStoreServices from '../../../../store/selectServices';
-import { URLBaseLocal, URLTest } from '../../../../lib/MyURLAPI';
+import { URLBaseLocal } from '../../../../lib/MyURLAPI';
 
 export default function ListService({ selectService, tapService }) {
   //------Store
@@ -13,8 +13,8 @@ export default function ListService({ selectService, tapService }) {
   const fetchServiceList = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${URLTest}/src/manager/servicelist`);
-      // const res = await fetch(`${URLBaseLocal}/src/manager/servicelist`);
+      // const res = await fetch(`${URLTest}/src/manager/servicelist`);
+      const res = await fetch(`${URLBaseLocal}/src/manager/servicelist`);
       const data = await res.json();
       setDataService(data.data);
       setLoading(false);

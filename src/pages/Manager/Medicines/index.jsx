@@ -307,7 +307,7 @@ const MedicinesPage = () => {
                       <td className="px-4 py-4">
                       {medicine?.created_at &&
                       !isNaN(new Date(medicine.created_at).getTime()) ? (
-                        new Date(medicine.created_at).toLocaleDateString('th-TH', {
+                        new Date(medicine.created_at).toLocaleDateString('en-US', {
                           day: '2-digit',
                           month: '2-digit',
                           year: 'numeric',
@@ -324,7 +324,7 @@ const MedicinesPage = () => {
                     <td className="px-4 py-4">
                       {medicine?.update_by &&
                       !isNaN(new Date(medicine.update_by).getTime()) ? (
-                        new Date(medicine.update_by).toLocaleDateString('th-TH', {
+                        new Date(medicine.update_by).toLocaleDateString('en-US', {
                           day: '2-digit',
                           month: '2-digit',
                           year: 'numeric',
@@ -442,12 +442,12 @@ const MedicinesPage = () => {
         onRowsPerPageChange={handleRowsPerPageChange}
       />
 
-      {/* <ConfirmModal
+  <ConfirmModal
         show={showModal}
         setShow={setShowModal}
         message="ທ່ານຕ້ອງການລົບຢານີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteMedicine}
-      /> */}
+      /> 
     </>
   );
 };

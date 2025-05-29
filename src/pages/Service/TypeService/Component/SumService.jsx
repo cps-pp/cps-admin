@@ -53,6 +53,8 @@ export default function SumService() {
         columns={columns}
         dataSource={services}
         pagination={{ pageSize: 5, size: 'middle' }}
+        rowKey="ser_id"
+        size="small"
       // rowKey={getRowKey}
       />
     </div>

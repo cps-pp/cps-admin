@@ -31,13 +31,15 @@ export default function ListDis({ selectService, tapService }) {
       dataIndex: 'disease_name',
       key: 'disease_name',
     },
-   
+
     {
       title: 'Action',
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <button type="button" onClick={() => selectService(record)}>Select</button>
+          <button type="button" onClick={() => selectService(record)}>
+            Select
+          </button>
         </Space>
       ),
     },
@@ -45,7 +47,12 @@ export default function ListDis({ selectService, tapService }) {
 
   return (
     <div>
-      <Table columns={columns} dataSource={dataMed} pagination={{ pageSize: 5 }}  />
+      <Table
+        columns={columns}
+        dataSource={dataMed}
+        pagination={{ pageSize: 5, size: 'middle' }}
+        size="small"
+      />
     </div>
   );
 }

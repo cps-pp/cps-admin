@@ -1,7 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import Button from '@/components/Button';
-import DatePicker from '@/components/DatePicker_two';
 import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import Loader from '@/common/Loader';
@@ -29,7 +28,7 @@ const EditMedicines = ({ id, setShow, getList }) => {
   const [selectedMedType, setSelectedMedType] = useState('');
   const [status, setStatus] = useState('');
   const [selectEmpUpdate, setSelectEmpUpdate] = useState('');
-
+const [dataLoaded, setDataLoaded] = useState(false);
   useEffect(() => {
     const handleBeforeUnload = (event) => {
       if (isDirty) {
@@ -73,40 +72,47 @@ const EditMedicines = ({ id, setShow, getList }) => {
     }
     fetchData();
   }, []);
-
-  useEffect(() => {
-    async function fetchMedicine() {
-      setLoading(true);
-      try {
-        const res = await fetch(
-          `http://localhost:4000/src/manager/medicines/${id}`,
-        );
-        const result = await res.json();
-        if (res.ok) {
-          const med = result.data;
-          reset({
-            med_id: med.med_id,
-            med_name: med.med_name,
-            qty: med.qty,
-            status: med.status,
-            price: med.price,
-            expired: med.expired,
-            medtype_id: med.medtype_id,
-            emp_id_create: med.emp_id_create,
-            created_at: med.created_at,
-          });
-          setSelectedMedType(med.medtype_id);
-          setStatus(med.status);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+useEffect(() => {
+  async function fetchMedicine() {
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `http://localhost:4000/src/manager/medicines/${id}`,
+      );
+      const result = await res.json();
+      console.log('Fetched data:', result);
+      
+      if (res.ok) {
+        const med = result.data;
+        console.log('Medicine data:', med); 
+        
+        reset({
+          med_id: med.med_id,
+          med_name: med.med_name,
+          qty: med.qty,
+          status: med.status,
+          price: med.price,
+          unit: med.unit,
+          expired: med.expired,
+          medtype_id: med.medtype_id,
+          emp_id_create: med.emp_id_create,
+          created_at: med.created_at,
+        });
+        setSelectedMedType(med.medtype_id);
+        setStatus(med.status);
       }
+    } catch (err) {
+      console.error('Error fetching medicine:', err);
+    } finally {
+      setLoading(false);
     }
+  }
+  
+  if (id) { 
     fetchMedicine();
-  }, [id, reset]);
+  }
 
+}, [id, reset]);
   const handleSave = async (formData) => {
     setLoading(true);
     try {
@@ -197,6 +203,16 @@ const EditMedicines = ({ id, setShow, getList }) => {
             required: 'ກະລຸນາປ້ອນລາຄາ',
             min: { value: 0, message: 'ລາຄາຕ້ອງຫຼາຍກວ່າ 0' },
           }}
+          errors={errors}
+        />
+
+        <InputBox
+          label="ຫົວໜ່ວຍ"
+          name="unit"
+          type="text"
+          placeholder="ປ້ອນຫົວໜ່ວຍເຊັ່ນ: ກັບ"
+          register={register}
+          formOptions={{ required: 'ກະລຸນາປ້ອນຫົວໜ່ວຍ' }}
           errors={errors}
         />
 

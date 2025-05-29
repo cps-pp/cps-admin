@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { Space, Table } from 'antd';
 import useStoreMed from '../../../../store/selectMed';
-import { URLBaseLocal, URLTest } from '../../../../lib/MyURLAPI';
 
 export default function ListMed({ selectService, dataValue, tapService }) {
   const [dataMed, setDataMed] = useState([]);
   const { addMedicine, medicines } = useStoreMed();
   const [loading, setLoading] = useState(false);
 
+
+  
   const fetchMedList = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`https://zkk8zxq6-4000.asse.devtunnels.ms/src/manager/medicines/${'M1'}`);
+      const res = await fetch(
+        `http://localhost:4000/src/manager/medicines/${'M1'}`,
+      );
       // const res = await fetch(`${URLBaseLocal}/src/manager/servicelist`);
       const data = await res.json();
       setDataMed(data.data);
@@ -22,7 +25,6 @@ export default function ListMed({ selectService, dataValue, tapService }) {
       setLoading(false);
     }
   };
-
 
   useEffect(() => {
     if (tapService === '2') {
@@ -57,7 +59,9 @@ export default function ListMed({ selectService, dataValue, tapService }) {
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <button type="button" onClick={() => selectionMedicine(record)}>Select</button>
+          <button type="button" onClick={() => selectionMedicine(record)}>
+            Select
+          </button>
         </Space>
       ),
     },

@@ -41,7 +41,9 @@ body {
 .ant-table-cell{
   font-family: 'Noto Sans Lao', serif !important; 
 }  
-
+.ant-input{
+   font-family: 'Noto Sans Lao', serif !important; 
+}
 /* third-party libraries CSS */
 
 .tableCheckbox:checked ~ div span {
