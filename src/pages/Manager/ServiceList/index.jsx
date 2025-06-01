@@ -71,7 +71,7 @@ const ServicePage = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:4000/manager/src/servicelist/${selectedServiceId}`,
+        `http://localhost:4000/src/manager/servicelist/${selectedServiceId}`,
         {
           method: 'DELETE',
         }
@@ -180,6 +180,8 @@ const ServicePage = () => {
                     <td className="px-4 py-4">{service.ser_id}</td>
 
                     <td className="px-4 py-4">{service.ser_name}</td>
+                   <td className="px-4 py-4">{service.ispackage }</td>
+
                     <td className="px-4 py-4">
                       {(service.price * 1).toLocaleString()}
                     </td>

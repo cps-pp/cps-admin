@@ -165,13 +165,13 @@ const paginatedPackets = (filteredPackets || []).slice(
                      className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
                     <td className="px-4 py-4">{packet.packetdetail_id}</td>
-                    <td className="px-4 py-4">{packet.packet_id}</td>
+                    <td className="px-4 py-4">{packet.ser_id}</td>
                     <td className="px-4 py-4">{packet.med_id}</td>
                   
                     <td className="px-4 py-4 text-center">
                       <TableAction
-                        onEdit={() => handleEdit(packet.packet_id)}
-                        onDelete={openDeleteModal(packet.packet_id)}
+                        onEdit={() => handleEdit(packet.packetdetail_id)}
+                        onDelete={openDeleteModal(packet.packetdetail_id)}
                       />
                     </td>
                   </tr>

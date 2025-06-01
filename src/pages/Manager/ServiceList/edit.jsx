@@ -9,6 +9,7 @@ import PriceInput from '@/components/Forms/PriceInput';
 import InputBox from '../../../components/Forms/Input_new';
 import PriceInputBox from '../../../components/Forms/PriceInput';
 import ButtonBox from '../../../components/Button';
+import SelectBox from '../../../components/Forms/Select';
 
 const EditServicerList = ({ id, onClose, setShow, getList }) => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const EditServicerList = ({ id, onClose, setShow, getList }) => {
     register,
     handleSubmit,
     getValues,
+    reset,
     formState: { errors },
     setValue,
   } = useForm();
@@ -23,27 +25,62 @@ const EditServicerList = ({ id, onClose, setShow, getList }) => {
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false);
   const dispatch = useAppDispatch();
+  const [ispackage, setPack] = useState('');
 
   useEffect(() => {
     const fetchListData = async () => {
+      if (!id) {
+        console.error('Patient ID is undefined');
+        return;
+      }
       try {
-        const response = await fetch(
-          `http://localhost:4000/src/manager/servicelist/${id}`,
-        );
+        const response = await fetch(`http://localhost:4000/src/manager/servicelist/${id}`);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        const data = await response.json();
-        setValue('ser_name', data.data.ser_name);
-        setValue('price', data.data.price);
+        const result = await response.json();
+
+        reset(result.data);
+        setPack(result.data.ispackage);
         setLoading(false);
-      } catch (error) {
-        console.error('Error fetching servicelist data:', error);
+      } catch (err) {
+        console.error(err);
+      
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchListData();
-  }, [id, setValue, fetching]);
+  }, [id, reset, fetching]);
+  useEffect(() => {
+    if (ispackage) {
+      setValue('ispackage', ispackage);
+    }
+  }, [ispackage, setValue]);
+
+  // useEffect(() => {
+  //   const fetchListData = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         `http://localhost:4000/src/manager/servicelist/${id}`,
+  //       );
+  //       if (!response.ok) {
+  //         throw new Error(`HTTP error! Status: ${response.status}`);
+  //       }
+  //       const data = await response.json();
+  //       setValue('ser_name', data.data.ser_name);
+  //       setValue('price', data.data.price);
+  //       setPack(data.data.ispackage);
+  //       setValue('ispackage', data.data.ispackage);
+  //       setLoading(false);
+  //     } catch (error) {
+  //       console.error('Error fetching servicelist data:', error);
+  //     }
+  //   };
+
+  //   fetchListData();
+  // }, [id, setValue, fetching]);
 
   const handleSave = async (formData) => {
     setLoading(true);
@@ -58,6 +95,7 @@ const EditServicerList = ({ id, onClose, setShow, getList }) => {
           body: JSON.stringify({
             ser_name: formData.ser_name,
             price: formData.price,
+            ispackage: formData.ispackage,
           }),
         },
       );
@@ -120,7 +158,15 @@ const EditServicerList = ({ id, onClose, setShow, getList }) => {
           }}
           errors={errors}
         />
-
+       <SelectBox
+          label="ແພັກເກັດ"
+          name="ແພັກເກັດ"
+          options={['NOT', 'PACKAGE']}
+          register={register}
+          errors={errors}
+          value={ispackage}
+          onSelect={(e) => setPack(e.target.value)}
+        />
         <div className="mt-8 flex justify-end space-x-4 col-span-full py-4">
           
           <ButtonBox variant="save" type="submit" disabled={loading}>

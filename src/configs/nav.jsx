@@ -186,10 +186,7 @@ export const MENU = [
         name: 'ຂໍ້ມູນລາຍການບໍລິການ',
         path: '/manager/servicelist',
       },
-      {
-        name: 'ຂໍ້ມູນລາຍແພັກແກັດ',
-        path: '/manager/packet',
-      },
+   
       {
         name: 'ຂໍ້ມູນລາຍລະອຽດແພັກແກັດ',
         path: '/manager/packetdetail',

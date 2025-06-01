@@ -26,7 +26,6 @@ import ReportPer from '../pages/report/ReportPer';
 import ReportImport from '../pages/report/ReportImport';
 import ReportOrder from '../pages/report/ReportOrder';
 import DetailPatientService from '../pages/Service/Detail';
-import PacketPage from '../pages/Manager/PacketOne';
 import PackectDetail from '../pages/Manager/PackectDetail';
 
 export const ROUTES = [
@@ -90,11 +89,7 @@ export const ROUTES = [
     title: 'Packet Detail | CPS Admin',
     component: <PackectDetail />,
   },
-  {
-    path: '/manager/packet',
-    title: 'Packet | CPS Admin',
-    component: <PacketPage />,
-  },
+
 
   // -------------------------- Exchange Path --------------------------------
   {
