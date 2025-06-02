@@ -212,6 +212,8 @@ const MedicinesPage = () => {
   };
 
   const handleEditMedicine = (id) => {
+    console.log('Edit clicked with ID:', id, 'Type:', typeof id);
+    console.log('Medicine data for this ID:', medicines.find(m => m.med_id === id));
     setSelectedId(id);
     setShowEditModal(true);
   };
@@ -309,6 +311,7 @@ const MedicinesPage = () => {
                     <td className="px-4 py-4">
                       {(medicine.price * 1).toLocaleString()}
                     </td>
+                    <td className="px-4 py-4">{medicine.unit}</td>
                     <td className="px-4 py-4">
                       {new Date(medicine.expired).toLocaleDateString('en-US', {
                         day: '2-digit',

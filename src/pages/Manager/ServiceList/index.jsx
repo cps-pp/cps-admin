@@ -149,7 +149,7 @@ const ServicePage = () => {
 
       <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
-          ຈັດການຂໍ້ມູນລາຍງານບໍລິການ
+          ຈັດການຂໍ້ມູນລາຍການບໍລິການ
         </h1>
         <div className="flex items-center gap-2">
           <Button
@@ -199,11 +199,12 @@ const ServicePage = () => {
                     <td className="px-4 py-4">{service.ser_id}</td>
 
                     <td className="px-4 py-4">{service.ser_name}</td>
-                   <td className="px-4 py-4">{service.ispackage }</td>
+
 
                     <td className="px-4 py-4">
                       {(service.price * 1).toLocaleString()}
                     </td>
+                    <td className="px-4 py-4">{service.ispackage }</td>
 
                     <td className="px-3 py-4 text-center">
                       <TableAction

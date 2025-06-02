@@ -10,11 +10,19 @@ import { openAlert } from '@/redux/reducer/alert';
 import { usePrompt } from '@/hooks/usePrompt';
 
 const CreateServiceList = ({ setShow, getList, existingIds = [], onCloseCallback }) => {
-  const { register, handleSubmit, reset, setFocus, formState: { errors, isDirty } } = useForm();
+  const { register, handleSubmit, reset, setFocus, formState: { errors, isDirty } } = useForm({
+    defaultValues: {
+      ser_id: '',
+      ser_name: '',
+      price: '',
+      ispackage: 'NOT' // ตั้งค่าเริ่มต้น
+    }
+  });
   const dispatch = useAppDispatch();
 
   const [loading, setLoading] = useState(false);
-  const [ispackage, setPack] = useState('NOT');
+  // ลบ state ispackage ออก เพราะใช้ react-hook-form ควบคุมแทน
+  // const [ispackage, setPack] = useState('NOT');
 
   const isDirtyRef = useRef(isDirty);
 
@@ -72,7 +80,7 @@ const CreateServiceList = ({ setShow, getList, existingIds = [], onCloseCallback
           ser_id: formData.ser_id,
           ser_name: formData.ser_name,
           price: formData.price,
-          ispackage: ispackage, // ใช้ state จาก select
+          ispackage: formData.ispackage, // ใช้ค่าจาก formData แทน state
         }),
       });
 
@@ -140,15 +148,25 @@ const CreateServiceList = ({ setShow, getList, existingIds = [], onCloseCallback
           }}
           errors={errors}
         />
-        <SelectBox
-          label="ແພັກເກັດ"
-          name="ispackage"
-          options={['NOT', 'PACKAGE']}
-          register={register}
-          errors={errors}
-          value={ispackage}
-          onChange={(e) => setPack(e.target.value)}
-        />
+        
+        {/* วิธีที่ 2: หาก SelectBox ยังไม่ทำงาน ให้ใช้ select ธรรมดา */}
+        
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2 text-black dark:text-white">
+            ແພັກເກັດ
+          </label>
+          <select
+            {...register('ispackage', { required: 'ກະລຸນາເລືອກປະເພດ' })}
+            className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+          >
+            <option value="NOT">NOT </option>
+            <option value="PACKAGE">PACKAGE </option>
+          </select>
+          {errors.ispackage && (
+            <p className="text-red-500 text-sm mt-1">{errors.ispackage.message}</p>
+          )}
+        </div>
+        
 
         <div className="mt-8 flex justify-end space-x-4 col-span-full px-4 py-4">
           <ButtonBox variant="save" type="submit" disabled={loading}>
@@ -161,3 +179,4 @@ const CreateServiceList = ({ setShow, getList, existingIds = [], onCloseCallback
 };
 
 export default CreateServiceList;
+
