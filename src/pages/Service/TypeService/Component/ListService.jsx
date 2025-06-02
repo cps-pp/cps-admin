@@ -1,20 +1,23 @@
 import { Table } from 'antd';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import useStoreServices from '../../../../store/selectServices';
+import { URLBaseLocal } from '../../../../lib/MyURLAPI';
 
 export default function ListService({ selectService, tapService }) {
-  const [dataService, setDataService] = useState([]);
+  //------Store
+  const { addService } = useStoreServices();
 
-  const { addService, services: listSelect } = useStoreServices((state) => ({
-    addService: state.addService,
-    services: state.services,
-  }));
+  const [dataService, setDataService] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const fetchServiceList = async () => {
+    setLoading(true);
     try {
-      const res = await fetch('http://localhost:4000/src/manager/servicelist');
+      // const res = await fetch(`${URLTest}/src/manager/servicelist`);
+      const res = await fetch(`${URLBaseLocal}/src/manager/servicelist`);
       const data = await res.json();
       setDataService(data.data);
+      setLoading(false);
     } catch (err) {
       console.error('Error fetching service list:', err);
     }
@@ -27,14 +30,12 @@ export default function ListService({ selectService, tapService }) {
   }, [tapService]);
 
   const selectionService = async (record) => {
-    // await addService(record);
+    await addService(record);
   };
 
   const columns = [
     { title: 'Services', dataIndex: 'ser_id', key: 'ser_id' },
-
     { title: 'Name', dataIndex: 'ser_name', key: 'ser_name' },
-
     {
       title: 'Price',
       dataIndex: 'price',
@@ -42,7 +43,7 @@ export default function ListService({ selectService, tapService }) {
       render: (price) => <a>{price?.toLocaleString()}</a>,
     },
     {
-      title: 'Action',
+      title: 'ຈັດການ',
       key: 'action',
       render: (_, record) => (
         <button
@@ -54,19 +55,24 @@ export default function ListService({ selectService, tapService }) {
           }}
           className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
         >
-          select
+          ເພີ່ມ
         </button>
       ),
     },
   ];
 
+  // console.log(services)
+
   return (
-    <Table
-      columns={columns}
-      dataSource={dataService}
-      pagination={{ pageSize: 5, size: 'middle' }}
-      rowKey="ser_id"
-      size="small"
-    />
+    <div>
+      <Table
+        columns={columns}
+        loading={loading}
+        dataSource={dataService || []}
+        pagination={{ pageSize: 5, size: 'middle' }}
+        rowKey="ser_id"
+        size="small"
+      />
+    </div>
   );
 }

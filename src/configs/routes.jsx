@@ -5,7 +5,7 @@ import NotFound from '@/pages/NotFound';
 import PatientPage from '@/pages/Manager/Patient';
 import ServcicePage from '@/pages/Manager/ServiceList';
 import SupplierPage from '@/pages/Manager/Supplier';
-// import DetailPatient from '@/pages/Manager/Patient/detail';
+import DetailPatient from '@/pages/Manager/Patient/detail';
 import DiseasePage from '@/pages/Manager/Disease';
 import CreateFollow from '@/pages/Follow/create';
 import Order from '@/pages/Order';
@@ -26,6 +26,7 @@ import ReportPer from '../pages/report/ReportPer';
 import ReportImport from '../pages/report/ReportImport';
 import ReportOrder from '../pages/report/ReportOrder';
 import DetailPatientService from '../pages/Service/Detail';
+import PackectDetail from '../pages/Manager/PackectDetail';
 
 export const ROUTES = [
   {
@@ -45,11 +46,11 @@ export const ROUTES = [
     component: <PatientPage />,
   },
  
-  // {
-  //   path: '/patient/detail/:id',
-  //   title: 'Patient Detail | CPS Admin',
-  //   component: <DetailPatient />,
-  // },
+  {
+    path: '/patient/detail/:id',
+    title: 'Patient Detail | CPS Admin',
+    component: <DetailPatient />,
+  },
   //  -------------------------- Employee Path --------------------------------
   {
     path: '/manager/employee',
@@ -82,6 +83,13 @@ export const ROUTES = [
     title: 'Service List | CPS Admin',
     component: <ServcicePage />,
   },
+  // -------------------------- Packet Path --------------------------------
+  {
+    path: '/manager/packetdetail',
+    title: 'Packet Detail | CPS Admin',
+    component: <PackectDetail />,
+  },
+
 
   // -------------------------- Exchange Path --------------------------------
   {

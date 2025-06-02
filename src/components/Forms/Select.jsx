@@ -51,9 +51,9 @@ const SelectBox = ({
         </span>
       </div>
 
-      {errors[name]?.type === 'required' && (
+      {/* {errors[name]?.type === 'required' && (
         <span className="text-red-500">ກະລຸນາເລືອກ {name}</span>
-      )}
+      )} */}
     </div>
   );
 };

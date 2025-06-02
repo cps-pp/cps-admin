@@ -1,48 +1,39 @@
-import React, { useState, useEffect, useRef } from 'react'; // ✅ เพิ่ม useRef
-import { useForm } from "react-hook-form";
-import Button from "@/components/Button";
-import Input from "@/components/Forms/Input";
-import PriceInput from "@/components/Forms/PriceInput";
-import Loader from "@/common/Loader";
-import { useAppDispatch } from "@/redux/hook";
-import { openAlert } from "@/redux/reducer/alert";
-import InputBox from "../../../components/Forms/Input_new";
-import PriceInputBox from "../../../components/Forms/PriceInput";
-import ButtonBox from "../../../components/Button";
+import React, { useState, useEffect, useRef } from 'react'; 
+import { useForm } from 'react-hook-form';
+import ButtonBox from '../../../components/Button';
+import InputBox from '../../../components/Forms/Input_new';
+import PriceInputBox from '../../../components/Forms/PriceInput';
+import SelectBox from '../../../components/Forms/Select';
+import Loader from '@/common/Loader';
+import { useAppDispatch } from '@/redux/hook';
+import { openAlert } from '@/redux/reducer/alert';
 import { usePrompt } from '@/hooks/usePrompt';
 
-const CreateServiceList = ({ setShow, getList, existingIds, onCloseCallback }) => {
-  const { register, handleSubmit, reset, setFocus, formState: { errors, isDirty  } } = useForm();
+const CreateServiceList = ({ setShow, getList, existingIds = [], onCloseCallback }) => {
+  const { register, handleSubmit, reset, setFocus, formState: { errors, isDirty } } = useForm();
   const dispatch = useAppDispatch();
 
   const [loading, setLoading] = useState(false);
+  const [ispackage, setPack] = useState('NOT');
 
-  // ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
   const isDirtyRef = useRef(isDirty);
-  
-  // ✅ อัพเดต ref ทุกครั้งที่ isDirty เปลี่ยน
+
   useEffect(() => {
     isDirtyRef.current = isDirty;
   }, [isDirty]);
-  
-  // ✅ เตือนเมื่อมีการพยายามออกจากหน้าด้วย navigation (Back / เปลี่ยน route)
+
   usePrompt('ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.', isDirty);
 
-  // ✅ เตือนเมื่อจะรีเฟรช / ปิดแท็บ
   useEffect(() => {
     const handleBeforeUnload = (event) => {
       if (!isDirtyRef.current) return;
       event.preventDefault();
       event.returnValue = '';
     };
-
     window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, []);
 
-  // ✅ เตือนเมื่อคลิกปิดฟอร์ม - ใช้ current value จาก ref
   const handleCloseForm = () => {
     if (isDirtyRef.current) {
       const confirmLeave = window.confirm('ທ່ານຕ້ອງການປິດຟອມແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ປ້ອນຈະສູນເສຍ');
@@ -51,18 +42,15 @@ const CreateServiceList = ({ setShow, getList, existingIds, onCloseCallback }) =
     setShow(false);
   };
 
-  // ✅ ส่ง handleCloseForm ไปให้ parent component แค่ครั้งเดียว
   useEffect(() => {
     if (onCloseCallback) {
       onCloseCallback(() => handleCloseForm);
     }
   }, [onCloseCallback]);
 
-
   const handleSave = async (formData) => {
     setLoading(true);
 
-    // เช็คว่ามี ser_id ซ้ำไหม
     if (existingIds.includes(formData.ser_id)) {
       setFocus('ser_id');
       dispatch(
@@ -70,7 +58,7 @@ const CreateServiceList = ({ setShow, getList, existingIds, onCloseCallback }) =
           type: 'error',
           title: 'ຜິດພາດ',
           message: 'ລະຫັດປະເພດຢາ ມີໃນລະບົບແລ້ວ',
-        }),
+        })
       );
       setLoading(false);
       return;
@@ -79,19 +67,16 @@ const CreateServiceList = ({ setShow, getList, existingIds, onCloseCallback }) =
     try {
       const response = await fetch('http://localhost:4000/src/manager/servicelist', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ser_id: formData.ser_id,
           ser_name: formData.ser_name,
           price: formData.price,
+          ispackage: ispackage, // ใช้ state จาก select
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
       setShow(false);
       await getList();
@@ -108,7 +93,7 @@ const CreateServiceList = ({ setShow, getList, existingIds, onCloseCallback }) =
         openAlert({
           type: 'error',
           title: 'ເກີດຂໍ້ຜິດພາດ',
-          message:  'ມີຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
+          message: 'ມີຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
         })
       );
     } finally {
@@ -120,8 +105,8 @@ const CreateServiceList = ({ setShow, getList, existingIds, onCloseCallback }) =
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
-      <div className="flex items-center border-b border-stroke dark:border-strokedark pb-4">
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
+      <div className="flex items-center border-b border-stroke dark:border-strokedark pb-4 px-4">
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
           ເພີ່ມຂໍ້ມູນ
         </h1>
       </div>
@@ -132,16 +117,16 @@ const CreateServiceList = ({ setShow, getList, existingIds, onCloseCallback }) =
           type="text"
           placeholder="ປ້ອນລະຫັດ"
           register={register}
-          formOptions={{ required: "ກະລຸນາປ້ອນລະຫັດກ່ອນ" }}
+          formOptions={{ required: 'ກະລຸນາປ້ອນລະຫັດກ່ອນ' }}
           errors={errors}
         />
         <InputBox
           label="ຊື່ລາຍການ"
           name="ser_name"
           type="text"
-          placeholder="ປ້ອນຊຶ່ລາຍການ"
+          placeholder="ປ້ອນຊື່ລາຍການ"
           register={register}
-          formOptions={{ required: "ກະລຸນາປ້ອນຊື່ລາຍການກ່ອນ" }}
+          formOptions={{ required: 'ກະລຸນາປ້ອນຊື່ລາຍການກ່ອນ' }}
           errors={errors}
         />
         <PriceInputBox
@@ -155,9 +140,17 @@ const CreateServiceList = ({ setShow, getList, existingIds, onCloseCallback }) =
           }}
           errors={errors}
         />
+        <SelectBox
+          label="ແພັກເກັດ"
+          name="ispackage"
+          options={['NOT', 'PACKAGE']}
+          register={register}
+          errors={errors}
+          value={ispackage}
+          onChange={(e) => setPack(e.target.value)}
+        />
+
         <div className="mt-8 flex justify-end space-x-4 col-span-full px-4 py-4">
-
-
           <ButtonBox variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </ButtonBox>

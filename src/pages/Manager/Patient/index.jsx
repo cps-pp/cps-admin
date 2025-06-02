@@ -13,7 +13,6 @@ import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import SearchBox from '../../../components/Forms/Search_New';
-
 const PatientPage = () => {
   const [patients, setPatients] = useState([]);
   const [filteredPatients, setFilteredPatients] = useState([]);
@@ -148,6 +147,13 @@ useEffect(() => {
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
+  const navigate = useNavigate();
+
+
+  const handleViewPatient = (id) => {
+    navigate(`/patient/detail/${id}`);
+  };
+
 
   return (
     <>
@@ -229,6 +235,7 @@ useEffect(() => {
                       <TableAction
                         onDelete={openDeleteModal(patient.patient_id)}
                         onEdit={() => handleEdit(patient.patient_id)}
+                        onView={() => handleViewPatient(patient.patient_id)}  
                       />
                     </td>
                   </tr>

@@ -69,7 +69,7 @@ const PriceInputBox = ({
     <div>
       {label && (
         <label
-          className="mb-3 block text-sm font-medium text-strokedark dark:text-bodydark3"
+          className="mb-1 block text-sm font-medium text-strokedark dark:text-bodydark3"
           htmlFor={name}
         >
           {label}
