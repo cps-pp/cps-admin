@@ -210,7 +210,6 @@ const BillPopup = ({
                 </div>
               </div>
             </div>
-         
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -333,65 +332,43 @@ const BillPopup = ({
           )}
 
           {/* Medicines Table */}
+          {/* Medicines Section */}
           {medicines.length > 0 && (
-            <div className="mb-6">
-              <h3 className="font-semibold text-gray-800 mb-3">ຢາທີ່ຈ່າຍ:</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full border border-gray-300 text-sm">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th className="border border-gray-300 px-3 py-2 text-left">
-                        ລຳດັບ
-                      </th>
-                      <th className="border border-gray-300 px-3 py-2 text-left">
-                        ຊື່ຢາ
-                      </th>
-                      <th className="border border-gray-300 px-3 py-2 text-center">
-                        ຈຳນວນ
-                      </th>
-                      <th className="border border-gray-300 px-3 py-2 text-right">
-                        ລາຄາ/ຫົວ
-                      </th>
-                      <th className="border border-gray-300 px-3 py-2 text-right">
-                        ລາຄາລວມ
-                      </th>
+            <div className="bg-gray-50 p-4 rounded-lg mb-8">
+              <h3 className="font-semibold text-form-strokedark mb-3 flex items-center">
+                <Receipt className="mr-2" size={18} />
+                ລາຍການຢາ
+              </h3>
+              <div className="text-sm">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="py-2 px-2">#</th>
+                      <th className="py-2 px-2">ຊື່ຢາ</th>
+                      <th className="py-2 px-2">ຈຳນວນ</th>
+                      <th className="py-2 px-2">ລາຄາ/ຫນ່ວຍ</th>
+                      <th className="py-2 px-2">ລາຄາລວມ</th>
                     </tr>
                   </thead>
                   <tbody>
                     {medicines.map((medicine, index) => (
-                      <tr key={index} className="hover:bg-gray-50">
-                        <td className="border border-gray-300 px-3 py-2">
-                          {index + 1}
-                        </td>
-                        <td className="border border-gray-300 px-3 py-2">
-                          {medicine.name || medicine.med_name || 'N/A'}
-                        </td>
-                        <td className="border border-gray-300 px-3 py-2 text-center">
-                          {medicine.qty}
-                        </td>
-                        <td className="border border-gray-300 px-3 py-2 text-right">
+                      <tr key={index} className="border-b border-gray-100">
+                        <td className="py-1 px-2">{index + 1}</td>
+                        <td className="py-1 px-2">{medicine.name}</td>
+                        <td className="py-1 px-2">{medicine.qty}</td>
+                        <td className="py-1 px-2">
                           {formatCurrency(medicine.price)}
                         </td>
-                        <td className="border border-gray-300 px-3 py-2 text-right">
+                        <td className="py-1 px-2">
                           {formatCurrency(medicine.price * medicine.qty)}
                         </td>
                       </tr>
                     ))}
                   </tbody>
-                  <tfoot className="bg-gray-100">
-                    <tr>
-                      <td
-                        colSpan="4"
-                        className="border border-gray-300 px-3 py-2 text-right font-semibold"
-                      >
-                        ລວມຢາ:
-                      </td>
-                      <td className="border border-gray-300 px-3 py-2 text-right font-semibold">
-                        {formatCurrency(totalMedicineCost)}
-                      </td>
-                    </tr>
-                  </tfoot>
                 </table>
+                <div className="text-right font-semibold mt-3">
+                  ລາຄາລວມຢາ: {formatCurrency(totalMedicineCost)}
+                </div>
               </div>
             </div>
           )}
@@ -399,7 +376,9 @@ const BillPopup = ({
           {/* Notes */}
           {inspectionData?.note && (
             <div className="mb-6">
-              <h3 className="font-semibold text-form-strokedark mb-2">ໝາຍເຫດ:</h3>
+              <h3 className="font-semibold text-form-strokedark mb-2">
+                ໝາຍເຫດ:
+              </h3>
               <p className="bg-blue-50 p-3 rounded  text-sm">
                 {inspectionData.note}
               </p>
