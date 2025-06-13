@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'; // ✅ เพิ่ม useRef
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import Loader from '@/common/Loader';
@@ -23,12 +23,12 @@ const CreateCategory = ({ setShow, getListCategory, existingIds, onCloseCallback
 
   // ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
   const isDirtyRef = useRef(isDirty);
-  
+
   // ✅ อัพเดต ref ทุกครั้งที่ isDirty เปลี่ยน
   useEffect(() => {
     isDirtyRef.current = isDirty;
   }, [isDirty]);
-  
+
   // ✅ เตือนเมื่อมีการพยายามออกจากหน้าด้วย navigation (Back / เปลี่ยน route)
   usePrompt('ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.', isDirty);
 
@@ -61,6 +61,18 @@ const CreateCategory = ({ setShow, getListCategory, existingIds, onCloseCallback
       onCloseCallback(() => handleCloseForm);
     }
   }, [onCloseCallback]);
+
+  // ✅ แก้ไขฟังก์ชันล้างข้อมูล
+  const handleClearForm = () => {
+    // ล้างข้อมูลฟอร์มและรีเซ็ต isDirty
+    reset({
+      medtype_id: '',
+      type_name: ''
+    }), 
+
+    // อัพเดต ref ให้เป็น false ทันที
+    isDirtyRef.current = false;
+  };
 
   const handleSave = async (formData) => {
     setLoading(true);
@@ -150,7 +162,15 @@ const CreateCategory = ({ setShow, getListCategory, existingIds, onCloseCallback
         />
 
         <div className="mt-8 flex justify-end space-x-4 py-4">
-          
+          <ButtonBox
+            variant="cancel"
+            type="button"
+            onClick={handleClearForm}
+            disabled={loading}
+          >
+            ລ້າງຂໍ້ມູນ
+          </ButtonBox>
+
           <ButtonBox variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </ButtonBox>

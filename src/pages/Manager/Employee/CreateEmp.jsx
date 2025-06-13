@@ -27,47 +27,64 @@ const CreateEmployee = ({ setShow, getList, existingIds, onCloseCallback }) => {
   const [role, setRole] = useState('');
   const [gender, setGender] = useState('');
 
- // ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
-   const isDirtyRef = useRef(isDirty);
-   
-   // ✅ อัพเดต ref ทุกครั้งที่ isDirty เปลี่ยน
-   useEffect(() => {
-     isDirtyRef.current = isDirty;
-   }, [isDirty]);
-   
-   // ✅ เตือนเมื่อมีการพยายามออกจากหน้าด้วย navigation (Back / เปลี่ยน route)
-   usePrompt('ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.', isDirty);
- 
-   // ✅ เตือนเมื่อจะรีเฟรช / ปิดแท็บ
-   useEffect(() => {
-     const handleBeforeUnload = (event) => {
-       if (!isDirtyRef.current) return;
-       event.preventDefault();
-       event.returnValue = '';
-     };
- 
-     window.addEventListener('beforeunload', handleBeforeUnload);
-     return () => {
-       window.removeEventListener('beforeunload', handleBeforeUnload);
-     };
-   }, []);
- 
-   // ✅ เตือนเมื่อคลิกปิดฟอร์ม - ใช้ current value จาก ref
-   const handleCloseForm = () => {
-     if (isDirtyRef.current) {
-       const confirmLeave = window.confirm('ທ່ານຕ້ອງການປິດຟອມແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ປ້ອນຈະສູນເສຍ');
-       if (!confirmLeave) return;
-     }
-     setShow(false);
-   };
- 
-   // ✅ ส่ง handleCloseForm ไปให้ parent component แค่ครั้งเดียว
-   useEffect(() => {
-     if (onCloseCallback) {
-       onCloseCallback(() => handleCloseForm);
-     }
-   }, [onCloseCallback]);
-     
+  // ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
+  const isDirtyRef = useRef(isDirty);
+
+  // ✅ อัพเดต ref ทุกครั้งที่ isDirty เปลี่ยน
+  useEffect(() => {
+    isDirtyRef.current = isDirty;
+  }, [isDirty]);
+
+  // ✅ เตือนเมื่อมีการพยายามออกจากหน้าด้วย navigation (Back / เปลี่ยน route)
+  usePrompt('ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.', isDirty);
+
+  // ✅ เตือนเมื่อจะรีเฟรช / ปิดแท็บ
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      if (!isDirtyRef.current) return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
+  // ✅ เตือนเมื่อคลิกปิดฟอร์ม - ใช้ current value จาก ref
+  const handleCloseForm = () => {
+    if (isDirtyRef.current) {
+      const confirmLeave = window.confirm('ທ່ານຕ້ອງການປິດຟອມແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ປ້ອນຈະສູນເສຍ');
+      if (!confirmLeave) return;
+    }
+    setShow(false);
+  };
+
+  // ✅ ส่ง handleCloseForm ไปให้ parent component แค่ครั้งเดียว
+  useEffect(() => {
+    if (onCloseCallback) {
+      onCloseCallback(() => handleCloseForm);
+    }
+  }, [onCloseCallback]);
+
+
+  // ✅ แก้ไขฟังก์ชันล้างข้อมูล
+  const handleClearForm = () => {
+    reset({
+      emp_id: '',
+      emp_name: '',
+      emp_surname: '',
+      dob: '',
+      phone: '',
+      address: '',
+    });
+    setGender('');
+    setRole('');
+    isDirtyRef.current = false;
+  };
+
+
   const handleSave = async (data) => {
     setLoading(true);
 
@@ -171,6 +188,7 @@ const CreateEmployee = ({ setShow, getList, existingIds, onCloseCallback }) => {
           value={gender}
           onSelect={(e) => setGender(e.target.value)}
         />
+
         <BoxDate
           select=""
           register={register}
@@ -218,7 +236,14 @@ const CreateEmployee = ({ setShow, getList, existingIds, onCloseCallback }) => {
           onSelect={(e) => setRole(e.target.value)}
         />
         <div className="mt-4 flex justify-end space-x-4 col-span-full py-4">
-
+          <ButtonBox
+            variant="cancel"
+            type="button"
+            onClick={handleClearForm}
+            disabled={loading}
+          >
+            ລ້າງຂໍ້ມູນ
+          </ButtonBox>
           <ButtonBox variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </ButtonBox>

@@ -155,9 +155,9 @@ const OrderCreate = ({ setShow, getList, existingIds, onCloseCallback }) => {
     setLoading(true);
 
     // ✅ แก้ไข: เปรียบเทียบแบบไม่สนใจตัวเล็ก-ใหญ่
-  const inputId = String(data.preorder_id).trim();
-  const existingIdsLower = existingIds.map(id => String(id).toLowerCase().trim());
-  const inputIdLower = inputId.toLowerCase();
+    const inputId = String(data.preorder_id).trim();
+    const existingIdsLower = existingIds.map(id => String(id).toLowerCase().trim());
+    const inputIdLower = inputId.toLowerCase();
 
     if (existingIdsLower.includes(inputIdLower)) {
       setFocus('preorder_id');
@@ -172,19 +172,18 @@ const OrderCreate = ({ setShow, getList, existingIds, onCloseCallback }) => {
       return;
     }
 
-    try {
-      const payload = {
-        preorder_id: data.preorder_id,
-        preorder_date: data.preorder_date,
-        qty: parseInt(data.qty),
-        status: 'ລໍຖ້າ',
-        lot: data.lot || 1,
-        sup_id: sup,
-        med_id: med,
-        emp_id_create: selectEmpCreate,
-        created_at: data.created_at,
-      };
+    // ✅ สร้าง payload ที่ตรงกับ API
+    const payload = {
+      preorder_id: data.preorder_id,
+      preorder_date: data.preorder_date,
+      status: 'ລໍຖ້າຈັດສົ່ງ', // ✅ เพิ่ม default status
+      sup_id: data.supplier, // ✅ แปลงชื่อ field
+      emp_id_create: data.emp_id_create // ✅ แปลงชื่อ field
+    };
 
+    console.log('Payload being sent:', payload); // ✅ Debug log
+
+    try {
       const response = await fetch(
         'http://localhost:4000/src/preorder/preorder',
         {
@@ -198,7 +197,10 @@ const OrderCreate = ({ setShow, getList, existingIds, onCloseCallback }) => {
 
       const result = await response.json();
 
-      if (!response.ok) throw new Error(result.error || 'ບັນທຶກບໍ່ສຳເລັດ');
+      if (!response.ok) {
+        console.error('API Error:', result); // ✅ Debug log
+        throw new Error(result.error || 'ບັນທຶກບໍ່ສຳເລັດ');
+      }
 
       dispatch(
         openAlert({
@@ -217,7 +219,7 @@ const OrderCreate = ({ setShow, getList, existingIds, onCloseCallback }) => {
         openAlert({
           type: 'error',
           title: 'ເກີດຂໍ້ຜິດພາດ',
-          message: 'ການບັນທຶກຂໍ້ມູນມີຂໍ້ຜິດພາດ',
+          message: error.message || 'ການບັນທຶກຂໍ້ມູນມີຂໍ້ຜິດພາດ',
         }),
       );
     } finally {
@@ -251,32 +253,15 @@ const OrderCreate = ({ setShow, getList, existingIds, onCloseCallback }) => {
 
         <BoxDate
           name="preorder_date"
-          label="ວັນທີນັດໝາຍ"
+          label="ວັນທີສັ່ງຊື້"
           register={register}
           errors={errors}
           select={selectedDate}
-          formOptions={{ required: 'ກະລຸນາເລືອກວັນທີນັດໝາຍ' }}
+          formOptions={{ required: 'ກະລຸນາເລືອກວັນທີວັນທີສັ່ງຊື້' }}
           setValue={setValue}
           withTime={false}
         />
-        <InputBox
-          label="ຈຳນວນ"
-          name="qty"
-          type="text"
-          placeholder="ປ້ອນຈຳນວນ"
-          register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນຈຳນວນ' }}
-          errors={errors}
-        />
-        <InputBox
-          label="ລ໋ອດການນຳເຂົ້າ"
-          name="lot"
-          type="number"
-          placeholder="ປ້ອນຈຳນວນ"
-          register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນຈຳນວນ' }}
-          errors={errors}
-        />
+
 
         <SelectBoxId
           label="ຜູ້ສະໜອງ"
@@ -288,26 +273,13 @@ const OrderCreate = ({ setShow, getList, existingIds, onCloseCallback }) => {
           }))}
           register={register}
           errors={errors}
+          formOptions={{ required: 'ກະລຸນາເລືອກຜູ້ສະໜອງ' }} // ✅ เพิ่ม validation
           onSelect={(e) => {
             setSelectSup(e.target.value);
             setSup(e.target.value);
           }}
         />
-        <SelectBoxId
-          label="ຢາ"
-          name="medicine"
-          value={selectMed}
-          options={medicine.map((m) => ({
-            value: m.med_id,
-            label: m.med_name,
-          }))}
-          register={register}
-          errors={errors}
-          onSelect={(e) => {
-            setSelectMed(e.target.value);
-            setMed(e.target.value);
-          }}
-        />
+
 
         <SelectBoxId
           label="ພະນັກງານ (ຜູ້ສ້າງ)"
@@ -319,17 +291,10 @@ const OrderCreate = ({ setShow, getList, existingIds, onCloseCallback }) => {
           }))}
           register={register}
           errors={errors}
+          formOptions={{ required: 'ກະລຸນາເລືອກພະນັກງານ' }} // ✅ เพิ่ม validation
           onSelect={(e) => setSelectEmpCreate(e.target.value)}
         />
-        <BoxDate
-          name="created_at"
-          label="ວັນທີ່"
-          select=""
-          register={register}
-          setValue={setValue}
-          errors={errors}
-          formOptions={{ required: 'ກະລຸນາເລືອກວັນທີ' }}
-        />
+        
 
         <div className="mt-4 flex justify-end space-x-4  py-4">
 

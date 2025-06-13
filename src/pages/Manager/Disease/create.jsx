@@ -60,6 +60,18 @@ const CreateDisease = ({ setShow, getList, existingIds, onCloseCallback }) => {
       }
     }, [onCloseCallback]);
 
+  // ✅ แก้ไขฟังก์ชันล้างข้อมูล
+  const handleClearForm = () => {
+    // ล้างข้อมูลฟอร์มและรีเซ็ต isDirty
+    reset({
+      disease_id: '',
+      disease_name: ''
+    }), 
+
+    // อัพเดต ref ให้เป็น false ทันที
+    isDirtyRef.current = false;
+  };
+
   const handleSave = async (formData) => {
     setLoading(true);
 
@@ -152,6 +164,14 @@ const CreateDisease = ({ setShow, getList, existingIds, onCloseCallback }) => {
 
         <div className="mt-8 flex justify-end space-x-4 col-span-full  py-4">
           
+          <ButtonBox
+            variant="cancel"
+            type="button"
+            onClick={handleClearForm}
+            disabled={loading}
+          >
+            ລ້າງຂໍ້ມູນ
+          </ButtonBox>
           <ButtonBox variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </ButtonBox>

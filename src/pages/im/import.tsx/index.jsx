@@ -4,17 +4,16 @@ import Button from '@/components/Button';
 import Search from '@/components/Forms/Search';
 import { TableAction } from '@/components/Tables/TableAction';
 import ConfirmModal from '@/components/Modal';
-import { iconAdd, PDF } from '@/configs/icon';
+import { iconAdd } from '@/configs/icon';
 import { HeadersImport } from './column/im';
 import CreateImport from './create';
 import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import Alerts from '@/components/Alerts';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-import EditImport from './edit';
-import autoTable from 'jspdf-autotable';
 
+import EditImport from './edit';
+import ViewImport from './view';
+import AddDetailImport from './create_detail';
 
 const ImportPage = () => {
   const [filterIm, setFilterIm] = useState([]);
@@ -24,14 +23,20 @@ const ImportPage = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [Im, setIm] = useState([]);
   const [empName, setEmpName] = useState([]);
-  const [supName, setSupName] = useState([]);
-  const [medName, setMedName] = useState([]);
+
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showAdd_detailModal, setShowAdd_detailModal] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  // เพิ่ม state สำหรับตัวกรอง
+  const [monthFilter, setMonthFilter] = useState('');
+  const [selectedOrder, setSelectedOrder] = useState('');
+  const [selectedEmployee, setSelectedEmployee] = useState('');
+
   const dispatch = useAppDispatch();
-     // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
+
+  // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
   const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
 
   const fetchImport = async () => {
@@ -52,81 +57,13 @@ const ImportPage = () => {
     }
   };
 
-  // ดึงข้อมูลยา
-  useEffect(() => {
-    const fetchMedicine = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('http://localhost:4000/src/manager/medicines');
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log("Medicine Data:", data.data);
-        setMedName(data.data);
-      } catch (error) {
-        console.error('Error fetching medicine data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMedicine();
-  }, []);
-
-  // ฟังก์ชันแปลง med_id เป็นชื่อยา
-  const getMedName = (med_id) => {
-    const med = medName.find((m) => m.med_id === med_id);
-    return med ? (
-      <>
-        {med.med_name}
-      </>
-    ) : (
-      <span className="text-purple-600">-</span>
-    );
-  };
-
   useEffect(() => {
     fetchImport();
   }, []);
 
-  // ดึงข้อมูลผู้สะหนอง
+  // ดึงข้อมูลพนักงาน (คนนำเข้า)
   useEffect(() => {
-    const fetchSup = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('http://localhost:4000/src/manager/supplier'); // URL ตัวอย่าง
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log("Supplier Data:", data.data);
-        setSupName(data.data);
-      } catch (error) {
-        console.error('Error fetching sup data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSup();
-  }, []);
-
-  // ฟังก์ชันแปลง id เป็นชื่อผู้สะหนอง
-  const getSupName = (sup_id) => {
-    const sup = supName.find((s) => s.sup_id === sup_id);
-    console.log("Found:", sup);
-    return sup ? (
-      <>
-        {sup.company_name}
-      </>
-    ) : (
-      <span className="text-purple-600">-</span>
-    );
-  };
-
-  useEffect(() => {
-    const fetchDoctor = async () => {
+    const fetchEmployee = async () => {
       try {
         setLoading(true);
         const response = await fetch('http://localhost:4000/src/manager/emp');
@@ -142,10 +79,11 @@ const ImportPage = () => {
       }
     };
 
-    fetchDoctor();
+    fetchEmployee();
   }, []);
 
-  const getDoctorName = (emp_id) => {
+  // ฟังก์ชันแปลง emp_id เป็นชื่อพนักงาน
+  const getEmployeeName = (emp_id) => {
     const emp = empName.find((employee) => employee.emp_id === emp_id);
     return emp ? (
       <>
@@ -156,19 +94,53 @@ const ImportPage = () => {
     );
   };
 
-  useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilterIm(Im);
-    } else {
-      const filtered = Im.filter((item) =>
+  // ฟังก์ชันกรองข้อมูลแบบรวม
+  const applyFilters = () => {
+    let filtered = [...Im];
+
+    // กรองตาม search query
+    if (searchQuery.trim() !== '') {
+      filtered = filtered.filter((item) =>
         Object.values(item)
           .join(' ')
           .toLowerCase()
           .includes(searchQuery.toLowerCase())
       );
-      setFilterIm(filtered);
+
     }
-  }, [searchQuery, Im]);
+
+    // กรองตามเดือน
+    if (monthFilter) {
+      filtered = filtered.filter((item) => {
+        const itemMonth = new Date(item.im_date).toISOString().slice(0, 7);
+        return itemMonth === monthFilter;
+      });
+    }
+
+    // กรองตามลະຫັດສັ່ງຊື້
+    if (selectedOrder !== '') {
+      filtered = filtered.filter((Im) => Im.preorder_id === selectedOrder);
+    }
+
+    // กรองตามพนักงาน
+    if (selectedEmployee !== '') {
+      filtered = filtered.filter((Im) => Im.emp_id_create === selectedEmployee);
+    }
+    setFilterIm(filtered);
+  };
+
+  // เรียกใช้ฟังก์ชันกรองเมื่อมีการเปลี่ยนแปลงใน filters หรือข้อมูล
+  useEffect(() => {
+    applyFilters();
+  }, [searchQuery, monthFilter, selectedOrder, selectedEmployee, Im]);
+
+  // ฟังก์ชันล้างตัวกรองทั้งหมด
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setMonthFilter('');
+    setSelectedOrder('');
+    setSelectedEmployee('');
+  };
 
   const openDeleteModal = (id) => () => {
     setSelectedId(id);
@@ -210,183 +182,70 @@ const ImportPage = () => {
     }
   };
 
-  const handleEditMedicine = (id) => {
+  const handleEditImport = (id) => {
     setSelectedId(id);
     setShowEditModal(true);
   };
 
-   // ✅ Handler สำหรับปุ่ม X ที่จะใช้ฟังก์ชันจาก CreateCategory
+  // เพิ่มฟังก์ชันสำหรับจัดการ View
+  const handleViewImport = (id) => {
+    setSelectedId(id);
+    setShowViewModal(true);
+  };
+
+  // ✅ ฟังก์ชันนี้ถูกต้องแล้ว - ใช้ setSelectedId
+  const handleAdd_detail = (id) => {
+    setSelectedId(id);
+    setShowAdd_detailModal(true);
+  };
+
+  // ✅ Handler สำหรับปุ่ม X ที่จะใช้ฟังก์ชันจาก CreateImport
   const handleCloseAddModal = () => {
     if (createFormCloseHandler) {
-      // เรียกใช้ฟังก์ชันที่ได้รับมาจาก CreateCategory
+      // เรียกใช้ฟังก์ชันที่ได้รับมาจาก CreateImport
       createFormCloseHandler();
     } else {
       // fallback ถ้าไม่มี handler
-      setShowAddModal(false); // ✅ แก้ไขชื่อตัวแปรให้ถูกต้อง
+      setShowAddModal(false);
     }
   };
 
-  const handleDownloadFile = async (fileName) => {
-    console.log('exportPDF clicked');
+  // แทนที่ฟังก์ชัน handleViewFile เดิมด้วยโค้ดนี้
+  const handleViewFile = (fileName) => {
+    if (!fileName) {
+      alert('ไม่พบไฟล์');
+      return;
+    }
+
+    // ✅ เปิดไฟล์ในหน้าใหม่โดยตรง (ไม่ต้องใช้ fetch)
+    const fileUrl = `http://localhost:4000/src/im/view/${fileName}`;
+    window.open(fileUrl, '_blank');
+  };
+
+  // ✅ หรือถ้าต้องการให้ robust มากขึ้น สามารถใช้แบบนี้
+  const handleViewFileAdvanced = async (fileName) => {
+    if (!fileName) {
+      alert('ไม่พบไฟล์');
+      return;
+    }
+
     try {
-      const response = await fetch(
-        `http://localhost:4000/im/import/download/${fileName}`,
-        {
-          method: 'GET',
-        }
-      );
+      const fileUrl = `http://localhost:4000/src/im/view/${fileName}`;
 
-      if (!response.ok) throw new Error('ไม่สามารถดาวน์โหลดไฟล์ได้');
+      // ✅ ตรวจสอบว่าไฟล์มีอยู่จริงก่อนเปิด
+      const response = await fetch(fileUrl, { method: 'HEAD' });
 
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      if (!response.ok) {
+        throw new Error('ไม่สามารถเปิดไฟล์ได้');
+      }
 
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      // ✅ เปิดไฟล์ในหน้าใหม่
+      window.open(fileUrl, '_blank');
 
-      window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error(error);
-      alert('เกิดข้อผิดพลาดในการดาวน์โหลดไฟล์');
+      console.error('Error viewing file:', error);
+      alert('เกิดข้อผิดพลาดในการเปิดไฟล์');
     }
-  };
-
-  const exportPDF = () => {
-    const doc = new jsPDF('landscape');
-
-    // ใช้ฟอนต์ที่รองรับ Unicode ได้ดีที่สุด
-    doc.setFont("NotoSansLao", "normal");
-
-    // ชื่อหัวข้อ
-    doc.setFontSize(16);
-    doc.text('Import Report', 14, 15);
-
-    // หัวตารางเหมือนเดิม (รักษาตามโค้ดต้นฉบับ)
-    const tableColumn = [
-      "ID",
-      "Import Date",
-      "Quantity",
-      "Expire Date",
-      "Lot",
-      "File",
-      "Supplier",
-      "Medicine",
-      "Created By",
-      "Created Date",
-      "Updated By",
-      "Updated Date"
-    ];
-
-    // แปลงข้อมูล filterIm เป็น row เหมือนเดิม แต่ปรับการแสดงผล
-    const tableRows = filterIm.map(item => {
-      // แปลงวันที่ให้อยู่ในรูปแบบที่อ่านง่าย
-      const formatDate = (dateString) => {
-        if (!dateString) return 'null';
-        return new Date(dateString).toLocaleDateString('en-US', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-        });
-      };
-
-      // หาชื่อผู้สะหนอง
-      const supplier = supName.find(s => s.sup_id === item.sup_id);
-      let supplierName = supplier ? supplier.company_name : (item.sup_id || 'null');
-      // ตัดชื่อให้สั้นลงถ้ายาวเกินไป เพื่อไม่ให้ล้นตาราง
-      if (supplierName && supplierName.length > 20) {
-        supplierName = supplierName.substring(0, 17) + '...';
-      }
-
-      // หาชื่อยา
-      const medicine = medName.find(m => m.med_id === item.med_id);
-      let medicineName = medicine ? medicine.med_name : (item.med_id || 'null');
-      // ตัดชื่อยาให้สั้นลงถ้ายาวเกินไป
-      if (medicineName && medicineName.length > 20) {
-        medicineName = medicineName.substring(0, 17) + '...';
-      }
-
-      // หาชื่อผู้สร้าง
-      const creator = empName.find(e => e.emp_id === item.emp_id_create);
-      let creatorName = creator ? `${creator.emp_name} ${creator.emp_surname}` : (item.emp_id_create || 'null');
-      // ตัดชื่อให้สั้นลงถ้ายาวเกินไป
-      if (creatorName && creatorName.length > 20) {
-        creatorName = creatorName.substring(0, 17) + '...';
-      }
-
-      // หาชื่อผู้อัปเดต
-      const updater = empName.find(e => e.emp_id === item.emp_id_updated);
-      let updaterName = updater ? `${updater.emp_name} ${updater.emp_surname}` : (item.emp_id_updated || 'null');
-      // ตัดชื่อให้สั้นลงถ้ายาวเกินไป
-      if (updaterName && updaterName.length > 20) {
-        updaterName = updaterName.substring(0, 17) + '...';
-      }
-
-      // วันที่อัปเดต
-      const updateDate = item.update_by && !isNaN(new Date(item.update_by).getTime())
-        ? formatDate(item.update_by)
-        : 'null';
-
-      return [
-        item.im_id || 'null',
-        formatDate(item.im_date),
-        item.qty || 'null',
-        formatDate(item.expired),
-        item.lot || 'null',
-        item.file ? 'Yes' : 'null',
-        supplierName,
-        medicineName,
-        creatorName,
-        formatDate(item.created_at),
-        updaterName,
-        updateDate
-      ];
-    });
-
-    // ใส่ตารางใน PDF - ปรับขนาดให้เหมาะสมกับ landscape
-    autoTable(doc, {
-      startY: 25,
-      head: [tableColumn],
-      body: tableRows,
-      styles: {
-        fontSize: 6,
-        cellPadding: 1,
-        font: "NotoSansLao",
-        overflow: 'linebreak',
-        cellWidth: 'wrap'
-      },
-      headStyles: {
-        fillColor: [66, 139, 202],
-        textColor: 255,
-        fontSize: 7,
-        fontStyle: 'bold',
-      },
-      columnStyles: {
-        0: { cellWidth: 18 }, // Import ID
-        1: { cellWidth: 22 }, // Import Date
-        2: { cellWidth: 18 }, // Quantity
-        3: { cellWidth: 22 }, // Expire Date
-        4: { cellWidth: 18 }, // Lot
-        5: { cellWidth: 15 }, // File
-        6: { cellWidth: 30 }, // Supplier
-        7: { cellWidth: 30 }, // Medicine
-        8: { cellWidth: 30 }, // Created By
-        9: { cellWidth: 22 }, // Created Date
-        10: { cellWidth: 30 }, // Updated By
-        11: { cellWidth: 22 }, // Updated Date
-      },
-      margin: { top: 25, left: 5, right: 5 },
-      pageBreak: 'auto',
-      showHead: 'everyPage',
-    });
-
-    // เปิดในหน้าใหม่ (เหมือนเดิม)
-    const pdfBlob = doc.output("blob");
-    const blobUrl = URL.createObjectURL(pdfBlob);
-    window.open(blobUrl);
   };
 
   return (
@@ -398,54 +257,7 @@ const ImportPage = () => {
         </h1>
 
         <div className="ml-auto flex flex-wrap items-center gap-x-2 gap-y-2">
-          {/* ตัวกรองตามผู้ส่ง */}
-          <select
-            className="border border-stroke dark:border-strokedark rounded p-2"
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value === '') {
-                setFilterIm(Im);
-              } else {
-                const filtered = Im.filter((item) => item.sup_id === value);
-                setFilterIm(filtered);
-              }
-            }}
-          >
-            <option value="">-- ກອງຕາມຜູ້ສະໜອງ --</option>
-            {[...new Set(Im.map((item) => item.sup_id))].map((id) => {
-              const supplier = supName.find((s) => s.sup_id === id);
-              return (
-                <option key={id} value={id}>
-                  {supplier ? supplier.company_name : id}
-                </option>
-              );
-            })}
-          </select>
-
-          {/* ตัวกรองตามเดือน */}
-          <input
-            type="month"
-            className="border border-stroke dark:border-strokedark rounded p-2"
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value === '') {
-                setFilterIm(Im);
-              } else {
-                const filtered = Im.filter((item) => {
-                  const itemMonth = new Date(item.im_date).toISOString().slice(0, 7);
-                  return itemMonth === value;
-                });
-                setFilterIm(filtered);
-              }
-            }}
-          />
-
-          {/* ปุ่ม */}
-          <Button onClick={exportPDF} icon={PDF} className="bg-primary">
-            Export
-          </Button>
-
-
+          {/* ปุ่มเพิ่มรายการ */}
           <Button
             onClick={() => setShowAddModal(true)}
             icon={iconAdd}
@@ -456,16 +268,67 @@ const ImportPage = () => {
         </div>
       </div>
 
-
+      {/* ส่วนของตัวกรอง */}
       <div className="grid w-full gap-4 p-4">
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          {/* Search Box */}
+          <Search
+            type="text"
+            name="search"
+            placeholder="ຄົ້ນຫາ..."
+            className="rounded border border-stroke dark:border-strokedark"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
 
-        <Search
-          type="text"
-          name="search"
-          placeholder="ຄົ້ນຫາ..."
-          className="rounded border border-stroke dark:border-strokedark"
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+          {/* ตัวกรองตามລະຫັດສັ່ງຊື້ */}
+          <select
+            className="border border-stroke dark:border-strokedark rounded p-2"
+            value={selectedOrder}
+            onChange={(e) => setSelectedOrder(e.target.value)}
+          >
+            <option value="">-- ກອງຕາມລະຫັດສັ່ງຊື້ --</option>
+            {[...new Set(Im.map((im) => im.preorder_id))].map((pre_id) => (
+              <option key={pre_id} value={pre_id}>
+                {pre_id}
+              </option>
+            ))}
+          </select>
+
+
+          {/* ตัวกรองตามพนักงาน */}
+          <select
+            className="border border-stroke dark:border-strokedark rounded p-2"
+            value={selectedEmployee}
+            onChange={(e) => setSelectedEmployee(e.target.value)}
+          >
+            <option value="">-- ກອງຕາມພະນັກງານ --</option>
+            {[...new Set(Im.map((im) => im.emp_id_create))].map((empId) => {
+              const employee = empName.find((emp) => emp.emp_id === empId);
+              return (
+                <option key={empId} value={empId}>
+                  {employee ? `${employee.emp_name} ${employee.emp_surname}` : empId}
+                </option>
+              );
+            })}
+          </select>
+
+          {/* ตัวกรองตามเดือน */}
+          <input
+            type="month"
+            className="border border-stroke dark:border-strokedark rounded p-2"
+            value={monthFilter}
+            onChange={(e) => setMonthFilter(e.target.value)}
+          />
+
+          {/* ปุ่มล้างตัวกรอง */}
+          <Button
+            onClick={clearAllFilters}
+            className="bg-graydark hover:bg-graydark"
+          >
+            ລ້າງຕົວກອງ
+          </Button>
+        </div>
       </div>
       <div className="overflow-x-auto rounded-lg shadow">
         <table className="w-full text-sm min-w-max table-auto border-collapse overflow-hidden rounded-lg">
@@ -474,7 +337,7 @@ const ImportPage = () => {
               {HeadersImport.map((header, index) => (
                 <th
                   key={index}
-                  className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300 "
+                  className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300"
                 >
                   {header.name}
                 </th>
@@ -488,7 +351,10 @@ const ImportPage = () => {
                   key={index}
                   className="border-b text-sm border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
+                  {/* ລະຫັດນຳເຂົ້າ */}
                   <td className="px-4 py-4">{im.im_id}</td>
+
+                  {/* ມື້ນຳເຂົ້າ */}
                   <td className="px-4 py-4">
                     {new Date(im.im_date).toLocaleDateString('en-US', {
                       day: '2-digit',
@@ -497,169 +363,199 @@ const ImportPage = () => {
                     })}
                   </td>
 
-                  <td className="px-4 py-4">{im.qty}</td>
+                  {/* ລະຫັດສັ່ງຊື້ */}
                   <td className="px-4 py-4">
-                    {new Date(im.expired).toLocaleDateString('en-US', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                    })}
+                    {im.preorder_id || <span className="text-purple-600">-</span>}
                   </td>
-                  <td className="px-4 py-4">{im.lot}</td>
 
+
+                  {/* ໄຟລ */}
                   <td className="px-4 py-4">
                     {im?.file ? (
-                      <button
-                        onClick={() => handleDownloadFile(im.file)}
-                        className="text-blue-500 hover:underline font-semibold"
+                      <span
+                        onClick={() => handleViewFileAdvanced(im.file)}
+                        style={{ color: 'blue', cursor: 'pointer', textDecoration: 'underline' }}
                       >
-                        ດາວໂຫລດ
-                      </button>
+                        open
+                      </span>
                     ) : (
                       <span className="text-purple-600">ບໍ່ພົບໄຟລ</span>
                     )}
                   </td>
 
+                  {/* ຄົນນຳເຂົ້າ */}
                   <td className="px-4 py-4">
-                    {getSupName(im.sup_id)}
+                    {getEmployeeName(im.emp_id_create)}
                   </td>
-                  <td className="px-4 py-4">
-                    {getMedName(im.med_id)}
-                  </td>
-                  <td className="px-4 py-4">
-                    {getDoctorName(im.emp_id_create)}{' '}
-                  </td>
-                  <td className="px-4 py-4">
-                    {new Date(im.created_at).toLocaleDateString('en-US', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                    })}
-                  </td>
-                  <td className="px-4 py-4">
-                    {getDoctorName(im?.emp_id_updated)}
-                    {''}
-                  </td>
-                  <td className="px-4 py-4">
-                    {im?.update_by &&
-
-                      !isNaN(new Date(im.update_by).getTime()) ? (
 
 
-                      new Date(im.update_by).toLocaleDateString('en-US', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                      })
-                    ) : (
-                      <span className="text-purple-600">-</span>
-                    )}
-                  </td>
+                  {/* ຫມາຍເຫດ */}
+                  <td className="px-4 py-4">{im.note}</td>
 
                   <td className="px-3 py-4 text-center">
                     <TableAction
+                      onView={() => handleViewImport(im.im_id)}
+                      onAdd={() => handleAdd_detail(im.im_id)}
+                    />
+                  </td>
+
+                  {/* Actions - เพิ่ม onView ให้กับ TableAction */}
+                  <td className="px-3 py-4 text-center">
+                    <TableAction
                       onDelete={openDeleteModal(im.im_id)}
-                      onEdit={() => handleEditMedicine(im.im_id)}
+                      onEdit={() => handleEditImport(im.im_id)}
                     />
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={12} className="py-4 text-center text-gray-500">
+                <td colSpan={8} className="py-4 text-center text-gray-500">
                   ບໍ່ມີຂໍ້ມູນ
                 </td>
               </tr>
             )}
           </tbody>
         </table>
-
-        {showAddModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
-            <div
-              className="
-        rounded
-        w-full max-w-lg     
-        md:max-w-2xl        
-        lg:max-w-5xl       
-        relative
-        overflow-auto
-        max-h-[90vh]
-      "
-            >
-              {/* ✅ ปุ่ม X ที่ใช้ฟังก์ชันป้องกันจาก CreateCategory */}
-              <button
-                onClick={handleCloseAddModal}
-                className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700 z-10"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-
-              <CreateImport 
-              setShow={setShowAddModal} 
-              getList={fetchImport}  
-              onCloseCallback={setCreateFormCloseHandler} // ✅ ส่ง callback function
-              />
-            </div>
-          </div>
-        )}
-
-        {showEditModal && selectedId && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
-            <div className="
-        rounded
-        w-full max-w-lg     
-        md:max-w-2xl        
-        lg:max-w-5xl       
-        relative
-        overflow-auto
-        max-h-[90vh]
-      "
-            >
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-
-              <EditImport
-                id={selectedId}
-                onClose={() => setShowEditModal(false)}
-                setShow={setShowEditModal}
-                getList={fetchImport}
-              />
-            </div>
-          </div>
-        )}
       </div>
 
+      {/* Modal เพิ่มรายการ */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
+          <div className="rounded w-full max-w-lg md:max-w-2xl lg:max-w-5xl relative overflow-auto max-h-[90vh]">
+            {/* ปุ่ม X */}
+            <button
+              onClick={handleCloseAddModal}
+              className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700 z-10"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            <CreateImport
+              setShow={setShowAddModal}
+              getList={fetchImport}
+              onCloseCallback={setCreateFormCloseHandler}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Modal แก้ไขรายการ */}
+      {showEditModal && selectedId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
+          <div className="rounded w-full max-w-lg md:max-w-2xl lg:max-w-5xl relative overflow-auto max-h-[90vh]">
+            <button
+              onClick={() => setShowEditModal(false)}
+              className="absolute top-4 right-2 text-gray-500 hover:text-gray-700 z-10"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            <EditImport
+              id={selectedId}
+              onClose={() => setShowEditModal(false)}
+              setShow={setShowEditModal}
+              getList={fetchImport}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Modal ดูรายละเอียด - เพิ่ม View Modal */}
+      {showViewModal && selectedId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
+          <div className="rounded w-full max-w-lg md:max-w-2xl lg:max-w-5xl relative overflow-auto max-h-[90vh]">
+            <button
+              onClick={() => setShowViewModal(false)}
+              className="absolute top-4 right-2 text-gray-500 hover:text-gray-700 z-10"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            <ViewImport
+              id={selectedId}
+              onClose={() => setShowViewModal(false)}
+              setShow={setShowViewModal}
+              getList={fetchImport}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Modal ดูรายละเอียด - เพิ่ม View Modal */}
+      {showAdd_detailModal && selectedId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
+          <div className="rounded w-full max-w-lg md:max-w-2xl lg:max-w-5xl relative overflow-auto max-h-[90vh]">
+            <button
+              onClick={() => setShowAdd_detailModal(false)}
+              className="absolute top-4 right-2 text-gray-500 hover:text-gray-700 z-10"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            <AddDetailImport
+              id={selectedId}
+              onClose={() => setShowAdd_detailModal(false)}
+              setShow={setShowAdd_detailModal}
+              getList={fetchImport}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Modal ยืนยันการลบ */}
       <ConfirmModal
         show={showModal}
         setShow={setShowModal}

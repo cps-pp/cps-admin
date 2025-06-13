@@ -14,6 +14,7 @@ import { Follow } from './column/follow';
 const FollowPage = () => {
   const [appointments, setAppointments] = useState([]);
   const [filteredAppointments, setFilteredAppointments] = useState([]);
+  const [todayAppointments, setTodayAppointments] = useState([]);
   const [patientName, setPatientName] = useState([]);
   const [empName, setEmpName] = useState([]);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
@@ -29,7 +30,16 @@ const FollowPage = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showPostponeModal, setShowPostponeModal] = useState(false);
+  const [postponeAppointmentId, setPostponeAppointmentId] = useState(null);
+  const [newDate, setNewDate] = useState('');
   const dispatch = useAppDispatch();
+
+  // Get today's date in YYYY-MM-DD format
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
 
   const fetchAppointments = async () => {
     try {
@@ -50,6 +60,15 @@ const FollowPage = () => {
       setFilteredAppointments(data.data);
 
       const allAppointments = data.data;
+      const today = getTodayDate();
+
+      // Filter today's appointments - เฉพาะวันนี้และสถานะ "ລໍຖ້າ" เท่านั้น
+      const todayAppts = allAppointments.filter(appointment => {
+        const appointmentDate = new Date(appointment.date_addmintted).toISOString().split('T')[0];
+        return appointmentDate === today && appointment.status === 'ລໍຖ້າ';
+      });
+
+      setTodayAppointments(todayAppts);
 
       setTotalCount(allAppointments.length);
       setDoneCount(
@@ -163,6 +182,13 @@ const FollowPage = () => {
         ),
       );
 
+      // Update today's appointments as well
+      setTodayAppointments((prevAppointments) =>
+        prevAppointments.filter(
+          (appointment) => appointment.appoint_id !== selectedAppointmentId,
+        ),
+      );
+
       setShowModal(false);
       dispatch(
         openAlert({
@@ -177,6 +203,97 @@ const FollowPage = () => {
           type: 'error',
           title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
           message: 'ເກີດຂໍ້ຜິດພາດໃນການລົບຂໍ້ມູນ',
+        }),
+      );
+    }
+  };
+
+  // Handle completing appointment (change status to ກວດແລ້ວ)
+  const handleCompleteAppointment = async (appointmentId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:4000/src/appoint/appointmentS/${appointmentId}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            status: 'ກວດແລ້ວ'
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      // Refresh the data - จะทำให้ตารางบนอัพเดทและไม่แสดงรายการที่เสร็จแล้ว
+      fetchAppointments();
+
+      dispatch(
+        openAlert({
+          type: 'success',
+          title: 'ອັບເດດສຳເລັດ',
+          message: 'ປ່ຽນສະຖານະເປັນກວດແລ້ວສຳເລັດ',
+        }),
+      );
+    } catch (error) {
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ອັບເດດບໍ່ສຳເລັດ',
+          message: 'ເກີດຂໍ້ຜິດພາດໃນການອັບເດດສະຖານະ',
+        }),
+      );
+    }
+  };
+
+  // Handle postponing appointment
+  const openPostponeModal = (appointmentId) => {
+    setPostponeAppointmentId(appointmentId);
+    setNewDate('');
+    setShowPostponeModal(true);
+  };
+
+  const handlePostponeAppointment = async () => {
+    if (!postponeAppointmentId || !newDate) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:4000/src/appoint/appointmentD/${postponeAppointmentId}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            date_addmintted: newDate
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      // Refresh the data
+      fetchAppointments();
+      setShowPostponeModal(false);
+
+      dispatch(
+        openAlert({
+          type: 'success',
+          title: 'ເລື່ອນນັດໝາຍສຳເລັດ',
+          message: 'ເປັ່ຽນວັນທີ່ນັດໝາຍສຳເລັດແລ້ວ',
+        }),
+      );
+    } catch (error) {
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ເລື່ອນນັດໝາຍບໍ່ສຳເລັດ',
+          message: 'ເກີດຂໍ້ຜິດພາດໃນການເປັ່ຽນວັນທີ່',
         }),
       );
     }
@@ -248,7 +365,7 @@ const FollowPage = () => {
             </div>
             <div className="ml-4">
               <h4 className="text-lg font-semibold text-strokedark dark:text-white">
-                ຈຳນວນນັດໝາຍທັງໝົດ
+                ຈຳນວນທັງໝົດ
               </h4>
               <p className="text-xl font-bold text-primary">{totalCount}</p>
             </div>
@@ -279,7 +396,7 @@ const FollowPage = () => {
             </div>
             <div className="ml-4">
               <h4 className="text-lg font-semibold text-strokedark dark:text-white">
-                ນັດໝາຍມື້ນີ້
+                ລໍຖ້າກວດ
               </h4>
               <p className="text-xl font-bold text-yellow-500 dark:text-yellow-300">
                 {waitingCount}
@@ -311,13 +428,103 @@ const FollowPage = () => {
             </div>
             <div className="ml-4">
               <h4 className="text-lg font-semibold text-strokedark dark:text-white">
-                ນັດໝາຍກວດສຳເລັດແລ້ວ
+                ກວດສຳເລັດແລ້ວ
               </h4>
               <p className="text-xl font-bold text-green-500 dark:text-green-300">
                 {doneCount}
               </p>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Today's Appointments Section - แสดงเฉพาะสถานะ "ລໍຖ້າ" */}
+      <div className="rounded bg-white pt-4 dark:bg-boxdark mb-6">
+        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
+          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+            ນັດໝາຍມື້ນີ້ທີ່ລໍຖ້າກວດ ({getTodayDate()})
+          </h1>
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            ລໍຖ້າກວດ: {todayAppointments.length} ລາຍການ
+          </div>
+        </div>
+
+        <div className="overflow-x-auto rounded-lg shadow-md">
+          <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
+            <thead>
+              <tr className="text-left bg-secondary2 text-white">
+                <th className="px-4 py-3 font-medium">ID</th>
+                <th className="px-4 py-3 font-medium">ຊື່ຄົນໄຂ້</th>
+                <th className="px-4 py-3 font-medium">ວັນທີ່ແລະເວລາ</th>
+                <th className="px-4 py-3 font-medium">ສະຖານະ</th>
+                <th className="px-4 py-3 font-medium">ແພດ</th>
+                <th className="px-4 py-3 font-medium">ລາຍລະອຽດ</th>
+                <th className="px-4 py-3 font-medium text-center">ການດຳເນີນງານ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {todayAppointments.length > 0 ? (
+                todayAppointments.map((appointment, index) => (
+                  <tr
+                    key={index}
+                    className="border-b border-stroke dark:border-strokedark hover:bg-blue-50 dark:hover:bg-blue-900"
+                  >
+                    <td className="px-4 py-4">{appointment.appoint_id}</td>
+                    <td className="px-4 py-4">
+                      {getPatientName(appointment.patient_id)}
+                    </td>
+                    <td className="px-4 py-4">
+                      {new Date(appointment.date_addmintted).toLocaleString(
+                        'en-US',
+                        {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: false,
+                          timeZone: 'Asia/Bangkok'
+                        },
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="inline-block rounded-full px-3 py-1 text-sm font-medium bg-yellow-100 text-yellow-800">
+                        {appointment.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4">
+                      {getDoctorName(appointment.emp_id)}
+                    </td>
+                    <td className="px-4 py-4">{appointment.description}</td>
+                    <td className="px-3 py-4 text-center">
+                      <div className="flex justify-center gap-2">
+                        <button
+                          onClick={() => handleCompleteAppointment(appointment.appoint_id)}
+                          className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
+                          title="ສຳເລັດສິ້ນ"
+                        >
+                          ສຳເລັດສິ້ນ
+                        </button>
+                        <button
+                          onClick={() => openPostponeModal(appointment.appoint_id)}
+                          className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
+                          title="ເລື່ອນນັດໝາຍ"
+                        >
+                          ເລື່ອນນັດໝາຍ
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="py-8 text-center text-gray-500">
+                    ບໍ່ມີນັດໝາຍທີ່ລໍຖ້າກວດສຳລັບມື້ນີ້
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -392,13 +599,12 @@ const FollowPage = () => {
 
                     <td className="px-4 py-3">
                       <span
-                        className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
-                          appointment.status === 'ກວດແລ້ວ'
+                        className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${appointment.status === 'ກວດແລ້ວ'
                             ? 'bg-green-100 text-green-700'
                             : appointment.status === 'ລໍຖ້າ'
                               ? 'bg-yellow-100 text-yellow-800'
                               : 'bg-gray-100 text-gray-700'
-                        }`}
+                          }`}
                       >
                         {appointment.status}
                       </span>
@@ -513,6 +719,67 @@ const FollowPage = () => {
         message="ທ່ານຕ້ອງການລົບນັດໝາຍນີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteAppointment} // Handle deletion on confirm
       />
+
+      {/* Postpone Modal */}
+      {showPostponeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                ເລື່ອນນັດໝາຍ
+              </h3>
+              <button
+                onClick={() => setShowPostponeModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                ເລືອກວັນທີ່ແລະເວລາໃໝ່:
+              </label>
+              <input
+                type="datetime-local"
+                value={newDate}
+                onChange={(e) => setNewDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowPostponeModal(false)}
+                className="px-4 py-2 text-gray-600 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
+              >
+                ຍົກເລີກ
+              </button>
+              <button
+                onClick={handlePostponeAppointment}
+                disabled={!newDate}
+                className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              >
+                ຢືນຢັນການເລື່ອນ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

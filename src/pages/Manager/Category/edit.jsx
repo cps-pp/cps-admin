@@ -37,6 +37,7 @@ const EditCate = ({ id, onClose, setShow, getList }) => {
     fetchCategoryData();
   }, [id, setValue, fetching]);
 
+
   const handleSave = async (formData) => {
     setLoading(true);
     try {
@@ -101,7 +102,7 @@ const EditCate = ({ id, onClose, setShow, getList }) => {
         />
 
         <div className="mt-8 flex justify-end space-x-4 col-span-full py-4">
-       
+
           <ButtonBox variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </ButtonBox>

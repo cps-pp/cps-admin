@@ -1,7 +1,6 @@
 import { useForm } from 'react-hook-form';
 import Button from '@/components/Button';
-import React, { useState, useEffect, useRef } from 'react'; // ✅ เพิ่ม useRef
-import SelectID from '@/components/Forms/SelectID';
+import React, { useState, useEffect, useRef } from 'react';
 import Loader from '@/common/Loader';
 import Alerts from '@/components/Alerts';
 import { useAppDispatch } from '@/redux/hook';
@@ -10,39 +9,37 @@ import FileUploadInput from '@/components/Forms/FileUploadInput';
 import BoxDate from '../../../components/Date';
 import InputBox from '../../../components/Forms/Input_new';
 import SelectBoxId from '../../../components/Forms/SelectID';
+import { usePrompt } from '@/hooks/usePrompt';
 
-const CreateImport = ({ setShow, getList, onCloseCallback }) => {
+const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
   const {
     register,
     handleSubmit,
     reset,
     setValue,
-    
+
     formState: { isDirty, errors },
   } = useForm();
 
   const dispatch = useAppDispatch();
 
+    // ref สำหรับ input file
+  const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
-  const [emp, setEmp] = useState('');
-  const [sup, setSup] = useState('');
-  const [med, setMed] = useState('');
-  const [selectMed, setSelectMed] = useState('');
-  const [selectSup, setSelectSup] = useState('');
-  const [selectEmpCreate, setSelectEmpCreate] = useState('');
-  const [selectEmpUpdate, setSelectEmpUpdate] = useState('');
-  const [medicine, setMedicine] = useState([]);
-  const [supplier, setSupplier] = useState([]);
+  const [selectedEmp, setSelectedEmp] = useState('');
+  const [selectedPreorder, setSelectedPreorder] = useState('');
   const [employees, setEmployees] = useState([]);
+  const [preorders, setPreorders] = useState([]);
+  const [usedPreorders, setUsedPreorders] = useState([]); // ✅ เก็บ preorder ที่ใช้แล้ว
 
   // ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
   const isDirtyRef = useRef(isDirty);
-  
+
   // ✅ อัพเดต ref ทุกครั้งที่ isDirty เปลี่ยน
   useEffect(() => {
     isDirtyRef.current = isDirty;
   }, [isDirty]);
-  
+
   // ✅ เตือนเมื่อมีการพยายามออกจากหน้าด้วย navigation (Back / เปลี่ยน route)
   usePrompt('ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.', isDirty);
 
@@ -76,42 +73,47 @@ const CreateImport = ({ setShow, getList, onCloseCallback }) => {
     }
   }, [onCloseCallback]);
 
+
+  // ✅ แก้ไขฟังก์ชันล้างข้อมูล
+  const handleClearForm = () => {
+    reset({
+      im_id: '',
+      im_date: '',
+      note: '',
+    });
+    setSelectedEmp('');
+    setSelectedPreorder('');
+    isDirtyRef.current = false;
+  };
+
+  // ✅ ฟังก์ชันดึงข้อมูล Import ที่มีอยู่แล้วเพื่อเช็ค preorder ที่ใช้แล้ว
+  const fetchUsedPreorders = async () => {
+    try {
+      const response = await fetch('http://localhost:4000/src/im/import');
+      if (response.ok) {
+        const data = await response.json();
+        const usedPreorderIds = data.data
+          .filter(item => item.preorder_id) // กรองเฉพาะที่มี preorder_id
+          .map(item => item.preorder_id);
+        setUsedPreorders(usedPreorderIds);
+      }
+    } catch (error) {
+      console.error('Error fetching used preorders:', error);
+    }
+  };
+
+  // ✅ useEffect สำหรับเซ็ต preorder_id อัตโนมัติเมื่อได้รับ props
   useEffect(() => {
-    const fetchMed = async () => {
-      try {
-        const res = await fetch('http://localhost:4000/src/manager/medicines');
-        const data = await res.json();
-        if (res.ok) {
-          setMedicine(data.data);
-        }
-      } catch (error) {
-        console.error('Error fetching medicine:', error);
-        dispatch(openAlert({
-          type: 'error',
-          title: 'ເກີດຂໍ້ຜິດພາດ',
-          message: 'ບໍ່ສາມາດດຶງຂໍ້ມູນຢາໄດ້',
-        }));
-      }
-    };
+    if (preorderId) {
+      console.log('Setting preorder_id from props:', preorderId);
+      setSelectedPreorder(preorderId);
+      setValue('preorder', preorderId);
+    }
+  }, [preorderId, setValue]);
 
-    const fetchSup = async () => {
-      try {
-        const res = await fetch('http://localhost:4000/src/manager/supplier');
-        const data = await res.json();
-        if (res.ok) {
-          setSupplier(data.data);
-        }
-      } catch (error) {
-        console.error('Error fetching suppliers:', error);
-        dispatch(openAlert({
-          type: 'error',
-          title: 'ເກີດຂໍ້ຜິດພາດ',
-          message: 'ບໍ່ສາມາດດຶງຂໍ້ມູນຜູ້ສະໜອງໄດ້',
-        }));
-      }
-    };
-
-    const fetchEmp = async () => {
+  // ✅ ดึงข้อมูล Employees, Preorders และ Used Preorders
+  useEffect(() => {
+    const fetchEmployees = async () => {
       try {
         const res = await fetch('http://localhost:4000/src/manager/emp');
         const data = await res.json();
@@ -134,36 +136,62 @@ const CreateImport = ({ setShow, getList, onCloseCallback }) => {
       }
     };
 
-    fetchMed();
-    fetchSup();
-    fetchEmp();
+    const fetchPreorders = async () => {
+      try {
+        const res = await fetch('http://localhost:4000/src/preorder/preorder');
+        const data = await res.json();
+        if (res.ok) {
+          setPreorders(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching preorders:', error);
+        dispatch(openAlert({
+          type: 'error',
+          title: 'ເກີດຂໍ້ຜິດພາດ',
+          message: 'ບໍ່ສາມາດດຶງຂໍ້ມູນ preorder ໄດ້',
+        }));
+      }
+    };
+
+    fetchEmployees();
+    fetchPreorders();
+    fetchUsedPreorders(); // ✅ ดึงข้อมูล preorder ที่ใช้แล้ว
   }, [dispatch]);
 
-  useEffect(() => {
-    const now = new Date().toISOString();
-    setValue('created_at', now);
-  }, [setValue]);
+  // ✅ ฟังก์ชันตรวจสอบก่อนบันทึก
+  const validatePreorderUsage = (preorderId) => {
+    if (usedPreorders.includes(preorderId)) {
+      dispatch(openAlert({
+        type: 'error',
+        title: 'ບໍ່ສາມາດນຳເຂົ້າໄດ້',
+        message: `ລະຫັດ Preorder ${preorderId} ໄດ້ຖືກນຳເຂົ້າແລ້ວ ບໍ່ສາມາດນຳເຂົ້າຊ້ຳໄດ້`,
+      }));
+      return false;
+    }
+    return true;
+  };
 
   const handleSave = async (data) => {
+    // ✅ ตรวจสอบก่อนว่า preorder นี้ถูกใช้แล้วหรือไม่
+    if (!validatePreorderUsage(selectedPreorder)) {
+      return;
+    }
+
     setLoading(true);
     try {
       const formData = new FormData();
       formData.append('im_id', data.im_id);
       formData.append('im_date', data.im_date);
-      formData.append('qty', data.qty);
-      formData.append('expired', data.expired);
-      formData.append('created_at', data.created_at);
-      formData.append('update_by', data.update_by);
-      formData.append('lot', data.lot || '');
+      formData.append('preorder_id', selectedPreorder);
+      formData.append('emp_id', selectedEmp);
+      formData.append('note', data.note || '');
 
-      if (data.document && data.document.length > 0) {
-        formData.append('document', data.document[0]);
+      // ✅ เพิ่มไฟล์ถ้ามี
+      if (data.file && data.file.length > 0) {
+        formData.append('file', data.file[0]);
       }
 
-      formData.append('emp_id_create', selectEmpCreate);
-      formData.append('emp_id_updated', selectEmpUpdate);
-      formData.append('sup_id', sup);
-      formData.append('med_id', med);
+
 
       const response = await fetch('http://localhost:4000/src/im/import', {
         method: 'POST',
@@ -172,7 +200,13 @@ const CreateImport = ({ setShow, getList, onCloseCallback }) => {
 
       const result = await response.json();
 
-      if (!response.ok) throw new Error(result.error || 'ບັນທຶກບໍ່ສຳເລັດ');
+      if (!response.ok) {
+        // ✅ ตรวจสอบข้อผิดพลาดจาก backend เกี่ยวกับ preorder ซ้ำ
+        if (result.message && result.message.includes('preorder_id')) {
+          throw new Error('ລະຫັດ Preorder ນີ້ໄດ້ຖືກນຳເຂົ້າແລ້ວ ບໍ່ສາມາດນຳເຂົ້າຊ້ຳໄດ້');
+        }
+        throw new Error(result.error || result.message || 'ບັນທຶກບໍ່ສຳເລັດ');
+      }
 
       dispatch(openAlert({
         type: 'success',
@@ -182,149 +216,136 @@ const CreateImport = ({ setShow, getList, onCloseCallback }) => {
 
       await getList();
       reset();
+      setSelectedEmp('');
+      setSelectedPreorder('');
       setShow(false);
     } catch (error) {
       console.error('Error saving data:', error);
       dispatch(openAlert({
         type: 'error',
         title: 'ເກີດຂໍ້ຜິດພາດ',
-        message: 'ການບັນທຶກຂໍ້ມູນມີຂໍ້ຜິດພາດ',
+        message: error.message || 'ການບັນທຶກຂໍ້ມູນມີຂໍ້ຜິດພາດ',
       }));
     } finally {
       setLoading(false);
     }
   };
 
+  // ✅ กรอง preorder ที่ยังไม่ได้ใช้
+  const availablePreorders = preorders.filter(preorder =>
+    !usedPreorders.includes(preorder.preorder_id)
+  );
+
   if (loading) return <Loader />;
+
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
       <Alerts />
       <div className="flex items-center border-b border-stroke dark:border-strokedark pb-4">
         <h1 className="text-lg font-medium text-strokedark dark:text-bodydark3 px-4">
-          ເພີ່ມຂໍ້ມູນ
+          ເພີ່ມຂໍ້ມູນ Import
         </h1>
       </div>
 
       <form
         onSubmit={handleSubmit(handleSave)}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 pt-4"
+        className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 pt-4"
       >
+        {/* ✅ ລະຫັດ Import */}
         <InputBox
-          label="ລະຫັດ"
+          label="ລະຫັດ Import (im_id)"
           name="im_id"
           type="text"
-          placeholder="ປ້ອນລະຫັດ"
+          placeholder="ປ້ອນລະຫັດ Import"
           register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນລະຫັດ' }}
+          formOptions={{ required: 'ກະລຸນາປ້ອນລະຫັດ Import' }}
           errors={errors}
         />
+
+        {/* ✅ ວັນທີ່ Import */}
         <BoxDate
           name="im_date"
-          label="ວັນທີ່"
+          label="ວັນທີ່ Import"
           select=""
           register={register}
           setValue={setValue}
           errors={errors}
-          formOptions={{ required: 'ກະລຸນາເລືອກວັນທີ' }}
-        />
-        <InputBox
-          label="ຈຳນວນ"
-          name="qty"
-          type="text"
-          placeholder="ປ້ອນຈຳນວນ"
-          register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນຈຳນວນ' }}
-          errors={errors}
-        />
-         <InputBox
-          label="ລ໋ອດການນຳເຂົ້າ"
-          name="lot"
-          type="number"
-          placeholder="ປ້ອນຈຳນວນ"
-          register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນຈຳນວນ' }}
-          errors={errors}
-        />
-        <BoxDate
-          name="expired"
-          label="ວັນໝົດອາຍຸ"
-          select=""
-          register={register}
-          setValue={setValue}
-          errors={errors}
-          formOptions={{ required: 'ກະລຸນາເລືອກວັນໝົດອາຍຸ' }}
-        />
-        <FileUploadInput
-          label="ໄຟລເອກະສານ"
-          name="document"
-          type="file"
-          register={register}
-          errors={errors}
-          formOptions={{ required:  false}}
+          formOptions={{ required: 'ກະລຸນາເລືອກວັນທີ່' }}
         />
 
+        {/* ✅ เลือก Preorder - แสดงเฉพาะที่ยังไม่ได้ใช้ */}
         <SelectBoxId
-          label="ຜູ້ສະໜອງ"
-          name="supplier"
-          value={selectSup}
-          options={supplier.map((s) => ({
-            value: s.sup_id,
-            label: `${s.company_name} ${s.address}`,
+          label=" Preorder (ທີ່ຍັງບໍ່ໄດ້ນຳເຂົ້າ)"
+          name="preorder"
+          value={selectedPreorder}
+          options={availablePreorders.map((preorder) => ({
+            value: preorder.preorder_id,
+            label: `${preorder.preorder_id || ''}`,
           }))}
           register={register}
           errors={errors}
+          formOptions={{ required: 'ກະລຸນາເລືອກ Preorder' }}
           onSelect={(e) => {
-            setSelectSup(e.target.value);
-            setSup(e.target.value);
-          }}
-        />
-        <SelectBoxId
-          label="ຢາ"
-          name="medicine"
-          value={selectMed}
-          options={medicine.map((m) => ({
-            value: m.med_id,
-            label: m.med_name,
-          }))}
-          register={register}
-          errors={errors}
-          onSelect={(e) => {
-            setSelectMed(e.target.value);
-            setMed(e.target.value);
+            setSelectedPreorder(e.target.value);
           }}
         />
 
+        {/* ✅ เลือก Employee */}
         <SelectBoxId
-          label="ພະນັກງານ (ຜູ້ສ້າງ)"
-          name="emp_id_create"
-          value={selectEmpCreate}
+          label="ເລືອກພະນັກງານ"
+          name="employee"
+          value={selectedEmp}
           options={employees.map((emp) => ({
-            label: `${emp.name} ${emp.surname} ${emp.role}`,
             value: emp.id,
+            label: `${emp.name} ${emp.surname} (${emp.role})`,
           }))}
           register={register}
           errors={errors}
-          onSelect={(e) => setSelectEmpCreate(e.target.value)}
+          formOptions={{ required: 'ກະລຸນາເລືອກພະນັກງານ' }}
+          onSelect={(e) => {
+            setSelectedEmp(e.target.value);
+          }}
         />
 
-        {/* ✅ เปลี่ยนจาก DatePicker เป็น BoxDate */}
-        <BoxDate
-          register={register}
-          errors={errors}
-          name="created_at"
-          label="ວັນທີສ້າງ"
-          select=""
-          formOptions={{ required: 'ກະລຸນາໃສ່ວັນທີສ້າງ' }}
-          setValue={setValue}
-        />
+        {/* ✅ อัพโลดไฟล์ */}
+        <div className="md:col-span-2">
+          <FileUploadInput
+            label="ໄຟລເອກະສານ"
+            name="file"
+            type="file"
+            register={register}
+            errors={errors}
+            formOptions={{ required: false }}
+          />
 
-       
-        <div className="mt-4 flex justify-end space-x-4 py-4">
+          {/* ✅ note */}
+          <InputBox
+            label="ໝາຍເຫດ ບໍ່ບັງຄັບ"
+            name="note"
+            type="text"
+            placeholder="ກະລຸນາປ້ອນລະຫັດໝາຍເຫດຖ້າມີ"
+            register={register}
+          />
+        </div>
+
+        {/* ✅ ปุ่มบันทึก */}
+        <div className="md:col-span-2 mt-4 flex justify-end space-x-4 py-4">
+
+          <Button
+            variant="cancel"
+            type="button"
+            onClick={handleClearForm}
+            disabled={loading}
+          >
+            ລ້າງຂໍ້ມູນ
+          </Button>
+
           <Button variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </Button>
         </div>
       </form>
+
     </div>
   );
 };
