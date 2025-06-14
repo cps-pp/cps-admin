@@ -18,15 +18,13 @@ module.exports = {
       colors: {
         current: 'currentColor',
         transparent: 'transparent',
-        white: '#FFFFFF',
-        black: '#1C2434',
-        'black-2': '#010101',
         body: '#64748B',
         bodydark: '#AEB7C0',
         bodydark1: '#DEE4EE',
         bodydark2: '#8A99AF',
         bodydark3: '#C7CDD4',
-        primary: '#7C67DE',
+        primary: '#51419B',
+        // primary: '#7C67DE',
         secondary: '#51419B',
         secondary2: '#51416B',
 

@@ -196,7 +196,7 @@ const ServicePage = () => {
             <Button
               onClick={() => setShowAddModal(true)}
               icon={iconAdd}
-              className="bg-primary"
+              className="bg-secondary2"
             >
               ເພີ່ມຂໍ້ມູນລາຍການ
             </Button>
@@ -216,14 +216,14 @@ const ServicePage = () => {
           />
         </div>
 
-        <div className="overflow-x-auto rounded-lg shadow-md">
-          <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
+       <div className="overflow-x-auto  shadow-md">
+          <table className="w-full min-w-max table-auto  ">
             <thead>
-              <tr className="text-left bg-secondary2 text-white">
+              <tr className="text-left  bg-gray border border-stroke">
                 {ServiceHeaders.map((header, index) => (
                   <th
                     key={index}
-                    className={`px-4 py-3 font-medium text-gray-600 dark:text-gray-300 ${
+                    className={`px-4 py-3 tracking-wide text-form-input  font-semibold ${
                       header.id === 'id'
                         ? 'cursor-pointer hover:bg-gray-100 hover:text-gray-800 select-none'
                         : ''
@@ -234,10 +234,10 @@ const ServicePage = () => {
                       {header.name}
                       {header.id === 'id' && (
                         <span
-                          className={`ml-2 inline-block text-xs font-bold transition-colors duration-200 ${
+                          className={`ml- inline-block text-md font-semibold transition-colors duration-200 ${
                             sortOrder === 'asc'
                               ? 'text-green-500'
-                              : 'text-white'
+                              : 'text-secondary2'
                           }`}
                           // aria-label={
                           //   sortOrder === 'asc'
@@ -258,7 +258,7 @@ const ServicePage = () => {
                 paginatedList.map((service, index) => (
                   <tr
                     key={index}
-                    className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
+                    className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 "
                   >
                     <td className="px-4 py-4">{service.ser_id}</td>
 

@@ -322,6 +322,18 @@ const EditMedicines = ({ id, setShow, getList }) => {
           }}
         />
 
+        <SelectBoxId
+          label="ປະເພດ"
+          name="ປະເພດ"
+          value={selectedMedType}
+          options={categories.map((cat) => ({
+            value: cat.medtype_id,
+            label: cat.type_name,
+          }))}
+          register={register}
+          errors={errors}
+          onSelect={(e) => setSelectedMedType(e.target.value)}
+        />
 
         <SelectBoxId
           label="ພະນັກງານ (ແກ້ໄຂ)"

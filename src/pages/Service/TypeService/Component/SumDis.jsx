@@ -9,17 +9,17 @@ export default function SumDiseases({
 }) {
   const columns = [
     {
-      title: 'Disease ID',
+      title: 'ລະຫັດ',
       dataIndex: 'disease_id',
       key: 'disease_id',
     },
     {
-      title: 'Name',
+      title: 'ພະຍາດ',
       dataIndex: 'disease_name',
       key: 'disease_name',
     },
     {
-      title: 'Action',
+      title: 'ຈັດການ',
       key: 'action',
       render: (_, record) => (
         <button
@@ -41,7 +41,9 @@ export default function SumDiseases({
       <Table
         columns={columns}
         dataSource={selectedServices}
-        pagination={{ pageSize: 3, size: 'middle' }}
+        pagination={{ pageSize: 4, size: 'middle' }}
+          locale={{ emptyText: 'ບໍ່ມີຂໍ້ມູນ' }}
+
       />
 
       {/* <div className="mt-4 p-3 bg-gray-100 rounded">

@@ -20,10 +20,10 @@ const SidebarTemplate = ({
             <>
               <NavLink
                 to="#"
-                className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-form-strokedark duration-300 ease-in-out hover:bg-secondary2 hover:text-white ${
                   (pathname === `/${menu.path}` ||
                     pathname.includes(menu.path)) &&
-                  'bg-graydark dark:bg-meta-4'
+                    'bg-secondary2 text-white'
                 }`}
                 onClick={(e) => {
                   e.preventDefault();
@@ -62,8 +62,8 @@ const SidebarTemplate = ({
                       <NavLink
                         to={sub.path}
                         className={({ isActive }) =>
-                          'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
-                          (isActive ? '!text-white' : '')
+                          'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-form-strokedark duration-300 ease-in-out hover:text-secondary2 ' +
+                          (isActive ? '!text-secondary2 font-semibold' : '')
                         }
                       >
                         {sub.name}
@@ -83,8 +83,8 @@ const SidebarTemplate = ({
     <li>
       <NavLink
         to={`/${menu.path}`}
-        className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-          pathname.includes(menu.path) && 'bg-graydark dark:bg-meta-4'
+        className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-form-strokedark duration-300 ease-in-out hover:bg-secondary2 hover:text-white ${
+          pathname.includes(menu.path) && 'bg-secondary2 text-white'
         }`}
       >
         {menu.icon}

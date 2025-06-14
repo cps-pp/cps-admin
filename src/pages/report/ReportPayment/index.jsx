@@ -7,101 +7,102 @@ import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { openAlert } from '@/redux/reducer/alert';
 import Alerts from '@/components/Alerts';
 import { Pay } from './colum/pay';
-
 const ReportPay = () => {
-   const [suppliers, setSuppliers] = useState([]);
-  const [filteredSuppliers, setFilteredSuppliers] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [filteredPayments, setFilteredPayments] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [selectedSupplierId, setSelectedSupplierId] = useState(null);
+  const [selectedPaymentId, setSelectedPaymentId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [invoiceFilter, setInvoiceFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const dispatch = useAppDispatch();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-
-//   const fetchSuppliers = async () => {
-//     try {
-//       setLoading(true);
-//       const response = await fetch('http://localhost:4000/src/manager/supplier');
-
-//       if (!response.ok) {
-//         throw new Error(`HTTP error! Status: ${response.status}`);
-//       }
-
-//       const data = await response.json();
-//       setSuppliers(data.data);
-//       setFilteredSuppliers(data.data);
-//     } catch (error) {
-//       console.error('Error fetching categories:', error);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchSuppliers();
-//   }, []);
-
-  useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredSuppliers(suppliers);
-    } else {
-      const filtered = suppliers.filter((supplier) =>
-        supplier.company_name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredSuppliers(filtered);
-    }
-  }, [searchQuery, suppliers]);
-
-  const openDeleteModal = (id) => () => {
-    setSelectedSupplierId(id);
-    setShowModal(true);
-  };
-
-  const handleDeleteSupplier = async () => {
-    if (!selectedSupplierId) return;
-
+  const fetchPayments = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:4000/manager/supplier/${selectedSupplierId}`,
-        { method: 'DELETE' }
-      );
+      setLoading(true);
+      let url = 'http://localhost:4000/src/report/payment';
+      const params = new URLSearchParams();
+
+      if (invoiceFilter) {
+        params.append('invoice_id', invoiceFilter);
+      }
+
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+
+      const response = await fetch(url);
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      setSuppliers((prevSuppliers) =>
-        prevSuppliers.filter((supplier) => supplier.sup_id !== selectedSupplierId)
-      );
-      setShowModal(false);
-      setSelectedSupplierId(null);
-      dispatch(
-        openAlert({
-          type: 'success',
-          title: 'ລົບຂໍ້ມູນສຳເລັດ',
-          message: 'ລົບຂໍ້ມູນຜູ້ສະໜອງສຳເລັດແລ້ວ',
-        })
-      );
+      const data = await response.json();
+      setPayments(data.data);
+      setFilteredPayments(data.data);
     } catch (error) {
+      console.error('Error fetching payments:', error);
       dispatch(
         openAlert({
           type: 'error',
-          title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
-          message: 'ເກີດຂໍ້ຜິດພາດໃນການລົບຂໍ້ມູນ',
-        })
+          title: 'ຂໍ້ຜິດພາດ',
+          message: 'ບໍ່ສາມາດດຶງຂໍ້ມູນການຊຳລະເງີນໄດ້',
+        }),
       );
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleEdit = (id) => {
-    setSelectedId(id);
-    setShowEditModal(true);
-  };
+  useEffect(() => {
+    fetchPayments();
+  }, [invoiceFilter]);
+
+  useEffect(() => {
+    let filtered = payments;
+
+    // Filter by search query
+    if (searchQuery.trim() !== '') {
+      filtered = filtered.filter(
+        (payment) =>
+          payment.payment_id?.toString().includes(searchQuery.toLowerCase()) ||
+          payment.invoice_id?.toString().includes(searchQuery.toLowerCase()) ||
+          payment.payment_method
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          payment.payment_status
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()),
+      );
+    }
+
+    // Filter by status
+    if (statusFilter) {
+      filtered = filtered.filter(
+        (payment) => payment.payment_status === statusFilter,
+      );
+    }
+
+    // Filter by date range
+    if (dateRange.start && dateRange.end) {
+      filtered = filtered.filter((payment) => {
+        const paymentDate = new Date(payment.payment_date);
+        const startDate = new Date(dateRange.start);
+        const endDate = new Date(dateRange.end);
+        return paymentDate >= startDate && paymentDate <= endDate;
+      });
+    }
+
+    setFilteredPayments(filtered);
+  }, [searchQuery, payments, statusFilter, dateRange]);
 
   const handlePageChange = (_, newPage) => {
     setPage(newPage);
@@ -112,52 +113,111 @@ const ReportPay = () => {
     setPage(0);
   };
 
-  const paginatedPSup = filteredSuppliers.slice(
+  const paginatedPayments = filteredPayments.slice(
     page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+    page * rowsPerPage + rowsPerPage,
   );
+
+  const totalCount = filteredPayments.length;
+
+  const totalAmount = filteredPayments.reduce(
+    (sum, payment) => sum + (Number(payment.paid_amount) || 0),
+    0,
+  );
+
+  const formattedTotalAmount = `${totalAmount.toLocaleString('en-US')} Kip`;
 
   return (
     <>
-    <div className="rounded bg-white pt-4 dark:bg-boxdark">
-      <Alerts />
-      <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
-          ລາຍງານການຊຳລະເງີນ
-        </h1>
-        {/* <div className="flex items-center gap-2">
-          <Button
-            onClick={() => setShowAddModal(true)}
-            icon={iconAdd}
-            className="bg-primary"
-          >
-            ເພີ່ມຜູ້ສະໜອງ
-          </Button>
-        </div> */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 2xl:gap-7.5 w-full mb-6">
+        <div className="rounded-sm border border-stroke bg-white p-4">
+          <div className="flex items-center">
+            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-blue-100">
+              <svg
+                class="w-[25px] h-[25px] text-form-strokedark"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2.1"
+                  d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 5h6m-6 4h6M10 3v4h4V3h-4Z"
+                />
+              </svg>
+            </div>
+            <div className="ml-4">
+              <h4 className="text-lg font-semibold  text-form-strokedark">ຈຳນວນລາຍການຊຳລະ</h4>
+              <p className="text-xl font-bold text-primary">
+                {totalCount} ລາຍການ
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-sm border border-stroke bg-white p-4">
+          <div className="flex items-center">
+            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-green-100">
+              <svg
+                class="w-[32px] h-[32px] text-green-700 "
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2.4"
+                  d="M5 11.917 9.724 16.5 19 7.5"
+                />
+              </svg>
+            </div>
+            <div className="ml-4">
+              <h4 className="text-lg font-semibold text-form-strokedark">ຍອດຊຳລະທັງໝົດ</h4>
+              <p className="text-xl font-bold text-primary">
+                <p>{formattedTotalAmount}</p>
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="grid w-full gap-4 p-4">
-        <Search
-          type="text"
-          name="search"
-          placeholder="ຄົ້ນຫາ..."
-          className="rounded border border-stroke dark:border-strokedark"
-          onChange={(e) => {
-            const query = e.target.value;
-            setSearchQuery(query);
-          }}
-        />
-      </div>
+      <div className="rounded bg-white pt-4 dark:bg-boxdark">
+        <Alerts />
+        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
+          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+            ລາຍງານການຊຳລະເງີນ
+          </h1>
+        </div>
 
-   
-      <div className="overflow-x-auto rounded-lg shadow-md">
-          <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
+        <div className="grid grid-cols-1 gap-4 p-4">
+          <Search
+            type="text"
+            name="search"
+            placeholder="ຄົ້ນຫາ Invoice ID, ວິທີການຊຳລະ..."
+            className="rounded border border-stroke dark:border-strokedark"
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        {/* Table */}
+        <div className="overflow-x-auto  shadow-md">
+          <table className="w-full min-w-max table-auto  ">
             <thead>
-              <tr className="text-left bg-secondary2 text-white">
+              <tr className="text-left bg-gray border border-stroke">
                 {Pay.map((header, index) => (
                   <th
                     key={index}
-                    className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300 "
+                    className="px-4 py-3 tracking-wide text-form-input  font-semibold"
                   >
                     {header.name}
                   </th>
@@ -165,124 +225,86 @@ const ReportPay = () => {
               </tr>
             </thead>
             <tbody>
-              {paginatedPSup.length > 0 ? (
-                paginatedPSup.map((supplier, index) => (
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="py-8 text-center">
+                    <div className="flex justify-center items-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                      <span className="ml-2">ກຳລັງໂຫລດຂໍ້ມູນ...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : paginatedPayments.length > 0 ? (
+                paginatedPayments.map((payment, index) => (
                   <tr
-                    key={index}
+                    key={payment.payment_id || index}
                     className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
-                    <td className="px-4 py-4">{supplier.sup_id}</td>
-                    <td className="px-4 py-4">{supplier.company_name}</td>
-                    <td className="px-4 py-4">{supplier.address}</td>
-                    <td className="px-4 py-4">{supplier.phone}</td>
-                    <td className="">
-                      <span
-                        className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
-                          supplier.status === 'ເປີດ'
-                            ? 'bg-green-100 text-green-700'
-                            : supplier.status === 'ປິດ'
-                              ? 'bg-red-100 text-red-700'
-                              : 'bg-gray-100 text-gray-700'
-                        }`}
-                      >
-                        {supplier.status}
+                    <td className="px-4 py-4 font-medium">{payment.pay_id}</td>
+                    <td className="px-4 py-4">{payment.in_id}</td>
+                    <td className="px-4 py-4">
+                      {new Date(payment.date).toLocaleString('en-US', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false,
+                      })}
+                    </td>
+                    <td className="px-4 py-4">
+                      {Number(payment.paid_amount).toLocaleString('en-US')}
+                    </td>
+
+                    <td className="px-4 py-4">
+                      <span className="inline-flex items-center gap-1">
+                        {payment.pay_type || '-'}
                       </span>
                     </td>
-                    <td className="px-3 py-4 text-center">
-                      <TableAction
-                        onDelete={openDeleteModal(supplier.sup_id)}
-                        onEdit={() => handleEdit(supplier.sup_id)}
-                      />
+
+                    <td className="px-4 py-4">
+                      <span
+                        className={`inline-block rounded-full px-3 py-1 text-sm font-medium bg-green-100 text-green-700 `}
+                      >
+                        {payment.payment_status}
+                      </span>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="py-4 text-center text-gray-500">
-                    ບໍ່ມີຂໍ້ມູນ
+                  <td colSpan={8} className="py-8 text-center text-gray-500">
+                    <div className="flex flex-col items-center">
+                      <svg
+                        className="w-12 h-12 text-gray-400 mb-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                      ບໍ່ມີຂໍ້ມູນການຊຳລະເງີນ
+                    </div>
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
+        </div>
       </div>
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="rounded-lg w-full max-w-2xl relative px-4 ">
-            <button
-              onClick={() => setShowAddModal(false)}
-              className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
 
-            <CreateSupplier
-              setShow={setShowAddModal}
-              getList={fetchSuppliers}
-            />
-          </div>
-        </div>
-      )}
-
-      {showEditModal && selectedId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
-          <div className="rounded-lg w-full max-w-2xl bg-white relative ">
-            <button
-              onClick={() => setShowEditModal(false)}
-              className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-
-            <EditSupplier
-              id={selectedId}
-              onClose={() => setShowEditModal(false)}
-              setShow={setShowEditModal}
-              getList={fetchSuppliers}
-            />
-          </div>
-        </div>
-      )}
-    </div>
       <TablePaginationDemo
-        count={paginatedPSup.length}
+        count={filteredPayments.length}
         page={page}
         onPageChange={handlePageChange}
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleRowsPerPageChange}
-      />
-
-      <ConfirmModal
-        show={showModal}
-        setShow={setShowModal}
-        message="ທ່ານຕ້ອງການລົບຜູ້ສະໜອງນີ້ອອກຈາກລະບົບບໍ່？"
-        handleConfirm={handleDeleteSupplier}
       />
     </>
   );

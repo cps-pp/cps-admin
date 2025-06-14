@@ -3,21 +3,21 @@ import { iconTrash } from '@/configs/icon';
 import useStoreQi from '../../../../store/selectQi';
 
 export default function SumQil() {
-  const { removeMedicine, medicine, updateQty } = useStoreQi();
+  const { removeMedicine, equipment, updateQty } = useStoreQi();
 
   const columns = [
      {
-      title: 'ID',
+      title: 'ລະຫັດ',
       dataIndex: 'med_id',
       key: 'med_id',
     },
     {
-      title: 'Name',
+      title: 'ລາຍການຈ່າຍອຸປະກອນ',
       dataIndex: 'med_name',
       key: 'med_name',
     },
     {
-      title: 'Qty',
+      title: 'ຈຳນວນ',
       dataIndex: 'qty',
       key: 'qty',
        render: (_, record) => (
@@ -30,19 +30,19 @@ export default function SumQil() {
     },
     
     {
-      title: 'Price',
+      title: 'ລາຄາ',
       dataIndex: 'price',
       key: 'price',
       render: (price) => <a>{price?.toLocaleString()}</a>,
     },
      {
-      title: 'Total',
+      title: 'ລວມ',
       dataIndex: 'total',
       key: 'total',
       render: (total) => <span>{total?.toLocaleString() ?? 0}</span>,
     },
     {
-      title: 'Action',
+      title: 'ຈັດການ',
       key: 'action',
        render: (_, record) => (
              <button
@@ -60,8 +60,11 @@ export default function SumQil() {
     <div>
       <Table
         columns={columns}
-        dataSource={medicine}
-        pagination={{ pageSize: 3, size: 'middle' }}
+        dataSource={equipment}
+        size="small"
+        pagination={{ pageSize: 4, size: 'middle' }}
+          locale={{ emptyText: 'ບໍ່ມີຂໍ້ມູນ' }}
+
       />
 
      

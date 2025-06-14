@@ -16,7 +16,7 @@ export default function SumService() {
       dataIndex: 'ser_id',
     },
     {
-      title: 'ລາຍການ ປິ່ນປົວ',
+      title: 'ລາຍການປິ່ນປົວ',
       key: 'ser_name',
       dataIndex: 'ser_name',
     },
@@ -52,9 +52,10 @@ export default function SumService() {
       <Table
         columns={columns}
         dataSource={services}
-        pagination={{ pageSize: 5, size: 'middle' }}
+        pagination={{ pageSize: 4, size: 'middle' }}
         rowKey="ser_id"
         size="small"
+          locale={{ emptyText: 'ບໍ່ມີຂໍ້ມູນ' }}
       // rowKey={getRowKey}
       />
     </div>

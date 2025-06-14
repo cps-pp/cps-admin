@@ -234,37 +234,13 @@ const ServicePage = () => {
           />
         </div>
 
-        <div className="overflow-x-auto rounded-lg shadow-md">
-          <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
+            <div className="overflow-x-auto  shadow-md">
+          <table className="w-full min-w-max table-auto  ">
             <thead>
-              <tr className="text-left bg-secondary2 text-white">
-                {ServiceHeaders.map((header, index) => (
-                  <th
-                    key={index}
-                    className={`px-4 py-3 font-medium text-gray-600 dark:text-gray-300 ${header.id === 'id'
-                      ? 'cursor-pointer hover:bg-gray-100 hover:text-gray-800 select-none'
-                      : ''
-                      }`}
-                    onClick={header.id === 'id' ? handleSortById : undefined}
-                  >
-                    <div className="flex items-center gap-2 ">
-                      {header.name}
-                      {header.id === 'id' && (
-                        <span
-                          className={`ml-2 inline-block text-xs font-bold transition-colors duration-200 ${sortOrder === 'asc'
-                            ? 'text-green-500'
-                            : 'text-white'
-                            }`}
-                        // aria-label={
-                        //   sortOrder === 'asc'
-                        //     ? 'ໜ້ອຍຫາຫຼາຍ'
-                        //     : 'ຫຼາຍຫາໜ້ອຍ'
-                        // }
-                        >
-                          {sortOrder === 'asc' ? '↑' : '↓'}
-                        </span>
-                      )}
-                    </div>
+              <tr className="bg-gray border border-stroke text-left">
+                {PacketHeaders.map((header, index) => (
+                  <th key={index} className="px-4 py-3 tracking-wide text-form-input  font-semibold">
+                    {header.name}
                   </th>
                 ))}
               </tr>

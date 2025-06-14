@@ -206,11 +206,7 @@ export const MENU = [
     ],
   },
 
-  // {
-  //   name: 'Careers',
-  //   path: 'careers',
-  //   icon: iconCareer,
-  // },
+  
 ];
 
 export const SERVICE = [
@@ -219,16 +215,26 @@ export const SERVICE = [
     path: 'treatment',
     icon: iconVolunteers,
   },
+    {
+    name: 'ລາຍລະອຽດໃບບິນ',
+    path: 'invoice',
+    icon: iconVolunteers,
+  },
+    {
+    name: 'ລາຍລະອຽດຊຳລະເງິນ',
+    path: 'pay',
+    icon: iconVolunteers,
+  },
   {
     name: 'ລາຍລະອຽດ',
-    path: 'detail',
+    path: 'patdetail',
     icon: iconResume,
   },
 ];
 export const FOLLOW = [
   {
     name: 'ຕິດຕາມການປິ່ວປົວ',
-    path: 'follow',
+    path: 'followpat',
     icon: iconCalenderWhite,
   },
 ];
@@ -241,7 +247,7 @@ export const IMPORT = [
 
   {
     name: 'ນຳເຂົ້າ',
-    path: 'import',
+    path: 'importorder',
     icon: icontImport,
   },
 ];
@@ -263,7 +269,7 @@ export const REPORTALL = [
       },
       {
         name: 'ການຊຳລະເງີນ',
-        path: '/report/payment',
+        path: '/report/payments',
       },
       {
         name: 'ນັດໝາຍ',

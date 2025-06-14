@@ -30,9 +30,8 @@ const PatientPage = () => {
   const [existingIds, setExistingIds] = useState([]);
   const [existingPhones1, setExistingPhones1] = useState([]);
   const [existingPhones2, setExistingPhones2] = useState([]);
-     // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
-    const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
-
+  // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
+  const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
 
   const fetchPatients = async () => {
     try {
@@ -51,7 +50,6 @@ const PatientPage = () => {
       setExistingIds(ids);
       setExistingPhones1(phones1); // <- ต้องเพิ่ม state นี้ด้วย
       setExistingPhones2(phones2); // <- ต้องเพิ่ม state นี้ด้วย
-
     } catch (error) {
       console.error('Error fetching patients:', error);
     } finally {
@@ -62,21 +60,21 @@ const PatientPage = () => {
   useEffect(() => {
     fetchPatients();
   }, []);
-useEffect(() => {
-  if (searchQuery.trim() === '') {
-    setFilteredPatients(patients);
-  } else {
-    const filtered = patients.filter((patient) => {
-      const patientDataString = Object.values(patient)
-        .filter(v => v !== null && v !== undefined) 
-        .map(v => String(v).toLowerCase()) 
-        .join(' '); 
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredPatients(patients);
+    } else {
+      const filtered = patients.filter((patient) => {
+        const patientDataString = Object.values(patient)
+          .filter((v) => v !== null && v !== undefined)
+          .map((v) => String(v).toLowerCase())
+          .join(' ');
 
-      return patientDataString.includes(searchQuery.toLowerCase());
-    });
-    setFilteredPatients(filtered);
-  }
-}, [searchQuery, patients]);
+        return patientDataString.includes(searchQuery.toLowerCase());
+      });
+      setFilteredPatients(filtered);
+    }
+  }, [searchQuery, patients]);
 
   const openDeleteModal = (id) => () => {
     setSelectedPatientId(id);
@@ -89,15 +87,19 @@ useEffect(() => {
     try {
       const response = await fetch(
         `http://localhost:4000/src/manager/patient/${selectedPatientId}`,
-        { method: 'DELETE' }
+        { method: 'DELETE' },
       );
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      setPatients((prev) => prev.filter((p) => p.patient_id !== selectedPatientId));
-      setFilteredPatients((prev) => prev.filter((p) => p.patient_id !== selectedPatientId));
+      setPatients((prev) =>
+        prev.filter((p) => p.patient_id !== selectedPatientId),
+      );
+      setFilteredPatients((prev) =>
+        prev.filter((p) => p.patient_id !== selectedPatientId),
+      );
       setShowModal(false);
 
       dispatch(
@@ -105,7 +107,7 @@ useEffect(() => {
           type: 'success',
           title: 'ລົບຂໍ້ມູນສຳເລັດ',
           message: 'ລົບຂໍ້ມູນຄົນເຈັບສຳເລັດແລ້ວ',
-        })
+        }),
       );
     } catch (error) {
       dispatch(
@@ -113,7 +115,7 @@ useEffect(() => {
           type: 'error',
           title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
           message: 'ເກີດຂໍ້ຜິດພາດໃນການລົບຂໍ້ມູນ',
-        })
+        }),
       );
     }
   };
@@ -145,15 +147,13 @@ useEffect(() => {
 
   const paginatedPatients = filteredPatients.slice(
     page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+    page * rowsPerPage + rowsPerPage,
   );
   const navigate = useNavigate();
-
 
   const handleViewPatient = (id) => {
     navigate(`/patient/detail/${id}`);
   };
-
 
   return (
     <>
@@ -170,7 +170,7 @@ useEffect(() => {
             <Button
               onClick={() => setShowAddModal(true)}
               icon={iconAdd}
-              className="bg-primary"
+              className="bg-secondary2"
             >
               ເພີ່ມຂໍ້ມູນຜູ່ປ່ວຍ
             </Button>
@@ -189,14 +189,14 @@ useEffect(() => {
           />
         </div>
 
-        <div className="overflow-x-auto rounded-lg shadow-md">
-          <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
+        <div className="overflow-x-auto  shadow-md">
+          <table className="w-full min-w-max table-auto  ">
             <thead>
-              <tr className="text-left bg-secondary2 text-white">
+              <tr className="text-left bg-gray border border-stroke ">
                 {PatientHeaders.map((header, index) => (
                   <th
                     key={index}
-                    className="px-4 py-3  font-medium tracking-wide text-white"
+                    className="px-4 py-3 tracking-wide text-form-input  font-semibold"
                   >
                     {header.name}
                   </th>
@@ -206,19 +206,11 @@ useEffect(() => {
             <tbody>
               {paginatedPatients.length > 0 ? (
                 paginatedPatients.map((patient, index) => (
-                  <tr key={index} className='text-left'>
-                    <td className="px-4 py-3  ">
-                      {patient.patient_id}
-                    </td>
-                    <td className="px-4 py-3 ">
-                      {patient.patient_name}
-                    </td>
-                    <td className="px-4 py-3 ">
-                      {patient.patient_surname}
-                    </td>
-                    <td className="px-4 py-3  ">
-                      {patient.gender}
-                    </td>
+                  <tr key={index} className="text-left  border border-stroke">
+                    <td className="px-4 py-4  ">{patient.patient_id}</td>
+                    <td className="px-4 py-3 ">{patient.patient_name}</td>
+                    <td className="px-4 py-3 ">{patient.patient_surname}</td>
+                    <td className="px-4 py-3  ">{patient.gender}</td>
                     <td className="px-4 py-3  ">
                       {new Date(patient.dob).toLocaleDateString('en-US', {
                         day: '2-digit',
@@ -235,17 +227,14 @@ useEffect(() => {
                       <TableAction
                         onDelete={openDeleteModal(patient.patient_id)}
                         onEdit={() => handleEdit(patient.patient_id)}
-                        onView={() => handleViewPatient(patient.patient_id)}  
+                        onView={() => handleViewPatient(patient.patient_id)}
                       />
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td
-                    colSpan={11}
-                    className="px-4 py-6  text-gray-500"
-                  >
+                  <td colSpan={11} className="px-4 py-6  text-gray-500">
                     ບໍ່ມີຂໍ້ມູນ
                   </td>
                 </tr>
@@ -256,14 +245,16 @@ useEffect(() => {
 
         {showAddModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
-                 <div className="    rounded
+            <div
+              className="    rounded
         w-full max-w-lg     
         md:max-w-2xl        
         lg:max-w-4xl 
         xl:max-w-5xl      
         relative
         overflow-auto
-        max-h-[90vh]">
+        max-h-[90vh]"
+            >
               {/* ✅ ปุ่ม X ที่ใช้ฟังก์ชันป้องกันจาก CreateCategory */}
               <button
                 onClick={handleCloseAddModal}
@@ -299,14 +290,16 @@ useEffect(() => {
 
         {showEditModal && selectedId && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
-          <div className="    rounded
+            <div
+              className="    rounded
         w-full max-w-lg     
         md:max-w-2xl        
        lg:max-w-4xl 
         xl:max-w-5xl      
         relative
         overflow-auto
-        max-h-[90vh]">
+        max-h-[90vh]"
+            >
               <button
                 onClick={() => setShowEditModal(false)}
                 className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"

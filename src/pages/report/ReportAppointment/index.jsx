@@ -1,292 +1,146 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { iconAdd } from '@/configs/icon';
-import Button from '@/components/Button';
 import Search from '@/components/Forms/Search';
-import { TableAction } from '@/components/Tables/TableAction';
-import ConfirmModal from '@/components/Modal';
-import { useAppDispatch } from '@/redux/hook';
-import TablePaginationDemo from '@/components/Tables/Pagination_two';
-import { openAlert } from '@/redux/reducer/alert';
 import Alerts from '@/components/Alerts';
-import { AppHeaders } from './colum/app';
+import TablePaginationDemo from '@/components/Tables/Pagination_two';
+import { useAppDispatch } from '@/redux/hook';
+import { openAlert } from '@/redux/reducer/alert';
+
+const columns = [
+  { key: 'patient_id', name: 'ລະຫັດຄົນເຈັບ' },
+  { key: 'patient_name', name: 'ຊື່ ແລະ ນາມສະກຸນ' },
+  { key: 'date_addmintted', name: 'ວັນທີນັດ' },
+  { key: 'status', name: 'ສະຖານະ' },
+];
 
 const ReportAppointment = () => {
-   const [suppliers, setSuppliers] = useState([]);
-  const [filteredSuppliers, setFilteredSuppliers] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedSupplierId, setSelectedSupplierId] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
   const dispatch = useAppDispatch();
+  const [appointments, setAppointments] = useState([]);
+  const [filteredAppointments, setFilteredAppointments] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  const fetchAppointments = async () => {
+    try {
+      const res = await fetch('http://localhost:4000/src/report/appointment');
+      const data = await res.json();
 
-//   const fetchSuppliers = async () => {
-//     try {
-//       setLoading(true);
-//       const response = await fetch('http://localhost:4000/src/manager/supplier');
+      if (!res.ok) throw new Error(data.error || 'Error fetching appointments');
 
-//       if (!response.ok) {
-//         throw new Error(`HTTP error! Status: ${response.status}`);
-//       }
-
-//       const data = await response.json();
-//       setSuppliers(data.data);
-//       setFilteredSuppliers(data.data);
-//     } catch (error) {
-//       console.error('Error fetching categories:', error);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchSuppliers();
-//   }, []);
+      setAppointments(data.data);
+      setFilteredAppointments(data.data);
+    } catch (error) {
+      console.error('Error:', error);
+      dispatch(openAlert({
+        type: 'error',
+        title: 'ຜິດພາດ',
+        message: 'ບໍ່ສາມາດດຶງຂໍ້ມູນນັດໝາຍໄດ້ ❌',
+      }));
+    }
+  };
 
   useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredSuppliers(suppliers);
-    } else {
-      const filtered = suppliers.filter((supplier) =>
-        supplier.company_name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredSuppliers(filtered);
-    }
-  }, [searchQuery, suppliers]);
+    fetchAppointments();
+  }, []);
 
-  const openDeleteModal = (id) => () => {
-    setSelectedSupplierId(id);
-    setShowModal(true);
-  };
+  useEffect(() => {
+    const filtered = appointments.filter((item) =>
+      item.patient_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.patient_surname?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.status?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredAppointments(filtered);
+  }, [searchQuery, appointments]);
 
-  const handleDeleteSupplier = async () => {
-    if (!selectedSupplierId) return;
-
-    try {
-      const response = await fetch(
-        `http://localhost:4000/manager/supplier/${selectedSupplierId}`,
-        { method: 'DELETE' }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      setSuppliers((prevSuppliers) =>
-        prevSuppliers.filter((supplier) => supplier.sup_id !== selectedSupplierId)
-      );
-      setShowModal(false);
-      setSelectedSupplierId(null);
-      dispatch(
-        openAlert({
-          type: 'success',
-          title: 'ລົບຂໍ້ມູນສຳເລັດ',
-          message: 'ລົບຂໍ້ມູນຜູ້ສະໜອງສຳເລັດແລ້ວ',
-        })
-      );
-    } catch (error) {
-      dispatch(
-        openAlert({
-          type: 'error',
-          title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
-          message: 'ເກີດຂໍ້ຜິດພາດໃນການລົບຂໍ້ມູນ',
-        })
-      );
-    }
-  };
-
-  const handleEdit = (id) => {
-    setSelectedId(id);
-    setShowEditModal(true);
-  };
-
-  const handlePageChange = (_, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleRowsPerPageChange = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const paginatedPSup = filteredSuppliers.slice(
+  const paginatedData = filteredAppointments.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
 
   return (
     <>
-    <div className="rounded bg-white pt-4 dark:bg-boxdark">
-      <Alerts />
-      <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
-          ລາຍງານການນັດໝາຍ
-        </h1>
-        {/* <div className="flex items-center gap-2">
-          <Button
-            onClick={() => setShowAddModal(true)}
-            icon={iconAdd}
-            className="bg-primary"
-          >
-            ເພີ່ມຜູ້ສະໜອງ
-          </Button>
-        </div> */}
-      </div>
+      <div className="rounded bg-white pt-4 dark:bg-boxdark">
+        <Alerts />
+        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4">
+          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark">
+            ລາຍງານນັດໝາຍ
+          </h1>
+        </div>
 
-      <div className="grid w-full gap-4 p-4">
-        <Search
-          type="text"
-          name="search"
-          placeholder="ຄົ້ນຫາ..."
-          className="rounded border border-stroke dark:border-strokedark"
-          onChange={(e) => {
-            const query = e.target.value;
-            setSearchQuery(query);
-          }}
-        />
-      </div>
+        <div className="grid grid-cols-1 gap-4 p-4">
+          <Search
+            name="search"
+            placeholder="ຄົ້ນຫາຊື່, ນາມສະກຸນ, ສະຖານະ..."
+            className="rounded border border-stroke"
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
 
-   
-      <div className="overflow-x-auto rounded-lg shadow-md">
-          <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
+           <div className="overflow-x-auto  shadow-md">
+          <table className="w-full min-w-max table-auto  ">
             <thead>
-              <tr className="text-left bg-secondary2 text-white">
-                {AppHeaders.map((header, index) => (
-                  <th
-                    key={index}
-                    className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300 "
-                  >
-                    {header.name}
-                  </th>
+              <tr className="text-left bg-gray border border-stroke">
+                {columns.map((col) => (
+                  <th key={col.key} className="px-4 py-3 text-form-input  font-semibold">{col.name}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {paginatedPSup.length > 0 ? (
-                paginatedPSup.map((supplier, index) => (
-                  <tr
-                    key={index}
+              {paginatedData.map((item, index) => (
+               <tr
+                    key={item.patient_id || index}
                     className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
-                    <td className="px-4 py-4">{supplier.sup_id}</td>
-                    <td className="px-4 py-4">{supplier.company_name}</td>
-                    <td className="px-4 py-4">{supplier.address}</td>
-                    <td className="px-4 py-4">{supplier.phone}</td>
-                    <td className="">
-                      <span
+                    <td className="px-4 py-3 font-medium">{item.patient_id}</td>
+                    {/* <td className="px-4 py-3 font-medium">{item.patient_name}</td>
+                    <td className="px-4 py-3">{item.patient_surname}</td> */}
+                    <td className="px-4 py-3 font-medium">
+  {item.patient_name} {item.patient_surname}
+</td>
+
+                    <td className="px-4 py-3">
+                      {new Date(item.date_addmintted).toLocaleString('en-US', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false,
+                      })}
+                    </td>
+                
+                   
+                    <td className="px-4 py-2">
+                         <span
                         className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
-                          supplier.status === 'ເປີດ'
+                          item.status === 'ກວດແລ້ວ'
                             ? 'bg-green-100 text-green-700'
-                            : supplier.status === 'ປິດ'
-                              ? 'bg-red-100 text-red-700'
+                            : item.status === 'ລໍຖ້າ'
+                              ? 'bg-yellow-100 text-yellow-800'
                               : 'bg-gray-100 text-gray-700'
                         }`}
                       >
-                        {supplier.status}
+                        {item.status}
                       </span>
                     </td>
-                    <td className="px-3 py-4 text-center">
-                      <TableAction
-                        onDelete={openDeleteModal(supplier.sup_id)}
-                        onEdit={() => handleEdit(supplier.sup_id)}
-                      />
-                    </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="py-4 text-center text-gray-500">
-                    ບໍ່ມີຂໍ້ມູນ
-                  </td>
-                </tr>
-              )}
+              ))}
             </tbody>
           </table>
+        </div>
+
       </div>
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="rounded-lg w-full max-w-2xl relative px-4 ">
-            <button
-              onClick={() => setShowAddModal(false)}
-              className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-
-            <CreateSupplier
-              setShow={setShowAddModal}
-              getList={fetchSuppliers}
-            />
-          </div>
-        </div>
-      )}
-
-      {showEditModal && selectedId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
-          <div className="rounded-lg w-full max-w-2xl bg-white relative ">
-            <button
-              onClick={() => setShowEditModal(false)}
-              className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-
-            <EditSupplier
-              id={selectedId}
-              onClose={() => setShowEditModal(false)}
-              setShow={setShowEditModal}
-              getList={fetchSuppliers}
-            />
-          </div>
-        </div>
-      )}
-    </div>
-      <TablePaginationDemo
-        count={paginatedPSup.length}
-        page={page}
-        onPageChange={handlePageChange}
-        rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={handleRowsPerPageChange}
-      />
-
-      {/* <ConfirmModal
-        show={showModal}
-        setShow={setShowModal}
-        message="ທ່ານຕ້ອງການລົບຜູ້ສະໜອງນີ້ອອກຈາກລະບົບບໍ່？"
-        handleConfirm={handleDeleteSupplier}
-      /> */}
+          <TablePaginationDemo
+            count={filteredAppointments.length}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            onPageChange={(_, newPage) => setPage(newPage)}
+            onRowsPerPageChange={(e) => {
+              setRowsPerPage(parseInt(e.target.value, 10));
+              setPage(0);
+            }}
+          />
     </>
   );
 };

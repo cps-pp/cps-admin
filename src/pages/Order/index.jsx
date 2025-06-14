@@ -309,7 +309,7 @@ const OrderPage = () => {
           <Button
             onClick={() => setShowAddModal(true)}
             icon={iconAdd}
-            className="bg-primary"
+            className="bg-secondary2"
           >
             ເພີ່ມລາຍການ
           </Button>
@@ -396,14 +396,14 @@ const OrderPage = () => {
 
 
 
-      <div className="overflow-x-auto rounded-lg shadow-md">
-        <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
+         <div className="overflow-x-auto  shadow-md">
+          <table className="w-full min-w-max table-auto  ">
           <thead>
-            <tr className="text-left bg-secondary2 text-white">
+            <tr className="text-left bg-gray border border-stroke ">
               {OrderHeaders.map((header, index) => (
                 <th
                   key={index}
-                  className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300"
+                  className="px-4 py-3 tracking-wide text-form-input  font-semibold"
                 >
                   {header.name}
                 </th>

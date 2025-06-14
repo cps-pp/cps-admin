@@ -4,7 +4,7 @@ import useStoreQi from '../../../../store/selectQi';
 
 export default function ListQi({ selectService, tapService }) {
   const [dataQi, setDataQi] = useState([]);
-  const { addMedicine, medicine } = useStoreQi();
+  const { addMedicine, equipment } = useStoreQi();
   const [loading, setLoading] = useState(false);
 
   const fetchQiList = async () => {
@@ -17,7 +17,7 @@ export default function ListQi({ selectService, tapService }) {
       setDataQi(data.data);
       setLoading(false);
     } catch (err) {
-      console.error('Error fetching medicine list:', err);
+      console.error('Error fetching equipment list:', err);
     } finally {
       setLoading(false);
     }
@@ -28,38 +28,47 @@ export default function ListQi({ selectService, tapService }) {
       fetchQiList();
     }
   }, [tapService]);
+  
 
   const columns = [
     {
-      title: 'ID',
+      title: 'ລະຫັດອຸປະກອນ',
       dataIndex: 'med_id',
       key: 'med_id',
     },
     {
-      title: 'Name',
+      title: 'ຊື່ອຸປະກອນ',
       dataIndex: 'med_name',
       key: 'med_name',
     },
     {
-      title: 'Qty',
+      title: 'ຈຳນວນ',
       dataIndex: 'qty',
       key: 'qty',
     },
     {
-      title: 'Price',
+      title: 'ລາຄາ',
       dataIndex: 'price',
       key: 'price',
       render: (price) => <a>{price?.toLocaleString()}</a>,
     },
+    
     {
-      title: 'Action',
+      title: 'ຈັດການ',
       key: 'action',
       render: (_, record) => (
-        <Space size="middle">
-          <button type="button" onClick={() => selectionMedicine(record)}>
-            Select
-          </button>
-        </Space>
+        
+        <button
+          type="button"
+          onClick={() => {
+            selectService(record);
+            selectionMedicine(record);
+          }}
+          
+          className="bg-secondary2 text-white px-3 py-1 rounded hover:bg-secondary"
+        >
+          ເພີ່ມ
+        </button>
       ),
     },
   ];
@@ -67,7 +76,10 @@ export default function ListQi({ selectService, tapService }) {
   const selectionMedicine = async (record) => {
     await addMedicine(record);
   };
-
+// const selectionMedicine = (record) => {
+//   console.log('เพิ่มอุปกรณ์:', record); // ตรวจสอบค่า record
+//   addMedicine(record);
+// };
   return (
     <div>
       <Table
@@ -76,6 +88,7 @@ export default function ListQi({ selectService, tapService }) {
         loading={loading}
         dataSource={dataQi || []}
         pagination={{ pageSize: 5, size: 'middle' }}
+        locale={{ emptyText: 'ບໍ່ມີຂໍ້ມູນ' }}
         size="small"
       />
     </div>

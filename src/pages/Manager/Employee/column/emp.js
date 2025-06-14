@@ -9,7 +9,7 @@ export const EmpHeaders = [
   { id: 'ເບີຕິດຕໍ່', name: 'ເບີຕິດຕໍ່', sortable: true },
   { id: 'ທີ່ຢູ່', name: 'ທີ່ຢູ່', sortable: true },
   { id: 'ຕຳແໜ່ງ', name: 'ຕຳແໜ່ງ', sortable: true },
-  { id: '', name: '', sortable: true },
+  { id: '', name: 'ຈັດການ', sortable: true },
 
  
 

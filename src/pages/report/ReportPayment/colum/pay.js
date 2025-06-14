@@ -2,13 +2,12 @@
 export const Pay = [
 
 
-  { id: 'ເລກທີ', name: 'ເລກທີ', sortable: true },
-  { id: 'ລະຫັດ', name: 'ລະຫັດ', sortable: true },
-  { id: 'ຊື່ຄົນເຈັບ', name: 'ຊື່ຄົນເຈັບ', sortable: true },
-  { id: 'ນາມສະກຸນ', name: 'ນາມສະກຸນ', sortable: true },
+  { id: 'ລະຫັດການຊຳລະ', name: 'ລະຫັດການຊຳລະ', sortable: true },
+  { id: 'ລະຫັດປິ່ນປົວ', name: 'ລະຫັດປິ່ນປົວ', sortable: true },
+  { id: 'ວັນທິປິ່ນປົວ', name: 'ວັນທິປິ່ນປົວ', sortable: true },
+  { id: 'ຈຳນວນເງີນ', name: 'ຈຳນວນເງີນ', sortable: true },
   { id: 'ສະຖານະ', name: 'ສະຖານະ', sortable: true },
-  { id: 'ຊື່ທ່ານຫມໍ', name: 'ຊື່ທ່ານຫມໍ', sortable: true },
-  { id: 'ລາຍລະອຽດ', name: 'ລາຍລະອຽດ', sortable: true },
+  { id: 'ປະເພດການຊຳລະ', name: 'ປະເພດການຊຳລະ', sortable: true },
   { id: '', name: '', sortable: true },
 
 

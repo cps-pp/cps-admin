@@ -22,35 +22,45 @@ export default function ListDis({ selectService, tapService }) {
 
   const columns = [
     {
-      title: 'Disease ID',
+      title: 'ລະຫັດພະຍາດ',
       dataIndex: 'disease_id',
       key: 'disease_id',
     },
     {
-      title: 'Name',
+      title: 'ຊື່ພະຍາດ',
       dataIndex: 'disease_name',
       key: 'disease_name',
     },
 
     {
-      title: 'Action',
+      title: 'ຈັດການ',
       key: 'action',
       render: (_, record) => (
-        <Space size="middle">
-          <button type="button" onClick={() => selectService(record)}>
-            Select
-          </button>
-        </Space>
+        <button
+          type="button"
+          onClick={() => {
+            // console.log('Selecting:', record);
+            selectService(record);
+            // selectionMedicine(record);
+          }}
+          className="bg-secondary2 text-white px-3 py-1 rounded hover:bg-secondary"
+        >
+          ເພີ່ມ
+        </button>
       ),
     },
   ];
-
+  const selectionMedicine = async (record) => {
+    await addMedicine(record);
+  };
   return (
     <div>
       <Table
         columns={columns}
         dataSource={dataMed}
-        pagination={{ pageSize: 5, size: 'middle' }}
+        pagination={{ pageSize: 3, size: 'middle' }}
+          locale={{ emptyText: 'ບໍ່ມີຂໍ້ມູນ' }}
+
         size="small"
       />
     </div>

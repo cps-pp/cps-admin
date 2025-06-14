@@ -34,10 +34,10 @@ export default function ListService({ selectService, tapService }) {
   };
 
   const columns = [
-    { title: 'Services', dataIndex: 'ser_id', key: 'ser_id' },
-    { title: 'Name', dataIndex: 'ser_name', key: 'ser_name' },
+    { title: 'ລະຫັດລາຍການ', dataIndex: 'ser_id', key: 'ser_id' },
+    { title: 'ຊື່ລາຍການ', dataIndex: 'ser_name', key: 'ser_name' },
     {
-      title: 'Price',
+      title: 'ລາຄາ',
       dataIndex: 'price',
       key: 'price',
       render: (price) => <a>{price?.toLocaleString()}</a>,
@@ -53,7 +53,7 @@ export default function ListService({ selectService, tapService }) {
             selectService(record);
             selectionService(record);
           }}
-          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+          className="bg-secondary2 text-white px-3 py-1 rounded hover:bg-secondary"
         >
           ເພີ່ມ
         </button>
@@ -70,6 +70,8 @@ export default function ListService({ selectService, tapService }) {
         loading={loading}
         dataSource={dataService || []}
         pagination={{ pageSize: 5, size: 'middle' }}
+          locale={{ emptyText: 'ບໍ່ມີຂໍ້ມູນ' }}
+
         rowKey="ser_id"
         size="small"
       />

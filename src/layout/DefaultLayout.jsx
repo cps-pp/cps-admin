@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import Header from '../components/Header/index';
 import Sidebar from '../components/Sidebar/index';
 import { Outlet, useLocation } from 'react-router-dom';
 import Alerts from '@/components/Alerts';
+import Header from '../components/Header';
 
 const DefaultLayout = () => {
   const location = useLocation();

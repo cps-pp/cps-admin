@@ -307,9 +307,10 @@ const CreateMedicines = ({ setShow, getList, existingIds, onCloseCallback }) => 
           isRequired={true}
         />
 
+         
         <SelectBoxId
           label="ປະເພດ"
-          name="medtype_id"
+          name="ປະເພດ"
           value={selectedMedType}
           options={categories.map((cat) => ({
             value: cat.medtype_id,
@@ -318,7 +319,6 @@ const CreateMedicines = ({ setShow, getList, existingIds, onCloseCallback }) => 
           register={register}
           errors={errors}
           onSelect={(e) => setSelectedMedType(e.target.value)}
-          formOptions={{ required: 'ກະລຸນາເລືອກປະເພດ' }}
         />
 
         <SelectBoxId

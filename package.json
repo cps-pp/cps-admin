@@ -30,11 +30,9 @@
     "jspdf-autotable": "^5.0.2",
     "light-date": "^1.2.0",
     "lodash": "^4.17.21",
-    
    
     
     "lucide-react": "0.511.0",
-  
     "moment": "^2.30.1",
     "prisma": "6.9.0-dev.25",
     "react": "^18.3.1",

@@ -8,7 +8,7 @@ export const AppHeaders = [
   { id: 'ສະຖານະ', name: 'ສະຖານະ', sortable: true },
   { id: 'ຊື່ທ່ານຫມໍ', name: 'ຊື່ທ່ານຫມໍ', sortable: true },
   { id: 'ລາຍລະອຽດ', name: 'ລາຍລະອຽດ', sortable: true },
-  { id: '', name: '', sortable: true },
+  { id: '', name: 'ຈັດການ', sortable: true },
 
 
  

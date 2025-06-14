@@ -3,9 +3,9 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, } from 'rech
 import CardDataStats from '../components/CardDataStats';
 import MonthChart from '../components/Charts/MonthChart';
 import { getAppointments } from '@/api/getAppointments';
-import { Follow } from '@/pages/Follow/column/follow';
 import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { useNavigate } from 'react-router-dom';
+import { FollowHeader } from './Follow/column/follow';
 
 
 const Dashboard = () => {
@@ -376,29 +376,29 @@ const Dashboard = () => {
         </CardDataStats>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mt-6">
+      <div className="grid grid-cols-2 gap-8 mt-6">
         {/* Patient Section - Left Side */}
-        <div className="rounded bg-white pt-4 dark:bg-boxdark">
-          <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-            <h2 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
-              ລາຍຊື່ຄົນເຈັບ
+        <div className="rounded bg-white pt-4 shadow-md  ">
+          <div className="flex items-center justify-between  px-4 pb-4 ">
+            <h2 className="text-md md:text-lg lg:text-xl font-medium text-strokedark ">
+              ລາຍຊື່ຄົນເຈັບເພີ່ມລ່າສຸດ
             </h2>
           </div>
 
-          <div className="overflow-x-auto rounded-lg shadow-md">
-            <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
+         <div className="overflow-x-auto  ">
+          <table className="w-full min-w-max table-auto  ">
               <thead>
-                <tr className="text-left bg-secondary2 text-white">
-                  <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300">
+                <tr className="text-left bg-gray border border-stroke">
+                  <th className="px-4 py-3 text-form-input  font-semibold">
                     ລະຫັດຄົນເຈັບ
                   </th>
-                  <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300">
+                  <th className="px-4 py-3 text-form-input  font-semibold">
                     ຊື່-ນາມສະກຸນ
                   </th>
-                  <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300">
+                  <th className="px-4 py-3 text-form-input  font-semibold">
                     ເພດ
                   </th>
-                  <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300">
+                  <th className="px-4 py-3 text-form-input  font-semibold">
                     ທີ່ຢູ່
                   </th>
                 </tr>
@@ -433,7 +433,7 @@ const Dashboard = () => {
           </div>
 
           {/* Link to view all patients */}
-          <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex justify-center">
+          <div className="px-4 py-3  flex justify-center">
             <button
               onClick={handlePatientManagement}
               className="text-primary hover:text-primary-dark text-md font-semibold hover:underline transition-colors duration-200"
@@ -446,17 +446,17 @@ const Dashboard = () => {
 
 
         {/* Appointments Section - Right Side */}
-        <div className="rounded bg-white pt-4 dark:bg-boxdark">
-          <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-            <h2 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+        <div className="rounded bg-white pt-1 shadow-md ">
+          <div className="flex items-center justify-between px-4 pb-4">
+            <h2 className="text-md md:text-lg lg:text-xl font-medium text-strokedark ">
               ນັດໝາຍມື້ນີ້ ({getTodayDate()})
             </h2>
             <div className="text-sm text-gray-600 dark:text-gray-400">
               ລໍຖ້າກວດ: {todayPendingAppointments.length} ລາຍການ
             </div>
             <button
-              onClick={() => navigate('/Follow')}
-              className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+              onClick={() => navigate('/followpat')}
+              className="bg-secondary hover:bg-secondary2 text-white px-4 py-2  text-sm rounded transition-colors duration-200 flex items-center gap-2"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -466,23 +466,23 @@ const Dashboard = () => {
             </button>
           </div>
 
-          <div className="overflow-x-auto rounded-lg shadow-md">
-            <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
+    <div className="overflow-x-auto  ">
+          <table className="w-full min-w-max table-auto  ">
               <thead>
-                <tr className="text-left bg-secondary2 text-white">
-                  <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300">
+                <tr className="text-left bg-gray border border-stroke">
+                  <th className="px-4 py-3 text-form-input  font-semibold">
                     ເລກທີ່
                   </th>
-                  <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300">
+                  <th className="px-4 py-3 text-form-input  font-semibold">
                     ຊື່ຄົນເຈັບ
                   </th>
-                  <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300">
+                  <th className="px-4 py-3 text-form-input  font-semibold">
                     ວັທີ່ນັດໝາຍ
                   </th>
-                  <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300">
+                  <th className="px-4 py-3 text-form-input  font-semibold">
                     ສະຖານະ
                   </th>
-                  <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300">
+                  <th className="px-4 py-3 text-form-input  font-semibold">
                     ຊື່ທ່ານໝໍ
                   </th>
                 </tr>
@@ -491,7 +491,7 @@ const Dashboard = () => {
                 {loading ? (
                   <tr>
                     <td
-                      colSpan={Follow.length}
+                      colSpan={FollowHeader.length}
                       className="py-8 text-center text-gray-500"
                     >
                       ກຳລັງໂຫຼດຂໍ້ມູນ...
@@ -525,7 +525,7 @@ const Dashboard = () => {
                 ) : (
                   <tr>
                     <td
-                      colSpan={Follow.length}
+                      colSpan={FollowHeader.length}
                       className="py-4 text-center text-gray-500"
                     >
                       ບໍ່ມີນັດໝາຍທີ່ລໍຖ້າສຳລັບມື້ນີ້

@@ -5,7 +5,7 @@ export const ExchangeHeaders = [
 
   { id: 'ສະກຸນເງີນ ', name: 'ສະກຸນເງີນ ', sortable: true },
   { id: 'ເລດ', name: 'ເລດ', sortable: true },
-  { id: '', name: '', sortable: true },
+  { id: 'ຈັດການ', name: 'ຈັດການ', sortable: true },
 
 
  

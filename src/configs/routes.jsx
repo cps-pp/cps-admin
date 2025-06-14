@@ -27,6 +27,8 @@ import ReportImport from '../pages/report/ReportImport';
 import ReportOrder from '../pages/report/ReportOrder';
 import DetailPatientService from '../pages/Service/Detail';
 import PackectDetail from '../pages/Manager/PackectDetail';
+import InvoicePage from '../pages/Invoice';
+import PaymentPage from '../pages/Payment';
 
 export const ROUTES = [
   {
@@ -34,6 +36,8 @@ export const ROUTES = [
     title: 'CPS Admin',
     component: <Dashboard />,
   },
+
+  
   {
     path: '/login',
     title: 'Signin | CPS Admin',
@@ -116,7 +120,17 @@ export const ROUTES = [
     component: <Treatment />,
   },
   {
-    path: '/detail',
+    path: '/invoice',
+    title: 'invoice | CPS Admin',
+    component: <InvoicePage />,
+  },
+  {
+    path: '/pay',
+    title: 'Payment | CPS Admin',
+    component: <PaymentPage />,
+  },
+  {
+    path: '/patdetail',
     title: 'DetailPatientService | CPS Admin',
     component: <DetailPatientService />,
   },
@@ -127,13 +141,13 @@ export const ROUTES = [
     component: <Order />,
   },
   {
-    path: '/import',
+    path: '/importorder',
     title: 'Import | CPS Admin',
     component: <ImportPage />,
   },
   // -------------------------- Follow Path --------------------------------
   {
-    path: '/follow',
+    path: '/followpat',
     title: 'Follow | CPS Admin',
     component: <FollowPage />,
   },
@@ -157,7 +171,7 @@ export const ROUTES = [
     component: <ReportMed />,
   },
   {
-    path: '/report/payment',
+    path: '/report/payments',
     title: 'Report  Payment | CPS Admin',
     component: <ReportPay />,
   },

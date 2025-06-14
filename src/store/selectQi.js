@@ -1,11 +1,11 @@
 import { create } from 'zustand'
 
 const useStoreQi = create((set) => ({
-  medicine: [],
+  equipment: [],
 
   addMedicine: (data) => {
     set((state) => {
-      const existsID = state.medicine.some(item => item.med_id === data.med_id);
+      const existsID = state.equipment.some(item => item.med_id === data.med_id);
       
       if (existsID) { 
         return state 
@@ -20,24 +20,24 @@ const useStoreQi = create((set) => ({
       
       return {
         ...state,
-        medicine: [...state.medicine, newMedicine]
+        equipment: [...state.equipment, newMedicine]
       };
     });
   },
 
   removeMedicine: (data) => {
     set((state) => {
-      const filteredData = state.medicine.filter((item) => item.med_id !== data.med_id);
+      const filteredData = state.equipment.filter((item) => item.med_id !== data.med_id);
       return {
         ...state,
-        medicine: filteredData
+        equipment: filteredData
       }
     });
   },
 
   updateQty: (med_id, qty) =>
     set((state) => ({
-      medicine: state.medicine.map((med) =>
+      equipment: state.equipment.map((med) =>
         med.med_id === med_id
           ? { ...med, qty, total: qty * med.price }
           : med

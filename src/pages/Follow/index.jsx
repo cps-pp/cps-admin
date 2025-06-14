@@ -9,8 +9,8 @@ import CreateFollow from '@/pages/Follow/create';
 import EditFollow from './edit';
 import { openAlert } from '@/redux/reducer/alert';
 import { useAppDispatch } from '@/redux/hook';
-import { Follow } from './column/follow';
-
+import {  FollowHeader } from './column/follow';
+import { iconAdd } from '@/configs/icon';
 const FollowPage = () => {
   const [appointments, setAppointments] = useState([]);
   const [filteredAppointments, setFilteredAppointments] = useState([]);
@@ -63,8 +63,10 @@ const FollowPage = () => {
       const today = getTodayDate();
 
       // Filter today's appointments - เฉพาะวันนี้และสถานะ "ລໍຖ້າ" เท่านั้น
-      const todayAppts = allAppointments.filter(appointment => {
-        const appointmentDate = new Date(appointment.date_addmintted).toISOString().split('T')[0];
+      const todayAppts = allAppointments.filter((appointment) => {
+        const appointmentDate = new Date(appointment.date_addmintted)
+          .toISOString()
+          .split('T')[0];
         return appointmentDate === today && appointment.status === 'ລໍຖ້າ';
       });
 
@@ -219,7 +221,7 @@ const FollowPage = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            status: 'ກວດແລ້ວ'
+            status: 'ກວດແລ້ວ',
           }),
         },
       );
@@ -268,7 +270,7 @@ const FollowPage = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            date_addmintted: newDate
+            date_addmintted: newDate,
           }),
         },
       );
@@ -342,7 +344,7 @@ const FollowPage = () => {
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 2xl:gap-7.5 w-full mb-6">
         {/* All Appointments */}
-        <div className="rounded-sm border border-stroke bg-white p-4 dark:border-strokedark dark:bg-boxdark">
+        <div className="rounded-sm border border-stroke bg-white p-4 ">
           <div className="flex items-center">
             <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-Third dark:bg-secondary">
               <svg
@@ -439,9 +441,9 @@ const FollowPage = () => {
       </div>
 
       {/* Today's Appointments Section - แสดงเฉพาะสถานะ "ລໍຖ້າ" */}
-      <div className="rounded bg-white pt-4 dark:bg-boxdark mb-6">
-        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+      <div className="rounded bg-white pt-4  mb-6">
+        <div className="flex items-center justify-between border-stroke px-4 pb-4 ">
+          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark">
             ນັດໝາຍມື້ນີ້ທີ່ລໍຖ້າກວດ ({getTodayDate()})
           </h1>
           <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -449,17 +451,18 @@ const FollowPage = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-lg shadow-md">
-          <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
+        <div className="overflow-x-auto  shadow-md">
+          <table className="w-full min-w-max table-auto  ">
             <thead>
-              <tr className="text-left bg-secondary2 text-white">
-                <th className="px-4 py-3 font-medium">ID</th>
-                <th className="px-4 py-3 font-medium">ຊື່ຄົນໄຂ້</th>
-                <th className="px-4 py-3 font-medium">ວັນທີ່ແລະເວລາ</th>
-                <th className="px-4 py-3 font-medium">ສະຖານະ</th>
-                <th className="px-4 py-3 font-medium">ແພດ</th>
-                <th className="px-4 py-3 font-medium">ລາຍລະອຽດ</th>
-                <th className="px-4 py-3 font-medium text-center">ການດຳເນີນງານ</th>
+              <tr className="text-left bg-gray border border-stroke">
+                {FollowHeader.map((header, index) => (
+                  <th
+                    key={index}
+                    className="px-4 py-3 tracking-wide text-form-input  font-semibold"
+                  >
+                    {header.name}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -467,7 +470,7 @@ const FollowPage = () => {
                 todayAppointments.map((appointment, index) => (
                   <tr
                     key={index}
-                    className="border-b border-stroke dark:border-strokedark hover:bg-blue-50 dark:hover:bg-blue-900"
+                    className="border-b border-stroke  hover:bg-slate-50 "
                   >
                     <td className="px-4 py-4">{appointment.appoint_id}</td>
                     <td className="px-4 py-4">
@@ -483,7 +486,7 @@ const FollowPage = () => {
                           hour: '2-digit',
                           minute: '2-digit',
                           hour12: false,
-                          timeZone: 'Asia/Bangkok'
+                          timeZone: 'Asia/Bangkok',
                         },
                       )}
                     </td>
@@ -499,14 +502,18 @@ const FollowPage = () => {
                     <td className="px-3 py-4 text-center">
                       <div className="flex justify-center gap-2">
                         <button
-                          onClick={() => handleCompleteAppointment(appointment.appoint_id)}
+                          onClick={() =>
+                            handleCompleteAppointment(appointment.appoint_id)
+                          }
                           className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
                           title="ສຳເລັດສິ້ນ"
                         >
                           ສຳເລັດສິ້ນ
                         </button>
                         <button
-                          onClick={() => openPostponeModal(appointment.appoint_id)}
+                          onClick={() =>
+                            openPostponeModal(appointment.appoint_id)
+                          }
                           className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
                           title="ເລື່ອນນັດໝາຍ"
                         >
@@ -536,7 +543,8 @@ const FollowPage = () => {
           <div className="flex items-center gap-2">
             <Button
               onClick={() => setShowAddModal(true)}
-              className="bg-primary"
+              className="bg-secondary2"
+                icon={iconAdd}
             >
               ເພີ່ມນັດໝາຍ
             </Button>
@@ -557,14 +565,14 @@ const FollowPage = () => {
           />
         </div>
 
-        <div className="overflow-x-auto rounded-lg shadow-md">
-          <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
+           <div className="overflow-x-auto  shadow-md">
+          <table className="w-full min-w-max table-auto  ">
             <thead>
-              <tr className="text-left bg-secondary2 text-white">
-                {Follow.map((header, index) => (
+              <tr className="text-left bg-gray border border-stroke">
+                {FollowHeader.map((header, index) => (
                   <th
                     key={index}
-                    className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300 "
+                    className="px-4 py-3 tracking-wide text-form-input  font-semibold"
                   >
                     {header.name}
                   </th>
@@ -592,19 +600,20 @@ const FollowPage = () => {
                           hour: '2-digit',
                           minute: '2-digit',
                           hour12: false,
-                          timeZone: 'Asia/Bangkok'
+                          timeZone: 'Asia/Bangkok',
                         },
                       )}
                     </td>
 
                     <td className="px-4 py-3">
                       <span
-                        className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${appointment.status === 'ກວດແລ້ວ'
+                        className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
+                          appointment.status === 'ກວດແລ້ວ'
                             ? 'bg-green-100 text-green-700'
                             : appointment.status === 'ລໍຖ້າ'
                               ? 'bg-yellow-100 text-yellow-800'
                               : 'bg-gray-100 text-gray-700'
-                          }`}
+                        }`}
                       >
                         {appointment.status}
                       </span>

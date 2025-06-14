@@ -132,7 +132,7 @@ const paginatedPackets = (filteredPackets || []).slice(
           <Button
             onClick={() => setShowAddModal(true)}
             icon={iconAdd}
-            className="bg-primary"
+            className="bg-secondary2"
           >
             ເພີ່ມຂໍ້ມູນ
           </Button>
@@ -148,12 +148,12 @@ const paginatedPackets = (filteredPackets || []).slice(
           />
         </div>
 
-        <div className="overflow-x-auto rounded-lg shadow-md">
-          <table className="w-full table-auto border-collapse rounded-lg">
+           <div className="overflow-x-auto  shadow-md">
+          <table className="w-full min-w-max table-auto  ">
             <thead>
-              <tr className="bg-secondary2 text-white text-left">
+              <tr className="bg-gray border border-stroke  text-left">
                 {PacketHeaders.map((header, index) => (
-                  <th key={index} className="px-4 py-3 font-medium">
+                  <th key={index} className="px-4 py-3 tracking-wide text-form-input  font-semibold">
                     {header.name}
                   </th>
                 ))}

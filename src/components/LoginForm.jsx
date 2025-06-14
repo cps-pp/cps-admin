@@ -3,19 +3,41 @@ import Logo from '../images/logo/cps.png';
 import { useAuth } from '@/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const LoginForm= () => {
+const LoginForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const auth = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = () => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (auth.login(username, password)) {
-      navigate('/dashboard');
-    } else {
-      setError('ຂໍ້ມູນບໍ່ຖືກຕ້ອງ');
+    setError('');
+    
+    // ตรวจสอบข้อมูล
+    if (!username.trim() || !password.trim()) {
+      setError('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      // ใช้ login function จาก AuthContext
+      const result = await login(username.trim(), password);
+      
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setError(result.message || 'ข้อมูลไม่ถูกต้อง');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -37,7 +59,8 @@ const LoginForm= () => {
             placeholder="ຊື່ຜູ້ໃຊ້"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full text-strokedark p-4 pl-4 pr-10 border border-stroke rounded focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
+            disabled={isLoading}
+            className="w-full text-strokedark p-4 pl-4 pr-10 border border-stroke rounded focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition disabled:opacity-50 disabled:cursor-not-allowed"
           />
 
           <input
@@ -45,7 +68,8 @@ const LoginForm= () => {
             placeholder="ລະຫັດຜ່ານ"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full text-strokedark p-4 pl-4 pr-10 border border-stroke rounded focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
+            disabled={isLoading}
+            className="w-full text-strokedark p-4 pl-4 pr-10 border border-stroke rounded focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition disabled:opacity-50 disabled:cursor-not-allowed"
           />
 
           {error && (
@@ -63,9 +87,20 @@ const LoginForm= () => {
 
           <button
             type="submit"
-            className="bg-purple-700 hover:bg-purple-800 text-white font-medium p-4 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg"
+            disabled={isLoading}
+            className="bg-purple-700 hover:bg-purple-800 disabled:bg-purple-400 text-white font-medium p-4 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100 shadow-md hover:shadow-lg disabled:cursor-not-allowed flex items-center justify-center"
           >
-            ເຂົ້າສູ່ລະບົບ
+            {isLoading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                ກຳລັງເຂົ້າສູ່ລະບົບ...
+              </>
+            ) : (
+              'ເຂົ້າສູ່ລະບົບ'
+            )}
           </button>
         </form>
       </div>
