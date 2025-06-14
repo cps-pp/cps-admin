@@ -37,7 +37,7 @@ const ServicePage = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        `http://localhost:4000/src/manager/servicelist`,
+        `http://localhost:4000/src/manager/servicelistNOT`,
       );
 
       if (!response.ok) {

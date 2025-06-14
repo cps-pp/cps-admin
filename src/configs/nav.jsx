@@ -188,7 +188,7 @@ export const MENU = [
       },
    
       {
-        name: 'ຂໍ້ມູນລາຍລະອຽດແພັກແກັດ',
+        name: 'ຂໍ້ມູນລາຍການແພັກແກັດ',
         path: '/manager/packetdetail',
       },
       {

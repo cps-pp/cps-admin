@@ -1,80 +1,95 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import Button from '@/components/Button';
 import Input from '@/components/Forms/Input';
-import Loader from '@/common/Loader';
 import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
-import Alerts from '@/components/Alerts';
 import PriceInput from '@/components/Forms/PriceInput';
+import InputBox from '../../../components/Forms/Input_new';
+import PriceInputBox from '../../../components/Forms/PriceInput';
+import ButtonBox from '../../../components/Button';
+import SelectBox from '../../../components/Forms/Select';
 
-const EditExChange = ({ id, onClose, setShow, getList }) => {
+const EditServicerList = ({ id, onClose, setShow, getList }) => {
   const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     getValues,
+    reset,
     formState: { errors },
     setValue,
   } = useForm();
+
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false);
   const dispatch = useAppDispatch();
+  const [ispackage, setPack] = useState('');
 
   useEffect(() => {
     const fetchListData = async () => {
+      if (!id) {
+        console.error('Patient ID is undefined');
+        return;
+      }
       try {
-        const response = await fetch(
-          `http://localhost:4000/src/manager/exchange/${id}`
-        );
+        const response = await fetch(`http://localhost:4000/src/manager/servicelist/${id}`);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        const data = await response.json();
-        setValue('ex_type', data.data.ex_type);
-        setValue('ex_rate', data.data.ex_rate);
+        const result = await response.json();
 
+        reset(result.data);
+        setPack(result.data.ispackage);
         setLoading(false);
-      } catch (error) {
-        console.error('Error fetching exchange data:', error);
+      } catch (err) {
+        console.error(err);
+      
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchListData();
-  }, [id, setValue, fetching]);
+  }, [id, reset, fetching]);
+  useEffect(() => {
+    if (ispackage) {
+      setValue('ispackage', ispackage);
+    }
+  }, [ispackage, setValue]);
 
   const handleSave = async (formData) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:4000/src/manager/exchange/${id}`,
+        `http://localhost:4000/src/manager/servicelist/${id}`,
         {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            ex_type: formData.ex_type,
-            ex_rate: parseFloat(formData.ex_rate),  // แปลงเป็นตัวเลขก่อนส่ง
+            ser_name: formData.ser_name,
+            price: formData.price,
+            ispackage: formData.ispackage,
           }),
-        }
+        },
       );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+      const result = await response.json();
+      if (!response.ok)
+        throw new Error(result.error || `Status ${response.status}`);
 
       dispatch(
         openAlert({
           type: 'success',
           title: 'ແກ້ໄຂສຳເລັດ',
-          message: 'ແກ້ໄຂຂໍ້ມູນອັດຕາແລກປ່ຽນສຳເລັດແລ້ວ',
-        })
+          message: 'ແກ້ໄຂຂໍ້ມູນລາຍການສຳເລັດແລ້ວ',
+        }),
       );
 
       if (getList) getList();
-
       setShow(false);
     } catch (err) {
       console.error(err);
@@ -82,56 +97,53 @@ const EditExChange = ({ id, onClose, setShow, getList }) => {
         openAlert({
           type: 'error',
           title: 'ແກ້ໄຂຂໍ້ມູນບໍ່ສຳເລັດ',
-          message: 'ເກີດຂໍ້ຜຶດພາດໃນການບັນທືກຂໍ້ມູນ',
-        })
+          message:  'ເກີດຂໍ້ຜຶດພາດໃນການບັນທືກຂໍ້ມູນ',
+        }),
       );
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) return <Loader />;
+  // if (loading) return <Loader />;
+
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
-      <Alerts/>
-      <div className="flex items-center  border-b border-stroke  dark:border-strokedark pb-4">
+      <div className="flex items-center border-b border-stroke dark:border-strokedark pb-4">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
           ແກ້ໄຂ
         </h1>
       </div>
-
       <form onSubmit={handleSubmit(handleSave)} className="mt-4 px-4">
-        <Input
-          label="ສະກຸນເງິນ"
-          name="ex_type"
+        <InputBox
+          label="ຊື່ລາຍການ"
+          name="ser_name"
           type="text"
-          placeholder="ປ້ອນສະກຸນເງິນ"
+          placeholder="ປ້ອນຊຶ່ລາຍການ"
           register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນສະກຸນເງິນກ່ອນ' }}
+          formOptions={{ required: 'ກະລຸນາປ້ອນຊື່ລາຍການກ່ອນ' }}
           errors={errors}
         />
-       
-   <PriceInput
+        <PriceInputBox
           label="ລາຄາ"
-          name="ex_rate"
+          name="price"
           register={register}
-          defaultValue={getValues('ex_rate')}
+          defaultValue={getValues('price')}
           formOptions={{
             required: 'ກະລຸນາປ້ອນລາຄາ',
             min: { value: 0, message: 'ລາຄາຕ້ອງຫຼາຍກວ່າ 0' },
           }}
           errors={errors}
         />
-
         <div className="mt-8 flex justify-end space-x-4 col-span-full py-4">
-       
-          <Button variant="save" type="submit">
+          
+          <ButtonBox variant="save" type="submit" disabled={loading}>
             ບັນທຶກ
-          </Button>
+          </ButtonBox>
         </div>
       </form>
     </div>
   );
 };
 
-export default EditExChange;
+export default EditServicerList;

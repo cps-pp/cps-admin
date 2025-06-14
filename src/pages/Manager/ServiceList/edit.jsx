@@ -59,28 +59,7 @@ const EditServicerList = ({ id, onClose, setShow, getList }) => {
     }
   }, [ispackage, setValue]);
 
-  // useEffect(() => {
-  //   const fetchListData = async () => {
-  //     try {
-  //       const response = await fetch(
-  //         `http://localhost:4000/src/manager/servicelist/${id}`,
-  //       );
-  //       if (!response.ok) {
-  //         throw new Error(`HTTP error! Status: ${response.status}`);
-  //       }
-  //       const data = await response.json();
-  //       setValue('ser_name', data.data.ser_name);
-  //       setValue('price', data.data.price);
-  //       setPack(data.data.ispackage);
-  //       setValue('ispackage', data.data.ispackage);
-  //       setLoading(false);
-  //     } catch (error) {
-  //       console.error('Error fetching servicelist data:', error);
-  //     }
-  //   };
 
-  //   fetchListData();
-  // }, [id, setValue, fetching]);
 
   const handleSave = async (formData) => {
     setLoading(true);
@@ -158,15 +137,7 @@ const EditServicerList = ({ id, onClose, setShow, getList }) => {
           }}
           errors={errors}
         />
-       <SelectBox
-          label="ແພັກເກັດ"
-          name="ແພັກເກັດ"
-          options={['NOT', 'PACKAGE']}
-          register={register}
-          errors={errors}
-          value={ispackage}
-          onSelect={(e) => setPack(e.target.value)}
-        />
+  
         <div className="mt-8 flex justify-end space-x-4 col-span-full py-4">
           
           <ButtonBox variant="save" type="submit" disabled={loading}>
