@@ -42,6 +42,66 @@ const EditPatient = ({ id, onClose, setShow, getList }) => {
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false);
   const [gender, setGender] = useState('');
+  
+  // ✅ เพิ่ม state สำหรับเบอร์โทร
+  const [phoneNumber1, setPhoneNumber1] = useState('020');
+  const [phoneNumber2, setPhoneNumber2] = useState('020');
+
+  // ✅ ฟังก์ชันจัดการการเปลี่ยนแปลงเบอร์โทร 1
+  const handlePhone1Change = (e) => {
+    let value = e.target.value;
+    
+    // ถ้าผู้ใช้พยายามลบ "020" ให้เซ็ตกลับเป็น "020"
+    if (!value.startsWith('020')) {
+      value = '020';
+    }
+    
+    // จำกัดให้ป้อนได้แค่ตัวเลข
+    const numericValue = value.replace(/[^0-9]/g, '');
+    
+    // ตรวจสอบว่าหลัง 020 ตัวที่ 4 ต้องเป็น 2, 5, 7, 9
+    if (numericValue.length >= 4) {
+      const fourthDigit = numericValue[3];
+      if (!['2', '5', '7', '9'].includes(fourthDigit)) {
+        return; // ไม่อัพเดทถ้าตัวที่ 4 ไม่ใช่ 2, 5, 7, 9
+      }
+    }
+    
+    // จำกัดความยาวไม่เกิน 11 ตัว (020 + 8 ตัว)
+    if (numericValue.length <= 11) {
+      setPhoneNumber1(numericValue);
+      // ✅ อัพเดทค่าใน react-hook-form ด้วย
+      setValue('phone1', numericValue, { shouldValidate: true, shouldDirty: true });
+    }
+  };
+
+  // ✅ ฟังก์ชันจัดการการเปลี่ยนแปลงเบอร์โทร 2
+  const handlePhone2Change = (e) => {
+    let value = e.target.value;
+    
+    // ถ้าผู้ใช้พยายามลบ "020" ให้เซ็ตกลับเป็น "020"
+    if (!value.startsWith('020')) {
+      value = '020';
+    }
+    
+    // จำกัดให้ป้อนได้แค่ตัวเลข
+    const numericValue = value.replace(/[^0-9]/g, '');
+    
+    // ตรวจสอบว่าหลัง 020 ตัวที่ 4 ต้องเป็น 2, 5, 7, 9
+    if (numericValue.length >= 4) {
+      const fourthDigit = numericValue[3];
+      if (!['2', '5', '7', '9'].includes(fourthDigit)) {
+        return; // ไม่อัพเดทถ้าตัวที่ 4 ไม่ใช่ 2, 5, 7, 9
+      }
+    }
+    
+    // จำกัดความยาวไม่เกิน 11 ตัว (020 + 8 ตัว)
+    if (numericValue.length <= 11) {
+      setPhoneNumber2(numericValue);
+      // ✅ อัพเดทค่าใน react-hook-form ด้วย
+      setValue('phone2', numericValue, { shouldValidate: true, shouldDirty: true });
+    }
+  };
 
   useEffect(() => {
     const fetchPatientData = async () => {
@@ -58,6 +118,22 @@ const EditPatient = ({ id, onClose, setShow, getList }) => {
 
         reset(result.data);
         setGender(result.data.gender);
+        
+        // ✅ จัดการเบอร์โทรพิเศษ - ถ้าไม่ขึ้นต้นด้วย 020 ให้เติม 020 ให้
+        let phone1Value = result.data.phone1 || '020';
+        if (!phone1Value.startsWith('020')) {
+          phone1Value = '020' + phone1Value;
+        }
+        setPhoneNumber1(phone1Value);
+        setValue('phone1', phone1Value);
+
+        let phone2Value = result.data.phone2 || '020';
+        if (!phone2Value.startsWith('020')) {
+          phone2Value = '020' + phone2Value;
+        }
+        setPhoneNumber2(phone2Value);
+        setValue('phone2', phone2Value);
+        
         setLoading(false);
       } catch (err) {
         console.error(err);
@@ -74,7 +150,7 @@ const EditPatient = ({ id, onClose, setShow, getList }) => {
     };
 
     fetchPatientData();
-  }, [id, reset, fetching, dispatch]);
+  }, [id, reset, fetching, dispatch, setValue]);
 
   useEffect(() => {
     if (gender) {
@@ -176,44 +252,100 @@ const EditPatient = ({ id, onClose, setShow, getList }) => {
 
         />
 
-<InputBox
-          label="ເບີຕິດຕໍ່"
-          name="phone1"
-          type="tel"
-          placeholder="ປ້ອນເບີຕິດຕໍ່"
-          register={register}
-          formOptions={{
-            required: 'ກະລຸນາປ້ອນເບີຕິດຕໍ່ກ່ອນ',
-            pattern: {
-              value: /^[0-9]+$/,
-              message: 'ເບີຕິດຕໍ່ຕ້ອງເປັນຕົວເລກເທົ່ານັ້ນ',
-            },
-            minLength: {
-              value: 8,
-              message: 'ເບີຕິດຕໍ່ຕ້ອງມີຢ່າງໜ້ອຍ 8 ຕົວເລກ',
-            },
-          }}
-          errors={errors}
-        />
-         <InputBox
-          label="ເບີຕິດຕໍ່"
-          name="phone2"
-          type="tel"
-          placeholder="ປ້ອນເບີຕິດຕໍ່"
-          register={register}
-          formOptions={{
-            required: 'ກະລຸນາປ້ອນເບີຕິດຕໍ່ກ່ອນ',
-            pattern: {
-              value: /^[0-9]+$/,
-              message: 'ເບີຕິດຕໍ່ຕ້ອງເປັນຕົວເລກເທົ່ານັ້ນ',
-            },
-            minLength: {
-              value: 8,
-              message: 'ເບີຕິດຕໍ່ຕ້ອງມີຢ່າງໜ້ອຍ 8 ຕົວເລກ',
-            },
-          }}
-          errors={errors}
-        />
+        {/* ✅ Custom Phone1 Input with 020 prefix */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2 text-black dark:text-white">
+            ເບີຕິດຕໍ່ 1
+          </label>
+          <input
+            type="tel"
+            value={phoneNumber1}
+            onChange={handlePhone1Change}
+            placeholder="0202xxxxxxx, 0205xxxxxxx, 0207xxxxxxx, 0209xxxxxxx"
+            className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+          />
+          {/* Hidden input for form validation */}
+          <input
+            type="hidden"
+            {...register('phone1', {
+              required: 'ກະລຸນາປ້ອນເບີຕິດຕໍ່ກ່ອນ',
+              validate: {
+                validLength: (value) => {
+                  if (value.length !== 11) {
+                    return 'ເບີຕິດຕໍ່ຕ້ອງມີ 11 ຕົວເລກ (020 + 8 ຕົວເລກ)';
+                  }
+                  return true;
+                },
+                startsWithPrefix: (value) => {
+                  if (!value.startsWith('020')) {
+                    return 'ເບີຕິດຕໍ່ຕ້ອງເລີ່ມຕົ້ນດ້ວຍ 020';
+                  }
+                  return true;
+                },
+                validFourthDigit: (value) => {
+                  if (value.length >= 4) {
+                    const fourthDigit = value[3];
+                    if (!['2', '5', '7', '9'].includes(fourthDigit)) {
+                      return 'ຫລັງ 020 ຕ້ອງຕາມດ້ວຍ 2, 5, 7, ຫຼື 9';
+                    }
+                  }
+                  return true;
+                }
+              }
+            })}
+          />
+          {errors.phone1 && (
+            <p className="text-red-500 text-sm mt-1">{errors.phone1.message}</p>
+          )}
+        </div>
+
+        {/* ✅ Custom Phone2 Input with 020 prefix */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2 text-black dark:text-white">
+            ເບີຕິດຕໍ່ 2
+          </label>
+          <input
+            type="tel"
+            value={phoneNumber2}
+            onChange={handlePhone2Change}
+            placeholder="0202xxxxxxx, 0205xxxxxxx, 0207xxxxxxx, 0209xxxxxxx"
+            className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+          />
+          {/* Hidden input for form validation */}
+          <input
+            type="hidden"
+            {...register('phone2', {
+              required: 'ກະລຸນາປ້ອນເບີຕິດຕໍ່ກ່ອນ',
+              validate: {
+                validLength: (value) => {
+                  if (value.length !== 11) {
+                    return 'ເບີຕິດຕໍ່ຕ້ອງມີ 11 ຕົວເລກ (020 + 8 ຕົວເລກ)';
+                  }
+                  return true;
+                },
+                startsWithPrefix: (value) => {
+                  if (!value.startsWith('020')) {
+                    return 'ເບີຕິດຕໍ່ຕ້ອງເລີ່ມຕົ້ນດ້ອຍ 020';
+                  }
+                  return true;
+                },
+                validFourthDigit: (value) => {
+                  if (value.length >= 4) {
+                    const fourthDigit = value[3];
+                    if (!['2', '5', '7', '9'].includes(fourthDigit)) {
+                      return 'ຫລັງ 020 ຕ້ອງຕາມດ້ວຍ 2, 5, 7, ຫຼື 9';
+                    }
+                  }
+                  return true;
+                }
+              }
+            })}
+          />
+          {errors.phone2 && (
+            <p className="text-red-500 text-sm mt-1">{errors.phone2.message}</p>
+          )}
+        </div>
+
         <InputBox
           label="ບ້ານ"
           name="village"
@@ -257,3 +389,4 @@ const EditPatient = ({ id, onClose, setShow, getList }) => {
 };
 
 export default EditPatient;
+

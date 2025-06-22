@@ -6,7 +6,7 @@ import Search from '@/components/Forms/Search';
 import { TableAction } from '@/components/Tables/TableAction';
 import ConfirmModal from '@/components/Modal';
 import Alerts from '@/components/Alerts';
-import { DiseaseHeaders } from './column/diseasw';
+import { DiseaseHeaders } from './column/disease';
 import CreateDisease from './create';
 import EditDisease from './edit';
 import { openAlert } from '@/redux/reducer/alert';
@@ -30,6 +30,10 @@ const DiseasePage = () => {
   const [existingIds, setExistingIds] = useState([]);
    // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
     const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
+
+    // ✅ เพิ่ม state สำหรับการเรียงลำดับ ID
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
+
 
   const fetchDiseases = async () => {
     try {
@@ -59,6 +63,7 @@ const DiseasePage = () => {
       setFilteredDiseases(diseases);
     } else {
       const filtered = diseases.filter((disease) =>
+        disease.disease_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
         disease.disease_name.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredDiseases(filtered);
@@ -69,6 +74,43 @@ const DiseasePage = () => {
     setSelectedDiseaseId(id);
     setShowModal(true);
   };
+
+  // ✅ ฟังก์ชันสำหรับเรียงลำดับ ID (แก้ไขแล้ว)
+const handleSortById = () => {
+  const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+  setSortOrder(newSortOrder);
+  
+  const sortedDiseases = [...diseases].sort((a, b) => { // ✅ แก้จาก disease เป็น diseases
+    const extractNumber = (id) => {
+      const match = id.match(/\d+/);
+      return match ? parseInt(match[0]) : 0;
+    };
+
+// ✅ แก้ไขส่วน TablePaginationDemo count ด้วย
+// เปลี่ยนจาก count={paginatedDiease.length} เป็น count={filteredDiseases.length}
+    
+    const numA = extractNumber(a.disease_id);
+    const numB = extractNumber(b.disease_id);
+    
+    if (newSortOrder === 'asc') {
+      return numA - numB; 
+    } else {
+      return numB - numA; 
+    }
+  });
+  
+  setDiseases(sortedDiseases);
+  
+  if (searchQuery.trim() !== '') {
+    const filtered = sortedDiseases.filter(disease =>
+      disease.disease_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      disease.disease_name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredDiseases(filtered);
+  } else {
+    setFilteredDiseases(sortedDiseases);
+  }
+};
 
   const handleDeleteDisease = async () => {
     if (!selectedDiseaseId) return;
@@ -139,7 +181,7 @@ const DiseasePage = () => {
             <Button
               onClick={() => setShowAddDiseaseModal(true)}
               icon={iconAdd}
-              className="bg-primary"
+              className="bg-secondary2"
             >
               ເພີ່ມຂໍ້ມູນພະຍາດແຂ້ວ
             </Button>
@@ -166,9 +208,27 @@ const DiseasePage = () => {
                 {DiseaseHeaders.map((header, index) => (
                   <th
                     key={index}
-                    className="px-4 py-3 tracking-wide text-form-input  font-semibold "
+                    className={`px-4 py-3 tracking-wide font-semibold text-form-input ${
+                      header.id === 'id'
+                        ? 'cursor-pointer hover:bg-gray-100 hover:text-gray-800 select-none'
+                        : ''
+                    }`}
+                    onClick={header.id === 'id' ? handleSortById : undefined}
                   >
-                    {header.name}
+                    <div className="flex items-center gap-2">
+                      {header.name}
+                      {header.id === 'id' && (
+                        <span
+                          className={`ml-1 inline-block text-md font-semibold transition-colors duration-200 ${
+                            sortOrder === 'asc'
+                              ? 'text-green-500'
+                              : 'text-black'
+                          }`}
+                        >
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
                   </th>
                 ))}
               </tr>
@@ -270,19 +330,19 @@ const DiseasePage = () => {
         )}
       </div>
       <TablePaginationDemo
-        count={paginatedDiease.length}
+        count={filteredDiseases.length}
         page={page}
         onPageChange={handlePageChange}
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleRowsPerPageChange}
       />
 
-      {/* <ConfirmModal
+      <ConfirmModal
         show={showModal}
         setShow={setShowModal}
-        message="ທ່ານຕ້ອງການລົບພະນັກງານອອກຈາກລະບົບບໍ່？"
+        message="ທ່ານຕ້ອງການລົບພະຍາດອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteDisease}
-      /> */}
+      /> 
     </>
   );
 };

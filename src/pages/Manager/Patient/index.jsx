@@ -13,6 +13,7 @@ import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import SearchBox from '../../../components/Forms/Search_New';
+
 const PatientPage = () => {
   const [patients, setPatients] = useState([]);
   const [filteredPatients, setFilteredPatients] = useState([]);
@@ -32,11 +33,14 @@ const PatientPage = () => {
   const [existingPhones2, setExistingPhones2] = useState([]);
   // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
   const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
+  
+  // ✅ เพิ่ม state สำหรับการเรียงลำดับ ID (คัดลอกจาก CategoryPage)
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
 
   const fetchPatients = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:4000/src/manager/patient');
+      const response = await fetch('http://localhost:4000/src/manager/patientP');
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -60,11 +64,45 @@ const PatientPage = () => {
   useEffect(() => {
     fetchPatients();
   }, []);
+  
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setFilteredPatients(patients);
     } else {
-      const filtered = patients.filter((patient) => {
+      const filtered = patients.filter((patient) => 
+        patient.patient_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        patient.patient_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        patient.patient_surname.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredPatients(filtered);
+    }
+  }, [searchQuery, patients]);
+
+  // ✅ ฟังก์ชันสำหรับเรียงลำดับ ID (คัดลอกจาก CategoryPage)
+  const handleSortById = () => {
+    const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortOrder(newSortOrder);
+    
+    const sortedPatients = [...patients].sort((a, b) => {
+      const extractNumber = (id) => {
+        const match = id.match(/\d+/);
+        return match ? parseInt(match[0]) : 0;
+      };
+      
+      const numA = extractNumber(a.patient_id);
+      const numB = extractNumber(b.patient_id);
+      
+      if (newSortOrder === 'asc') {
+        return numA - numB; 
+      } else {
+        return numB - numA; 
+      }
+    });
+    
+    setPatients(sortedPatients);
+    
+    if (searchQuery.trim() !== '') {
+      const filtered = sortedPatients.filter((patient) => {
         const patientDataString = Object.values(patient)
           .filter((v) => v !== null && v !== undefined)
           .map((v) => String(v).toLowerCase())
@@ -73,8 +111,10 @@ const PatientPage = () => {
         return patientDataString.includes(searchQuery.toLowerCase());
       });
       setFilteredPatients(filtered);
+    } else {
+      setFilteredPatients(sortedPatients);
     }
-  }, [searchQuery, patients]);
+  };
 
   const openDeleteModal = (id) => () => {
     setSelectedPatientId(id);
@@ -196,9 +236,27 @@ const PatientPage = () => {
                 {PatientHeaders.map((header, index) => (
                   <th
                     key={index}
-                    className="px-4 py-3 tracking-wide text-form-input  font-semibold"
+                    className={`px-4 py-3 tracking-wide text-form-input font-semibold ${
+                      header.id === 'id'
+                        ? 'cursor-pointer hover:bg-gray-100 hover:text-gray-800 select-none'
+                        : ''
+                    }`}
+                    onClick={header.id === 'id' ? handleSortById : undefined}
                   >
-                    {header.name}
+                    <div className="flex items-center gap-2">
+                      {header.name}
+                      {header.id === 'id' && (
+                        <span
+                          className={`ml-1 inline-block text-md font-semibold transition-colors duration-200 ${
+                            sortOrder === 'asc'
+                              ? 'text-green-500'
+                              : 'text-black'
+                          }`}
+                        >
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
                   </th>
                 ))}
               </tr>
@@ -325,6 +383,7 @@ const PatientPage = () => {
                 onClose={() => setShowEditModal(false)}
                 setShow={setShowEditModal}
                 getList={fetchPatients}
+                
               />
             </div>
           </div>
@@ -348,3 +407,4 @@ const PatientPage = () => {
 };
 
 export default PatientPage;
+

@@ -138,6 +138,7 @@ const EditFollow = ({ setShow, getList, id }) => {
           message: 'ແກ້ໄຂຂໍ້ມູນສຳເລັດແລ້ວ',
         }),
       );
+      window.dispatchEvent(new Event('refresh-notifications'));
 
       await getList();
       setShow(false);

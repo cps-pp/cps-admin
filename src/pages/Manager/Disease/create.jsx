@@ -14,10 +14,13 @@ const CreateDisease = ({ setShow, getList, existingIds, onCloseCallback }) => {
     handleSubmit,
     reset,
     setFocus,
+    setValue,
     formState: { errors, isDirty },
   } = useForm();
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
+  const [loadingNextId, setLoadingNextId] = useState(true);
+  const [nextDiseaseId, setNextDiseaseId] = useState('');
 
   // ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
     const isDirtyRef = useRef(isDirty);
@@ -60,17 +63,38 @@ const CreateDisease = ({ setShow, getList, existingIds, onCloseCallback }) => {
       }
     }, [onCloseCallback]);
 
-  // ✅ แก้ไขฟังก์ชันล้างข้อมูล
-  const handleClearForm = () => {
-    // ล้างข้อมูลฟอร์มและรีเซ็ต isDirty
-    reset({
-      disease_id: '',
-      disease_name: ''
-    }), 
+  // ดึงรหัสถัดไปเมื่อ component โหลด
+  useEffect(() => {
+    const fetchNextId = async () => {
+      try {
+        setLoadingNextId(true);
+        const response = await fetch(
+          'http://localhost:4000/src/manager/next-disease-id',
+        );
 
-    // อัพเดต ref ให้เป็น false ทันที
-    isDirtyRef.current = false;
-  };
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setNextDiseaseId(data.nextId);
+        setValue('disease_id', data.nextId); // ตั้งค่ารหัสในฟอร์ม
+      } catch (error) {
+        console.error('Error fetching next ID:', error);
+        dispatch(
+          openAlert({
+            type: 'error',
+            title: 'ເກີດຂໍ້ຜິດພາດ',
+            message: 'ບໍ່ສາມາດດຶງລະຫັດໃໝ່ໄດ້',
+          }),
+        );
+      } finally {
+        setLoadingNextId(false);
+      }
+    };
+
+    fetchNextId();
+  }, [dispatch, setValue]);
 
   const handleSave = async (formData) => {
     setLoading(true);
@@ -129,7 +153,7 @@ const CreateDisease = ({ setShow, getList, existingIds, onCloseCallback }) => {
     }
   };
 
-  if (loading) return <Loader />;
+  if (loading || loadingNextId) return <Loader />;
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
            <Alerts/>
@@ -141,16 +165,22 @@ const CreateDisease = ({ setShow, getList, existingIds, onCloseCallback }) => {
       </div>
 
       <form onSubmit={handleSubmit(handleSave)} className="mt-4 px-4">
-        <InputBox
-          label="ລະຫັດພະຍາດແຂ້ວ"
-          name="disease_id"
-          type="text"
-          placeholder="ປ້ອນລະຫັດພະຍາດແຂ້ວ"
-          register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນລະຫັດພະຍາດແຂ້ວກ່ອນ' }}
-          errors={errors}
-          className="text-strokedark dark:text-bodydark3"
-        />
+
+        {/* แสดงรหัสที่สร้างอัตโนมัติ (แบบ read-only) */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2 text-black dark:text-white">
+            ລະຫັດພະຍາດແຂ້ວ
+          </label>
+          <input
+            type="text"
+            value={nextDiseaseId}
+            readOnly
+            className="w-full rounded-lg border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
+          />
+          {/* Hidden input สำหรับส่งค่าไปกับฟอร์ม */}
+          <input type="hidden" {...register('disease_id')} />
+        </div>
+        
         <InputBox
           label="ພະຍາດແຂ້ວ"
           name="disease_name"
@@ -164,14 +194,7 @@ const CreateDisease = ({ setShow, getList, existingIds, onCloseCallback }) => {
 
         <div className="mt-8 flex justify-end space-x-4 col-span-full  py-4">
           
-          <ButtonBox
-            variant="cancel"
-            type="button"
-            onClick={handleClearForm}
-            disabled={loading}
-          >
-            ລ້າງຂໍ້ມູນ
-          </ButtonBox>
+
           <ButtonBox variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </ButtonBox>

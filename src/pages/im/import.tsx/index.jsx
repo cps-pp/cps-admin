@@ -34,6 +34,9 @@ const ImportPage = () => {
   const [selectedOrder, setSelectedOrder] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState('');
 
+  // ✅ เพิ่ม state สำหรับการเรียงลำดับ ID
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
+
   const dispatch = useAppDispatch();
 
   // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
@@ -94,9 +97,36 @@ const ImportPage = () => {
     );
   };
 
-  // ฟังก์ชันกรองข้อมูลแบบรวม
-  const applyFilters = () => {
-    let filtered = [...Im];
+  // ✅ ฟังก์ชันสำหรับเรียงลำดับ ID (เพิ่มใหม่)
+  const handleSortById = () => {
+    const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortOrder(newSortOrder);
+    
+    const sortedImports = [...Im].sort((a, b) => {
+      const extractNumber = (id) => {
+        const match = id.match(/\d+/);
+        return match ? parseInt(match[0]) : 0;
+      };
+      
+      const numA = extractNumber(a.im_id);
+      const numB = extractNumber(b.im_id);
+      
+      if (newSortOrder === 'asc') {
+        return numA - numB; 
+      } else {
+        return numB - numA; 
+      }
+    });
+    
+    setIm(sortedImports);
+    
+    // ถ้ามีการค้นหาหรือกรองอยู่ ให้ใช้ข้อมูลที่เรียงแล้วมากรองใหม่
+    applyFiltersWithData(sortedImports);
+  };
+
+  // ฟังก์ชันกรองข้อมูลแบบรวม (แก้ไขให้รับ data parameter)
+  const applyFiltersWithData = (data = Im) => {
+    let filtered = [...data];
 
     // กรองตาม search query
     if (searchQuery.trim() !== '') {
@@ -106,7 +136,7 @@ const ImportPage = () => {
           .toLowerCase()
           .includes(searchQuery.toLowerCase())
       );
-
+      
     }
 
     // กรองตามเดือน
@@ -127,6 +157,11 @@ const ImportPage = () => {
       filtered = filtered.filter((Im) => Im.emp_id_create === selectedEmployee);
     }
     setFilterIm(filtered);
+  };
+
+  // ฟังก์ชันกรองข้อมูลแบบรวม (เดิม)
+  const applyFilters = () => {
+    applyFiltersWithData(Im);
   };
 
   // เรียกใช้ฟังก์ชันกรองเมื่อมีการเปลี่ยนแปลงใน filters หรือข้อมูล
@@ -281,7 +316,7 @@ const ImportPage = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
 
-          {/* ตัวกรองตามລະຫັດສັ່ງຊື້ */}
+          {/* ตัวกรองตามลະຫັດສັ່ງຊື້ */}
           <select
             className="border border-stroke dark:border-strokedark rounded p-2"
             value={selectedOrder}
@@ -337,9 +372,27 @@ const ImportPage = () => {
               {HeadersImport.map((header, index) => (
                 <th
                   key={index}
-                  className="px-4 py-3 tracking-wide text-form-input  font-semibold"
+                  className={`px-4 py-3 tracking-wide text-form-input font-semibold ${
+                    header.id === 'id'
+                      ? 'cursor-pointer hover:bg-gray-100 hover:text-gray-800 select-none'
+                      : ''
+                  }`}
+                  onClick={header.id === 'id' ? handleSortById : undefined}
                 >
-                  {header.name}
+                  <div className="flex items-center gap-2">
+                    {header.name}
+                    {header.id === 'id' && (
+                      <span
+                        className={`ml-1 inline-block text-md font-semibold transition-colors duration-200 ${
+                          sortOrder === 'asc'
+                            ? 'text-green-500'
+                            : 'text-black'
+                        }`}
+                      >
+                        {sortOrder === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </div>
                 </th>
               ))}
             </tr>

@@ -1,9 +1,9 @@
 
 export const Cate = [
 
-  { id: 'ລະຫັດປະເພດ', name: 'ລະຫັດປະເພດ', sortable: true },
-  { id: 'ຊື່ປະເພດຢາ ແລະ ອຸປະກອນ', name: 'ຊື່ປະເພດຢາ ແລະ ອຸປະກອນ', sortable: true },
-  { id: 'ຈັດການ', name: 'ຈັດການ', sortable: true },
+  { id: 'id', name: 'ລະຫັດປະເພດ', sortable: true },
+  { id: 'name', name: 'ຊື່ປະເພດຢາ ແລະ ອຸປະກອນ', sortable: true },
+  { id: 'action', name: 'ຈັດການ', sortable: true },
 
 
 

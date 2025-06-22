@@ -32,6 +32,9 @@ const ExchangePage = () => {
   // ✅ เก็บ reference ของ handleCloseForm จาก CreateExChange
   const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
 
+  // ✅ เพิ่ม state สำหรับการเรียงลำดับ ID
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
+
   const fetchExchanges = async () => {
     try {
       setLoading(true);
@@ -64,11 +67,48 @@ const ExchangePage = () => {
       setFilteredExchanges(exchanges);
     } else {
       const filtered = exchanges.filter((exchange) =>
-        exchange.ser_name.toLowerCase().includes(searchQuery.toLowerCase())
+        exchange.ex_type.toLowerCase().includes(searchQuery.toLowerCase())||
+        exchange.ex_id.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredExchanges(filtered);
     }
   }, [searchQuery, exchanges]);
+
+  // ✅ ฟังก์ชันสำหรับเรียงลำดับ ID
+  const handleSortById = () => {
+    
+    const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortOrder(newSortOrder);
+    
+    const sortedExchanges = [...exchanges].sort((a, b) => {
+      const extractNumber = (id) => {
+        const match = id.match(/\d+/);
+        return match ? parseInt(match[0]) : 0;
+      };
+      
+      const numA = extractNumber(a.ex_id);
+      const numB = extractNumber(b.ex_id);
+      
+      if (newSortOrder === 'asc') {
+        return numA - numB; 
+      } else {
+        return numB - numA; 
+      }
+    });
+    
+    setExchanges(sortedExchanges);
+    
+    if (searchQuery.trim() !== '') {
+      const filtered = sortedExchanges.filter(exchange =>
+        exchange.ex_type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        exchange.ex_id.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredExchanges(filtered);
+    } else {
+      setFilteredExchanges(sortedExchanges);
+    }
+    
+  };
 
   const openDeleteModal = (id) => () => {
     setSelectedExchangeId(id);
@@ -177,17 +217,34 @@ const ExchangePage = () => {
           />
         </div>
 
-        
-        <div className="overflow-x-auto  shadow-md">
-          <table className="w-full min-w-max table-auto  ">
+        <div className="overflow-x-auto shadow-md">
+          <table className="w-full min-w-max table-auto">
             <thead>
               <tr className="text-left bg-gray border border-stroke">
                 {ExchangeHeaders.map((header, index) => (
                   <th
                     key={index}
-                    className="px-4 py-3 tracking-wide text-form-input  font-semibold "
+                    className={`px-4 py-3 tracking-wide font-semibold text-form-input ${
+                      header.id === 'id'
+                        ? 'cursor-pointer hover:bg-gray-100 hover:text-gray-800 select-none'
+                        : ''
+                    }`}
+                    onClick={header.id === 'id' ? handleSortById : undefined}
                   >
-                    {header.name}
+                    <div className="flex items-center gap-2">
+                      {header.name}
+                      {header.id === 'id' && (
+                        <span
+                          className={`ml-1 inline-block text-md font-semibold transition-colors duration-200 ${
+                            sortOrder === 'asc'
+                              ? 'text-green-500'
+                              : 'text-black'
+                          }`}
+                        >
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
                   </th>
                 ))}
               </tr>
@@ -204,7 +261,13 @@ const ExchangePage = () => {
                     <td className="px-4 py-4">
                       {(exchange.ex_rate * 1).toLocaleString()}
                     </td>
-
+                    <td className="px-4 py-4">
+                      {new Date(exchange.ex_date).toLocaleDateString('en-US', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                      })}
+                    </td>
                     <td className="px-3 py-4 text-center">
                       <TableAction
                         // onView={() => handleViewExchange(exchange.ex_id)}
@@ -305,7 +368,7 @@ const ExchangePage = () => {
         message="ທ່ານຕ້ອງການລົບອັດຕາແລກປ່ຽນນີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteExchange}
       />
- </>
+    </>
   );
 };
 

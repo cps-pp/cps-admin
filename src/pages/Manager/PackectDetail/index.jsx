@@ -73,7 +73,8 @@ const ServicePage = () => {
       setFilteredServices(services);
     } else {
       const filtered = services.filter((service) =>
-        service.ser_name.toLowerCase().includes(searchQuery.toLowerCase()),
+        service.ser_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        service.ser_id.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredServices(filtered);
     }
@@ -81,9 +82,7 @@ const ServicePage = () => {
 
   // ✅ ฟังก์ชันสำหรับเรียงลำดับ ID
   const handleSortById = () => {
-    console.log('คลิกเรียงลำดับ ID แล้ว'); // เพิ่ม debug
-    console.log('sortOrder ปัจจุบัน:', sortOrder);
-    console.log('services ก่อนเรียง:', services);
+
 
     const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
     setSortOrder(newSortOrder);
@@ -115,8 +114,7 @@ const ServicePage = () => {
       setFilteredServices(sortedServices);
     }
 
-    // console.log('sortOrder :', newSortOrder);
-    // console.log('services :', sortedServices);
+
   };
 
   // ✅ ฟังก์ชันนี้ถูกต้องแล้ว - ใช้ setSelectedId
@@ -214,7 +212,7 @@ const ServicePage = () => {
             <Button
               onClick={() => setShowAddModal(true)}
               icon={iconAdd}
-              className="bg-primary"
+              className="bg-secondary2"
             >
               ເພີ່ມຂໍ້ມູນລາຍການ
             </Button>
@@ -234,13 +232,32 @@ const ServicePage = () => {
           />
         </div>
 
-            <div className="overflow-x-auto  shadow-md">
+        <div className="overflow-x-auto  shadow-md">
           <table className="w-full min-w-max table-auto  ">
             <thead>
-              <tr className="bg-gray border border-stroke text-left">
-                {PacketHeaders.map((header, index) => (
-                  <th key={index} className="px-4 py-3 tracking-wide text-form-input  font-semibold">
-                    {header.name}
+              <tr className="text-left bg-gray border border-stroke">
+                {ServiceHeaders.map((header, index) => (
+                  <th
+                    key={index}
+                    className={`px-4 py-3 tracking-wide font-semibold text-form-input ${header.id === 'id'
+                      ? 'cursor-pointer hover:bg-gray-100 hover:text-gray-800 select-none'
+                      : ''
+                      }`}
+                    onClick={header.id === 'id' ? handleSortById : undefined}
+                  >
+                    <div className="flex items-center gap-2 ">
+                      {header.name}
+                      {header.id === 'id' && (
+                        <span
+                          className={`ml-2 inline-block text-xs font-bold transition-colors duration-200 ${sortOrder === 'asc'
+                            ? 'text-green-600'
+                            : 'text-black'
+                            }`}
+                        >
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
                   </th>
                 ))}
               </tr>

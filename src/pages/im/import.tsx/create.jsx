@@ -23,14 +23,16 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
 
   const dispatch = useAppDispatch();
 
-    // ref สำหรับ input file
+
   const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const [loadingNextId, setLoadingNextId] = useState(true); // ✅ เพิ่ม state สำหรับโหลดรหัส
+  const [nextImportId, setNextImportId] = useState(''); // ✅ เพิ่ม state สำหรับเก็บรหัสถัดไป
   const [selectedEmp, setSelectedEmp] = useState('');
   const [selectedPreorder, setSelectedPreorder] = useState('');
   const [employees, setEmployees] = useState([]);
   const [preorders, setPreorders] = useState([]);
-  const [usedPreorders, setUsedPreorders] = useState([]); // ✅ เก็บ preorder ที่ใช้แล้ว
+  const [usedPreorders, setUsedPreorders] = useState([]);
 
   // ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
   const isDirtyRef = useRef(isDirty);
@@ -73,18 +75,36 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
     }
   }, [onCloseCallback]);
 
+  // ✅ ดึงรหัส Import ถัดไปเมื่อ component โหลด
+  useEffect(() => {
+    const fetchNextId = async () => {
+      try {
+        setLoadingNextId(true);
+        const response = await fetch('http://localhost:4000/src/im/next-import-id');
 
-  // ✅ แก้ไขฟังก์ชันล้างข้อมูล
-  const handleClearForm = () => {
-    reset({
-      im_id: '',
-      im_date: '',
-      note: '',
-    });
-    setSelectedEmp('');
-    setSelectedPreorder('');
-    isDirtyRef.current = false;
-  };
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setNextImportId(data.nextId);
+        setValue('im_id', data.nextId); // ✅ ตั้งค่ารหัสในฟอร์ม
+      } catch (error) {
+        console.error('Error fetching next Import ID:', error);
+        dispatch(
+          openAlert({
+            type: 'error',
+            title: 'ເກີດຂໍ້ຜິດພາດ',
+            message: 'ບໍ່ສາມາດດຶງລະຫັດ Import ໃໝ່ໄດ້',
+          }),
+        );
+      } finally {
+        setLoadingNextId(false);
+      }
+    };
+
+    fetchNextId();
+  }, [dispatch, setValue]);
 
   // ✅ ฟังก์ชันดึงข้อมูล Import ที่มีอยู่แล้วเพื่อเช็ค preorder ที่ใช้แล้ว
   const fetchUsedPreorders = async () => {
@@ -93,7 +113,7 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
       if (response.ok) {
         const data = await response.json();
         const usedPreorderIds = data.data
-          .filter(item => item.preorder_id) // กรองเฉพาะที่มี preorder_id
+          .filter(item => item.preorder_id)
           .map(item => item.preorder_id);
         setUsedPreorders(usedPreorderIds);
       }
@@ -155,7 +175,7 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
 
     fetchEmployees();
     fetchPreorders();
-    fetchUsedPreorders(); // ✅ ดึงข้อมูล preorder ที่ใช้แล้ว
+    fetchUsedPreorders();
   }, [dispatch]);
 
   // ✅ ฟังก์ชันตรวจสอบก่อนบันทึก
@@ -201,7 +221,7 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
       const result = await response.json();
 
       if (!response.ok) {
-        // ✅ ตรวจสอบข้อผิดพลาดจาก backend เกี่ยวกับ preorder ซ้ำ
+
         if (result.message && result.message.includes('preorder_id')) {
           throw new Error('ລະຫັດ Preorder ນີ້ໄດ້ຖືກນຳເຂົ້າແລ້ວ ບໍ່ສາມາດນຳເຂົ້າຊ້ຳໄດ້');
         }
@@ -236,7 +256,7 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
     !usedPreorders.includes(preorder.preorder_id)
   );
 
-  if (loading) return <Loader />;
+  if (loading || loadingNextId) return <Loader />; // ✅ เพิ่ม loadingNextId
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
@@ -251,16 +271,20 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
         onSubmit={handleSubmit(handleSave)}
         className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 pt-4"
       >
-        {/* ✅ ລະຫັດ Import */}
-        <InputBox
-          label="ລະຫັດ Import (im_id)"
-          name="im_id"
-          type="text"
-          placeholder="ປ້ອນລະຫັດ Import"
-          register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນລະຫັດ Import' }}
-          errors={errors}
-        />
+        {/* ✅ แสดงรหัส Import ที่สร้างอัตโนมัติ (แบบ read-only) */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2 text-black dark:text-white">
+            ລະຫັດ Import (im_id)
+          </label>
+          <input
+            type="text"
+            value={nextImportId}
+            readOnly
+            className="w-full rounded-lg border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
+          />
+          {/* ✅ Hidden input สำหรับส่งค่าไปกับฟอร์ม */}
+          <input type="hidden" {...register('im_id')} />
+        </div>
 
         {/* ✅ ວັນທີ່ Import */}
         <BoxDate
@@ -331,14 +355,7 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
         {/* ✅ ปุ่มบันทึก */}
         <div className="md:col-span-2 mt-4 flex justify-end space-x-4 py-4">
 
-          <Button
-            variant="cancel"
-            type="button"
-            onClick={handleClearForm}
-            disabled={loading}
-          >
-            ລ້າງຂໍ້ມູນ
-          </Button>
+
 
           <Button variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}

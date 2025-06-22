@@ -180,7 +180,7 @@ const AddDetailImport = ({ id, setShow, getList, onClose }) => {
           message: `ເພີ່ມລາຍລະອຽດສິນຄ້ານຳເຂົ້າສຳເລັດແລ້ວ (ID: ${newDetailId}) ✅`,
         })
       );
-
+      window.dispatchEvent(new Event('refresh-notifications'));
       // รีเฟรชข้อมูล
       await getList();
       await fetchImportDetailsAgain();
@@ -241,7 +241,7 @@ const AddDetailImport = ({ id, setShow, getList, onClose }) => {
           message: `ລົບລາຍການ ID: ${deleteDetailId} ສຳເລັດແລ້ວ`,
         })
       );
-
+      window.dispatchEvent(new Event('refresh-notifications'));
       // รีเฟรชข้อมูลหลังจากลบสำเร็จ
       await getList();
       await fetchImportDetailsAgain();

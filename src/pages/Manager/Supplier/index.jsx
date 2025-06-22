@@ -14,7 +14,7 @@ import { openAlert } from '@/redux/reducer/alert';
 import Alerts from '@/components/Alerts';
 
 const SupplierPage = () => {
-   const [suppliers, setSuppliers] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const [filteredSuppliers, setFilteredSuppliers] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedSupplierId, setSelectedSupplierId] = useState(null);
@@ -28,13 +28,16 @@ const SupplierPage = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const [existingIds, setExistingIds] = useState([]);
-     // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
-    const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
+  // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
+  const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
 
   const fetchSuppliers = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:4000/src/manager/supplier');
+      const response = await fetch(
+        'http://localhost:4000/src/manager/supplier',
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -62,12 +65,50 @@ const SupplierPage = () => {
     if (searchQuery.trim() === '') {
       setFilteredSuppliers(suppliers);
     } else {
-      const filtered = suppliers.filter((supplier) =>
-        supplier.company_name.toLowerCase().includes(searchQuery.toLowerCase())
+      const filtered = suppliers.filter(
+        (supplier) =>
+          supplier.company_name
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          supplier.sup_id.toLowerCase().includes(searchQuery.toLowerCase()),
       );
       setFilteredSuppliers(filtered);
     }
   }, [searchQuery, suppliers]);
+
+  // ✅ ฟังก์ชันสำหรับเรียงลำดับ ID (เพิ่มหลัง useEffect)
+const handleSortById = () => {
+  const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+  setSortOrder(newSortOrder);
+  
+  const sortedSuppliers = [...suppliers].sort((a, b) => {
+    const extractNumber = (id) => {
+      const match = id.match(/\d+/);
+      return match ? parseInt(match[0]) : 0;
+    };
+    
+    const numA = extractNumber(a.sup_id);
+    const numB = extractNumber(b.sup_id);
+    
+    if (newSortOrder === 'asc') {
+      return numA - numB; 
+    } else {
+      return numB - numA; 
+    }
+  });
+  
+  setSuppliers(sortedSuppliers);
+  
+  if (searchQuery.trim() !== '') {
+    const filtered = sortedSuppliers.filter(supplier =>
+      supplier.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      supplier.sup_id.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredSuppliers(filtered);
+  } else {
+    setFilteredSuppliers(sortedSuppliers);
+  }
+};
 
   const openDeleteModal = (id) => () => {
     setSelectedSupplierId(id);
@@ -80,7 +121,7 @@ const SupplierPage = () => {
     try {
       const response = await fetch(
         `http://localhost:4000/manager/supplier/${selectedSupplierId}`,
-        { method: 'DELETE' }
+        { method: 'DELETE' },
       );
 
       if (!response.ok) {
@@ -88,7 +129,9 @@ const SupplierPage = () => {
       }
 
       setSuppliers((prevSuppliers) =>
-        prevSuppliers.filter((supplier) => supplier.sup_id !== selectedSupplierId)
+        prevSuppliers.filter(
+          (supplier) => supplier.sup_id !== selectedSupplierId,
+        ),
       );
       setShowModal(false);
       setSelectedSupplierId(null);
@@ -97,7 +140,7 @@ const SupplierPage = () => {
           type: 'success',
           title: 'ລົບຂໍ້ມູນສຳເລັດ',
           message: 'ລົບຂໍ້ມູນຜູ້ສະໜອງສຳເລັດແລ້ວ',
-        })
+        }),
       );
     } catch (error) {
       dispatch(
@@ -105,7 +148,7 @@ const SupplierPage = () => {
           type: 'error',
           title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
           message: 'ເກີດຂໍ້ຜິດພາດໃນການລົບຂໍ້ມູນ',
-        })
+        }),
       );
     }
   };
@@ -124,7 +167,7 @@ const SupplierPage = () => {
     setPage(0);
   };
 
-    // ✅ Handler สำหรับปุ่ม X ที่จะใช้ฟังก์ชันจาก CreateCategory
+  // ✅ Handler สำหรับปุ่ม X ที่จะใช้ฟังก์ชันจาก CreateCategory
   const handleCloseAddModal = () => {
     if (createFormCloseHandler) {
       // เรียกใช้ฟังก์ชันที่ได้รับมาจาก CreateCategory
@@ -137,52 +180,69 @@ const SupplierPage = () => {
 
   const paginatedPSup = filteredSuppliers.slice(
     page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+    page * rowsPerPage + rowsPerPage,
   );
 
   return (
     <>
-    <div className="rounded bg-white pt-4 dark:bg-boxdark">
-      <Alerts />
-      <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
-          ຈັດການຂໍ້ມູນຜູ້ສະໜອງ
-        </h1>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => setShowAddModal(true)}
-            icon={iconAdd}
-            className="bg-secondary2"
-          >
-            ເພີ່ມຜູ້ສະໜອງ
-          </Button>
+      <div className="rounded bg-white pt-4 dark:bg-boxdark">
+        <Alerts />
+        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
+          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+            ຈັດການຂໍ້ມູນຜູ້ສະໜອງ
+          </h1>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => setShowAddModal(true)}
+              icon={iconAdd}
+              className="bg-secondary2"
+            >
+              ເພີ່ມຜູ້ສະໜອງ
+            </Button>
+          </div>
         </div>
-      </div>
 
-      <div className="grid w-full gap-4 p-4">
-        <Search
-          type="text"
-          name="search"
-          placeholder="ຄົ້ນຫາຊື່..."
-          className="rounded border border-stroke dark:border-strokedark"
-          onChange={(e) => {
-            const query = e.target.value;
-            setSearchQuery(query);
-          }}
-        />
-      </div>
+        <div className="grid w-full gap-4 p-4">
+          <Search
+            type="text"
+            name="search"
+            placeholder="ຄົ້ນຫາຊື່..."
+            className="rounded border border-stroke dark:border-strokedark"
+            onChange={(e) => {
+              const query = e.target.value;
+              setSearchQuery(query);
+            }}
+          />
+        </div>
 
-   
-     <div className="overflow-x-auto  shadow-md">
-          <table className="w-full min-w-max table-auto  ">
+        <div className="overflow-x-auto rounded-lg shadow-md">
+          <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
             <thead>
               <tr className="text-left bg-gray border border-stroke">
                 {SupHeaders.map((header, index) => (
                   <th
                     key={index}
-                    className="px-4 py-3 tracking-wide text-form-input  font-semibold "
+                    className={`px-4 py-3 tracking-wide text-form-input font-semibold ${
+                      header.id === 'id'
+                        ? 'cursor-pointer hover:bg-gray-100 hover:text-gray-800 select-none'
+                        : ''
+                    }`}
+                    onClick={header.id === 'id' ? handleSortById : undefined}
                   >
-                    {header.name}
+                    <div className="flex items-center gap-2">
+                      {header.name}
+                      {header.id === 'id' && (
+                        <span
+                          className={`ml-1 inline-block text-md font-semibold transition-colors duration-200 ${
+                            sortOrder === 'asc'
+                              ? 'text-green-500'
+                              : 'text-black'
+                          }`}
+                        >
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
                   </th>
                 ))}
               </tr>
@@ -228,88 +288,88 @@ const SupplierPage = () => {
               )}
             </tbody>
           </table>
-      </div>
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="rounded-lg w-full max-w-2xl relative px-4 ">
-            {/* ✅ ปุ่ม X ที่ใช้ฟังก์ชันป้องกันจาก CreateCategory */}
+        </div>
+        {showAddModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="rounded-lg w-full max-w-2xl relative px-4 ">
+              {/* ✅ ปุ่ม X ที่ใช้ฟังก์ชันป้องกันจาก CreateCategory */}
               <button
                 onClick={handleCloseAddModal}
                 className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700 z-10"
               >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
 
-            <CreateSupplier
-              setShow={setShowAddModal}
-              getList={fetchSuppliers}
-              existingIds={existingIds} // ✅ เพิ่มบรรทัดน
-              onCloseCallback={setCreateFormCloseHandler} // ✅ ส่ง callback function
-            />
+              <CreateSupplier
+                setShow={setShowAddModal}
+                getList={fetchSuppliers}
+                existingIds={existingIds} // ✅ เพิ่มบรรทัดน
+                onCloseCallback={setCreateFormCloseHandler} // ✅ ส่ง callback function
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {showEditModal && selectedId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
-          <div className="rounded-lg w-full max-w-2xl bg-white relative ">
-            <button
-              onClick={() => setShowEditModal(false)}
-              className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+        {showEditModal && selectedId && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
+            <div className="rounded-lg w-full max-w-2xl bg-white relative ">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
 
-            <EditSupplier
-              id={selectedId}
-              onClose={() => setShowEditModal(false)}
-              setShow={setShowEditModal}
-              getList={fetchSuppliers}
-            />
+              <EditSupplier
+                id={selectedId}
+                onClose={() => setShowEditModal(false)}
+                setShow={setShowEditModal}
+                getList={fetchSuppliers}
+              />
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
       <TablePaginationDemo
-        count={paginatedPSup.length}
+        count={filteredSuppliers.length}
         page={page}
         onPageChange={handlePageChange}
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleRowsPerPageChange}
       />
 
-      {/* <ConfirmModal
+      <ConfirmModal
         show={showModal}
         setShow={setShowModal}
         message="ທ່ານຕ້ອງການລົບຜູ້ສະໜອງນີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteSupplier}
-      /> */}
+      />
     </>
   );
 };

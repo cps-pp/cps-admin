@@ -66,7 +66,8 @@ const ServicePage = () => {
       setFilteredServices(services);
     } else {
       const filtered = services.filter((service) =>
-        service.ser_name.toLowerCase().includes(searchQuery.toLowerCase()),
+        service.ser_name.toLowerCase().includes(searchQuery.toLowerCase())||
+        service.ser_id.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredServices(filtered);
     }
@@ -219,15 +220,14 @@ const ServicePage = () => {
        <div className="overflow-x-auto  shadow-md">
           <table className="w-full min-w-max table-auto  ">
             <thead>
-              <tr className="text-left  bg-gray border border-stroke">
+              <tr className="text-left bg-gray border border-stroke">
                 {ServiceHeaders.map((header, index) => (
                   <th
                     key={index}
-                    className={`px-4 py-3 tracking-wide text-form-input  font-semibold ${
-                      header.id === 'id'
-                        ? 'cursor-pointer hover:bg-gray-100 hover:text-gray-800 select-none'
-                        : ''
-                    }`}
+                    className={`px-4 py-3 tracking-wide font-semibold text-form-input ${header.id === 'id'
+                      ? 'cursor-pointer hover:bg-gray-100 hover:text-gray-800 select-none'
+                      : ''
+                      }`}
                     onClick={header.id === 'id' ? handleSortById : undefined}
                   >
                     <div className="flex items-center gap-2 ">
@@ -237,7 +237,7 @@ const ServicePage = () => {
                           className={`ml- inline-block text-md font-semibold transition-colors duration-200 ${
                             sortOrder === 'asc'
                               ? 'text-green-500'
-                              : 'text-secondary2'
+                              : 'text-black'
                           }`}
                           // aria-label={
                           //   sortOrder === 'asc'

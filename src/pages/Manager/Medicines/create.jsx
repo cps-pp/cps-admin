@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import React, { useState, useEffect, useRef } from 'react'; // ✅ เพิ่ม useRef
+import React, { useState, useEffect, useRef } from 'react';
 import Button from '@/components/Button';
 import Input from '@/components/Forms/Input';
 import DatePicker from '@/components/DatePicker_two';
@@ -18,7 +18,12 @@ import ButtonBox from '../../../components/Button';
 import BoxDate from '../../../components/Date';
 import { usePrompt } from '@/hooks/usePrompt';
 
-const CreateMedicines = ({ setShow, getList, existingIds, onCloseCallback }) => {
+const CreateMedicines = ({
+  setShow,
+  getList,
+  existingIds,
+  onCloseCallback,
+}) => {
   const {
     register,
     handleSubmit,
@@ -36,20 +41,24 @@ const CreateMedicines = ({ setShow, getList, existingIds, onCloseCallback }) => 
   const [employees, setEmployees] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedMedType, setSelectedMedType] = useState('');
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState(''); // เก็บไว้แต่ไม่ส่งไป backend
 
-// ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
+  const [loadingNextId, setLoadingNextId] = useState(true);
+  const [nextMedicinesId, setNextMedicinesId] = useState('');
+
+
   const isDirtyRef = useRef(isDirty);
-  
-  // ✅ อัพเดต ref ทุกครั้งที่ isDirty เปลี่ยน
+
   useEffect(() => {
     isDirtyRef.current = isDirty;
   }, [isDirty]);
-  
-  // ✅ เตือนเมื่อมีการพยายามออกจากหน้าด้วย navigation (Back / เปลี่ยน route)
-  usePrompt('ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.', isDirty);
 
-  // ✅ เตือนเมื่อจะรีเฟรช / ปิดแท็บ
+  usePrompt(
+    'ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.',
+    isDirty,
+  );
+
+
   useEffect(() => {
     const handleBeforeUnload = (event) => {
       if (!isDirtyRef.current) return;
@@ -63,22 +72,8 @@ const CreateMedicines = ({ setShow, getList, existingIds, onCloseCallback }) => 
     };
   }, []);
 
-  // ✅ เตือนเมื่อคลิกปิดฟอร์ม - ใช้ current value จาก ref
-  const handleCloseForm = () => {
-    if (isDirtyRef.current) {
-      const confirmLeave = window.confirm('ທ່ານຕ້ອງການປິດຟອມແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ປ້ອນຈະສູນເສຍ');
-      if (!confirmLeave) return;
-    }
-    setShow(false);
-  };
 
-  // ✅ ส่ง handleCloseForm ไปให้ parent component แค่ครั้งเดียว
-  useEffect(() => {
-    if (onCloseCallback) {
-      onCloseCallback(() => handleCloseForm);
-    }
-  }, [onCloseCallback]);
-
+  // ดึงข้อมูลหมวดหมู่ยา
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -87,7 +82,7 @@ const CreateMedicines = ({ setShow, getList, existingIds, onCloseCallback }) => 
         );
         const data = await response.json();
         if (response.ok) {
-          console.log('API Response:', data.data);
+          console.log('Categories loaded:', data.data);
           setCategories(
             data.data.map((cat) => ({
               medtype_id: cat.medtype_id,
@@ -96,21 +91,36 @@ const CreateMedicines = ({ setShow, getList, existingIds, onCloseCallback }) => 
           );
         } else {
           console.error('Failed to fetch categories', data);
+          dispatch(
+            openAlert({
+              type: 'error',
+              title: 'ເກີດຂໍ້ຜິດພາດ',
+              message: 'ບໍ່ສາມາດດຶງຂໍ້ມູນປະເພດຢາໄດ້',
+            }),
+          );
         }
       } catch (error) {
         console.error('Error fetching categories', error);
+        dispatch(
+          openAlert({
+            type: 'error',
+            title: 'ເກີດຂໍ້ຜິດພາດ',
+            message: 'ບໍ່ສາມາດເຊື່ອມຕໍ່ກັບເຊີຟເວີ',
+          }),
+        );
       }
     };
     fetchCategories();
-  }, []);
+  }, [dispatch]);
 
+  // ดึงข้อมูลพนักงาน
   useEffect(() => {
     const fetchEmp = async () => {
       try {
         const response = await fetch('http://localhost:4000/src/manager/emp');
         const data = await response.json();
         if (response.ok) {
-          console.log('API Response:', data.data);
+          console.log('Employees loaded:', data.data);
           setEmployees(
             data.data.map((em) => ({
               id: em.emp_id,
@@ -120,69 +130,139 @@ const CreateMedicines = ({ setShow, getList, existingIds, onCloseCallback }) => 
             })),
           );
         } else {
-          console.error('Failed to fetch categories', data);
+          console.error('Failed to fetch employees', data);
+          dispatch(
+            openAlert({
+              type: 'error',
+              title: 'ເກີດຂໍ້ຜິດພາດ',
+              message: 'ບໍ່ສາມາດດຶງຂໍ້ມູນພະນັກງານໄດ້',
+            }),
+          );
         }
       } catch (error) {
-        console.error('Error fetching categories', error);
+        console.error('Error fetching employees', error);
+        dispatch(
+          openAlert({
+            type: 'error',
+            title: 'ເກີດຂໍ້ຜິດພາດ',
+            message: 'ບໍ່ສາມາດເຊື່ອມຕໍ່ກັບເຊີຟເວີ',
+          }),
+        );
       }
     };
     fetchEmp();
-  }, []);
+  }, [dispatch]);
 
+  // ตั้งค่าวันที่ปัจจุบัน
   useEffect(() => {
-    const now = new Date().toISOString().split('T')[0]; // Format เป็น YYYY-MM-DD
+    const now = new Date().toISOString().split('T')[0];
     setValue('created_at', now);
   }, [setValue]);
 
-  const handleSave = async (formData) => {
-    setLoading(true);
+  // ดึงรหัสถัดไป
+  useEffect(() => {
+    const fetchNextId = async () => {
+      try {
+        setLoadingNextId(true);
+        const response = await fetch(
+          'http://localhost:4000/src/manager/next-medicines-id',
+        );
 
-    // เช็คว่ามี med_id ซ้ำไหม
-    if (existingIds.includes(formData.med_id)) {
-      setFocus('med_id');
-      dispatch(
-        openAlert({
-          type: 'error',
-          title: 'ຜິດພາດ',
-          message: 'ລະຫັດປະເພດຢາ ມີໃນລະບົບແລ້ວ',
-        }),
-      );
-      setLoading(false);
-      return;
-    }
-    // เตรียมข้อมูลก่อนส่ง
-    const dataToSend = {
-      med_id: formData.med_id,
-      med_name: formData.med_name,
-      qty: parseInt(formData.qty), // แปลงเป็น number
-      status: status || 'ຍັງມີ', // ค่า default ถ้าไม่ได้เลือก
-      unit: formData.unit,
-      price: parseFloat(formData.price), // แปลงเป็น number
-      expired: formData.expired || null, // ให้เป็น null ถ้าไม่มีค่า
-      medtype_id: selectedMedType,
-      emp_id_create: selectEmpCreate,
-      created_at: formData.created_at,
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Next ID received:', data.nextId);
+        setNextMedicinesId(data.nextId);
+        setValue('med_id', data.nextId);
+      } catch (error) {
+        console.error('Error fetching next ID:', error);
+        dispatch(
+          openAlert({
+            type: 'error',
+            title: 'ເກີດຂໍ້ຜິດພາດ',
+            message: 'ບໍ່ສາມາດດຶງລະຫັດໃໝ່ໄດ້',
+          }),
+        );
+      } finally {
+        setLoadingNextId(false);
+      }
     };
 
-    console.log('Data to send:', dataToSend);
+    fetchNextId();
+  }, [dispatch, setValue]);
+
+  const handleSave = async (formData) => {
+    console.log('Form data received:', formData);
+    
+    setLoading(true);
 
     try {
+      // ตรวจสอบข้อมูลที่จำเป็น
+      if (!formData.med_id || !formData.med_name || !formData.qty || !formData.unit || !formData.price) {
+        throw new Error('กรุณากรอกข้อมูลให้ครบถ้วน');
+      }
+
+      if (!selectedMedType) {
+        throw new Error('กรุณาเลือกประเภทยา');
+      }
+
+      if (!selectEmpCreate) {
+        throw new Error('กรุณาเลือกพนักงานผู้สร้าง');
+      }
+
+      // เช็คว่ามี med_id ซ้ำไหม (ถ้ามี existingIds)
+      if (existingIds && existingIds.includes(formData.med_id)) {
+        setFocus('med_id');
+        throw new Error('ລະຫັດຢານີ້มີໃນລະບົບແລ້ວ');
+      }
+
+      // เตรียมข้อมูลส่ง - ไม่ส่ง status เพราะ backend จะคำนวณเอง
+      const dataToSend = {
+        med_id: formData.med_id,
+        med_name: formData.med_name.trim(),
+        qty: parseInt(formData.qty) || 0,
+        unit: formData.unit.trim(),
+        price: parseFloat(formData.price) || 0,
+        expired: formData.expired || null,
+        medtype_id: selectedMedType,
+        emp_id_create: selectEmpCreate,
+        created_at: formData.created_at,
+      };
+
+      console.log('Data to send:', dataToSend);
+
+      // ส่งข้อมูลไป backend
       const response = await fetch(
         'http://localhost:4000/src/manager/medicines',
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
           body: JSON.stringify(dataToSend),
         },
       );
 
       const result = await response.json();
+      console.log('Server response:', result);
 
       if (!response.ok) {
-        console.error('Server error:', result);
-        throw new Error(result.error || 'ບັນທຶກຂໍ້ມູບໍ່ສຳເລັດ');
+        // จัดการข้อผิดพาดจาก server
+        let errorMessage = 'ບັນທຶກຂໍ້ມູນບໍ່ສຳເລັດ';
+        
+        if (result.error) {
+          errorMessage = result.error;
+        } else if (result.details) {
+          errorMessage = result.details;
+        }
+        
+        throw new Error(errorMessage);
       }
 
+      // สำเร็จ
       dispatch(
         openAlert({
           type: 'success',
@@ -191,16 +271,22 @@ const CreateMedicines = ({ setShow, getList, existingIds, onCloseCallback }) => 
         }),
       );
 
-      await getList();
-      reset();
-      setShow(false);
-
-      // รีเซ็ต state
+      // รีเฟรชรายการและปิดฟอร์ม
+      if (getList) {
+        await getList();
+      }
+      
+      // รีเซ็ตฟอร์ม
+        reset();
       setStatus('');
       setSelectedMedType('');
       setSelectEmpCreate('');
+      
+      // ปิดฟอร์ม
+      setShow(false);
+
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Save error:', error);
       dispatch(
         openAlert({
           type: 'error',
@@ -213,14 +299,14 @@ const CreateMedicines = ({ setShow, getList, existingIds, onCloseCallback }) => 
     }
   };
 
-  if (loading) return <Loader />;
+  if (loading || loadingNextId) return <Loader />;
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
       <Alerts />
       <div className="flex items-center border-b border-stroke dark:border-strokedark pb-4">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
-          ເພີ່ມຂໍ້ມູນ
+          ເພີ່ມຂໍ້ມູນຢາ ແລະ ອຸປະກອນ
         </h1>
       </div>
 
@@ -228,23 +314,30 @@ const CreateMedicines = ({ setShow, getList, existingIds, onCloseCallback }) => 
         onSubmit={handleSubmit(handleSave)}
         className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 px-4"
       >
-        <InputBox
-          label="ລະຫັດ"
-          name="med_id"
-          type="text"
-          placeholder="ປ້ອນລະຫັດເຊັ່ນ: M01"
-          register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນລະຫັດ' }}
-          errors={errors}
-        />
+        {/* แสดงรหัสที่สร้างอัตโนมัติ */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2 text-black dark:text-white">
+            ລະຫັດຢາ ແລະ ອຸປະກອນ <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={nextMedicinesId}
+            readOnly
+            className="w-full rounded-lg border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
+          />
+          <input type="hidden" {...register('med_id')} />
+        </div>
 
         <InputBox
-          label="ຊື່"
+          label="ຊື່ຢາ"
           name="med_name"
           type="text"
           placeholder="ປ້ອນຊື່ຢາ"
           register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນຊື່ຢາ' }}
+          formOptions={{ 
+            required: 'ກະລຸນາປ້ອນຊື່ຢາ',
+            minLength: { value: 2, message: 'ຊື່ຢາຕ້ອງມີຢ່າງນ້ອຍ 2 ຕົວອັກສອນ' }
+          }}
           errors={errors}
         />
 
@@ -256,7 +349,8 @@ const CreateMedicines = ({ setShow, getList, existingIds, onCloseCallback }) => 
           register={register}
           formOptions={{
             required: 'ກະລຸນາປ້ອນຈຳນວນ',
-            min: { value: 1, message: 'ຈຳນວນຕ້ອງຫຼາຍກວ່າ 0' },
+            min: { value: 0, message: 'ຈຳນວນຕ້ອງຫຼາຍກວ່າ ຫຼື ເທົ່າກັບ 0' },
+            valueAsNumber: true
           }}
           errors={errors}
         />
@@ -265,26 +359,31 @@ const CreateMedicines = ({ setShow, getList, existingIds, onCloseCallback }) => 
           label="ຫົວໜ່ວຍ"
           name="unit"
           type="text"
-          placeholder="ປ້ອນຫົວໜ່ວຍເຊັ່ນ: ກັບ"
+          placeholder="ປ້ອນຫົວໜ່ວຍ ເຊັ່ນ: ກັບ, ແຜງ, ຂວດ"
           register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນຫົວໜ່ວຍ' }}
+          formOptions={{ 
+            required: 'ກະລຸນາປ້ອນຫົວໜ່ວຍ',
+            minLength: { value: 1, message: 'ຫົວໜ່ວຍຕ້ອງມີຢ່າງນ້ອຍ 1 ຕົວອັກສອນ' }
+          }}
           errors={errors}
         />
 
         <PriceInputBox
-          label="ລາຄາຕໍ່ເມັດ"
+          label="ລາຄາຕໍ່ຫົວໜ່ວຍ"
           name="price"
           placeholder="ປ້ອນລາຄາ"
           register={register}
           formOptions={{
             required: 'ກະລຸນາປ້ອນລາຄາ',
-            min: { value: 0, message: 'ລາຄາຕ້ອງຫຼາຍກວ່າ 0' },
+            min: { value: 0, message: 'ລາຄາຕ້ອງຫຼາຍກວ່າ ຫຼື ເທົ່າກັບ 0' },
+            valueAsNumber: true
           }}
           errors={errors}
         />
 
+
         <BoxDate
-          select=""
+
           register={register}
           errors={errors}
           name="expired"
@@ -294,23 +393,8 @@ const CreateMedicines = ({ setShow, getList, existingIds, onCloseCallback }) => 
         />
 
         <SelectBoxId
-          label="ສະຖານະ"
-          name="status"
-          options={[
-            { label: 'ຍັງມີ', value: 'ຍັງມີ' },
-            { label: 'ໝົດ', value: 'ໝົດ' },
-          ]}
-          register={register}
-          errors={errors}
-          value={status}
-          onSelect={(e) => setStatus(e.target.value)}
-          isRequired={true}
-        />
-
-         
-        <SelectBoxId
-          label="ປະເພດ"
-          name="ປະເພດ"
+          label="ປະເພດຢາ"
+          name="medtype_id"
           value={selectedMedType}
           options={categories.map((cat) => ({
             value: cat.medtype_id,
@@ -318,7 +402,9 @@ const CreateMedicines = ({ setShow, getList, existingIds, onCloseCallback }) => 
           }))}
           register={register}
           errors={errors}
-          onSelect={(e) => setSelectedMedType(e.target.value)}
+          onSelect={(e) => {
+            setSelectedMedType(e.target.value);
+          }}
         />
 
         <SelectBoxId
@@ -331,8 +417,9 @@ const CreateMedicines = ({ setShow, getList, existingIds, onCloseCallback }) => 
           }))}
           register={register}
           errors={errors}
-          onSelect={(e) => setSelectEmpCreate(e.target.value)}
-          formOptions={{ required: 'ກະລຸນາເລືອກພະນັກງານ' }}
+          onSelect={(e) => {
+            setSelectEmpCreate(e.target.value);
+          }}
         />
 
         <BoxDate
@@ -340,21 +427,15 @@ const CreateMedicines = ({ setShow, getList, existingIds, onCloseCallback }) => 
           errors={errors}
           name="created_at"
           label="ວັນທີສ້າງ"
-          select=""
+
           formOptions={{ required: 'ກະລຸນາໃສ່ວັນທີສ້າງ' }}
           setValue={setValue}
         />
 
-       
 
         <div className="flex justify-end space-x-4 col-span-full py-4">
-          <ButtonBox
-            variant="cancel"
-            type="button"
-            onClick={() => setShow(false)}
-          >
-            ຍົກເລີກ
-          </ButtonBox>
+      
+          
           <ButtonBox variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </ButtonBox>

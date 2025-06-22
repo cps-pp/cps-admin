@@ -3,10 +3,30 @@ import { Link } from 'react-router-dom';
 import { User, Search, Bell, Settings, LogOut, Menu, X } from 'lucide-react';
 import Logo from '../../images/logo/cps-logo.png';
 import axios from 'axios';
+import { Clock } from 'lucide-react';
 
 const Header = (props) => {
   const [user, setUser] = useState(null);
+  const [notifications, setNotifications] = useState({  // <-- เพิ่มตรงนี้
+    appointments: 0,
+    nearExpiry: 0,
+    expired: 0,
+  });
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showNotificationMenu, setShowNotificationMenu] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+
+  useEffect(() => {
+  const handleRefresh = () => {
+    fetchNotifications(); // 👉 โหลดข้อมูลแจ้งเตือนใหม่
+  };
+
+  window.addEventListener('refresh-notifications', handleRefresh);
+  // โหลดแจ้งเตือนครั้งแรกตอน mount
+  fetchNotifications();
+  return () => window.removeEventListener('refresh-notifications', handleRefresh);
+}, []);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -34,10 +54,132 @@ const Header = (props) => {
     fetchProfile();
   }, []);
 
+// ฟังก์ชัน fetchNotifications ออกมาอยู่นอก useEffect เพื่อให้เรียกได้ทุกที่ใน component
+  const fetchNotifications = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      // ดึงข้อมูลนัดหมาย
+      const appointmentRes = await axios.get(
+        'http://localhost:4000/src/appoint/appointmentWang',
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      // ดึงข้อมูลยา
+      const medicineRes = await axios.get(
+        'http://localhost:4000/src/manager/medicinesWang',
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      // ตรวจสอบโครงสร้างข้อมูล appointment
+      let appointmentData = appointmentRes.data;
+      if (appointmentData && typeof appointmentData === 'object' && !Array.isArray(appointmentData)) {
+        appointmentData = appointmentData.appointments || appointmentData.data || appointmentData.result || Object.values(appointmentData)[0];
+      }
+
+      // ตรวจสอบโครงสร้างข้อมูล medicine
+      let medicineData = medicineRes.data;
+      if (medicineData && typeof medicineData === 'object' && !Array.isArray(medicineData)) {
+        medicineData = medicineData.medicines || medicineData.data || medicineData.result || Object.values(medicineData)[0];
+      }
+
+      // นับจำนวนนัดหมาย
+      const appointmentCount = Array.isArray(appointmentData) ? appointmentData.length : 0;
+
+      // นับจำนวนยาใกล้หมดและหมด
+      let nearExpiryCount = 0;
+      let expiredCount = 0;
+
+      if (Array.isArray(medicineData)) {
+        medicineData.forEach((medicine) => {
+          const quantity = parseInt(medicine.quantity) ||
+                           parseInt(medicine.stock) ||
+                           parseInt(medicine.amount) ||
+                           parseInt(medicine.qty) ||
+                           parseInt(medicine.remaining) || 0;
+
+          if (quantity === 0) {
+            expiredCount++;
+          } else if (quantity <= 20) {
+            nearExpiryCount++;
+          }
+        });
+      } else {
+        console.log('Medicine data is not an array:', typeof medicineData);
+      }
+
+      // อัพเดตสถานะแจ้งเตือน
+      setNotifications({
+        appointments: appointmentCount,
+        nearExpiry: nearExpiryCount,
+        expired: expiredCount,
+      });
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
+
+  // useEffect โหลดข้อมูลตอน mount และตั้ง interval รีเฟรชทุก 5 นาที
+  useEffect(() => {
+    fetchNotifications();
+
+    const interval = setInterval(fetchNotifications, 5 * 60 * 1000); // 5 นาที
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // useEffect ตั้ง listener รอรับ event 'refresh-notifications'
+  useEffect(() => {
+    const handleRefresh = () => {
+      fetchNotifications();
+    };
+
+    window.addEventListener('refresh-notifications', handleRefresh);
+
+    return () => {
+      window.removeEventListener('refresh-notifications', handleRefresh);
+    };
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatDateTime = (date) => {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const time = date.toLocaleTimeString('lo-LA', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+      timeZone: 'Asia/Bangkok',
+    });
+    const weekday = date.toLocaleDateString('lo-LA', {
+      weekday: 'long',
+      timeZone: 'Asia/Bangkok',
+    });
+
+    return `${weekday} ${day}/${month}/${year} ${time}`;
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     window.location.href = '/login';
   };
+
+  // คำนวณจำนวนแจ้งเตือนทั้งหมด
+  const totalNotifications = notifications.appointments + notifications.nearExpiry + notifications.expired;
+
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-white shadow">
@@ -56,22 +198,117 @@ const Header = (props) => {
               <Menu className="h-5 w-5 text-blue-600 transition-transform duration-300 group-hover:scale-110" />
             )}
           </button>
+
+          <div className="hidden lg:flex items-center gap-2 border border-gray-300 px-4 py-1 rounded-lg shadow-sm bg-gray-50">
+            <Clock className="w-4 h-4 text-blue-500" />
+            <span className="text-base text-black font-semibold">
+              {formatDateTime(currentTime)}
+            </span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-4 ">
+        <div className="flex items-center gap-4">
+          {/* Notification Bell - แสดงเสมอไม่ต้องรอ user */}
+          <div className="relative">
+            <button
+              onClick={() => setShowNotificationMenu(!showNotificationMenu)}
+              className="relative p-2 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200/50 transition-all duration-300 hover:shadow-md group"
+            >
+              <Bell className="h-5 w-5 text-blue-600 transition-transform duration-300 group-hover:scale-110" />
+              {totalNotifications > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold animate-pulse">
+                  {totalNotifications > 99 ? '99+' : totalNotifications}
+                </span>
+              )}
+            </button>
+
+            {showNotificationMenu && (
+              <div className="absolute right-0 mt-2 w-80 bg-white backdrop-blur-md border border-stroke rounded-lg shadow-xl py-2 z-50">
+                <div className="px-4 py-3 border-b border-stroke">
+                  <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                    <Bell className="h-4 w-4 text-blue-600" />
+                    ການແຈ້ງເຕືອນ
+                  </h3>
+                </div>
+
+                <div className="py-2 max-h-96 overflow-y-auto">
+                  {totalNotifications === 0 ? (
+                    <div className="px-4 py-6 text-center text-gray-500">
+                      <Bell className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                      <p>ບໍ່ມີການແຈ້ງເຕືອນ</p>
+                    </div>
+                  ) : (
+                    <>
+                      {notifications.appointments > 0 && (
+                        <div className="px-4 py-3 hover:bg-blue-50 border-l-4 border-blue-400 transition-colors duration-200">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                              <div>
+                                <p className="font-medium text-gray-800">ນັດໝາຍ</p>
+                                <p className="text-sm text-gray-600">ມີນັດໝາຍທີ່ຕ້ອງດຳເນີນການ</p>
+                              </div>
+                            </div>
+                            <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded-full">
+                              {notifications.appointments}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {notifications.nearExpiry > 0 && (
+                        <div className="px-4 py-3 hover:bg-yellow-50 border-l-4 border-yellow-400 transition-colors duration-200">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                              <div>
+                                <p className="font-medium text-gray-800">ສິນຄ້າໃກ້ໝົດ</p>
+                                <p className="text-sm text-gray-600">ສິນຄ້າທີ່ເຫຼືອນ້ອຍ (≤20 ຊິ້ນ)</p>
+                              </div>
+                            </div>
+                            <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">
+                              {notifications.nearExpiry}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {notifications.expired > 0 && (
+                        <div className="px-4 py-3 hover:bg-red-50 border-l-4 border-red-400 transition-colors duration-200">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                              <div>
+                                <p className="font-medium text-gray-800">ສິນຄ້າໝົດສະຕ໋ອກ</p>
+                                <p className="text-sm text-gray-600">ສິນຄ້າທີ່ໝົດສະຕ໋ອກ (0 ຊິ້ນ)</p>
+                              </div>
+                            </div>
+                            <span className="bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded-full">
+                              {notifications.expired}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* User Profile Section */}
           {user ? (
             <div className="relative">
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-3 p-2 rounded  bg-slate-50 hover:bg-slate-100 border border-stroke transition-all duration-300 hover:shadow-md group"
+                className="flex items-center gap-3 p-2 rounded bg-slate-50 hover:bg-slate-100 border border-stroke transition-all duration-300 hover:shadow-md group"
               >
                 <div className="w-8 h-8 bg-secondary2 rounded-full flex items-center justify-center">
                   <User className="h-4 w-4 text-white" />
                 </div>
                 <div className="hidden md:block text-left">
                   <div className="text-md font-semibold text-form-input group-hover:text-secondary transition-colors duration-200">
-                    {user.username}  {user.role}
+                    {user.username} {user.role}
                   </div>
                   
                 </div>
@@ -132,7 +369,7 @@ const Header = (props) => {
                   </div>
 
                   <div className="py-2">
-                  
+
                     <button
                       onClick={handleLogout}
                       className="w-full flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-200"
@@ -155,11 +392,14 @@ const Header = (props) => {
         </div>
       </div>
 
-      {/* Click outside to close dropdown */}
-      {showUserMenu && (
+      {/* Click outside to close dropdowns */}
+      {(showUserMenu || showNotificationMenu) && (
         <div
           className="fixed inset-0 z-40"
-          onClick={() => setShowUserMenu(false)}
+          onClick={() => {
+            setShowUserMenu(false);
+            setShowNotificationMenu(false);
+          }}
         ></div>
       )}
     </header>
@@ -167,94 +407,4 @@ const Header = (props) => {
 };
 
 export default Header;
-// import React, { useState } from 'react';
-// import { Link } from 'react-router-dom';
-// import Logo from '../../images/logo/cps-logo.png';
 
-// const Header = (props) => {
-//   const [user, setUser] = useState(null);
-
-//   return (
-//     <header className="sticky top-0 z-10 flex w-full bg-white drop-shadow-1 ">
-//       <div className="flex flex-grow items-center justify-between px-4 py-8 md:py-6 lg:py-6 shadow-2 ">
-//         <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
-//           <button
-//             aria-controls="sidebar"
-//             onClick={(e) => {
-//               e.stopPropagation();
-//               props.setSidebarOpen(!props.sidebarOpen);
-//             }}
-//             className="z-99999 block rounded-sm border border-stroke bg-white p-1.5 shadow-sm dark:border-strokedark dark:bg-boxdark lg:hidden"
-//           >
-//             <span className="relative block h-5.5 w-5.5 cursor-pointer">
-//               <span className="du-block absolute right-0 h-full w-full">
-//                 <span
-//                   className={`relative left-0 top-0 my-1 block h-0.5 w-0 rounded-sm bg-black delay-[0] duration-200 ease-in-out dark:bg-white ${
-//                     !props.sidebarOpen && '!w-full delay-300'
-//                   }`}
-//                 ></span>
-//                 <span
-//                   className={`relative left-0 top-0 my-1 block h-0.5 w-0 rounded-sm bg-black delay-150 duration-200 ease-in-out dark:bg-white ${
-//                     !props.sidebarOpen && 'delay-400 !w-full'
-//                   }`}
-//                 ></span>
-//                 <span
-//                   className={`relative left-0 top-0 my-1 block h-0.5 w-0 rounded-sm bg-black delay-200 duration-200 ease-in-out dark:bg-white ${
-//                     !props.sidebarOpen && '!w-full delay-500'
-//                   }`}
-//                 ></span>
-//               </span>
-//               <span className="absolute right-0 h-full w-full rotate-45">
-//                 <span
-//                   className={`absolute left-2.5 top-0 block h-full w-0.5 rounded-sm bg-black delay-300 duration-200 ease-in-out dark:bg-white ${
-//                     !props.sidebarOpen && '!h-0 !delay-[0]'
-//                   }`}
-//                 ></span>
-//                 <span
-//                   className={`delay-400 absolute left-0 top-2.5 block h-0.5 w-full rounded-sm bg-black duration-200 ease-in-out dark:bg-white ${
-//                     !props.sidebarOpen && '!h-0 !delay-200'
-//                   }`}
-//                 ></span>
-//               </span>
-//             </span>
-//           </button>
-
-//           <div>
-//             <Link className="block flex-shrink-0 lg:hidden" to="/dashboard">
-//               <img
-//                 src={Logo}
-//                 alt="Logo"
-//                 className="w-[60px] h-[60px] lg:w-[35px] lg:h-[60px] object-contain hidden dark:block"
-//               />
-//             </Link>
-//           </div>
-//         </div>
-
-//         <div className="hidden sm:block">
-//           <div className="relative">
-//             <button className="absolute left-0 top-1/2 -translate-y-1/2">
-//               {/* Optional Search Icon */}
-//             </button>
-
-//             {/* Optional Search Input */}
-//             {/* <input
-//               type="text"
-//               placeholder="Type to search..."
-//               className="w-full bg-transparent pl-9 pr-4 text-black focus:outline-none dark:text-white xl:w-125"
-//             /> */}
-//           </div>
-//         </div>
-
-//         <div className="flex items-center gap-3 2xsm:gap-7">
-//           <ul className="flex items-center gap-2 2xsm:gap-4 list-none">
-//             {/* <DarkModeSwitcher /> */}
-//             {/* <DropdownNotification /> */}
-//           </ul>
-//           {/* <DropdownUser user={user} /> */}
-//         </div>
-//       </div>
-//     </header>
-//   );
-// };
-
-// export default Header;

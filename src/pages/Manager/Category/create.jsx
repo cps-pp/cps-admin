@@ -8,18 +8,26 @@ import InputBox from '../../../components/Forms/Input_new';
 import ButtonBox from '../../../components/Button';
 import { usePrompt } from '@/hooks/usePrompt';
 
-const CreateCategory = ({ setShow, getListCategory, existingIds, onCloseCallback }) => {
+const CreateCategory = ({
+  setShow,
+  getListCategory,
+  existingIds,
+  onCloseCallback,
+}) => {
   const {
     register,
     handleSubmit,
     reset,
     setFocus,
+    setValue,
     formState: { errors, isDirty },
   } = useForm();
 
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const [loadingNextId, setLoadingNextId] = useState(true);
+  const [nextMedtypeId, setNextMedtypeId] = useState('');
 
   // ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
   const isDirtyRef = useRef(isDirty);
@@ -30,7 +38,10 @@ const CreateCategory = ({ setShow, getListCategory, existingIds, onCloseCallback
   }, [isDirty]);
 
   // ✅ เตือนเมื่อมีการพยายามออกจากหน้าด้วย navigation (Back / เปลี่ยน route)
-  usePrompt('ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.', isDirty);
+  usePrompt(
+    'ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.',
+    isDirty,
+  );
 
   // ✅ เตือนเมื่อจะรีเฟรช / ปิดแท็บ
   useEffect(() => {
@@ -49,7 +60,9 @@ const CreateCategory = ({ setShow, getListCategory, existingIds, onCloseCallback
   // ✅ เตือนเมื่อคลิกปิดฟอร์ม - ใช้ current value จาก ref
   const handleCloseForm = () => {
     if (isDirtyRef.current) {
-      const confirmLeave = window.confirm('ທ່ານຕ້ອງການປິດຟອມແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ປ້ອນຈະສູນເສຍ');
+      const confirmLeave = window.confirm(
+        'ທ່ານຕ້ອງການປິດຟອມແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ປ້ອນຈະສູນເສຍ',
+      );
       if (!confirmLeave) return;
     }
     setShow(false);
@@ -62,17 +75,38 @@ const CreateCategory = ({ setShow, getListCategory, existingIds, onCloseCallback
     }
   }, [onCloseCallback]);
 
-  // ✅ แก้ไขฟังก์ชันล้างข้อมูล
-  const handleClearForm = () => {
-    // ล้างข้อมูลฟอร์มและรีเซ็ต isDirty
-    reset({
-      medtype_id: '',
-      type_name: ''
-    }), 
+  // ดึงรหัสถัดไปเมื่อ component โหลด
+  useEffect(() => {
+    const fetchNextId = async () => {
+      try {
+        setLoadingNextId(true);
+        const response = await fetch(
+          'http://localhost:4000/src/manager/next-category-id',
+        );
 
-    // อัพเดต ref ให้เป็น false ทันที
-    isDirtyRef.current = false;
-  };
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setNextMedtypeId(data.nextId);
+        setValue('medtype_id', data.nextId); // ตั้งค่ารหัสในฟอร์ม
+      } catch (error) {
+        console.error('Error fetching next ID:', error);
+        dispatch(
+          openAlert({
+            type: 'error',
+            title: 'ເກີດຂໍ້ຜິດພາດ',
+            message: 'ບໍ່ສາມາດດຶງລະຫັດໃໝ່ໄດ້',
+          }),
+        );
+      } finally {
+        setLoadingNextId(false);
+      }
+    };
+
+    fetchNextId();
+  }, [dispatch, setValue]);
 
   const handleSave = async (formData) => {
     setLoading(true);
@@ -91,14 +125,17 @@ const CreateCategory = ({ setShow, getListCategory, existingIds, onCloseCallback
     }
 
     try {
-      const response = await fetch('http://localhost:4000/src/manager/category', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type_name: formData.type_name,
-          medtype_id: formData.medtype_id,
-        }),
-      });
+      const response = await fetch(
+        'http://localhost:4000/src/manager/category',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type_name: formData.type_name,
+            medtype_id: formData.medtype_id,
+          }),
+        },
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -109,7 +146,7 @@ const CreateCategory = ({ setShow, getListCategory, existingIds, onCloseCallback
           type: 'success',
           title: 'ສຳເລັດ',
           message: 'ບັນທຶກຂໍ້ມູນປະເພດຢາສຳເລັດແລ້ວ',
-        })
+        }),
       );
 
       setShow(false);
@@ -122,14 +159,14 @@ const CreateCategory = ({ setShow, getListCategory, existingIds, onCloseCallback
           type: 'error',
           title: 'ເກີດຂໍ້ຜິດພາດ',
           message: 'ມີຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
-        })
+        }),
       );
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
+  if (loading || loadingNextId) {
     return <Loader />;
   }
 
@@ -142,15 +179,21 @@ const CreateCategory = ({ setShow, getListCategory, existingIds, onCloseCallback
       </div>
 
       <form onSubmit={handleSubmit(handleSave)} className="mt-4 px-4">
-        <InputBox
-          label="ລະຫັດປະເພດ"
-          name="medtype_id"
-          type="text"
-          placeholder="ປ້ອນລະຫັດປະເພດ"
-          register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນລະຫັດປະເພດກ່ອນ' }}
-          errors={errors}
-        />
+        {/* แสดงรหัสที่สร้างอัตโนมัติ (แบบ read-only) */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2 text-black dark:text-white">
+            ລະຫັດປະເພດ
+          </label>
+          <input
+            type="text"
+            value={nextMedtypeId}
+            readOnly
+            className="w-full rounded-lg border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
+          />
+          {/* Hidden input สำหรับส่งค่าไปกับฟอร์ม */}
+          <input type="hidden" {...register('medtype_id')} />
+        </div>
+
         <InputBox
           label="ຊື່ປະເພດ"
           name="type_name"
@@ -162,14 +205,7 @@ const CreateCategory = ({ setShow, getListCategory, existingIds, onCloseCallback
         />
 
         <div className="mt-8 flex justify-end space-x-4 py-4">
-          <ButtonBox
-            variant="cancel"
-            type="button"
-            onClick={handleClearForm}
-            disabled={loading}
-          >
-            ລ້າງຂໍ້ມູນ
-          </ButtonBox>
+
 
           <ButtonBox variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}

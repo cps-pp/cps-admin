@@ -20,7 +20,16 @@ const EditExChange = ({ id, onClose, setShow, getList }) => {
   } = useForm();
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false);
+  const [updateDate, setUpdateDate] = useState('');
   const dispatch = useAppDispatch();
+
+  // ✅ ตั้งค่าวันที่ปัจจุบันสำหรับการแก้ไข
+  useEffect(() => {
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0]; // รูปแบบ YYYY-MM-DD
+    setUpdateDate(formattedDate);
+    setValue('ex_date', formattedDate); // ตั้งค่าวันที่ในฟอร์ม
+  }, [setValue]);
 
   useEffect(() => {
     const fetchListData = async () => {
@@ -57,6 +66,7 @@ const EditExChange = ({ id, onClose, setShow, getList }) => {
           body: JSON.stringify({
             ex_type: formData.ex_type,
             ex_rate: parseFloat(formData.ex_rate),  // แปลงเป็นตัวเลขก่อนส่ง
+            ex_date: formData.ex_date, // ✅ ส่งวันที่ปัจจุบันไปด้วย
           }),
         }
       );
@@ -101,6 +111,7 @@ const EditExChange = ({ id, onClose, setShow, getList }) => {
       </div>
 
       <form onSubmit={handleSubmit(handleSave)} className="mt-4 px-4">
+
         <Input
           label="ສະກຸນເງິນ"
           name="ex_type"
@@ -111,7 +122,7 @@ const EditExChange = ({ id, onClose, setShow, getList }) => {
           errors={errors}
         />
        
-   <PriceInput
+        <PriceInput
           label="ລາຄາ"
           name="ex_rate"
           register={register}
@@ -124,7 +135,7 @@ const EditExChange = ({ id, onClose, setShow, getList }) => {
         />
 
         <div className="mt-8 flex justify-end space-x-4 col-span-full py-4">
-       
+
           <Button variant="save" type="submit">
             ບັນທຶກ
           </Button>

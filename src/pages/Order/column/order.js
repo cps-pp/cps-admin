@@ -1,8 +1,8 @@
 
 export const OrderHeaders = [
 
-  { id: 'ລະຫັດ', name: 'ລະຫັດ', sortable: true },
-  { id: 'ວັນທີ່ສັ່ງຊື່', name: 'ວັນທີ່ສັ່ງຊື່', sortable: true },
+  { id: 'id', name: 'ລະຫັດ', sortable: true },
+  { id: 'name', name: 'ວັນທີ່ສັ່ງຊື່', sortable: true },
 
   { id: 'ສະຖານະ', name: 'ສະຖານະ', sortable: true },
 

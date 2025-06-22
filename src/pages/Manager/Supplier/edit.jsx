@@ -14,17 +14,64 @@ const EditSupplier = ({ id, onClose, setShow, getList }) => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
     setValue,
   } = useForm();
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false);
   const dispatch = useAppDispatch();
   const [status, setStatus] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('020'); // ✅ เพิ่ม state สำหรับเบอร์โทร
+
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      if (isDirty) {
+        const message =
+          'ທ່ານຍັງບໍ່ໄດ້ບັນທຶກຂໍ້ມູນ. ຢືນຢັນວ່າຈະອອກຈາກໜ້ານີ້ຫຼືບໍ?';
+        event.preventDefault();
+        event.returnValue = message;
+        return message;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
+
+  // ✅ ฟังก์ชันจัดการการเปลี่ยนแปลงเบอร์โทร
+  const handlePhoneChange = (e) => {
+    let value = e.target.value;
+    
+    // ถ้าผู้ใช้พยายามลบ "020" ให้เซ็ตกลับเป็น "020"
+    if (!value.startsWith('020')) {
+      value = '020';
+    }
+    
+    // จำกัดให้ป้อนได้แค่ตัวเลข
+    const numericValue = value.replace(/[^0-9]/g, '');
+    
+    // ตรวจสอบตัวเลขตัวที่ 4 (หลัง 020) ต้องเป็น 2, 5, 7, หรือ 9
+    if (numericValue.length > 3) {
+      const fourthDigit = numericValue[3];
+      const validStarters = ['2', '5', '7', '9'];
+      
+      if (!validStarters.includes(fourthDigit)) {
+        // ถ้าตัวเลขตัวที่ 4 ไม่ถูกต้อง ให้คงค่าเดิมไว้
+        return;
+      }
+    }
+    
+    // จำกัดความยาวไม่เกิน 11 ตัว (020 + 8 ตัว)
+    if (numericValue.length <= 11) {
+      setPhoneNumber(numericValue);
+      // ✅ อัพเดทค่าใน react-hook-form ด้วย
+      setValue('phone', numericValue, { shouldValidate: true, shouldDirty: true });
+    }
+  };
 
   useEffect(() => {
     const fetchSupplierData = async () => {
-  
+      
       try {
         const response = await fetch(`http://localhost:4000/src/manager/supplier/${id}`);
         if (!response.ok) {
@@ -34,18 +81,33 @@ const EditSupplier = ({ id, onClose, setShow, getList }) => {
 
         setValue('company_name', data.data.company_name);
         setValue('address', data.data.address);
-        setValue('phone', data.data.phone);
+        setStatus(data.data.status || '');
         setValue('status', data.data.status);
+
+        // ✅ จัดการเบอร์โทรพิเศษ - ถ้าไม่ขึ้นต้นด้วย 020 ให้เติม 020 ให้
+        let phoneValue = data.data.phone || '020';
+        if (!phoneValue.startsWith('020')) {
+          phoneValue = '020' + phoneValue;
+        }
+        setPhoneNumber(phoneValue);
+        setValue('phone', phoneValue);
 
         setLoading(false);
       } catch (error) {
         console.error('Error fetching supplier data:', error);
+        dispatch(
+          openAlert({
+            type: 'error',
+            title: 'ເກີດຂໍ້ຜິດພາດ',
+            message: error.message || 'ມີຂໍ້ຜິດພາດໃນການດຶງຂໍ້ມູນ',
+          }),
+        );
         setLoading(false);
       }
     };
 
     fetchSupplierData();
-  }, [id, setValue, fetching, navigate]);
+  }, [id, setValue, fetching, navigate, dispatch]);
 
   const handleSave = async (formData) => {
     setLoading(true);
@@ -120,25 +182,55 @@ const EditSupplier = ({ id, onClose, setShow, getList }) => {
           formOptions={{ required: 'ກະລຸນາປ້ອນທີ່ຢູ່ກ່ອນ' }}
           errors={errors}
         />
-        <Input
-          label="ເບີຕິດຕໍ່"
-          name="phone"
-          type="tel"
-          placeholder="ປ້ອນເບີຕິດຕໍ່"
-          register={register}
-          formOptions={{
-            required: 'ກະລຸນາປ້ອນເບີຕິດຕໍ່ກ່ອນ',
-            pattern: {
-              value: /^[0-9]+$/,
-              message: 'ເບີຕິດຕໍ່ຕ້ອງເປັນຕົວເລກເທົ່ານັ້ນ',
-            },
-            minLength: {
-              value: 8,
-              message: 'ເບີຕິດຕໍ່ຕ້ອງມີຢ່າງໜ້ອຍ 8 ຕົວເລກ',
-            },
-          }}
-          errors={errors}
-        />
+        
+        {/* ✅ Custom Phone Input with 020 prefix and digit validation */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2 text-black dark:text-white">
+            ເບີຕິດຕໍ່
+          </label>
+          <input
+            type="tel"
+            value={phoneNumber}
+            onChange={handlePhoneChange}
+            placeholder="020xxxxxxxx (ຕົວເລກທີ 4 ຕ້ອງເປັນ 2, 5, 7, ຫຼື 9)"
+            className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+          />
+          {/* Hidden input for form validation */}
+          <input
+            type="hidden"
+            {...register('phone', {
+              required: 'ກະລຸນາປ້ອນເບີຕິດຕໍ່ກ່ອນ',
+              validate: {
+                validLength: (value) => {
+                  if (value.length !== 11) {
+                    return 'ເບີຕິດຕໍ່ຕ້ອງມີ 11 ຕົວເລກ (020 + 8 ຕົວເລກ)';
+                  }
+                  return true;
+                },
+                startsWithPrefix: (value) => {
+                  if (!value.startsWith('020')) {
+                    return 'ເບີຕິດຕໍ່ຕ້ອງເລີ່ມຕົ້ນດ້ວຍ 020';
+                  }
+                  return true;
+                },
+                validFourthDigit: (value) => {
+                  if (value.length >= 4) {
+                    const fourthDigit = value[3];
+                    const validStarters = ['2', '5', '7', '9'];
+                    if (!validStarters.includes(fourthDigit)) {
+                      return 'ຕົວເລກທີ 4 ຫຼັງຈາກ 020 ຕ້ອງເປັນ 2, 5, 7, ຫຼື 9';
+                    }
+                  }
+                  return true;
+                }
+              }
+            })}
+          />
+          {errors.phone && (
+            <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
+          )}
+        </div>
+
         <Select
           label="ສະຖານນະ"
           name="status"
@@ -152,8 +244,8 @@ const EditSupplier = ({ id, onClose, setShow, getList }) => {
           }}
         />
         <div className="mt-8 flex justify-end space-x-4 col-span-full py-4">
-          <Button variant="save" type="submit">
-            ບັນທຶກ
+          <Button variant="save" type="submit" disabled={loading}>
+            {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </Button>
         </div>
       </form>

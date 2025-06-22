@@ -28,8 +28,12 @@ const CategoryPage = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [existingIds, setExistingIds] = useState([]);
 
-   // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
+  // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
   const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
+
+  // ✅ เพิ่ม state สำหรับการเรียงลำดับ ID (คัดลอกจาก DiseasePage)
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
+
 
   const fetchCategories = async () => {
     try {
@@ -63,11 +67,46 @@ const CategoryPage = () => {
       setFilteredCategories(categories);
     } else {
       const filtered = categories.filter((category) =>
-        category.type_name.toLowerCase().includes(searchQuery.toLowerCase())
+        category.type_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        category.medtype_id.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredCategories(filtered);
     }
   }, [searchQuery, categories]);
+
+  // ✅ ฟังก์ชันสำหรับเรียงลำดับ ID (คัดลอกจาก DiseasePage)
+  const handleSortById = () => {
+    const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortOrder(newSortOrder);
+    
+    const sortedCategories = [...categories].sort((a, b) => {
+      const extractNumber = (id) => {
+        const match = id.match(/\d+/);
+        return match ? parseInt(match[0]) : 0;
+      };
+      
+      const numA = extractNumber(a.medtype_id);
+      const numB = extractNumber(b.medtype_id);
+      
+      if (newSortOrder === 'asc') {
+        return numA - numB; 
+      } else {
+        return numB - numA; 
+      }
+    });
+    
+    setCategory(sortedCategories);
+    
+    if (searchQuery.trim() !== '') {
+      const filtered = sortedCategories.filter(category =>
+        category.type_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        category.medtype_id.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredCategories(filtered);
+    } else {
+      setFilteredCategories(sortedCategories);
+    }
+  };
 
   const handleDeleteCategory = async () => {
     if (!selectedCategoryId) return;
@@ -137,7 +176,7 @@ const CategoryPage = () => {
       createFormCloseHandler();
     } else {
       // fallback ถ้าไม่มี handler
-      setShowAddCategoryModal(false); // ✅ แก้ไขชื่อตัวแปรให้ถูกต้อง
+      setShowAddCategoryModal(false);
     }
   };
 
@@ -157,7 +196,7 @@ const CategoryPage = () => {
             <Button
               onClick={() => setShowAddCategoryModal(true)}
               icon={iconAdd}
-              className="bg-primary"
+              className="bg-secondary2"
             >
               ເພີ່ມຂໍ້ມູນຢາ
             </Button>
@@ -179,16 +218,34 @@ const CategoryPage = () => {
         </div>
 
         {/* Table */}
-           <div className="overflow-x-auto  shadow-md">
-          <table className="w-full min-w-max table-auto  ">
+        <div className="overflow-x-auto shadow-md">
+          <table className="w-full min-w-max table-auto">
             <thead>
-              <tr className="text-left  bg-gray border border-stroke">
+              <tr className="text-left bg-gray border border-stroke">
                 {Cate.map((header, index) => (
                   <th
                     key={index}
-                    className="px-4 py-3 tracking-wide text-form-input  font-semibold "
+                    className={`px-4 py-3 tracking-wide font-semibold text-form-input ${
+                      header.id === 'id'
+                        ? 'cursor-pointer hover:bg-gray-100 hover:text-gray-800 select-none'
+                        : ''
+                    }`}
+                    onClick={header.id === 'id' ? handleSortById : undefined}
                   >
-                    {header.name}
+                    <div className="flex items-center gap-2">
+                      {header.name}
+                      {header.id === 'id' && (
+                        <span
+                          className={`ml-1 inline-block text-md font-semibold transition-colors duration-200 ${
+                            sortOrder === 'asc'
+                              ? 'text-green-500'
+                              : 'text-black'
+                          }`}
+                        >
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
                   </th>
                 ))}
               </tr>
@@ -223,7 +280,7 @@ const CategoryPage = () => {
 
         {showAddCategoryModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="rounded-lg w-full max-w-2xl  relative px-4">
+            <div className="rounded-lg w-full max-w-2xl relative px-4">
               {/* ✅ ปุ่ม X ที่ใช้ฟังก์ชันป้องกันจาก CreateCategory */}
               <button
                 onClick={handleCloseAddModal}
@@ -249,7 +306,7 @@ const CategoryPage = () => {
                 setShow={setShowAddCategoryModal}
                 getListCategory={fetchCategories}
                 existingIds={existingIds}
-                onCloseCallback={setCreateFormCloseHandler} // ✅ ส่ง callback function
+                onCloseCallback={setCreateFormCloseHandler}
               />
             </div>
           </div>
@@ -257,10 +314,10 @@ const CategoryPage = () => {
 
         {showEditModal && selectedId && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
-            <div className="rounded-lg w-full max-w-2xl bg-white relative ">
+            <div className="rounded-lg w-full max-w-2xl bg-white relative">
               <button
                 onClick={() => setShowEditModal(false)}
-                className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"
+                className="absolute top-4 right-2 text-gray-500 hover:text-gray-700"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -297,10 +354,11 @@ const CategoryPage = () => {
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleRowsPerPageChange}
       />
-       <ConfirmModal
+      
+      <ConfirmModal
         show={showDeleteModal}
         setShow={setShowDeleteModal}
-        message="ທ່ານຕ້ອງການລົບປະເພດຢານີ້ອອກຈາກລະບົບບໍ່？"
+        message="ທ່ານຕ້ອງການລົບປະເພດຢານີ້ອອกຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteCategory}
 
       />

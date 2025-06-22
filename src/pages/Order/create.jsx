@@ -34,6 +34,11 @@ const OrderCreate = ({ setShow, getList, existingIds, onCloseCallback }) => {
   const [medicine, setMedicine] = useState([]);
   const [supplier, setSupplier] = useState([]);
   const [employees, setEmployees] = useState([]);
+  
+  // ✅ เพิ่ม state สำหรับ auto-generate ID
+  const [loadingNextId, setLoadingNextId] = useState(true);
+  const [nextPreorderId, setNextPreorderId] = useState('');
+  
   const selectedDate = watch('preorder_date');
 
   // ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
@@ -76,6 +81,39 @@ const OrderCreate = ({ setShow, getList, existingIds, onCloseCallback }) => {
       onCloseCallback(() => handleCloseForm);
     }
   }, [onCloseCallback]);
+
+  // ✅ ดึงรหัสถัดไปเมื่อ component โหลด
+  useEffect(() => {
+    const fetchNextId = async () => {
+      try {
+        setLoadingNextId(true);
+        const response = await fetch(
+          'http://localhost:4000/src/preorder/next-preorder-id'
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setNextPreorderId(data.nextId);
+        setValue('preorder_id', data.nextId); // ตั้งค่ารหัสในฟอร์ม
+      } catch (error) {
+        console.error('Error fetching next preorder ID:', error);
+        dispatch(
+          openAlert({
+            type: 'error',
+            title: 'ເກີດຂໍ້ຜິດພາດ',
+            message: 'ບໍ່ສາມາດດຶງລະຫັດໃໝ່ໄດ້',
+          }),
+        );
+      } finally {
+        setLoadingNextId(false);
+      }
+    };
+
+    fetchNextId();
+  }, [dispatch, setValue]);
 
   useEffect(() => {
     const fetchMed = async () => {
@@ -154,25 +192,7 @@ const OrderCreate = ({ setShow, getList, existingIds, onCloseCallback }) => {
   const handleSave = async (data) => {
     setLoading(true);
 
-    // ✅ แก้ไข: เปรียบเทียบแบบไม่สนใจตัวเล็ก-ใหญ่
-    const inputId = String(data.preorder_id).trim();
-    const existingIdsLower = existingIds.map(id => String(id).toLowerCase().trim());
-    const inputIdLower = inputId.toLowerCase();
 
-    if (existingIdsLower.includes(inputIdLower)) {
-      setFocus('preorder_id');
-      dispatch(
-        openAlert({
-          type: 'error',
-          title: 'ຜິດພາດ',
-          message: 'ລະຫັດອໍເດີ້ ມີໃນລະບົບແລ້ວ',
-        }),
-      );
-      setLoading(false);
-      return;
-    }
-
-    // ✅ สร้าง payload ที่ตรงกับ API
     const payload = {
       preorder_id: data.preorder_id,
       preorder_date: data.preorder_date,
@@ -227,7 +247,7 @@ const OrderCreate = ({ setShow, getList, existingIds, onCloseCallback }) => {
     }
   };
 
-  if (loading) return <Loader />;
+  if (loading || loadingNextId) return <Loader />;
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
       <Alerts />
@@ -241,15 +261,20 @@ const OrderCreate = ({ setShow, getList, existingIds, onCloseCallback }) => {
         onSubmit={handleSubmit(handleSave)}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 pt-4"
       >
-        <InputBox
-          label="ລະຫັດ"
-          name="preorder_id"
-          type="text"
-          placeholder="ປ້ອນລະຫັດ"
-          register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນລະຫັດ' }}
-          errors={errors}
-        />
+        {/* ✅ แทนที่ InputBox ด้วย read-only input แบบ auto-generate */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2 text-black dark:text-white">
+            ລະຫັດອໍເດີ້
+          </label>
+          <input
+            type="text"
+            value={nextPreorderId}
+            readOnly
+            className="w-full rounded-lg border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
+          />
+          {/* Hidden input สำหรับส่งค่าไปกับฟอร์ม */}
+          <input type="hidden" {...register('preorder_id')} />
+        </div>
 
         <BoxDate
           name="preorder_date"
@@ -295,7 +320,6 @@ const OrderCreate = ({ setShow, getList, existingIds, onCloseCallback }) => {
           onSelect={(e) => setSelectEmpCreate(e.target.value)}
         />
         
-
         <div className="mt-4 flex justify-end space-x-4  py-4">
 
           <ButtonBox variant="save" type="submit" disabled={loading}>

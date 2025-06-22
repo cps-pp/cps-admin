@@ -31,8 +31,11 @@ const EmployeePage = () => {
   const dispatch = useAppDispatch();
 
   const [existingIds, setExistingIds] = useState([]);
-   // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
+  // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
   const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
+
+  // ✅ เพิ่ม state สำหรับการเรียงลำดับ ID (คัดลอกจาก CategoryPage)
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
 
   const fetchEmployees = async () => {
     try {
@@ -63,11 +66,47 @@ const EmployeePage = () => {
     } else {
       const filtered = employees.filter((emp) =>
         emp.emp_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        emp.emp_surname.toLowerCase().includes(searchQuery.toLowerCase())
+        emp.emp_surname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        emp.emp_id.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredEmployees(filtered);
     }
   }, [searchQuery, employees]);
+
+  // ✅ ฟังก์ชันสำหรับเรียงลำดับ ID (คัดลอกจาก CategoryPage)
+  const handleSortById = () => {
+    const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortOrder(newSortOrder);
+    
+    const sortedEmployees = [...employees].sort((a, b) => {
+      const extractNumber = (id) => {
+        const match = id.match(/\d+/);
+        return match ? parseInt(match[0]) : 0;
+      };
+      
+      const numA = extractNumber(a.emp_id);
+      const numB = extractNumber(b.emp_id);
+      
+      if (newSortOrder === 'asc') {
+        return numA - numB; 
+      } else {
+        return numB - numA; 
+      }
+    });
+    
+    setEmployees(sortedEmployees);
+    
+    if (searchQuery.trim() !== '') {
+      const filtered = sortedEmployees.filter(emp =>
+        emp.emp_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        emp.emp_surname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        emp.emp_id.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredEmployees(filtered);
+    } else {
+      setFilteredEmployees(sortedEmployees);
+    }
+  };
 
   const openDeleteModal = (id) => () => {
     setSelectedEmpId(id);
@@ -170,9 +209,27 @@ const EmployeePage = () => {
                 {EmpHeaders.map((header, index) => (
                   <th
                     key={index}
-                    className="px-4 py-3  text-form-input font-semibold "
+                    className={`px-4 py-3 tracking-wide font-semibold text-form-input ${
+                      header.id === 'id'
+                        ? 'cursor-pointer hover:bg-gray-100 hover:text-gray-800 select-none'
+                        : ''
+                    }`}
+                    onClick={header.id === 'id' ? handleSortById : undefined}
                   >
-                    {header.name}
+                    <div className="flex items-center gap-2">
+                      {header.name}
+                      {header.id === 'id' && (
+                        <span
+                          className={`ml-1 inline-block text-md font-semibold transition-colors duration-200 ${
+                            sortOrder === 'asc'
+                              ? 'text-green-500'
+                              : 'text-black'
+                          }`}
+                        >
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
                   </th>
                 ))}
               </tr>

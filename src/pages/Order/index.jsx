@@ -47,6 +47,9 @@ const OrderPage = () => {
   const [selectedStatus, setSelectedStatus] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState('');
 
+  // ✅ เพิ่ม state สำหรับการเรียงลำดับ ID (คัดลอกจาก CategoryPage)
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
+
   const fetchOrders = async () => {
     try {
       setLoading(true);
@@ -176,6 +179,70 @@ const OrderPage = () => {
   useEffect(() => {
     fetchOrders();
   }, []);
+
+  // ✅ ฟังก์ชันสำหรับเรียงลำดับ ID (คัดลอกจาก CategoryPage และดัดแปลงสำหรับ preorder_id)
+  const handleSortById = () => {
+    const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortOrder(newSortOrder);
+    
+    const sortedOrders = [...orders].sort((a, b) => {
+      const extractNumber = (id) => {
+        const match = id.match(/\d+/);
+        return match ? parseInt(match[0]) : 0;
+      };
+      
+      const numA = extractNumber(a.preorder_id);
+      const numB = extractNumber(b.preorder_id);
+      
+      if (newSortOrder === 'asc') {
+        return numA - numB; 
+      } else {
+        return numB - numA; 
+      }
+    });
+    
+    setOrders(sortedOrders);
+    
+    // ปรับปรุง filteredOrder ด้วยเงื่อนไขการกรองปัจจุบัน
+    applyFiltersToSortedData(sortedOrders);
+  };
+
+  // ✅ ฟังก์ชันช่วยสำหรับใช้ตัวกรองกับข้อมูลที่เรียงลำดับแล้ว
+  const applyFiltersToSortedData = (sortedData) => {
+    let filtered = sortedData;
+
+    // กรองตามการค้นหา
+    if (searchQuery.trim() !== '') {
+      filtered = filtered.filter((order) =>
+        order.preorder_id.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
+    }
+
+    // กรองตามผู้สะหนอง
+    if (selectedSupplier !== '') {
+      filtered = filtered.filter((order) => order.sup_id === selectedSupplier);
+    }
+
+    // กรองตามเดือน
+    if (selectedMonth !== '') {
+      filtered = filtered.filter((order) => {
+        const orderMonth = new Date(order.preorder_date).toISOString().slice(0, 7);
+        return orderMonth === selectedMonth;
+      });
+    }
+
+    // กรองตามสถานะ
+    if (selectedStatus !== '') {
+      filtered = filtered.filter((order) => order.status === selectedStatus);
+    }
+
+    // กรองตามพนักงาน
+    if (selectedEmployee !== '') {
+      filtered = filtered.filter((order) => order.emp_id_create === selectedEmployee);
+    }
+
+    setFilteredOrder(filtered);
+  };
 
   // ฟังก์ชันกรองข้อมูล
   const applyFilters = () => {
@@ -394,18 +461,35 @@ const OrderPage = () => {
         </div>
       </div>
 
-
-
-         <div className="overflow-x-auto  shadow-md">
-          <table className="w-full min-w-max table-auto  ">
+      <div className="overflow-x-auto shadow-md">
+        <table className="w-full min-w-max table-auto">
           <thead>
-            <tr className="text-left bg-gray border border-stroke ">
+            <tr className="text-left bg-gray border border-stroke">
               {OrderHeaders.map((header, index) => (
                 <th
                   key={index}
-                  className="px-4 py-3 tracking-wide text-form-input  font-semibold"
+                  className={`px-4 py-3 tracking-wide font-semibold text-form-input ${
+                    header.id === 'id'
+                      ? 'cursor-pointer hover:bg-gray-100 hover:text-gray-800 select-none'
+                      : ''
+                  }`}
+                  onClick={header.id === 'id' ? handleSortById : undefined}
                 >
-                  {header.name}
+                  <div className="flex items-center gap-2">
+                    {header.name}
+                    {/* ✅ เพิ่มไอคอนลูกศรสำหรับการเรียงลำดับ (เฉพาะคอลัมน์ ID) */}
+                    {header.id === 'id' && (
+                      <span
+                        className={`ml-1 inline-block text-md font-semibold transition-colors duration-200 ${
+                          sortOrder === 'asc'
+                            ? 'text-green-500'
+                            : 'text-black'
+                        }`}
+                      >
+                        {sortOrder === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </div>
                 </th>
               ))}
             </tr>

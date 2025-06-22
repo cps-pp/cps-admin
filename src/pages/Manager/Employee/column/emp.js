@@ -1,8 +1,8 @@
 
 export const EmpHeaders = [
 
-  { id: 'ລະຫັດ', name: 'ລະຫັດ', sortable: true },
-  { id: 'ຊື່ຫມໍ', name: 'ຊື່ຫມໍ', sortable: true },
+  { id: 'id', name: 'ລະຫັດ', sortable: true },
+  { id: 'name', name: 'ຊື່ຫມໍ', sortable: true },
   { id: 'ນາມສະກຸນ', name: 'ນາມສະກຸນ', sortable: true },
   { id: 'ເພດ', name: 'ເພດ', sortable: true },
   { id: 'ວັນເດືອນປີເກີດ', name: 'ວັນເດືອນປີເກີດ', sortable: true },

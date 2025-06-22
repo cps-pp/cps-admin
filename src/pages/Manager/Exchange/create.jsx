@@ -20,6 +20,9 @@ const CreateExChange = ({ setShow, getList, existingIds, onCloseCallback }) => {
   } = useForm();
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
+  const [loadingNextId, setLoadingNextId] = useState(true);
+  const [nextExchangeId, setNextExchangeId] = useState('');
+  const [currentDate, setCurrentDate] = useState('');
   
   // ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
   const isDirtyRef = useRef(isDirty);
@@ -62,6 +65,47 @@ const CreateExChange = ({ setShow, getList, existingIds, onCloseCallback }) => {
     }
   }, [onCloseCallback]);
 
+  // ✅ ตั้งค่าวันที่ปัจจุบัน
+  useEffect(() => {
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0]; // รูปแบบ YYYY-MM-DD
+    setCurrentDate(formattedDate);
+    setValue('ex_date', formattedDate); // ตั้งค่าวันที่ในฟอร์ม
+  }, [setValue]);
+
+  // ดึงรหัสถัดไปเมื่อ component โหลด
+  useEffect(() => {
+    const fetchNextId = async () => {
+      try {
+        setLoadingNextId(true);
+        const response = await fetch(
+          'http://localhost:4000/src/manager/next-exchange-id',
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setNextExchangeId(data.nextId);
+        setValue('ex_id', data.nextId); // ตั้งค่ารหัสในฟอร์ม
+      } catch (error) {
+        console.error('Error fetching next ID:', error);
+        dispatch(
+          openAlert({
+            type: 'error',
+            title: 'ເກີດຂໍ້ຜິດພາດ',
+            message: 'ບໍ່ສາມາດດຶງລະຫັດໃໝ່ໄດ້',
+          }),
+        );
+      } finally {
+        setLoadingNextId(false);
+      }
+    };
+
+    fetchNextId();
+  }, [dispatch, setValue]);
+
   const handleSave = async (formData) => {
     setLoading(true);
 
@@ -91,6 +135,7 @@ const CreateExChange = ({ setShow, getList, existingIds, onCloseCallback }) => {
             ex_id: formData.ex_id,
             ex_type: formData.ex_type,
             ex_rate: formData.ex_rate,
+            ex_date: formData.ex_date, // ✅ ส่งวันที่ไปด้วย
           }),
         },
       );
@@ -126,7 +171,7 @@ const CreateExChange = ({ setShow, getList, existingIds, onCloseCallback }) => {
     }
   };
 
-  if (loading) return <Loader />;
+  if (loading || loadingNextId) return <Loader />;
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
@@ -140,15 +185,22 @@ const CreateExChange = ({ setShow, getList, existingIds, onCloseCallback }) => {
         onSubmit={handleSubmit(handleSave)}
         className="grid grid-cols-1 gap-4 px-4 pt-4"
       >
-        <InputBox
-          label="ລະຫັດອັດຕາແລກປ່ຽນ"
-          name="ex_id"
-          type="text"
-          placeholder="ປ້ອນລະຫັດ"
-          register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນລະຫັດກ່ອນ' }}
-          errors={errors}
-        />
+        {/* แสดงรหัสที่สร้างอัตโนมัติ (แบบ read-only) */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2 text-black dark:text-white">
+            ລະຫັດອັດຕາແລກປ່ຽນ
+          </label>
+          <input
+            type="text"
+            value={nextExchangeId}
+            readOnly
+            className="w-full rounded-lg border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
+          />
+          {/* Hidden input สำหรับส่งค่าไปกับฟอร์ม */}
+          <input type="hidden" {...register('ex_id')} />
+        </div>
+
+        
         <InputBox
           label="ສະກຸນເງິນ"
           name="ex_type"
@@ -172,7 +224,7 @@ const CreateExChange = ({ setShow, getList, existingIds, onCloseCallback }) => {
         />
 
         <div className="mt-8 flex justify-end space-x-4 col-span-full px-4 py-4">
-        
+
           <ButtonBox variant="save" type="submit">
             ບັນທຶກ
           </ButtonBox>

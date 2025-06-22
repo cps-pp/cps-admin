@@ -20,7 +20,7 @@ const MedicinesPage = () => {
   const [selectedMedicineId, setSelectedMedicineId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [loading, setLoading] = useState(true);
   const [showAddMedicinesModal, setShowAddMedicinesModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -34,10 +34,18 @@ const MedicinesPage = () => {
   // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
   const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
 
+  // ✅ เพิ่ม state สำหรับการเรียงลำดับ ID (คัดลอกจาก CategoryPage)
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
+
+  // เพิ่ม state สำหรับฟิลเตอร์สถานะ
+  const [selectedStatus, setSelectedStatus] = useState('');
+
   const fetchMedicines = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:4000/src/manager/medicines');
+      const response = await fetch(
+        'http://localhost:4000/src/manager/medicines',
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -65,7 +73,9 @@ const MedicinesPage = () => {
     const fetchCategories = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:4000/src/manager/category');
+        const response = await fetch(
+          'http://localhost:4000/src/manager/category',
+        );
 
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -83,24 +93,108 @@ const MedicinesPage = () => {
     fetchCategories();
   }, []);
 
-  useEffect(() => {
-    let filtered = medicines;
+  // ✅ ฟังก์ชันกรองข้อมูลแบบรวม (คัดลอกจาก ImportPage)
+  const applyFiltersWithData = (data = medicines) => {
+    let filtered = [...data];
 
+    // กรองตาม search query
     if (searchQuery.trim() !== '') {
       filtered = filtered.filter((medicine) =>
-        medicine.med_name.toLowerCase().includes(searchQuery.toLowerCase())
+        medicine.med_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        medicine.med_id.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(
-        (medicine) => medicine.medtype_id.toString() === selectedCategory
-      );
+    // กรองตามประเภทยา
+    if (selectedCategory !== '') {
+      filtered = filtered.filter((medicine) => medicine.medtype_id === selectedCategory);
+    }
+
+    // กรองตามสถานะ
+    if (selectedStatus !== '') {
+      filtered = filtered.filter((medicine) => medicine.status === selectedStatus);
     }
 
     setFilteredMedicines(filtered);
     setPage(0);
-  }, [searchQuery, selectedCategory, medicines]);
+  };
+
+  // ฟังก์ชันกรองข้อมูลแบบรวม (เดิม)
+  const applyFilters = () => {
+    applyFiltersWithData(medicines);
+  };
+
+  // เรียกใช้ฟังก์ชันกรองเมื่อมีการเปลี่ยนแปลงใน filters หรือข้อมูล
+  useEffect(() => {
+    applyFilters();
+  }, [searchQuery, selectedCategory, selectedStatus, medicines]);
+
+  // ฟังก์ชันล้างตัวกรองทั้งหมด
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setSelectedCategory('');
+    setSelectedStatus('');
+  };
+
+  // เพิ่มฟังก์ชันในการแสดงสถานะพร้อมไอคอน (ถ้าต้องการ)
+  const getStatusDisplay = (status, qty) => {
+    const statusConfig = {
+      ຍັງມີ: {
+        color: 'bg-green-100 text-green-700',
+        icon: '✅',
+        description: 'เพียงพอ',
+      },
+      ໃກ້ໝົດ: {
+        color: 'bg-yellow-100 text-yellow-700',
+        icon: '⚠️',
+        description: 'ใกล้หมด',
+      },
+      ໝົດ: {
+        color: 'bg-red-100 text-red-700',
+        icon: '❌',
+        description: 'หมดแล้ว',
+      },
+    };
+
+    const config = statusConfig[status] || statusConfig['ໝົດ'];
+
+    return (
+      <span
+        className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${config.color}`}
+      >
+        <span className="mr-1">{config.icon}</span>
+        {status}
+        <span className="ml-1 text-xs opacity-75">({qty} ชิ้น)</span>
+      </span>
+    );
+  };
+
+  // ✅ ฟังก์ชันสำหรับเรียงลำดับ ID (คัดลอกจาก CategoryPage)
+  const handleSortById = () => {
+    const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortOrder(newSortOrder);
+
+    const sortedMedicines = [...medicines].sort((a, b) => {
+      const extractNumber = (id) => {
+        const match = id.match(/\d+/);
+        return match ? parseInt(match[0]) : 0;
+      };
+
+      const numA = extractNumber(a.med_id);
+      const numB = extractNumber(b.med_id);
+
+      if (newSortOrder === 'asc') {
+        return numA - numB;
+      } else {
+        return numB - numA;
+      }
+    });
+
+    setMedicines(sortedMedicines);
+    
+    // ถ้ามีการค้นหาหรือกรองอยู่ ให้ใช้ข้อมูลที่เรียงแล้วมากรองใหม่
+    applyFiltersWithData(sortedMedicines);
+  };
 
   const openDeleteModal = (id) => () => {
     setSelectedMedicineId(id);
@@ -113,7 +207,7 @@ const MedicinesPage = () => {
     try {
       const response = await fetch(
         `http://localhost:4000/src/manager/medicines/${selectedMedicineId}`,
-        { method: 'DELETE' }
+        { method: 'DELETE' },
       );
       const result = await response.json();
 
@@ -121,15 +215,19 @@ const MedicinesPage = () => {
         throw new Error(result.error || 'Delete failed');
       }
 
-      setMedicines((prev) => prev.filter((m) => m.med_id !== selectedMedicineId));
-      setFilteredMedicines((prev) => prev.filter((m) => m.med_id !== selectedMedicineId));
+      setMedicines((prev) =>
+        prev.filter((m) => m.med_id !== selectedMedicineId),
+      );
+      setFilteredMedicines((prev) =>
+        prev.filter((m) => m.med_id !== selectedMedicineId),
+      );
 
       dispatch(
         openAlert({
           type: 'success',
           title: 'ລົບຂໍ້ມູນສຳເລັດ',
           message: 'ລົບຂໍ້ມູນສຳເລັດແລ້ວ',
-        })
+        }),
       );
     } catch (error) {
       console.error('Error deleting medicine:', error);
@@ -138,7 +236,7 @@ const MedicinesPage = () => {
           type: 'error',
           title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
           message: error.message,
-        })
+        }),
       );
     } finally {
       setShowModal(false);
@@ -199,7 +297,7 @@ const MedicinesPage = () => {
 
   const paginatedMedicines = filteredMedicines.slice(
     page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+    page * rowsPerPage + rowsPerPage,
   );
 
   const getTypeName = (medtype_id) => {
@@ -213,28 +311,26 @@ const MedicinesPage = () => {
 
   const handleEditMedicine = (id) => {
     console.log('Edit clicked with ID:', id, 'Type:', typeof id);
-    console.log('Medicine data for this ID:', medicines.find(m => m.med_id === id));
+    console.log(
+      'Medicine data for this ID:',
+      medicines.find((m) => m.med_id === id),
+    );
     setSelectedId(id);
     setShowEditModal(true);
   };
 
-  const categoryOptions = [
-    { value: 'all', label: 'ປະເພດຢາທັງໝົດ' },
-    ...categories.map((cat) => ({
-      value: cat.medtype_id.toString(),
-      label: cat.type_name,
-    })),
-  ];
+  
   return (
     <>
       <div className="rounded bg-white pt-4 dark:bg-boxdark">
         <Alerts />
 
-        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
+        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark flex-wrap gap-2">
           <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
             ຈັດການຂໍ້ມູນຢາ ແລະ ອຸປະກອນ
           </h1>
-          <div className="flex items-center gap-2">
+
+          <div className="ml-auto flex flex-wrap items-center gap-x-2 gap-y-2">
             <Button
               onClick={() => setShowAddMedicinesModal(true)}
               icon={iconAdd}
@@ -244,45 +340,84 @@ const MedicinesPage = () => {
             </Button>
           </div>
         </div>
+    
+        {/* ✅ ส่วนของตัวกรอง (คัดลอกจาก ImportPage) */}
+        <div className="grid w-full gap-4 p-4">
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            {/* Search Box */}
+            <Search
+              type="text"
+              name="search"
+              placeholder="ຄົ້ນຫາຊື່ຢາ..."
+              className="rounded border border-stroke dark:border-strokedark"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 w-full gap-4 p-4">
-          <Search
-            type="text"
-            name="search"
-            placeholder="ຄົ້ນຫາຊື່..."
-            className="rounded border border-stroke dark:border-strokedark"
-            onChange={(e) => {
-              const query = e.target.value;
-              setSearchQuery(query);
-            }}
-          />
+            {/* ตัวกรองตามประเภทยา */}
+            <select
+              className="border border-stroke dark:border-strokedark rounded p-2"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              <option value="">-- ກອງຕາມປະເພດຢາ --</option>
+              {categories.map((category) => (
+                <option key={category.medtype_id} value={category.medtype_id}>
+                  {category.type_name}
+                </option>
+              ))}
+            </select>
 
-          <FilterSelect
-            name="categoryFilter"
-            options={categoryOptions}
-            value={selectedCategory}
-            placeholder="ເລືອກປະເພດຢາ"
-            className="rounded border border-stroke dark:border-strokedark"
-            onChange={(e) => {
-              const selectedId = e.target.value;
-              console.log('Selected category:', selectedId);
+            {/* ตัวกรองตามสถานะ */}
+            <select
+              className="border border-stroke dark:border-strokedark rounded p-2"
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+            >
+              <option value="">-- ກອງຕາມສະຖານະ --</option>
+              <option value="ຍັງມີ">ຍັງມີ</option>
+              <option value="ໃກ້ໝົດ">ໃກ້ໝົດ</option>
+              <option value="ໝົດ">ໝົດ</option>
+            </select>
 
-              selectedId && setSelectedCategory(selectedId);
-            }}
-          />
+            {/* ปุ่มล้างตัวกรอง */}
+            <Button
+              onClick={clearAllFilters}
+              className="bg-graydark hover:bg-graydark"
+            >
+              ລ້າງຕົວກອງ
+            </Button>
+          </div>
         </div>
 
-      
-       <div className="overflow-x-auto  shadow-md">
-          <table className="w-full min-w-max table-auto  ">
+        <div className="overflow-x-auto shadow-md">
+          <table className="w-full min-w-max table-auto">
             <thead>
               <tr className="text-left bg-gray border border-stroke">
                 {MedicinesHeaders.map((header, index) => (
                   <th
                     key={index}
-                    className="px-4 py-3 tracking-wide text-form-input  font-semibold"
+                    className={`px-4 py-3 tracking-wide text-form-input font-semibold ${
+                      header.id === 'id'
+                        ? 'cursor-pointer hover:bg-gray-100 hover:text-gray-800 select-none'
+                        : ''
+                    }`}
+                    onClick={header.id === 'id' ? handleSortById : undefined}
                   >
-                    {header.name}
+                    <div className="flex items-center gap-2">
+                      {header.name}
+                      {header.id === 'id' && (
+                        <span
+                          className={`ml-1 inline-block text-md font-semibold transition-colors duration-200 ${
+                            sortOrder === 'asc'
+                              ? 'text-green-500'
+                              : 'text-black'
+                          }`}
+                        >
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
                   </th>
                 ))}
               </tr>
@@ -299,12 +434,15 @@ const MedicinesPage = () => {
                     <td className="px-4 py-4">{medicine.qty}</td>
                     <td className="px-4 py-3">
                       <span
-                        className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${medicine.status === 'ຍັງມີ'
+                        className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
+                          medicine.status === 'ຍັງມີ'
                             ? 'bg-green-100 text-green-700'
-                            : medicine.status === 'ໝົດ'
-                              ? 'bg-red-100 text-red-700'
-                              : 'bg-gray-100 text-gray-700'
-                          }`}
+                            : medicine.status === 'ໃກ້ໝົດ'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : medicine.status === 'ໝົດ'
+                                ? 'bg-red-100 text-red-700'
+                                : 'bg-gray-100 text-gray-700'
+                        }`}
                       >
                         {medicine.status}
                       </span>
@@ -328,29 +466,15 @@ const MedicinesPage = () => {
                     </td>
                     <td className="px-4 py-4">
                       {medicine?.created_at &&
-                        !isNaN(new Date(medicine.created_at).getTime()) ? (
-                        new Date(medicine.created_at).toLocaleDateString('th-TH', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                        })
-                      ) : (
-                        <span className="text-purple-600">-</span>
-                      )}
-                    </td>
-
-                    <td className="px-4 py-4">
-                      {getDoctorName(medicine?.emp_id_updated)}
-                      {''}
-                    </td>
-                    <td className="px-4 py-4">
-                      {medicine?.update_by &&
-                        !isNaN(new Date(medicine.update_by).getTime()) ? (
-                        new Date(medicine.update_by).toLocaleDateString('th-TH', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                        })
+                      !isNaN(new Date(medicine.created_at).getTime()) ? (
+                        new Date(medicine.created_at).toLocaleDateString(
+                          'th-TH',
+                          {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                          },
+                        )
                       ) : (
                         <span className="text-purple-600">-</span>
                       )}
@@ -366,7 +490,7 @@ const MedicinesPage = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={8} className="py-4 text-center text-gray-500">
+                  <td colSpan={11} className="py-4 text-center text-gray-500">
                     ບໍ່ມີຂໍ້ມູນ
                   </td>
                 </tr>
@@ -377,16 +501,7 @@ const MedicinesPage = () => {
 
         {showAddMedicinesModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div
-              className="    rounded
-        w-full max-w-lg     
-        md:max-w-2xl        
-         lg:max-w-4xl 
-        xl:max-w-5xl        
-        relative
-        overflow-auto
-        max-h-[90vh]"
-            >
+            <div className="rounded w-full max-w-lg md:max-w-2xl lg:max-w-4xl xl:max-w-5xl relative overflow-auto max-h-[90vh]">
               {/* ✅ ปุ่ม X ที่ใช้ฟังก์ชันป้องกันจาก CreateCategory */}
               <button
                 onClick={handleCloseAddModal}
@@ -420,15 +535,7 @@ const MedicinesPage = () => {
 
         {showEditModal && selectedId && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
-            <div
-              className="    rounded
-        w-full max-w-lg     
-        md:max-w-2xl        
-        lg:max-w-5xl       
-        relative
-        overflow-auto
-        max-h-[90vh]"
-            >
+            <div className="rounded w-full max-w-lg md:max-w-2xl lg:max-w-5xl relative overflow-auto max-h-[90vh]">
               <button
                 onClick={() => setShowEditModal(false)}
                 className="absolute top-4 right-2 text-gray-500 hover:text-gray-700"
@@ -460,19 +567,19 @@ const MedicinesPage = () => {
         )}
       </div>
       <TablePaginationDemo
-        count={paginatedMedicines.length}
+        count={filteredMedicines.length}
         page={page}
         onPageChange={handlePageChange}
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleRowsPerPageChange}
       />
 
-  <ConfirmModal
+      <ConfirmModal
         show={showModal}
         setShow={setShowModal}
         message="ທ່ານຕ້ອງການລົບຢານີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteMedicine}
-      /> 
+      />
     </>
   );
 };

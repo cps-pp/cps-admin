@@ -1,8 +1,8 @@
 
 export const HeadersImport = [
 
-  { id: 'ລະຫັດນຳເຂົ້າ ', name: 'ລະຫັດນຳເຂົ້າ ', sortable: true },
-  { id: 'ມື້ນຳເຂົ້າ ', name: 'ມື້ນຳເຂົ້າ ', sortable: true },
+  { id: 'id', name: 'ລະຫັດນຳເຂົ້າ ', sortable: true },
+  { id: 'name', name: 'ມື້ນຳເຂົ້າ ', sortable: true },
   { id: 'ລະຫັດສັ່ງຊື້', name: 'ລະຫັດສັ່ງຊື້ ', sortable: true },
   { id: 'ໄຟລ', name: 'ໄຟລ ', sortable: true },
 

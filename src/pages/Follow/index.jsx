@@ -35,6 +35,9 @@ const FollowPage = () => {
   const [newDate, setNewDate] = useState('');
   const dispatch = useAppDispatch();
 
+    // ✅ เพิ่ม state สำหรับการเรียงลำดับ ID (คัดลอกจาก CategoryPage)
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
+
   // Get today's date in YYYY-MM-DD format
   const getTodayDate = () => {
     const today = new Date();
@@ -70,7 +73,14 @@ const FollowPage = () => {
         return appointmentDate === today && appointment.status === 'ລໍຖ້າ';
       });
 
-      setTodayAppointments(todayAppts);
+      // ✅ เรียงลำดับตามเวลา (จากเวลาน้อยไปมาก)
+      const sortedTodayAppts = todayAppts.sort((a, b) => {
+        const timeA = new Date(a.date_addmintted).getTime();
+        const timeB = new Date(b.date_addmintted).getTime();
+        return timeA - timeB; // เรียงจากเวลาน้อยไปมาก
+      });
+
+      setTodayAppointments(sortedTodayAppts);
 
       setTotalCount(allAppointments.length);
       setDoneCount(
@@ -83,6 +93,67 @@ const FollowPage = () => {
       console.error('Error fetching appointments:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredAppointments(appointments);
+    } else {
+      const filtered = appointments.filter((appointment) => {
+        const patientName = getPatientName(appointment.patient_id);
+        const doctorName = getDoctorName(appointment.emp_id);
+        return (
+          appointment.appoint_id.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+          patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          doctorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          appointment.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          appointment.description.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      });
+      setFilteredAppointments(filtered);
+    }
+  }, [searchQuery, appointments, patientName, empName]);
+
+  // ✅ ฟังก์ชันสำหรับเรียงลำดับ ID (คัดลอกจาก CategoryPage และปรับให้เหมาะกับ appointment)
+  const handleSortById = () => {
+    const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortOrder(newSortOrder);
+    
+    const sortedAppointments = [...appointments].sort((a, b) => {
+      const extractNumber = (id) => {
+        const match = id.toString().match(/\d+/);
+        return match ? parseInt(match[0]) : 0;
+      };
+      
+      const numA = extractNumber(a.appoint_id);
+      const numB = extractNumber(b.appoint_id);
+      
+      if (newSortOrder === 'asc') {
+        return numA - numB; 
+      } else {
+        return numB - numA; 
+      }
+    });
+    
+    setAppointments(sortedAppointments);
+    
+    if (searchQuery.trim() !== '') {
+      const filtered = sortedAppointments.filter(appointment => {
+        const patientName = getPatientName(appointment.patient_id);
+        const doctorName = getDoctorName(appointment.emp_id);
+        return (
+          appointment.appoint_id.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+          patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          doctorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          appointment.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          appointment.description.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      });
+      setFilteredAppointments(filtered);
+    } else {
+      setFilteredAppointments(sortedAppointments);
     }
   };
 
@@ -147,11 +218,19 @@ const FollowPage = () => {
   };
 
   const getPatientName = (patient_id) => {
-    const patient = patientName.find((pat) => pat.patient_id === patient_id);
+   const patient = patientName.find((pat) => pat.patient_id === patient_id);
     return patient
-      ? `${patient.patient_name} ${patient.patient_surname}`
-      : 'ບໍ່ພົບຊື່';
-  };
+    ? `${patient.patient_name} ${patient.patient_surname}`
+    : 'ບໍ່ພົບຊື່';
+};
+
+  const getPatientPhone = (patient_id) => {
+   const patient = patientName.find((pat) => pat.patient_id === patient_id);
+    return patient
+    ? ` ${patient.phone1 || ''}${patient.phone2 ? ' / ' + patient.phone2 : ''}`
+    : 'ບໍ່ພົບເບີໂທ';
+};
+
 
   const openDeleteModal = (id) => () => {
     setSelectedAppointmentId(id);
@@ -199,6 +278,10 @@ const FollowPage = () => {
           message: 'ລົບຂໍ້ມູນນັດໝາຍສຳເລັດແລ້ວ',
         }),
       );
+
+      // 🟢 เพิ่มบรรทัดนี้เพื่อแจ้งให้ Header รีเฟรชข้อมูล
+    window.dispatchEvent(new Event('refresh-notifications'));
+
     } catch (error) {
       dispatch(
         openAlert({
@@ -240,6 +323,10 @@ const FollowPage = () => {
           message: 'ປ່ຽນສະຖານະເປັນກວດແລ້ວສຳເລັດ',
         }),
       );
+
+      // 🟢 เพิ่มบรรทัดนี้เพื่อแจ้งให้ Header รีเฟรชข้อมูล
+    window.dispatchEvent(new Event('refresh-notifications'));
+
     } catch (error) {
       dispatch(
         openAlert({
@@ -290,6 +377,9 @@ const FollowPage = () => {
           message: 'ເປັ່ຽນວັນທີ່ນັດໝາຍສຳເລັດແລ້ວ',
         }),
       );
+
+      // 🟢 เพิ่มบรรทัดนี้เพื่อแจ้งให้ Header รีเฟรชข้อมูล
+    window.dispatchEvent(new Event('refresh-notifications'));
     } catch (error) {
       dispatch(
         openAlert({
@@ -301,25 +391,7 @@ const FollowPage = () => {
     }
   };
 
-  const handleSearch = async (query) => {
-    try {
-      const response = await fetch(
-        `http://localhost:4000/src/appoint/search?query=${query}`,
-        {
-          method: 'GET',
-        },
-      );
 
-      if (response.ok) {
-        const data = await response.json();
-        setFilteredAppointments(data.data);
-      } else {
-        console.error('Error searching appointments:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error searching appointments:', error);
-    }
-  };
 
   const handlePageChange = (event, newPage) => {
     setPage(newPage);
@@ -440,11 +512,11 @@ const FollowPage = () => {
         </div>
       </div>
 
-      {/* Today's Appointments Section - แสดงเฉพาะสถานะ "ລໍຖ້າ" */}
+      {/* Today's Appointments Section - แสดงเฉพาะสถานะ "ລໍຖ້າ" และเรียงตามเวลา */}
       <div className="rounded bg-white pt-4  mb-6">
         <div className="flex items-center justify-between border-stroke px-4 pb-4 ">
           <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark">
-            ນັດໝາຍມື້ນີ້ທີ່ລໍຖ້າກວດ ({getTodayDate()})
+            ນັດໝາຍມື້ນີ້ທີ່ລໍຖ້າກວດ ({getTodayDate()}) - ເລ່ຍງຕາມເວລາ
           </h1>
           <div className="text-sm text-gray-600 dark:text-gray-400">
             ລໍຖ້າກວດ: {todayAppointments.length} ລາຍການ
@@ -477,6 +549,9 @@ const FollowPage = () => {
                       {getPatientName(appointment.patient_id)}
                     </td>
                     <td className="px-4 py-4">
+                      {getPatientPhone(appointment.patient_id)}
+                    </td>
+                    <td className="px-4 py-4">
                       {new Date(appointment.date_addmintted).toLocaleString(
                         'en-US',
                         {
@@ -506,9 +581,9 @@ const FollowPage = () => {
                             handleCompleteAppointment(appointment.appoint_id)
                           }
                           className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
-                          title="ສຳເລັດສິ້ນ"
+                          title="ສຳເລັດ"
                         >
-                          ສຳເລັດສິ້ນ
+                          ສຳເລັດ
                         </button>
                         <button
                           onClick={() =>
@@ -560,7 +635,7 @@ const FollowPage = () => {
             onChange={(e) => {
               const query = e.target.value;
               setSearchQuery(query);
-              handleSearch(query);
+
             }}
           />
         </div>
@@ -572,9 +647,27 @@ const FollowPage = () => {
                 {FollowHeader.map((header, index) => (
                   <th
                     key={index}
-                    className="px-4 py-3 tracking-wide text-form-input  font-semibold"
+                    className={`px-4 py-3 tracking-wide font-semibold text-form-input ${
+                      header.id === 'id'
+                        ? 'cursor-pointer hover:bg-gray-100 hover:text-gray-800 select-none'
+                        : ''
+                    }`}
+                    onClick={header.id === 'id' ? handleSortById : undefined}
                   >
-                    {header.name}
+                    <div className="flex items-center gap-2">
+                      {header.name}
+                      {header.id === 'id' && (
+                        <span
+                          className={`ml-1 inline-block text-md font-semibold transition-colors duration-200 ${
+                            sortOrder === 'asc'
+                              ? 'text-green-500'
+                              : 'text-black'
+                          }`}
+                        >
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
                   </th>
                 ))}
               </tr>
@@ -589,6 +682,9 @@ const FollowPage = () => {
                     <td className="px-4 py-4">{appointment.appoint_id}</td>
                     <td className="px-4 py-4">
                       {getPatientName(appointment.patient_id)}{' '}
+                    </td>
+                    <td className="px-4 py-4">
+                      {getPatientPhone(appointment.patient_id)}{' '}
                     </td>
                     <td className="px-4 py-4">
                       {new Date(appointment.date_addmintted).toLocaleString(
