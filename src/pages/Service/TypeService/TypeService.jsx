@@ -5,7 +5,7 @@ import ListService from './Component/ListService';
 import ListDis from './Component/ListDis';
 import SumService from './Component/SumService';
 import SumDiseases from './Component/SumDis';
-
+import { CopyPlus, Activity } from 'lucide-react';
 export default function TypeService({ selectService, value }) {
   const [selectedServices, setSelectedServices] = useState([]);
   const [selectedDis, setSelectedDis] = useState([]);
@@ -22,13 +22,13 @@ export default function TypeService({ selectService, value }) {
 
   const handleRemoveService = (service) => {
     setSelectedServices((prev) =>
-      prev.filter((item) => item.ser_id !== service.ser_id)
+      prev.filter((item) => item.ser_id !== service.ser_id),
     );
     setAllSelectedItems((prev) =>
       prev.filter(
         (item) =>
-          !(item.ser_id === service.ser_id && item.itemType === 'service')
-      )
+          !(item.ser_id === service.ser_id && item.itemType === 'service'),
+      ),
     );
   };
 
@@ -37,7 +37,7 @@ export default function TypeService({ selectService, value }) {
       !selectedDis.find(
         (item) =>
           item.dis_id === service.dis_id ||
-          item.disease_id === service.disease_id
+          item.disease_id === service.disease_id,
       )
     ) {
       const diseaseWithType = { ...service, itemType: 'disease' };
@@ -52,8 +52,8 @@ export default function TypeService({ selectService, value }) {
       prev.filter(
         (item) =>
           item.dis_id !== service.dis_id &&
-          item.disease_id !== service.disease_id
-      )
+          item.disease_id !== service.disease_id,
+      ),
     );
     setAllSelectedItems((prev) =>
       prev.filter(
@@ -62,8 +62,8 @@ export default function TypeService({ selectService, value }) {
             (item.dis_id === service.dis_id ||
               item.disease_id === service.disease_id) &&
             item.itemType === 'disease'
-          )
-      )
+          ),
+      ),
     );
   };
 
@@ -118,17 +118,23 @@ export default function TypeService({ selectService, value }) {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="p-2 rounded shadow">
+    <>
+      <h1 className="text-lg font-semibold text-form-strokedark py-2 text-left flex items-center gap-2 ">
+        <CopyPlus className="w-5 h-5" />
+        ເພີ່ມລາຍການບໍລິການ
+      </h1>
+      <div className="p-2 rounded bg-white border border-stroke ">
         <Tabs defaultActiveKey="1" items={upperTabs} />
       </div>
-      <div className="p-2 rounded shadow">
+      <h1 className="text-lg font-semibold text-form-strokedark py-4  text-left flex items-center gap-2 ">
+        ສະຫຼຸບການລາຍການທັງໝົດ
+      </h1>
+      <div className="p-2  rounded bg-white border border-stroke ">
         <Tabs defaultActiveKey="5" items={lowerTabs} />
       </div>
-    </div>
+    </>
   );
 }
-
 
 // import { Tabs } from 'antd';
 // import { useState } from 'react';
@@ -484,8 +490,8 @@ export default function TypeService({ selectService, value }) {
 //   };
 
 //   const handleSelectQi = (service) => {
-//     const isExist = selectedQi.find((item) => 
-//       item.med_id === service.qi_id || 
+//     const isExist = selectedQi.find((item) =>
+//       item.med_id === service.qi_id ||
 //       item.equipment_id === service.equipment_id ||
 //       item.id === service.id
 //     );
@@ -504,10 +510,10 @@ export default function TypeService({ selectService, value }) {
 
 //   const handleRemoveQi = (service) => {
 //     setSelectedQi((prev) =>
-//       prev.filter((item) => 
-//         item.qi_id !== service.qi_id && 
+//       prev.filter((item) =>
+//         item.qi_id !== service.qi_id &&
 //         item.equipment_id !== service.equipment_id &&
-//         item.id !== service.id 
+//         item.id !== service.id
 //       ),
 //     );
 //   };
@@ -530,8 +536,8 @@ export default function TypeService({ selectService, value }) {
 
 //   const handleRemoveDis = (service) => {
 //     setSelectedDis((prev) =>
-//       prev.filter((item) => 
-//         item.dis_id !== service.dis_id && 
+//       prev.filter((item) =>
+//         item.dis_id !== service.dis_id &&
 //         item.disease_id !== service.disease_id
 //       ),
 //     );
@@ -626,8 +632,8 @@ export default function TypeService({ selectService, value }) {
 //       label: 'ສະຫຼຸບພະຍາດ',
 //       children: (
 //         <SumDiseases
-//           selectedServices={selectedDis} 
-//           removeService={handleRemoveDis} 
+//           selectedServices={selectedDis}
+//           removeService={handleRemoveDis}
 //           tapService={TabDiseaseSum}
 //         />
 //       ),

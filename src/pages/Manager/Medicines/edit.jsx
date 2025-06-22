@@ -21,6 +21,7 @@ const EditMedicines = ({ id, setShow, getList }) => {
     watch,
     formState: { errors, isDirty },
   } = useForm();
+  const [status, setStatus] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -73,7 +74,7 @@ const EditMedicines = ({ id, setShow, getList }) => {
     fetchData();
   }, []);
 
-// EditMedicines.jsx - แก้ไขส่วน useEffect ที่ fetch ข้อมูล
+
 useEffect(() => {
   async function fetchMedicine() {
     if (!id) {
@@ -85,28 +86,20 @@ useEffect(() => {
     setDataLoaded(false);
 
     try {
-      console.log('Fetching medicine with ID:', id);
+      console.log('Fetching medicine with med_id:', id);
+      
       const res = await fetch(
-        `http://localhost:4000/src/manager/medicines/${id}`,
+        `http://localhost:4000/src/manager/medicine-list/${id}`,
       );
+      
       const result = await res.json();
       console.log('API Response:', result);
 
       if (res.ok && result.data) {
-        // ✅ แก้ไข: รองรับทั้งกรณีที่ได้ array หรือ object
-        let med;
-        if (Array.isArray(result.data)) {
-          // หากได้ array มา ให้หา medicine ที่ med_id ตรงกับ id ที่ต้องการ
-          med = result.data.find(medicine => medicine.med_id === id);
-          if (!med) {
-            throw new Error('ไม่พบข้อมูลยาที่ต้องการแก้ไข');
-          }
-        } else {
-          // หากได้ object มา ให้ใช้เลย
-          med = result.data;
-        }
+        // ✅ ตอนนี้ result.data จะเป็น object เดียว ไม่ใช่ array แล้ว
+        const med = result.data;
         
-        console.log('Medicine data before processing:', med);
+        console.log('Medicine data:', med);
 
         // Format dates if needed
         const formattedExpired = med.expired
@@ -148,18 +141,6 @@ useEffect(() => {
         setSelectEmpCreate(med.emp_id_create || '');
         setCreatedAt(formattedCreatedAt);
 
-        // Debug log
-        setTimeout(() => {
-          console.log('Values after reset:', getValues());
-          console.log('Watched values:', watchedValues);
-          console.log('State values:', {
-            selectedMedType: med.medtype_id,
-            selectEmpCreate: med.emp_id_create,
-            createdAt: formattedCreatedAt,
-            price: med.price,
-          });
-        }, 200);
-
         setDataLoaded(true);
       } else {
         console.error('API Error Details:', result);
@@ -187,17 +168,10 @@ useEffect(() => {
 
   fetchMedicine();
 }, [id, reset, dispatch, setValue]);
-
   const handleSave = async (formData) => {
     setLoading(true);
 
     try {
-      console.log('Form data before save:', formData);
-      console.log('Selected states:', {
-        selectedMedType,
-        selectEmpCreate,
-        createdAt,
-      });
 
       const payload = {
         ...formData,
@@ -249,10 +223,10 @@ useEffect(() => {
     }
   };
 
-  // Show loader while fetching data
-  if (loading && !dataLoaded) {
-    return <Loader />;
-  }
+  // // Show loader while fetching data
+  // if (loading && !dataLoaded) {
+  //   return <Loader />;
+  // }
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
@@ -320,6 +294,16 @@ useEffect(() => {
           formOptions={{ required: false }}
           select={getValues('expired')}
           setValue={setValue}
+        />
+
+        <SelectBox
+          label="ສະຖານະ"
+          name="ສະຖານະ"
+          options={['ຍັງມີ', 'ໝົດ']}
+          register={register}
+          errors={errors}
+          value={status}
+          onSelect={(e) => setStatus(e.target.value)}
         />
 
 

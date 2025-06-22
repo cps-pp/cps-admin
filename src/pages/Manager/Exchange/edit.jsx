@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import Button from '@/components/Button';
 import Input from '@/components/Forms/Input';
@@ -8,6 +8,7 @@ import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import Alerts from '@/components/Alerts';
 import PriceInput from '@/components/Forms/PriceInput';
+import BoxDate from '../../../components/Date';
 
 const EditExChange = ({ id, onClose, setShow, getList }) => {
   const navigate = useNavigate();
@@ -19,18 +20,17 @@ const EditExChange = ({ id, onClose, setShow, getList }) => {
     setValue,
   } = useForm();
   const [loading, setLoading] = useState(true);
-  const [fetching, setFetching] = useState(false);
-  const [updateDate, setUpdateDate] = useState('');
+  const [hasDateChanged, setHasDateChanged] = useState(false); // ✅ เพิ่มตัวแปรนี้
   const dispatch = useAppDispatch();
 
-  // ✅ ตั้งค่าวันที่ปัจจุบันสำหรับการแก้ไข
+  // ✅ ตั้งค่าวันที่เริ่มต้น
   useEffect(() => {
     const today = new Date();
-    const formattedDate = today.toISOString().split('T')[0]; // รูปแบบ YYYY-MM-DD
-    setUpdateDate(formattedDate);
-    setValue('ex_date', formattedDate); // ตั้งค่าวันที่ในฟอร์ม
+    const formattedDate = today.toISOString().split('T')[0];
+    setValue('ex_date', formattedDate);
   }, [setValue]);
 
+  // ✅ ดึงข้อมูลมาแสดง
   useEffect(() => {
     const fetchListData = async () => {
       try {
@@ -43,7 +43,7 @@ const EditExChange = ({ id, onClose, setShow, getList }) => {
         const data = await response.json();
         setValue('ex_type', data.data.ex_type);
         setValue('ex_rate', data.data.ex_rate);
-
+        setValue('ex_date', data.data.ex_date);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching exchange data:', error);
@@ -51,11 +51,18 @@ const EditExChange = ({ id, onClose, setShow, getList }) => {
     };
 
     fetchListData();
-  }, [id, setValue, fetching]);
+  }, [id, setValue]);
 
+  // ✅ บันทึกข้อมูล
   const handleSave = async (formData) => {
     setLoading(true);
     try {
+      let finalDate = formData.ex_date;
+      if (!hasDateChanged) {
+        const today = new Date();
+        finalDate = today.toISOString().split('T')[0];
+      }
+
       const response = await fetch(
         `http://localhost:4000/src/manager/exchange/${id}`,
         {
@@ -65,8 +72,8 @@ const EditExChange = ({ id, onClose, setShow, getList }) => {
           },
           body: JSON.stringify({
             ex_type: formData.ex_type,
-            ex_rate: parseFloat(formData.ex_rate),  // แปลงเป็นตัวเลขก่อนส่ง
-            ex_date: formData.ex_date, // ✅ ส่งวันที่ปัจจุบันไปด้วย
+            ex_rate: parseFloat(formData.ex_rate),
+            ex_date: finalDate,
           }),
         }
       );
@@ -84,7 +91,6 @@ const EditExChange = ({ id, onClose, setShow, getList }) => {
       );
 
       if (getList) getList();
-
       setShow(false);
     } catch (err) {
       console.error(err);
@@ -92,7 +98,7 @@ const EditExChange = ({ id, onClose, setShow, getList }) => {
         openAlert({
           type: 'error',
           title: 'ແກ້ໄຂຂໍ້ມູນບໍ່ສຳເລັດ',
-          message: 'ເກີດຂໍ້ຜຶດພາດໃນການບັນທືກຂໍ້ມູນ',
+          message: 'ເກີດຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
         })
       );
     } finally {
@@ -101,17 +107,17 @@ const EditExChange = ({ id, onClose, setShow, getList }) => {
   };
 
   if (loading) return <Loader />;
+
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
-      <Alerts/>
-      <div className="flex items-center  border-b border-stroke  dark:border-strokedark pb-4">
+      <Alerts />
+      <div className="flex items-center border-b border-stroke dark:border-strokedark pb-4">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
           ແກ້ໄຂ
         </h1>
       </div>
 
       <form onSubmit={handleSubmit(handleSave)} className="mt-4 px-4">
-
         <Input
           label="ສະກຸນເງິນ"
           name="ex_type"
@@ -121,7 +127,7 @@ const EditExChange = ({ id, onClose, setShow, getList }) => {
           formOptions={{ required: 'ກະລຸນາປ້ອນສະກຸນເງິນກ່ອນ' }}
           errors={errors}
         />
-       
+
         <PriceInput
           label="ລາຄາ"
           name="ex_rate"
@@ -134,8 +140,18 @@ const EditExChange = ({ id, onClose, setShow, getList }) => {
           errors={errors}
         />
 
-        <div className="mt-8 flex justify-end space-x-4 col-span-full py-4">
+        <BoxDate
+          name="ex_date"
+          label="ວັນທີ"
+          register={register}
+          errors={errors}
+          setValue={setValue}
+          select={getValues('ex_date')}
+          className="text-strokedark dark:text-bodydark3"
+          onChange={() => setHasDateChanged(true)} // ✅ เมื่อมีการเปลี่ยนวันที่
+        />
 
+        <div className="mt-8 flex justify-end space-x-4 col-span-full py-4">
           <Button variant="save" type="submit">
             ບັນທຶກ
           </Button>

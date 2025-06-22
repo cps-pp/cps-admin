@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 
 const ExchangeRateModal = ({ isOpen, onClose, onSubmit, missingRates }) => {
   const [rates, setRates] = useState({
-    'ບາດ': '',
-    'ດອນລາ': '',
-    'ຢວນ': ''
+    'BATH': '',
+    'Dollar': '',
+    'YUAN': ''
   });
   const [currentRates, setCurrentRates] = useState({
-    'ບາດ': null,
-    'ດອນລາ': null,
-    'ຢວນ': null
+    'BATH': null,
+    'Dollar': null,
+    'YUAN': null
   });
   const [loading, setLoading] = useState(false);
   const [loadingCurrentRates, setLoadingCurrentRates] = useState(false);
@@ -24,9 +24,9 @@ const ExchangeRateModal = ({ isOpen, onClose, onSubmit, missingRates }) => {
         const data = await response.json();
         // แปลงข้อมูลที่ได้จาก API ให้เข้ากับ format ที่ใช้
         const formattedRates = {
-          'ບາດ': data.baht || null,
-          'ດອນລາ': data.dollar || null,
-          'ຢວນ': data.yuan || null
+          'BATH': data.baht || null,
+          'Dollar': data.dollar || null,
+          'YUAN': data.yuan || null
         };
         setCurrentRates(formattedRates);
       }
@@ -41,9 +41,9 @@ const ExchangeRateModal = ({ isOpen, onClose, onSubmit, missingRates }) => {
   useEffect(() => {
     if (isOpen) {
       setRates({
-        'ບາດ': '',
-        'ດອນລາ': '',
-        'ຢວນ': ''
+        'BATH': '',
+        'Dollar': '',
+        'YUAN': ''
       });
       setErrors({});
       fetchCurrentRates();
@@ -96,18 +96,18 @@ const ExchangeRateModal = ({ isOpen, onClose, onSubmit, missingRates }) => {
 
   const getCurrencySymbol = (currency) => {
     switch(currency) {
-      case 'ບາດ': return '฿';
-      case 'ດອນລາ': return '$';
-      case 'ຢວນ': return '¥';
+      case 'BATH': return '฿';
+      case 'Dollar': return '$';
+      case 'YUAN': return '¥';
       default: return '';
     }
   };
 
   const getCurrencyName = (currency) => {
     switch(currency) {
-      case 'ບາດ': return 'ບາດໄທ';
-      case 'ດອນລາ': return 'ດອນລາສະຫະລັດ';
-      case 'ຢວນ': return 'ຢວນຈີນ';
+      case 'BATH': return 'BATH';
+      case 'Dollar': return 'Dollar';
+      case 'YUAN': return 'YUAN';
       default: return currency;
     }
   };
@@ -115,6 +115,7 @@ const ExchangeRateModal = ({ isOpen, onClose, onSubmit, missingRates }) => {
   if (!isOpen) return null;
 
   return (
+  <>
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
         <div className="p-6">
@@ -203,6 +204,7 @@ const ExchangeRateModal = ({ isOpen, onClose, onSubmit, missingRates }) => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

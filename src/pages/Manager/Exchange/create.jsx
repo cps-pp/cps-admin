@@ -8,6 +8,7 @@ import InputBox from '../../../components/Forms/Input_new';
 import ButtonBox from '../../../components/Button';
 import PriceInputBox from '../../../components/Forms/PriceInput';
 import { usePrompt } from '@/hooks/usePrompt';
+import BoxDate from '../../../components/Date';
 
 const CreateExChange = ({ setShow, getList, existingIds, onCloseCallback }) => {
   const {
@@ -25,17 +26,18 @@ const CreateExChange = ({ setShow, getList, existingIds, onCloseCallback }) => {
   const [currentDate, setCurrentDate] = useState('');
   
   // ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
+
   const isDirtyRef = useRef(isDirty);
-  
-  // ✅ อัพเดต ref ทุกครั้งที่ isDirty เปลี่ยน
+
   useEffect(() => {
     isDirtyRef.current = isDirty;
   }, [isDirty]);
-  
-  // ✅ เตือนเมื่อมีการพยายามออกจากหน้าด้วย navigation (Back / เปลี่ยน route)
-  usePrompt('ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.', isDirty);
 
-  // ✅ เตือนเมื่อจะรีเฟรช / ปิดแท็บ
+  usePrompt(
+    'ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.',
+    isDirty,
+  );
+
   useEffect(() => {
     const handleBeforeUnload = (event) => {
       if (!isDirtyRef.current) return;
@@ -49,16 +51,16 @@ const CreateExChange = ({ setShow, getList, existingIds, onCloseCallback }) => {
     };
   }, []);
 
-  // ✅ เตือนเมื่อคลิกปิดฟอร์ม - ใช้ current value จาก ref
   const handleCloseForm = () => {
     if (isDirtyRef.current) {
-      const confirmLeave = window.confirm('ທ່ານຕ້ອງການປິດຟອມແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ປ້ອນຈະສູນເສຍ');
+      const confirmLeave = window.confirm(
+        'ທ່ານຕ້ອງການປິດຟອມແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ປ້ອນຈະສູນເສຍ',
+      );
       if (!confirmLeave) return;
     }
     setShow(false);
   };
 
-  // ✅ ส่ง handleCloseForm ไปให้ parent component แค่ครั้งเดียว
   useEffect(() => {
     if (onCloseCallback) {
       onCloseCallback(() => handleCloseForm);
@@ -109,14 +111,13 @@ const CreateExChange = ({ setShow, getList, existingIds, onCloseCallback }) => {
   const handleSave = async (formData) => {
     setLoading(true);
 
-    // เช็คว่ามี ex_id ซ้ำไหม
     if (existingIds.includes(formData.ex_id)) {
       setFocus('ex_id');
       dispatch(
         openAlert({
           type: 'error',
           title: 'ຜິດພາດ',
-          message: 'ລະຫັດປະເພດຢາ ມີໃນລະບົບແລ້ວ',
+          message: 'ລະຫັດອັດຕາແລກປ່ຽນນີ້ ມີໃນລະບົບແລ້ວ ກະລຸນາປ້ອນໃຫ່ມ',
         }),
       );
       setLoading(false);
@@ -135,7 +136,7 @@ const CreateExChange = ({ setShow, getList, existingIds, onCloseCallback }) => {
             ex_id: formData.ex_id,
             ex_type: formData.ex_type,
             ex_rate: formData.ex_rate,
-            ex_date: formData.ex_date, // ✅ ส่งวันที่ไปด้วย
+            ex_date: formData.ex_date,
           }),
         },
       );
@@ -165,7 +166,7 @@ const CreateExChange = ({ setShow, getList, existingIds, onCloseCallback }) => {
         openAlert({
           type: 'error',
           title: 'ເກີດຂໍ້ຜິດພາດ',
-          message: error.message || 'ມີຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
+          message: 'ມີຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
         }),
       );
     }
@@ -222,9 +223,16 @@ const CreateExChange = ({ setShow, getList, existingIds, onCloseCallback }) => {
           }}
           errors={errors}
         />
-
+        <BoxDate
+          select=""
+          register={register}
+          errors={errors}
+          name="ex_date"
+          label="ວັນເດືອນປິເກີດ"
+          formOptions={{ required: 'ກະລຸນາໃສ່ວັນເດືອນປີເກີດ' }}
+          setValue={setValue}
+        />
         <div className="mt-8 flex justify-end space-x-4 col-span-full px-4 py-4">
-
           <ButtonBox variant="save" type="submit">
             ບັນທຶກ
           </ButtonBox>
@@ -235,4 +243,3 @@ const CreateExChange = ({ setShow, getList, existingIds, onCloseCallback }) => {
 };
 
 export default CreateExChange;
-

@@ -30,7 +30,6 @@ const ReportMed = () => {
     try {
       setLoading(true);
 
-      // กำหนด URL ตามประเภทที่เลือก
       const medicineURL =
         activeTab === 'medicine'
           ? 'http://localhost:4000/src/manager/medicines/M1'
@@ -174,9 +173,9 @@ const ReportMed = () => {
             {item.qty || 0}
           </span>
         </td>
-        <td className="px-4 py-4">
+        <td className="px-4 py-4 ">
           <span
-            className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
+            className={`inline-block rounded-full px-3 py-1 text-sm font-medium  ${
               (item.qty || 0) < 10
                 ? 'bg-red-100 text-red-700'
                 : (item.qty || 0) < 50
@@ -185,7 +184,7 @@ const ReportMed = () => {
             }`}
           >
             {(item.qty || 0) < 10
-              ? 'ຈະໝົດ'
+              ? 'ກຳລັງຈະໝົດ'
               : (item.qty || 0) < 50
                 ? 'ໃກ້ໝົດ'
                 : 'ພຽງພໍ'}
@@ -203,32 +202,36 @@ const ReportMed = () => {
   return (
     <>
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 2xl:gap-7.5 w-full mb-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 2xl:gap-7.5 w-full mb-6">
         {/* Total Items */}
         <div className="rounded-sm border border-stroke bg-white p-4">
           <div className="flex items-center">
-            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-Third dark:bg-secondary">
+            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-blue-100">
               <svg
-                className="w-6 h-6"
+                class="w-[25px] h-[25px] text-form-strokedark"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
                 fill="none"
-                stroke="currentColor"
                 viewBox="0 0 24 24"
               >
                 <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2.1"
+                  d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 5h6m-6 4h6M10 3v4h4V3h-4Z"
                 />
               </svg>
             </div>
             <div className="ml-4">
-              <h4 className="text-lg font-semibold text-strokedark dark:text-white">
+              <h4 className="text-lg font-semibold text-strokedark">
                 {activeTab === 'medicine'
                   ? 'ຈຳນວນຢາທັງໝົດ'
                   : 'ຈຳນວນອຸປະກອນທັງໝົດ'}
               </h4>
-              <p className="text-xl font-bold text-primary">
+              <p className="text-xl font-bold text-blue-700">
                 {activeTab === 'medicine'
                   ? summaryStats.totalMedicines
                   : summaryStats.totalEquipment}
@@ -238,7 +241,7 @@ const ReportMed = () => {
         </div>
 
         {/* Total Stock */}
-        <div className="rounded-sm border border-stroke bg-white p-4 ">
+        {/* <div className="rounded-sm border border-stroke bg-white p-4 ">
           <div className="flex items-center">
             <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900">
               <svg
@@ -268,7 +271,7 @@ const ReportMed = () => {
               </p>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Low Stock Items */}
         <div className="rounded-sm border border-stroke bg-white p-4 ">

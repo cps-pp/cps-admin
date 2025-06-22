@@ -55,7 +55,7 @@ const checkTodayExchangeRates = async () => {
     const data = await response.json();
     console.log('Today exchange rates check:', data);
     
-    const requiredCurrencies = ['ບາດ', 'ດອນລາ', 'ຢວນ'];
+    const requiredCurrencies = ['BATH', 'Dollar', 'YUAN'];
     const existingCurrencies = data.data ? data.data.map(item => item.ex_type) : [];
     const missing = requiredCurrencies.filter(currency => !existingCurrencies.includes(currency));
     
@@ -70,7 +70,7 @@ const checkTodayExchangeRates = async () => {
     
   } catch (error) {
     console.error('Error checking today exchange rates:', error);
-    setMissingExchangeRates(['ບາດ', 'ດອນລາ', 'ຢວນ']);
+    setMissingExchangeRates(['BATH', 'Dollar', 'YUAN']);
     setShowExchangeModal(true);
   } finally {
     setExchangeCheckLoading(false);
@@ -80,9 +80,9 @@ const checkTodayExchangeRates = async () => {
 // แก้ไขฟังก์ชัน handleSubmitExchangeRates
 const handleSubmitExchangeRates = async (rates) => {
   const mapToCode = {
-    'ບາດ': 'ບາດ',
-    'ດອນລາ': 'ດອນລາ',
-    'ຢວນ': 'ຢວນ'
+    'BATH': 'BATH',
+    'Dollar': 'Dollar',
+    'YUAN': 'YUAN'
   };
 
   const payload = {
@@ -133,13 +133,13 @@ const fetchExchangeRates = async () => {
         const typeCheck = item.ex_type?.trim();
         
         switch(typeCheck) {
-          case 'ບາດ':
+          case 'BATH':
             rates.baht = item.ex_rate || 0;
             break;
-          case 'ດອນລາ':
+          case 'Dollar':
             rates.dollar = item.ex_rate || 0;
             break;
-          case 'ຢວນ':
+          case 'YUAN':
             rates.yuan = item.ex_rate || 0;
             break;
         }
@@ -172,7 +172,7 @@ const shouldCheckExchangeRates = async () => {
     const data = await response.json();
     console.log('Database check result:', data);
     
-    const requiredCurrencies = ['ບາດ', 'ດອນລາ', 'ຢວນ'];
+    const requiredCurrencies = ['BATH', 'Dollar', 'YUAN'];
     const existingCurrencies = data.data ? data.data.map(item => item.ex_type) : [];
     const missing = requiredCurrencies.filter(currency => !existingCurrencies.includes(currency));
     

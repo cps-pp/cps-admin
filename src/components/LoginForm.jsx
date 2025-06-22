@@ -16,9 +16,8 @@ const LoginForm = () => {
     e.preventDefault();
     setError('');
     
-    // ตรวจสอบข้อมูล
     if (!username.trim() || !password.trim()) {
-      setError('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
+      setError('ກະລຸນາປ້ອນຊື່ຜູ້ໃໍຊ້ງານ ແລະ ລະຫັດຜ່ານ');
       return;
     }
 
@@ -31,25 +30,27 @@ const LoginForm = () => {
       if (result.success) {
         navigate('/dashboard');
       } else {
-        setError(result.message || 'ข้อมูลไม่ถูกต้อง');
+        setError(result.message || 'ຂໍ້ມູນບໍ່ຖຶກຕ້ອງ');
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+      setError('ເກີດຂໍ້ຜິດພາດໃນການເຊື່ຶອມຕໍ່ເຊີບເວິ');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-Third relative">
+    <>
+    
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-green-50 relative">
       <div className="relative bg-white p-8 rounded-lg shadow-xl w-full max-w-md z-10">
         <div className="mb-8 flex justify-center">
           <img src={Logo} alt="Logo" width={220} className="mx-auto" />
         </div>
 
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">ຍິນດີຕ້ອນຮັບ</h1>
+          <h1 className="text-3xl font-bold text-form-input">ຍິນດີຕ້ອນຮັບ</h1>
           <p className="text-gray-700 mt-1">ກະລຸນາລ໋ອກອິນເພື່ອເຂົ້າສູ່ລະບົບ</p>
         </div>
 
@@ -60,7 +61,7 @@ const LoginForm = () => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             disabled={isLoading}
-            className="w-full text-strokedark p-4 pl-4 pr-10 border border-stroke rounded focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full text-strokedark p-4 pl-4 pr-10 border border-stroke rounded focus:outline-none focus:ring-2 focus:ring-slate-200 focus:border-transparent transition disabled:opacity-50 disabled:cursor-not-allowed"
           />
 
           <input
@@ -69,7 +70,7 @@ const LoginForm = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={isLoading}
-            className="w-full text-strokedark p-4 pl-4 pr-10 border border-stroke rounded focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full text-strokedark p-4 pl-4 pr-10 border border-stroke rounded focus:outline-none focus:ring-2 focus:ring-slate-200 focus:border-transparent transition disabled:opacity-50 disabled:cursor-not-allowed"
           />
 
           {error && (
@@ -105,6 +106,7 @@ const LoginForm = () => {
         </form>
       </div>
     </div>
+    </>
   );
 };
 

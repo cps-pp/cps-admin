@@ -11,6 +11,9 @@ import useStoreServices from '../../../store/selectServices';
 import BillPopup from './BillPopup';
 import useStoreMed from '../../../store/selectMed';
 import useStoreQi from '../../../store/selectQi';
+
+import { CheckCircle, Save } from 'lucide-react';
+
 const InTreatmentService = ({
   selectedPatient,
   setSelectedPatient,
@@ -23,10 +26,12 @@ const InTreatmentService = ({
   setValue,
   register,
   errors,
+  onTreatmentSubmit,
+  loading,
+  isTreatmentSaved,
 }) => {
   const [patients, setPatients] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
-  const [loading, setLoading] = useState(false);
   const { services } = useStoreServices();
   const { medicines } = useStoreMed();
   const { equipment } = useStoreQi();
@@ -99,7 +104,7 @@ const InTreatmentService = ({
   }, [checkID]);
 
   return (
-    <div className="rounded-lg">
+    <div className="">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="relative">
           <label className="text-sm text-gray-600 mb-1 block">
@@ -204,6 +209,7 @@ const InTreatmentService = ({
           value={intivalue.diseases_now}
         />
 
+      </div>
         <AntdTextArea
           label="ໝາຍເຫດ"
           name="note"
@@ -212,10 +218,23 @@ const InTreatmentService = ({
           onChange={(e) => setIntivalue({ ...intivalue, note: e.target.value })}
           value={intivalue.note}
         />
-      </div>
 
-      <div className="overflow-x-auto shadow mb-8">
+      <div className="overflow-x-auto  mb-4">
         <TypeService />
+      </div>
+      <div className=" flex justify-end">
+        <button
+          onClick={onTreatmentSubmit}
+          disabled={loading || !inspectionId}
+          className={`px-6 py-2 rounded flex items-center gap-2 transition  ${
+            loading || !inspectionId
+              ? 'bg-gray-400 text-white cursor-not-allowed'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
+        >
+          <Save className="w-5 h-5" />
+          {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກການປິ່ນປົວ'}
+        </button>
       </div>
     </div>
   );

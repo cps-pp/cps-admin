@@ -30,6 +30,7 @@ const CreateMedicines = ({
     setValue,
     reset,
     setFocus,
+    control,
     formState: { errors, isDirty },
   } = useForm();
 
@@ -41,11 +42,10 @@ const CreateMedicines = ({
   const [employees, setEmployees] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedMedType, setSelectedMedType] = useState('');
-  const [status, setStatus] = useState(''); // เก็บไว้แต่ไม่ส่งไป backend
+  const [status, setStatus] = useState('');
 
   const [loadingNextId, setLoadingNextId] = useState(true);
   const [nextMedicinesId, setNextMedicinesId] = useState('');
-
 
   const isDirtyRef = useRef(isDirty);
 
@@ -57,7 +57,6 @@ const CreateMedicines = ({
     'ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.',
     isDirty,
   );
-
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
@@ -72,8 +71,6 @@ const CreateMedicines = ({
     };
   }, []);
 
-
-  // ดึงข้อมูลหมวดหมู่ยา
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -113,7 +110,6 @@ const CreateMedicines = ({
     fetchCategories();
   }, [dispatch]);
 
-  // ดึงข้อมูลพนักงาน
   useEffect(() => {
     const fetchEmp = async () => {
       try {
@@ -153,13 +149,11 @@ const CreateMedicines = ({
     fetchEmp();
   }, [dispatch]);
 
-  // ตั้งค่าวันที่ปัจจุบัน
   useEffect(() => {
     const now = new Date().toISOString().split('T')[0];
     setValue('created_at', now);
   }, [setValue]);
 
-  // ดึงรหัสถัดไป
   useEffect(() => {
     const fetchNextId = async () => {
       try {
@@ -194,31 +188,14 @@ const CreateMedicines = ({
   }, [dispatch, setValue]);
 
   const handleSave = async (formData) => {
-    console.log('Form data received:', formData);
-    
     setLoading(true);
 
     try {
-      // ตรวจสอบข้อมูลที่จำเป็น
-      if (!formData.med_id || !formData.med_name || !formData.qty || !formData.unit || !formData.price) {
-        throw new Error('กรุณากรอกข้อมูลให้ครบถ้วน');
-      }
-
-      if (!selectedMedType) {
-        throw new Error('กรุณาเลือกประเภทยา');
-      }
-
-      if (!selectEmpCreate) {
-        throw new Error('กรุณาเลือกพนักงานผู้สร้าง');
-      }
-
-      // เช็คว่ามี med_id ซ้ำไหม (ถ้ามี existingIds)
       if (existingIds && existingIds.includes(formData.med_id)) {
         setFocus('med_id');
         throw new Error('ລະຫັດຢານີ້มີໃນລະບົບແລ້ວ');
       }
 
-      // เตรียมข้อมูลส่ง - ไม่ส่ง status เพราะ backend จะคำนวณเอง
       const dataToSend = {
         med_id: formData.med_id,
         med_name: formData.med_name.trim(),
@@ -229,40 +206,37 @@ const CreateMedicines = ({
         medtype_id: selectedMedType,
         emp_id_create: selectEmpCreate,
         created_at: formData.created_at,
+        status: status || null,
       };
 
       console.log('Data to send:', dataToSend);
 
-      // ส่งข้อมูลไป backend
       const response = await fetch(
         'http://localhost:4000/src/manager/medicines',
         {
           method: 'POST',
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            Accept: 'application/json',
           },
           body: JSON.stringify(dataToSend),
         },
       );
 
       const result = await response.json();
-      console.log('Server response:', result);
 
       if (!response.ok) {
-        // จัดการข้อผิดพาดจาก server
         let errorMessage = 'ບັນທຶກຂໍ້ມູນບໍ່ສຳເລັດ';
-        
+
         if (result.error) {
           errorMessage = result.error;
         } else if (result.details) {
           errorMessage = result.details;
         }
-        
+
         throw new Error(errorMessage);
       }
 
-      // สำเร็จ
       dispatch(
         openAlert({
           type: 'success',
@@ -271,27 +245,23 @@ const CreateMedicines = ({
         }),
       );
 
-      // รีเฟรชรายการและปิดฟอร์ม
       if (getList) {
         await getList();
       }
-      
-      // รีเซ็ตฟอร์ม
-        reset();
+
+      reset();
       setStatus('');
       setSelectedMedType('');
       setSelectEmpCreate('');
-      
-      // ปิดฟอร์ม
-      setShow(false);
 
+      setShow(false);
     } catch (error) {
       console.error('Save error:', error);
       dispatch(
         openAlert({
           type: 'error',
           title: 'ເກີດຂໍ້ຜິດພາດ',
-          message: error.message || 'ມີຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
+          message: 'ມີຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
         }),
       );
     } finally {
@@ -314,7 +284,6 @@ const CreateMedicines = ({
         onSubmit={handleSubmit(handleSave)}
         className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 px-4"
       >
-        {/* แสดงรหัสที่สร้างอัตโนมัติ */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2 text-black dark:text-white">
             ລະຫັດຢາ ແລະ ອຸປະກອນ <span className="text-red-500">*</span>
@@ -334,9 +303,9 @@ const CreateMedicines = ({
           type="text"
           placeholder="ປ້ອນຊື່ຢາ"
           register={register}
-          formOptions={{ 
+          formOptions={{
             required: 'ກະລຸນາປ້ອນຊື່ຢາ',
-            minLength: { value: 2, message: 'ຊື່ຢາຕ້ອງມີຢ່າງນ້ອຍ 2 ຕົວອັກສອນ' }
+            minLength: { value: 2, message: 'ຊື່ຢາຕ້ອງມີຢ່າງນ້ອຍ 2 ຕົວອັກສອນ' },
           }}
           errors={errors}
         />
@@ -350,7 +319,7 @@ const CreateMedicines = ({
           formOptions={{
             required: 'ກະລຸນາປ້ອນຈຳນວນ',
             min: { value: 0, message: 'ຈຳນວນຕ້ອງຫຼາຍກວ່າ ຫຼື ເທົ່າກັບ 0' },
-            valueAsNumber: true
+            valueAsNumber: true,
           }}
           errors={errors}
         />
@@ -361,9 +330,12 @@ const CreateMedicines = ({
           type="text"
           placeholder="ປ້ອນຫົວໜ່ວຍ ເຊັ່ນ: ກັບ, ແຜງ, ຂວດ"
           register={register}
-          formOptions={{ 
+          formOptions={{
             required: 'ກະລຸນາປ້ອນຫົວໜ່ວຍ',
-            minLength: { value: 1, message: 'ຫົວໜ່ວຍຕ້ອງມີຢ່າງນ້ອຍ 1 ຕົວອັກສອນ' }
+            minLength: {
+              value: 1,
+              message: 'ຫົວໜ່ວຍຕ້ອງມີຢ່າງນ້ອຍ 1 ຕົວອັກສອນ',
+            },
           }}
           errors={errors}
         />
@@ -373,23 +345,32 @@ const CreateMedicines = ({
           name="price"
           placeholder="ປ້ອນລາຄາ"
           register={register}
+           control={control}
           formOptions={{
             required: 'ກະລຸນາປ້ອນລາຄາ',
             min: { value: 0, message: 'ລາຄາຕ້ອງຫຼາຍກວ່າ ຫຼື ເທົ່າກັບ 0' },
-            valueAsNumber: true
+            valueAsNumber: true,
           }}
           errors={errors}
         />
 
-
         <BoxDate
-
           register={register}
           errors={errors}
           name="expired"
           label="ວັນໝົດອາຍຸ"
           formOptions={{ required: false }}
           setValue={setValue}
+        />
+
+        <SelectBox
+          label="ສະຖານະ"
+          name="ສະຖານະ"
+          options={['ຍັງມີ', 'ໝົດ']}
+          register={register}
+          errors={errors}
+          value={status}
+          onSelect={(e) => setStatus(e.target.value)}
         />
 
         <SelectBoxId
@@ -427,15 +408,11 @@ const CreateMedicines = ({
           errors={errors}
           name="created_at"
           label="ວັນທີສ້າງ"
-
           formOptions={{ required: 'ກະລຸນາໃສ່ວັນທີສ້າງ' }}
           setValue={setValue}
         />
 
-
         <div className="flex justify-end space-x-4 col-span-full py-4">
-      
-          
           <ButtonBox variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </ButtonBox>

@@ -153,7 +153,7 @@ const ReportPay = () => {
             </div>
             <div className="ml-4">
               <h4 className="text-lg font-semibold  text-form-strokedark">ຈຳນວນລາຍການຊຳລະ</h4>
-              <p className="text-xl font-bold text-primary">
+              <p className="text-xl font-bold text-blue-700">
                 {totalCount} ລາຍການ
               </p>
             </div>

@@ -45,7 +45,7 @@ export default function SumService() {
     },
   ];
 
-  console.log(services)
+  // console.log(services)
 
   return (
     <div>

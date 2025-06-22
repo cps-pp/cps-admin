@@ -134,8 +134,8 @@ const PaymentPage = () => {
                       </td>
                   
                       <td className="px-4 py-2">{pay.pay_type}</td>
-                      <td className="px-4 py-2">{pay.ex_id || '-'}</td>
-                      <td className="px-4 py-2">    {(pay.ex_rate * 1).toLocaleString()}</td>
+                      {/* <td className="px-4 py-2">{pay.ex_id || '-'}</td>
+                      <td className="px-4 py-2">    {(pay.ex_rate * 1).toLocaleString()}</td> */}
                   
                       {/* <td className="px-4 py-2">
                         <Button

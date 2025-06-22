@@ -31,11 +31,9 @@ const MedicinesPage = () => {
   const [empName, setEmpName] = useState([]);
 
   const [existingIds, setExistingIds] = useState([]);
-  // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
   const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
 
-  // ✅ เพิ่ม state สำหรับการเรียงลำดับ ID (คัดลอกจาก CategoryPage)
-  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
+  const [sortOrder, setSortOrder] = useState('asc');
 
   // เพิ่ม state สำหรับฟิลเตอร์สถานะ
   const [selectedStatus, setSelectedStatus] = useState('');
@@ -93,11 +91,9 @@ const MedicinesPage = () => {
     fetchCategories();
   }, []);
 
-  // ✅ ฟังก์ชันกรองข้อมูลแบบรวม (คัดลอกจาก ImportPage)
   const applyFiltersWithData = (data = medicines) => {
     let filtered = [...data];
 
-    // กรองตาม search query
     if (searchQuery.trim() !== '') {
       filtered = filtered.filter((medicine) =>
         medicine.med_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -105,12 +101,10 @@ const MedicinesPage = () => {
       );
     }
 
-    // กรองตามประเภทยา
     if (selectedCategory !== '') {
       filtered = filtered.filter((medicine) => medicine.medtype_id === selectedCategory);
     }
 
-    // กรองตามสถานะ
     if (selectedStatus !== '') {
       filtered = filtered.filter((medicine) => medicine.status === selectedStatus);
     }
@@ -119,57 +113,19 @@ const MedicinesPage = () => {
     setPage(0);
   };
 
-  // ฟังก์ชันกรองข้อมูลแบบรวม (เดิม)
   const applyFilters = () => {
     applyFiltersWithData(medicines);
   };
-
-  // เรียกใช้ฟังก์ชันกรองเมื่อมีการเปลี่ยนแปลงใน filters หรือข้อมูล
   useEffect(() => {
     applyFilters();
   }, [searchQuery, selectedCategory, selectedStatus, medicines]);
 
-  // ฟังก์ชันล้างตัวกรองทั้งหมด
   const clearAllFilters = () => {
     setSearchQuery('');
     setSelectedCategory('');
     setSelectedStatus('');
   };
 
-  // เพิ่มฟังก์ชันในการแสดงสถานะพร้อมไอคอน (ถ้าต้องการ)
-  const getStatusDisplay = (status, qty) => {
-    const statusConfig = {
-      ຍັງມີ: {
-        color: 'bg-green-100 text-green-700',
-        icon: '✅',
-        description: 'เพียงพอ',
-      },
-      ໃກ້ໝົດ: {
-        color: 'bg-yellow-100 text-yellow-700',
-        icon: '⚠️',
-        description: 'ใกล้หมด',
-      },
-      ໝົດ: {
-        color: 'bg-red-100 text-red-700',
-        icon: '❌',
-        description: 'หมดแล้ว',
-      },
-    };
-
-    const config = statusConfig[status] || statusConfig['ໝົດ'];
-
-    return (
-      <span
-        className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${config.color}`}
-      >
-        <span className="mr-1">{config.icon}</span>
-        {status}
-        <span className="ml-1 text-xs opacity-75">({qty} ชิ้น)</span>
-      </span>
-    );
-  };
-
-  // ✅ ฟังก์ชันสำหรับเรียงลำดับ ID (คัดลอกจาก CategoryPage)
   const handleSortById = () => {
     const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
     setSortOrder(newSortOrder);
@@ -192,7 +148,6 @@ const MedicinesPage = () => {
 
     setMedicines(sortedMedicines);
     
-    // ถ้ามีการค้นหาหรือกรองอยู่ ให้ใช้ข้อมูลที่เรียงแล้วมากรองใหม่
     applyFiltersWithData(sortedMedicines);
   };
 
@@ -201,48 +156,39 @@ const MedicinesPage = () => {
     setShowModal(true);
   };
 
-  const handleDeleteMedicine = async () => {
-    if (!selectedMedicineId) return;
+const handleDeleteMedicine = async () => {
+  if (!selectedMedicineId) return;
 
-    try {
-      const response = await fetch(
-        `http://localhost:4000/src/manager/medicines/${selectedMedicineId}`,
-        { method: 'DELETE' },
-      );
-      const result = await response.json();
+  try {
+    const response = await fetch(
+      `http://localhost:4000/src/manager/medicines/${selectedMedicineId}`,
+      { method: 'DELETE' }
+    );
+    const result = await response.json();
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Delete failed');
-      }
-
-      setMedicines((prev) =>
-        prev.filter((m) => m.med_id !== selectedMedicineId),
-      );
-      setFilteredMedicines((prev) =>
-        prev.filter((m) => m.med_id !== selectedMedicineId),
-      );
-
-      dispatch(
-        openAlert({
-          type: 'success',
-          title: 'ລົບຂໍ້ມູນສຳເລັດ',
-          message: 'ລົບຂໍ້ມູນສຳເລັດແລ້ວ',
-        }),
-      );
-    } catch (error) {
-      console.error('Error deleting medicine:', error);
-      dispatch(
-        openAlert({
-          type: 'error',
-          title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
-          message: error.message,
-        }),
-      );
-    } finally {
-      setShowModal(false);
-      setSelectedMedicineId(null);
+    if (!response.ok) {
+      throw new Error(result.error || 'Delete failed');
     }
-  };
+
+    await fetchMedicines(); 
+    dispatch(openAlert({
+      type: 'success',
+      title: 'ລົບຂໍ້ມູນສໍາເລັດ',
+      message: 'ລົບຂໍ້ມູນສໍາເລັດແລ້ວ',
+    }));
+  } catch (error) {
+    console.error('Error deleting medicine:', error);
+    dispatch(openAlert({
+      type: 'error',
+      title: 'ບໍ່ສາມດລົບຂໍ້ມູນໄດ້',
+      message: error.message,
+    }));
+  } finally {
+    setShowModal(false);
+    setSelectedMedicineId(null);
+  }
+};
+
 
   useEffect(() => {
     const fetchDoctor = async () => {
@@ -452,7 +398,7 @@ const MedicinesPage = () => {
                     </td>
                     <td className="px-4 py-4">{medicine.unit}</td>
                     <td className="px-4 py-4">
-                      {new Date(medicine.expired).toLocaleDateString('en-US', {
+                      {new Date(medicine.expired).toLocaleDateString('en-GB', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
@@ -468,7 +414,7 @@ const MedicinesPage = () => {
                       {medicine?.created_at &&
                       !isNaN(new Date(medicine.created_at).getTime()) ? (
                         new Date(medicine.created_at).toLocaleDateString(
-                          'th-TH',
+                          'en-GB',
                           {
                             day: '2-digit',
                             month: '2-digit',

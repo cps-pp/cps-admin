@@ -70,7 +70,7 @@ const Header = (props) => {
 
       // ดึงข้อมูลยา
       const medicineRes = await axios.get(
-        'http://localhost:4000/src/manager/medicinesWang',
+        'http://localhost:4000/src/manager/medicines',
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -190,26 +190,25 @@ const Header = (props) => {
               e.stopPropagation();
               props.setSidebarOpen(!props.sidebarOpen);
             }}
-            className="lg:hidden p-2 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200/50 transition-all duration-300 hover:shadow-md group"
+            className="lg:hidden p-2 rounded-lg bg-purple-100  hover:from-purple-100 hover:to-indigo-100 border border-purple-200/50 transition-all duration-300 hover:shadow-md group"
           >
             {props.sidebarOpen ? (
-              <X className="h-5 w-5 text-blue-600 transition-transform duration-300 group-hover:rotate-90" />
+              <X className="h-5 w-5 text-primary transition-transform duration-300 group-hover:rotate-90" />
             ) : (
-              <Menu className="h-5 w-5 text-blue-600 transition-transform duration-300 group-hover:scale-110" />
+              <Menu className="h-5 w-5 text-primary transition-transform duration-300 group-hover:scale-110" />
             )}
           </button>
 
-          <div className="hidden lg:flex items-center gap-2 border border-gray-300 px-4 py-1 rounded-lg shadow-sm bg-gray-50">
+          <div className="hidden lg:flex items-center gap-2 border border-stroke px-4 py-1 rounded shadow-sm bg-gray-50">
             <Clock className="w-4 h-4 text-blue-500" />
-            <span className="text-base text-black font-semibold">
+            <span className="text-base text-form-strokedark font-semibold">
               {formatDateTime(currentTime)}
             </span>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
-          {/* Notification Bell - แสดงเสมอไม่ต้องรอ user */}
-          <div className="relative">
+          {/* <div className="relative">
             <button
               onClick={() => setShowNotificationMenu(!showNotificationMenu)}
               className="relative p-2 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200/50 transition-all duration-300 hover:shadow-md group"
@@ -294,9 +293,8 @@ const Header = (props) => {
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
 
-          {/* User Profile Section */}
           {user ? (
             <div className="relative">
               <button

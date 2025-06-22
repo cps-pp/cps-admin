@@ -100,10 +100,11 @@ const SelectBoxId = ({
           id={name}
           {...(register ? register(name, {
             required: isRequired ? `ກະລຸນາເລືອກ${label}` : false,
-            onChange: onSelect,
+            // onChange: onSelect,
           }) : {})}
+            onChange={onSelect}
           value={value}
-          onChange={register ? undefined : onSelect} // ถ้าไม่มี register ให้ใช้ onSelect ตรงนี้เลย
+          // onChange={register ? undefined : onSelect} // ถ้าไม่มี register ให้ใช้ onSelect ตรงนี้เลยฝ
           className="text-strokedark dark:text-stroke relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:disabled:bg-meta-4 dark:focus:border-primary capitalize"
         >
           <option value="" disabled>

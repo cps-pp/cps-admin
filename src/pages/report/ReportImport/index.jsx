@@ -1,110 +1,132 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { iconAdd } from '@/configs/icon';
-import Button from '@/components/Button';
+import React, { useState, useEffect } from 'react';
 import Search from '@/components/Forms/Search';
-import { TableAction } from '@/components/Tables/TableAction';
-import ConfirmModal from '@/components/Modal';
 import { useAppDispatch } from '@/redux/hook';
 import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { openAlert } from '@/redux/reducer/alert';
 import Alerts from '@/components/Alerts';
-import { im } from './colum/im';
 
 const ReportImport = () => {
-   const [suppliers, setSuppliers] = useState([]);
-  const [filteredSuppliers, setFilteredSuppliers] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedSupplierId, setSelectedSupplierId] = useState(null);
+  const [activeTab, setActiveTab] = useState('medicine');
+  const [reportData, setReportData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
   const dispatch = useAppDispatch();
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  const [summaryStats, setSummaryStats] = useState({
+    totalMedicines: 0,
+    totalMedicineStock: 0,
+    totalEquipment: 0,
+    totalEquipmentStock: 0,
+    lowStockItems: 0,
+  });
 
-//   const fetchSuppliers = async () => {
-//     try {
-//       setLoading(true);
-//       const response = await fetch('http://localhost:4000/src/manager/supplier');
-
-//       if (!response.ok) {
-//         throw new Error(`HTTP error! Status: ${response.status}`);
-//       }
-
-//       const data = await response.json();
-//       setSuppliers(data.data);
-//       setFilteredSuppliers(data.data);
-//     } catch (error) {
-//       console.error('Error fetching categories:', error);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchSuppliers();
-//   }, []);
-
-  useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredSuppliers(suppliers);
-    } else {
-      const filtered = suppliers.filter((supplier) =>
-        supplier.company_name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredSuppliers(filtered);
-    }
-  }, [searchQuery, suppliers]);
-
-  const openDeleteModal = (id) => () => {
-    setSelectedSupplierId(id);
-    setShowModal(true);
-  };
-
-  const handleDeleteSupplier = async () => {
-    if (!selectedSupplierId) return;
-
+  const fetchImportReport = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:4000/manager/supplier/${selectedSupplierId}`,
-        { method: 'DELETE' }
-      );
+      setLoading(true);
 
+      const medicineURL =
+        activeTab === 'medicine'
+          ? 'http://localhost:4000/src/manager/medicines/M1'
+          : 'http://localhost:4000/src/manager/medicines/M2';
+
+      // ดึงข้อมูลรายการยา/อุปกรณ์ตาม tab
+      const response = await fetch(medicineURL);
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
+      const medicineData = await response.json();
 
-      setSuppliers((prevSuppliers) =>
-        prevSuppliers.filter((supplier) => supplier.sup_id !== selectedSupplierId)
+      const stockResponse = await fetch(
+        'http://localhost:4000/src/report/import',
       );
-      setShowModal(false);
-      setSelectedSupplierId(null);
-      dispatch(
-        openAlert({
-          type: 'success',
-          title: 'ລົບຂໍ້ມູນສຳເລັດ',
-          message: 'ລົບຂໍ້ມູນຜູ້ສະໜອງສຳເລັດແລ້ວ',
-        })
+      if (!stockResponse.ok) {
+        throw new Error(`HTTP error! Status: ${stockResponse.status}`);
+      }
+      const stockData = await stockResponse.json();
+
+      
+    const medicinesWithStock = (medicineData.data || []).map((item) => {
+      const stockInfo = (stockData.detail || []).find(
+        (stock) => stock.med_id === item.med_id
       );
+      
+      return {
+        ...item, 
+        im_id: stockInfo ? stockInfo.im_id : '-',
+        im_date: stockInfo ? stockInfo.im_date : '-',
+        note: stockInfo ? (stockInfo.note || '-') : '-',
+        emp_id_create: stockInfo ? stockInfo.emp_id_create : item.emp_id_create,
+        // ✅ ใช้ qty จาก stockInfo ถ้ามี หรือจาก item
+        stock_qty: stockInfo ? stockInfo.qty : 0,
+        // เก็บ qty เดิมจากตาราง medicines ไว้ด้วย
+        medicine_qty: item.qty || 0
+      };
+    });
+
+
+      setReportData(medicinesWithStock);
+      setFilteredData(medicinesWithStock);
+
+      const totalStock = medicinesWithStock.reduce(
+        (sum, item) => sum + (item.quantity || 0),
+        0,
+      );
+      const lowStock = medicinesWithStock.filter(
+        (item) => (item.quantity || 0) < 10,
+      ).length;
+
+      if (activeTab === 'medicine') {
+        setSummaryStats((prev) => ({
+          ...prev,
+          totalMedicines: medicinesWithStock.length,
+          totalMedicineStock: totalStock,
+          lowStockItems: lowStock,
+        }));
+      } else {
+        setSummaryStats((prev) => ({
+          ...prev,
+          totalEquipment: medicinesWithStock.length,
+          totalEquipmentStock: totalStock,
+          lowStockItems: lowStock,
+        }));
+      }
     } catch (error) {
+      console.error('Error fetching data:', error);
       dispatch(
         openAlert({
           type: 'error',
-          title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
-          message: 'ເກີດຂໍ້ຜິດພາດໃນການລົບຂໍ້ມູນ',
-        })
+          title: 'ເກີດຂໍ້ຜິດພາດ',
+          message: 'ບໍ່ສາມາດດຶງຂໍ້ມູນໄດ້',
+        }),
       );
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleEdit = (id) => {
-    setSelectedId(id);
-    setShowEditModal(true);
-  };
+  useEffect(() => {
+    fetchImportReport();
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredData(reportData);
+    } else {
+      const filtered = reportData.filter((item) => {
+        const searchStr = searchQuery.toLowerCase();
+        return (
+          (item.med_name && item.med_name.toLowerCase().includes(searchStr)) ||
+          (item.med_id && item.med_id.toLowerCase().includes(searchStr)) ||
+          (item.medtype_id && item.medtype_id.toLowerCase().includes(searchStr))
+        );
+      });
+      setFilteredData(filtered);
+    }
+  }, [searchQuery, reportData]);
 
   const handlePageChange = (_, newPage) => {
     setPage(newPage);
@@ -115,178 +137,215 @@ const ReportImport = () => {
     setPage(0);
   };
 
-  const paginatedPSup = filteredSuppliers.slice(
+  const paginatedData = filteredData.slice(
     page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+    page * rowsPerPage + rowsPerPage,
   );
+
+  // Table headers
+  const getTableHeaders = () => {
+    return ['ລະຫັດນຳເຂົ້າ', 'ວັນທີ', 'ລະຫັດ','ຊື່ຢາ/ອຸປະກອນ', 'ຈຳນວນ', 'ໝາຍເຫດ'];
+  };
+
+  const renderTableRow = (item, index) => {
+    const globalIndex = page * rowsPerPage + index + 1;
+
+    return (
+      <tr
+        key={index}
+        className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
+      >
+        <td className="px-4 py-4">{item.im_id || '-'}</td>
+        <td className="px-4 py-4">
+          {item.im_date
+            ? new Date(item.im_date).toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+              })
+            : '-'}
+        </td>
+
+        <td className="px-4 py-4">{item.med_id || '-'}</td>
+        <td className="px-4 py-4">{item.med_name || '-'}</td>
+
+        <td className="px-4 py-4">
+          <span
+            className={`font-medium ${(item.qty || 0) < 10 ? 'text-red-600' : 'text-green-600'}`}
+          >
+            {item.qty || 0}
+          </span>
+        </td>
+      </tr>
+    );
+  };
 
   return (
     <>
-    <div className="rounded bg-white pt-4 dark:bg-boxdark">
-      <Alerts />
-      <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
-          ລາຍງານການນຳເຂົ້າ
-        </h1>
-        {/* <div className="flex items-center gap-2">
-          <Button
-            onClick={() => setShowAddModal(true)}
-            icon={iconAdd}
-            className="bg-primary"
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 2xl:gap-7.5 w-full mb-6">
+        {/* Total Items */}
+        <div className="rounded-sm border border-stroke bg-white p-4">
+          <div className="flex items-center">
+            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-blue-100">
+              <svg
+                class="w-[25px] h-[25px] text-form-strokedark"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2.1"
+                  d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 5h6m-6 4h6M10 3v4h4V3h-4Z"
+                />
+              </svg>
+            </div>
+            <div className="ml-4">
+              <h4 className="text-lg font-semibold text-strokedark">
+                {activeTab === 'medicine'
+                  ? 'ຈຳນວນຢາທັງໝົດ'
+                  : 'ຈຳນວນອຸປະກອນທັງໝົດ'}
+              </h4>
+              <p className="text-xl font-bold text-blue-700">
+                {activeTab === 'medicine'
+                  ? summaryStats.totalMedicines
+                  : summaryStats.totalEquipment}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Low Stock Items */}
+        <div className="rounded-sm border border-stroke bg-white p-4 ">
+          <div className="flex items-center">
+            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"
+                />
+              </svg>
+            </div>
+            <div className="ml-4">
+              <h4 className="text-lg font-semibold text-strokedark dark:text-white">
+                {activeTab === 'medicine' ? 'ຢາໃກ້ໝົດ' : 'ອຸປະກອນໃກ້ໝົດ'}
+              </h4>
+              <p className="text-xl font-bold text-red-500 dark:text-red-300">
+                {summaryStats.lowStockItems}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded bg-white pt-4 dark:bg-boxdark">
+        <Alerts />
+
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
+          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 ">
+            ລາຍງານການຢາແລະອຸປະກອນ
+          </h1>
+        </div>
+
+        <div className="flex gap-4 px-4 mt-4 ">
+          <button
+            onClick={() => setActiveTab('medicine')}
+            className={`px-4 py-2 ${activeTab === 'medicine' ? 'bg-blue-500 text-white rounded' : 'bg-gray-200'}`}
           >
-            ເພີ່ມຜູ້ສະໜອງ
-          </Button>
-        </div> */}
-      </div>
+            ຢາ
+          </button>
+          <button
+            onClick={() => setActiveTab('equipment')}
+            className={`px-4 py-2 ${activeTab === 'equipment' ? 'bg-blue-500 text-white rounded' : 'bg-gray-200'}`}
+          >
+            ອຸປະກອນ
+          </button>
+        </div>
 
-      <div className="grid w-full gap-4 p-4">
-        <Search
-          type="text"
-          name="search"
-          placeholder="ຄົ້ນຫາ..."
-          className="rounded border border-stroke dark:border-strokedark"
-          onChange={(e) => {
-            const query = e.target.value;
-            setSearchQuery(query);
-          }}
-        />
-      </div>
+        <div className="grid w-full gap-4 p-4">
+          <Search
+            type="text"
+            name="search"
+            placeholder="ຄົ້ນຫາ..."
+            className="rounded border border-stroke dark:border-strokedark"
+            onChange={(e) => {
+              const query = e.target.value;
+              setSearchQuery(query);
+            }}
+          />
+        </div>
 
-   
-      <div className="overflow-x-auto rounded-lg shadow-md">
-          <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
+        {/* Table */}
+        <div className="overflow-x-auto shadow-md">
+          <table className="w-full min-w-max table-auto">
             <thead>
-              <tr className="text-left bg-secondary2 text-white">
-                {im.map((header, index) => (
+              <tr className="text-left bg-gray border border-stroke">
+                {getTableHeaders().map((header, index) => (
                   <th
                     key={index}
-                    className="px-4 py-3 font-medium text-gray-600 dark:text-gray-300 "
+                    className="px-4 py-3 text-form-input font-semibold"
                   >
-                    {header.name}
+                    {header}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {paginatedPSup.length > 0 ? (
-                paginatedPSup.map((supplier, index) => (
-                  <tr
-                    key={index}
-                    className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan={getTableHeaders().length}
+                    className="py-8 text-center"
                   >
-                    <td className="px-4 py-4">{supplier.sup_id}</td>
-                    <td className="px-4 py-4">{supplier.company_name}</td>
-                    <td className="px-4 py-4">{supplier.address}</td>
-                    <td className="px-4 py-4">{supplier.phone}</td>
-                    <td className="">
-                      <span
-                        className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
-                          supplier.status === 'ເປີດ'
-                            ? 'bg-green-100 text-green-700'
-                            : supplier.status === 'ປິດ'
-                              ? 'bg-red-100 text-red-700'
-                              : 'bg-gray-100 text-gray-700'
-                        }`}
-                      >
-                        {supplier.status}
-                      </span>
-                    </td>
-                    <td className="px-3 py-4 text-center">
-                      <TableAction
-                        onDelete={openDeleteModal(supplier.sup_id)}
-                        onEdit={() => handleEdit(supplier.sup_id)}
-                      />
-                    </td>
-                  </tr>
-                ))
+                    <div className="flex justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                  </td>
+                </tr>
+              ) : paginatedData.length > 0 ? (
+                paginatedData.map((item, index) => renderTableRow(item, index))
               ) : (
                 <tr>
-                  <td colSpan={6} className="py-4 text-center text-gray-500">
-                    ບໍ່ມີຂໍ້ມູນ
+                  <td
+                    colSpan={getTableHeaders().length}
+                    className="px-4 py-4 text-center text-gray-500"
+                  >
+                    ບໍ່ພົບຂໍ້ມູນ
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
+        </div>
       </div>
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="rounded-lg w-full max-w-2xl relative px-4 ">
-            <button
-              onClick={() => setShowAddModal(false)}
-              className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
 
-            <CreateSupplier
-              setShow={setShowAddModal}
-              getList={fetchSuppliers}
-            />
-          </div>
-        </div>
+      {/* Pagination */}
+      {filteredData.length > 0 && (
+        <TablePaginationDemo
+          count={filteredData.length}
+          page={page}
+          onPageChange={handlePageChange}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleRowsPerPageChange}
+        />
       )}
-
-      {showEditModal && selectedId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
-          <div className="rounded-lg w-full max-w-2xl bg-white relative ">
-            <button
-              onClick={() => setShowEditModal(false)}
-              className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-
-            <EditSupplier
-              id={selectedId}
-              onClose={() => setShowEditModal(false)}
-              setShow={setShowEditModal}
-              getList={fetchSuppliers}
-            />
-          </div>
-        </div>
-      )}
-    </div>
-      <TablePaginationDemo
-        count={paginatedPSup.length}
-        page={page}
-        onPageChange={handlePageChange}
-        rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={handleRowsPerPageChange}
-      />
-
-      {/* <ConfirmModal
-        show={showModal}
-        setShow={setShowModal}
-        message="ທ່ານຕ້ອງການລົບຜູ້ສະໜອງນີ້ອອກຈາກລະບົບບໍ່？"
-        handleConfirm={handleDeleteSupplier}
-      /> */}
     </>
   );
 };

@@ -612,16 +612,16 @@ const FollowPage = () => {
 
       <div className="rounded bg-white pt-4 dark:bg-boxdark">
         <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+          {/* <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
             ຈັດການນັດໝາຍ
-          </h1>
+          </h1> */}
           <div className="flex items-center gap-2">
             <Button
               onClick={() => setShowAddModal(true)}
-              className="bg-secondary2"
+              className="bg-secondary"
                 icon={iconAdd}
             >
-              ເພີ່ມນັດໝາຍ
+              ເພີ່ມ
             </Button>
           </div>
         </div>

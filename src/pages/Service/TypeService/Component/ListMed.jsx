@@ -128,43 +128,16 @@ export default function ListMed({ selectService, refreshFlag, tapService }) {
 
   const isAdded = (med_id) => medicines.some((med) => med.med_id === med_id);
 
-  const handleAddMedicine = async (record) => {
-    if (isAdded(record.med_id)) return;
+const handleAddMedicine = async (record) => {
+  if (isAdded(record.med_id)) return;
 
-    // เรียก API ตัดสต็อก 1 หน่วยก่อน
-    const success = await deductOneStock(record);
-    if (success) {
-      addMedicine({ ...record, qty: 1 });
-    } else {
-      alert('ไม่สามารถเพิ่มยาได้ เนื่องจากสต็อกไม่เพียงพอ');
-    }
-  };
+  const success = await deductOneStock(record);
+  if (!success) {
+    return;
+  }
 
-  // แก้ deductOneStock ให้ return boolean success/fail
-  const deductOneStock = async (record) => {
-    const payload = [{ med_id: record.med_id, med_qty: 1 }];
-    try {
-      const res = await fetch('http://localhost:4000/src/stock/checkstock', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: payload }),
-      });
-      const result = await res.json();
-      if (res.ok) {
-        setDataMed((prevData) =>
-          prevData.map((med) =>
-            med.med_id === record.med_id ? { ...med, qty: med.qty - 1 } : med,
-          ),
-        );
-        return true;
-      } else {
-        return false;
-      }
-    } catch (error) {
-      console.error(error);
-      return false;
-    }
-  };
+  addMedicine({ ...record, qty: 1 });
+};
 
   const columns = [
     {
@@ -193,18 +166,24 @@ export default function ListMed({ selectService, refreshFlag, tapService }) {
       title: 'ຈັດການ',
       key: 'action',
       render: (_, record) => (
+        
         <button
           type="button"
-          onClick={() => handleAddMedicine(record)}
-          disabled={isAdded(record.med_id)}
-          className={`bg-secondary2 text-white px-3 py-1 rounded hover:bg-secondary ${isAdded(record.med_id) ? 'opacity-50 cursor-not-allowed' : ''}`}
+          onClick={() => {
+            selectService(record);
+            selectionMedicine(record);
+          }}
+          
+          className="bg-secondary2 text-white px-3 py-1 rounded hover:bg-secondary"
         >
           ເພີ່ມ
         </button>
       ),
     },
   ];
-
+  const selectionMedicine = async (record) => {
+    await addMedicine(record);
+  };
   return (
     <div>
       <Table

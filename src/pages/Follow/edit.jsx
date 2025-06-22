@@ -99,11 +99,11 @@ const EditFollow = ({ setShow, getList, id }) => {
     try {
       setLoading(true);
 
-      if (!status || !selectedEmp || !selectedPat) {
-        alert('ກະລຸນາກວດສອບຂໍ້ມູນກ່ອນສົ່ງ');
-        setLoading(false);
-        return;
-      }
+      // if (!status || !selectedEmp || !selectedPat) {
+      //   alert('ກະລຸນາກວດສອບຂໍ້ມູນກ່ອນສົ່ງ');
+      //   setLoading(false);
+      //   return;
+      // }
 
       const originalDate = data.date_addmintted
         ? moment(data.date_addmintted).format('YYYY-MM-DDTHH:mm:ssZ')

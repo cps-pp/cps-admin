@@ -12,6 +12,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const { pathname } = useLocation();
   const trigger = useRef(null);
   const sidebar = useRef(null);
+
   const filterSubs = (subs) => {
     if (!subs) return undefined;
     return subs.filter(
@@ -30,13 +31,37 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   //   subs: filterSubs(menu.subs),
   // }));
 
-
-
 const adminRestrictedPaths = [
-  '/manager/employee',
-  '/manager/servicelist',
-  '/manager/packetdetail',
-];
+    '/manager/employee',
+    '/manager/servicelist',
+    '/manager/packetdetail',
+  ];
+
+  const filteredMENU = MENU.filter((menu) => {
+    // ถ้าเป็น admin และ path อยู่ใน restricted paths ให้ซ่อน
+    if (role === 'admin' && adminRestrictedPaths.includes(menu.path)) {
+      return false;
+    }
+    
+    // ถ้ามี submenu ให้กรอง submenu ด้วย
+    if (menu.subs) {
+      menu.subs = menu.subs.filter((sub) => {
+        if (role === 'admin' && adminRestrictedPaths.includes(sub.path)) {
+          return false;
+        }
+        return true;
+      });
+      
+      // ถ้า submenu ถูกกรองหมดแล้ว ให้ซ่อน parent menu ด้วย
+      if (menu.subs.length === 0) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
+
+
 
 const filterMenuByRole = (menuList) => {
   return menuList
@@ -56,10 +81,9 @@ const filterMenuByRole = (menuList) => {
         subs: filteredSubs,
       };
     })
-    .filter(Boolean); // กรองค่า null ออก
+    .filter(Boolean); 
 };
 
-const filteredMENU = filterMenuByRole(MENU);
 
 
 
@@ -135,7 +159,7 @@ const filteredMENU = filterMenuByRole(MENU);
         <section className="mb-6">
           <h3 className="px-2 text-sm font-semibold text-gray-400">ເມນູ</h3>
           <ul className="mt-2 space-y-1">
-            {filteredMENU.map((menu) => (
+             {filteredMENU.map((menu) => (
               <SidebarTemplate
                 key={menu.path}
                 menu={menu}
@@ -166,7 +190,7 @@ const filteredMENU = filterMenuByRole(MENU);
         {/* FOLLOW */}
         <section className="mb-6">
           <h3 className="px-2 text-sm font-semibold text-gray-400">
-            ຕິດຕາມການປິ່ວປົວ
+            ນັດໝາຍ
           </h3>
           <ul className="mt-2 space-y-1">
             {FOLLOW.map((menu) => (

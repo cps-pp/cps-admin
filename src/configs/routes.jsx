@@ -29,6 +29,9 @@ import DetailPatientService from '../pages/Service/Detail';
 import PackectDetail from '../pages/Manager/PackectDetail';
 import InvoicePage from '../pages/Invoice';
 import PaymentPage from '../pages/Payment';
+import ReportFollowAll from '../pages/report/ReportFollow';
+import DetailFollow from '../pages/report/ReportFollow/detail';
+import EditTreatment from '../pages/Service/Detail/EditTreatment';
 
 export const ROUTES = [
   {
@@ -115,24 +118,30 @@ export const ROUTES = [
   },
   // -------------------------- ServicePatient Path --------------------------------
   {
-    path: '/treatment',
+    path: '/treatment-service',
     title: 'Service Treatment Create | CPS Admin',
     component: <Treatment />,
   },
+
   {
     path: '/invoice',
     title: 'invoice | CPS Admin',
     component: <InvoicePage />,
   },
   {
-    path: '/pay',
+    path: '/list-pay',
     title: 'Payment | CPS Admin',
     component: <PaymentPage />,
   },
   {
-    path: '/patdetail',
+    path: '/list-detail',
     title: 'DetailPatientService | CPS Admin',
     component: <DetailPatientService />,
+  },
+    {
+    path: '/list-detail/edit-treatment/:id',
+    title: 'Service Treatment Create | CPS Admin',
+    component: <EditTreatment />,
   },
   // ---------------------------
   {
@@ -160,6 +169,16 @@ export const ROUTES = [
   //------------------------------- Report
 
   
+  {
+    path: '/report/follow-inspection',
+    title: 'Report Follow | CPS Admin',
+    component: <ReportFollowAll />,
+  },
+    {
+    path: '/follow-inspection/detail/:id',
+    title: 'Follow Detail | CPS Admin',
+    component: <DetailFollow />,
+  },
   {
     path: '/report/appointment',
     title: 'Report Appointment | CPS Admin',

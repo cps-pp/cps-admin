@@ -9,9 +9,340 @@ import {
   Hash,
   Receipt,
   CheckCircle,
+  Banknote,
+  CreditCard as TransferIcon,
 } from 'lucide-react';
 import SelectBoxId from '../../../components/Forms/SelectID';
+import { useDispatch } from 'react-redux';
+import { openAlert } from '@/redux/reducer/alert';
+// const BillPopup = ({
+//   isOpen,
+//   onClose,
+//   patientData,
+//   inspectionData,
+//   services = [],
+//   medicines = [],
+// }) => {
+//   if (!isOpen) return null;
+//   // Payment states
+//   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
+//   const [paymentType, setPaymentType] = useState('cash');
+//   const [paymentStatus, setPaymentStatus] = useState('pending');
+//   const [invoiceData, setInvoiceData] = useState(null);
+//   const [exchange, setExchange] = useState([]);
+//   const [selectedExType, setSelectedExType] = useState(null);
+//   const [receivedAmount, setReceivedAmount] = useState('');
+//   const [displayAmount, setDisplayAmount] = useState('');
+//   const [isProcessing, setIsProcessing] = useState(false);
 
+//   // Exchange rates (default values)
+//   const [exchangeRates, setExchangeRates] = useState({});
+//   const [selectedCurrency, setSelectedCurrency] = useState('KIP');
+
+//   const [isMixedPayment, setIsMixedPayment] = useState(false);
+//   const [cashAmount, setCashAmount] = useState('');
+//   const [transferAmount, setTransferAmount] = useState('');
+//   const [displayCashAmount, setDisplayCashAmount] = useState('');
+//   const [displayTransferAmount, setDisplayTransferAmount] = useState('');
+
+//   const totalServiceCost = services.reduce(
+//     (total, service) => total + service.price * service.qty,
+//     0,
+//   );
+
+//   const totalMedicineCost = medicines.reduce(
+//     (total, medicine) => total + medicine.price * medicine.qty,
+//     0,
+//   );
+
+//   const grandTotal = totalServiceCost + totalMedicineCost;
+
+//   // Helper function to round currency properly
+//   const roundCurrency = (amount, currency) => {
+//     if (currency === 'KIP') {
+//       return Math.ceil(amount); // Always round up for KIP
+//     } else if (currency === 'THB' || currency === 'USD') {
+//       // For THB and USD, round up if decimal >= 0.5
+//       const decimalPart = amount - Math.floor(amount);
+//       if (decimalPart >= 0.5) {
+//         return Math.ceil(amount);
+//       } else {
+//         return parseFloat(amount.toFixed(2)); // Keep original decimal if < 0.5
+//       }
+//     }
+//     return parseFloat(amount.toFixed(2));
+//   };
+
+//   const totalInSelectedCurrency = (() => {
+//     if (selectedCurrency === 'KIP') {
+//       return grandTotal;
+//     }
+//     const rate = exchangeRates[selectedCurrency] || 1;
+//     const convertedAmount = grandTotal / rate;
+//     return roundCurrency(convertedAmount, selectedCurrency);
+//   })();
+
+//   // Calculate amounts in all currencies for display
+//   const getAmountInAllCurrencies = () => {
+//     const kipAmount = grandTotal;
+//     const currencies = {};
+
+//     currencies['KIP'] = Math.ceil(kipAmount);
+
+//     // Add other currencies
+//     exchange.forEach((ex) => {
+//       if (ex.ex_type !== 'KIP') {
+//         const convertedAmount = kipAmount / ex.ex_rate;
+//         currencies[ex.ex_type] = roundCurrency(convertedAmount, ex.ex_type);
+//       }
+//     });
+
+//     return currencies;
+//   };
+
+//   const allCurrencyAmounts = getAmountInAllCurrencies();
+
+//   // Now we can use totalInSelectedCurrency safely
+//   const totalMixedAmount =
+//     parseFloat(cashAmount || 0) + parseFloat(transferAmount || 0);
+//   const isAmountSufficient = isMixedPayment
+//     ? totalMixedAmount >= totalInSelectedCurrency
+//     : parseFloat(receivedAmount || 0) >= totalInSelectedCurrency;
+
+//   // Calculate change amount
+//   const changeAmount = receivedAmount
+//     ? Math.max(0, parseFloat(receivedAmount) - totalInSelectedCurrency)
+//     : 0;
+
+//   // Calculate change in KIP for display
+//   const changeAmountInKIP =
+//     selectedCurrency === 'KIP'
+//       ? changeAmount
+//       : changeAmount * (exchangeRates[selectedCurrency] || 1);
+
+//   useEffect(() => {
+//     if (isOpen && !invoiceData) {
+//       generateInvoice();
+//     }
+//   }, [isOpen]);
+
+//   // Fetch exchange rates
+//   useEffect(() => {
+//     const fetchEx = async () => {
+//       try {
+//         const response = await fetch(
+//           'http://localhost:4000/src/manager/exchange',
+//         );
+//         const data = await response.json();
+//         if (response.ok) {
+//           console.log('API Response:', data.data);
+//           const exchangeData = data.data.map((cat) => ({
+//             ex_id: cat.ex_id,
+//             ex_type: cat.ex_type,
+//             ex_rate: cat.ex_rate,
+//           }));
+//           setExchange(exchangeData);
+
+//           // Update exchange rates state
+//           const rates = {};
+//           exchangeData.forEach((ex) => {
+//             rates[ex.ex_type] = ex.ex_rate;
+//           });
+//           setExchangeRates((prev) => ({ ...prev, ...rates }));
+//         } else {
+//           console.error('Failed to fetch exchange rates', data);
+//         }
+//       } catch (error) {
+//         console.error('Error fetching exchange rates', error);
+//       }
+//     };
+//     fetchEx();
+//   }, []);
+
+//   const handlePrint = () => {
+//     window.print();
+//   };
+
+//   const formatDate = (dateString) => {
+//     if (!dateString) return '';
+//     const date = new Date(dateString);
+//     return date.toLocaleDateString('lo-LA', {
+//       year: 'numeric',
+//       month: 'long',
+//       day: 'numeric',
+//     });
+//   };
+
+//   const formatCurrency = (amount, currency = 'KIP') => {
+//     if (currency === 'KIP') {
+//       return new Intl.NumberFormat('lo-LA').format(Math.ceil(amount)) + ' ກີບ';
+//     } else if (currency === 'THB') {
+//       return (
+//         new Intl.NumberFormat('en-US', {
+//           minimumFractionDigits: 2,
+//           maximumFractionDigits: 2,
+//         }).format(amount) + ' ບາດ'
+//       );
+//     } else if (currency === 'USD') {
+//       return (
+//         new Intl.NumberFormat('en-US', {
+//           minimumFractionDigits: 2,
+//           maximumFractionDigits: 2,
+//         }).format(amount) + ' ໂດລາ'
+//       );
+//     }
+//     return new Intl.NumberFormat('en-US', {
+//       minimumFractionDigits: 2,
+//       maximumFractionDigits: 2,
+//     }).format(amount);
+//   };
+
+//   const handleExchangeSelect = (e) => {
+//     const selectedExId = e.target.value;
+//     setSelectedExType(selectedExId);
+
+//     const selectedEx = exchange.find((ex) => ex.ex_id == selectedExId);
+//     if (selectedEx) {
+//       setSelectedCurrency(selectedEx.ex_type);
+//     }
+//   };
+
+//   const generateInvoice = async () => {
+//     try {
+//       const response = await fetch(
+//         'http://localhost:4000/src/invoice/invoice',
+//         {
+//           method: 'POST',
+//           headers: { 'Content-Type': 'application/json' },
+//           body: JSON.stringify({
+//             total: grandTotal,
+//             in_id: inspectionData?.in_id,
+//           }),
+//         },
+//       );
+
+//       if (response.ok) {
+//         const resData = await response.json();
+//         const invoice = resData.data;
+
+//         console.log('Invoice API:', invoice);
+//         console.log('Invoice ID:', invoice.invoice_id);
+//         setInvoiceData(invoice);
+//       }
+//     } catch (error) {
+//       console.error('Failed to generate invoice:', error);
+//     }
+//   };
+//   const handlePaymentConfirm = async () => {
+//     setIsProcessing(true);
+//     const selectedEx = exchange.find((ex) => ex.ex_id == selectedExType);
+//     const exRateValue = selectedEx ? selectedEx.ex_rate : 1;
+
+//     try {
+//       if (isMixedPayment) {
+//         // สำหรับการชำระแบบผสม - ส่ง 2 รายการ
+//         const payments = [];
+
+//         // เพิ่มการชำระด้วยเงินสดถ้ามี
+//         if (parseFloat(cashAmount || 0) > 0) {
+//           payments.push({
+//             invoice_id: invoiceData.invoice_id,
+//             paid_amount: parseFloat(cashAmount),
+//             pay_type: 'CASH',
+//             ex_id: selectedExType,
+//             ex_rate: exRateValue,
+//           });
+//         }
+
+//         // เพิ่มการชำระด้วยการโอนถ้ามี
+//         if (parseFloat(transferAmount || 0) > 0) {
+//           payments.push({
+//             invoice_id: invoiceData.invoice_id,
+//             paid_amount: parseFloat(transferAmount),
+//             pay_type: 'TRANSFER',
+//             ex_id: selectedExType,
+//             ex_rate: exRateValue,
+//           });
+//         }
+
+//         // ส่ง payment แต่ละรายการทีละรายการ (Sequential)
+//         for (let i = 0; i < payments.length; i++) {
+//           const payment = payments[i];
+
+//           // Add a small delay between requests to ensure different timestamps
+//           if (i > 0) {
+//             await new Promise((resolve) => setTimeout(resolve, 100)); // 100ms delay
+//           }
+
+//           const response = await fetch(
+//             'http://localhost:4000/src/payment/payment',
+//             {
+//               method: 'POST',
+//               headers: { 'Content-Type': 'application/json' },
+//               body: JSON.stringify(payment),
+//             },
+//           );
+
+//           if (!response.ok) {
+//             const errorData = await response.json();
+//             console.error('Payment error:', errorData);
+
+//             // Show specific error message to user
+//             alert(`ການຊຳລະລົ້ມເຫລວ: ${errorData.message || 'Unknown error'}`);
+//             return;
+//           }
+
+//           const result = await response.json();
+//           console.log(`Payment ${i + 1} successful:`, result);
+//         }
+//       } else {
+//         // การชำระแบบปกติ (แค่วิธีเดียว)
+//         const response = await fetch(
+//           'http://localhost:4000/src/payment/payment',
+//           {
+//             method: 'POST',
+//             headers: { 'Content-Type': 'application/json' },
+//             body: JSON.stringify({
+//               invoice_id: invoiceData.invoice_id,
+//               paid_amount: parseFloat(receivedAmount),
+//               pay_type: paymentType.toUpperCase(),
+//               ex_id: selectedExType,
+//               ex_rate: exRateValue,
+//             }),
+//           },
+//         );
+
+//         if (!response.ok) {
+//           const errorData = await response.json();
+//           console.error('Payment error:', errorData);
+//           // alert(`ການຊຳລະລົ້ມເຫລວ: ${errorData.message || 'Unknown error'}`);
+//           return;
+//         }
+
+//         const result = await response.json();
+//         console.log('Payment successful:', result);
+//       }
+
+//       console.log('All payments completed successfully');
+//       setShowPaymentPopup(false);
+//       onClose();
+//       setInvoiceData(null);
+
+//       setPaymentType('cash');
+//       setIsMixedPayment(false);
+//       setCashAmount('');
+//       setTransferAmount('');
+//       setDisplayAmount('');
+//       setDisplayCashAmount('');
+//       setDisplayTransferAmount('');
+//       setReceivedAmount('');
+//     } catch (error) {
+//       console.error('Payment failed:', error);
+//       // alert(`ເກີດຂໍ້ຜິດພາດ: ${error.message}`);
+//     } finally {
+//       setIsProcessing(false);
+//     }
+//   };
 const BillPopup = ({
   isOpen,
   onClose,
@@ -19,14 +350,19 @@ const BillPopup = ({
   inspectionData,
   services = [],
   medicines = [],
+
+  invoiceData,
 }) => {
   if (!isOpen) return null;
-
   // Payment states
+  const isInvoiceCancelled = invoiceData?.status === 'CANCEL';
+  const isInvoicePaid = invoiceData?.status === 'PAID';
+  const shouldShowPaymentButtons = !isInvoiceCancelled && !isInvoicePaid;
+  const dispatch = useDispatch();
+
   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
   const [paymentType, setPaymentType] = useState('cash');
   const [paymentStatus, setPaymentStatus] = useState('pending');
-  const [invoiceData, setInvoiceData] = useState(null);
   const [exchange, setExchange] = useState([]);
   const [selectedExType, setSelectedExType] = useState(null);
   const [receivedAmount, setReceivedAmount] = useState('');
@@ -42,25 +378,67 @@ const BillPopup = ({
   const [transferAmount, setTransferAmount] = useState('');
   const [displayCashAmount, setDisplayCashAmount] = useState('');
   const [displayTransferAmount, setDisplayTransferAmount] = useState('');
+
   const totalServiceCost = services.reduce(
     (total, service) => total + service.price * service.qty,
     0,
   );
 
+  // const totalMedicineCost = medicines.reduce(
+  //   (total, medicine) => total + (medicine.total || 0),
+  //   0,
+  // );
+
   const totalMedicineCost = medicines.reduce(
     (total, medicine) => total + medicine.price * medicine.qty,
     0,
   );
-
   const grandTotal = totalServiceCost + totalMedicineCost;
+
+  // Helper function to round currency properly
+  const roundCurrency = (amount, currency) => {
+    if (currency === 'KIP') {
+      return Math.ceil(amount); // Always round up for KIP
+    } else if (currency === 'THB' || currency === 'USD') {
+      // For THB and USD, round up if decimal >= 0.5
+      const decimalPart = amount - Math.floor(amount);
+      if (decimalPart >= 0.5) {
+        return Math.ceil(amount);
+      } else {
+        return parseFloat(amount.toFixed(2)); // Keep original decimal if < 0.5
+      }
+    }
+    return parseFloat(amount.toFixed(2));
+  };
 
   const totalInSelectedCurrency = (() => {
     if (selectedCurrency === 'KIP') {
       return grandTotal;
     }
     const rate = exchangeRates[selectedCurrency] || 1;
-    return grandTotal / rate;
+    const convertedAmount = grandTotal / rate;
+    return roundCurrency(convertedAmount, selectedCurrency);
   })();
+
+  // Calculate amounts in all currencies for display
+  const getAmountInAllCurrencies = () => {
+    const kipAmount = grandTotal;
+    const currencies = {};
+
+    currencies['KIP'] = Math.ceil(kipAmount);
+
+    // Add other currencies
+    exchange.forEach((ex) => {
+      if (ex.ex_type !== 'KIP') {
+        const convertedAmount = kipAmount / ex.ex_rate;
+        currencies[ex.ex_type] = roundCurrency(convertedAmount, ex.ex_type);
+      }
+    });
+
+    return currencies;
+  };
+
+  const allCurrencyAmounts = getAmountInAllCurrencies();
 
   // Now we can use totalInSelectedCurrency safely
   const totalMixedAmount =
@@ -80,11 +458,7 @@ const BillPopup = ({
       ? changeAmount
       : changeAmount * (exchangeRates[selectedCurrency] || 1);
 
-  useEffect(() => {
-    if (isOpen && !invoiceData) {
-      generateInvoice();
-    }
-  }, [isOpen]);
+  // ลบ useEffect ที่เรียก generateInvoice ออก เพราะตอนนี้รับ invoiceData จาก parent แล้ว
 
   // Fetch exchange rates
   useEffect(() => {
@@ -135,7 +509,21 @@ const BillPopup = ({
 
   const formatCurrency = (amount, currency = 'KIP') => {
     if (currency === 'KIP') {
-      return new Intl.NumberFormat('lo-LA').format(amount) + ' ກີບ';
+      return new Intl.NumberFormat('lo-LA').format(Math.ceil(amount)) + ' ກີບ';
+    } else if (currency === 'THB') {
+      return (
+        new Intl.NumberFormat('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(amount) + ' ບາດ'
+      );
+    } else if (currency === 'USD') {
+      return (
+        new Intl.NumberFormat('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(amount) + ' ໂດລາ'
+      );
     }
     return new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 2,
@@ -153,132 +541,16 @@ const BillPopup = ({
     }
   };
 
-  const generateInvoice = async () => {
-    try {
-      const response = await fetch(
-        'http://localhost:4000/src/invoice/invoice',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            total: grandTotal,
-            in_id: inspectionData?.in_id,
-          }),
-        },
-      );
-
-      if (response.ok) {
-        const resData = await response.json();
-        const invoice = resData.data;
-
-        console.log('Invoice API:', invoice); // ✅ ต้องแสดง object ที่มี invoice_id
-        console.log('Invoice ID:', invoice.invoice_id); // ✅ แสดงค่า invoice_id
-        setInvoiceData(invoice);
-      }
-    } catch (error) {
-      console.error('Failed to generate invoice:', error);
-    }
-  };
-//  const handlePaymentConfirm = async () => {
-  
-//   setIsProcessing(true);
-//   const selectedEx = exchange.find((ex) => ex.ex_id == selectedExType);
-//   const exRateValue = selectedEx ? selectedEx.ex_rate : 1;
-  
-//   try {
-//     if (isMixedPayment) {
-//       // สำหรับการชำระแบบผสม - ส่ง 2 รายการ
-//       const payments = [];
-      
-//       // เพิ่มการชำระด้วยเงินสดถ้ามี
-//       if (parseFloat(cashAmount || 0) > 0) {
-//         payments.push({
-//           invoice_id: invoiceData.invoice_id,
-//           paid_amount: parseFloat(cashAmount),
-//           pay_type: 'CASH',
-//           ex_id: selectedExType,
-//           ex_rate: exRateValue,
-//         });
-//       }
-      
-//       // เพิ่มการชำระด้วยการโอนถ้ามี
-//       if (parseFloat(transferAmount || 0) > 0) {
-//         payments.push({
-//           invoice_id: invoiceData.invoice_id,
-//           paid_amount: parseFloat(transferAmount),
-//           pay_type: 'TRANSFER',
-//           ex_id: selectedExType,
-//           ex_rate: exRateValue,
-//         });
-//       }
-      
-//       // ส่ง payment แต่ละรายการ
-//       for (const payment of payments) {
-//         const response = await fetch(
-//           'http://localhost:4000/src/payment/payment',
-//           {
-//             method: 'POST',
-//             headers: { 'Content-Type': 'application/json' },
-//             body: JSON.stringify(payment),
-//           }
-//         );
-        
-//         if (!response.ok) {
-//           const errorData = await response.text();
-//           console.error('Payment error:', errorData);
-//           throw new Error('Payment failed');
-//         }
-//       }
-      
-//     } else {
-//       // การชำระแบบปกติ (แค่วิธีเดียว)
-//       const response = await fetch(
-//         'http://localhost:4000/src/payment/payment',
-//         {
-//           method: 'POST',
-//           headers: { 'Content-Type': 'application/json' },
-//           body: JSON.stringify({
-//             invoice_id: invoiceData.invoice_id,
-//             paid_amount: parseFloat(receivedAmount),
-//             pay_type: paymentType.toUpperCase(),
-//             ex_id: selectedExType,
-//             ex_rate: exRateValue,
-//           }),
-//         }
-//       );
-
-//       if (!response.ok) {
-//         // const errorData = await response.text();
-//         // console.error('Payment error:', errorData);
-//         // throw new Error('Payment failed');
-//       }
-//     }
-    
-//     // สำเร็จแล้ว
-//     setShowPaymentPopup(false);
-//     onClose();
-//     setInvoiceData(null);
-    
-//   } catch (error) {
-//     console.error('Payment failed:', error);
-//     // alert('การชำระเงินไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
-//   } finally {
-//     setIsProcessing(false);
-//   }
-// };
-  
-
-
   const handlePaymentConfirm = async () => {
     setIsProcessing(true);
     const selectedEx = exchange.find((ex) => ex.ex_id == selectedExType);
     const exRateValue = selectedEx ? selectedEx.ex_rate : 1;
-    
+
     try {
       if (isMixedPayment) {
         // สำหรับการชำระแบบผสม - ส่ง 2 รายการ
         const payments = [];
-        
+
         // เพิ่มการชำระด้วยเงินสดถ้ามี
         if (parseFloat(cashAmount || 0) > 0) {
           payments.push({
@@ -289,7 +561,7 @@ const BillPopup = ({
             ex_rate: exRateValue,
           });
         }
-        
+
         // เพิ่มการชำระด้วยการโอนถ้ามี
         if (parseFloat(transferAmount || 0) > 0) {
           payments.push({
@@ -300,25 +572,37 @@ const BillPopup = ({
             ex_rate: exRateValue,
           });
         }
-        
-        // ส่ง payment แต่ละรายการ
-        for (const payment of payments) {
+
+        // ส่ง payment แต่ละรายการทีละรายการ (Sequential)
+        for (let i = 0; i < payments.length; i++) {
+          const payment = payments[i];
+
+          // Add a small delay between requests to ensure different timestamps
+          if (i > 0) {
+            await new Promise((resolve) => setTimeout(resolve, 100)); // 100ms delay
+          }
+
           const response = await fetch(
             'http://localhost:4000/src/payment/payment',
             {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(payment),
-            }
+            },
           );
-          
+
           if (!response.ok) {
-            const errorData = await response.text();
+            const errorData = await response.json();
             console.error('Payment error:', errorData);
-            throw new Error('Payment failed');
+
+            // Show specific error message to user
+            alert(`ການຊຳລະລົ້ມເຫລວ: ${errorData.message || 'Unknown error'}`);
+            return;
           }
+
+          const result = await response.json();
+          console.log(`Payment ${i + 1} successful:`, result);
         }
-        
       } else {
         // การชำระแบบปกติ (แค่วิธีเดียว)
         const response = await fetch(
@@ -333,31 +617,54 @@ const BillPopup = ({
               ex_id: selectedExType,
               ex_rate: exRateValue,
             }),
-          }
+          },
         );
 
         if (!response.ok) {
-          // const errorData = await response.text();
-          // console.error('Payment error:', errorData);
-          // throw new Error('Payment failed');
+          const errorData = await response.json();
+          console.error('Payment error:', errorData);
+          // alert(`ການຊຳລະລົ້ມເຫລວ: ${errorData.message || 'Unknown error'}`);
+          return;
         }
+
+        const result = await response.json();
+        console.log('Payment successful:', result);
       }
-      
-      // สำเร็จแล้ว
+
+      console.log('All payments completed successfully');
       setShowPaymentPopup(false);
       onClose();
-      setInvoiceData(null);
-      
+
+      setPaymentType('cash');
+      setIsMixedPayment(false);
+      setCashAmount('');
+      setTransferAmount('');
+      setDisplayAmount('');
+      setDisplayCashAmount('');
+      setDisplayTransferAmount('');
+      setReceivedAmount('');
     } catch (error) {
       console.error('Payment failed:', error);
-      // alert('การชำระเงินไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+      // alert(`ເກີດຂໍ້ຜິດພາດ: ${error.message}`);
     } finally {
       setIsProcessing(false);
     }
   };
+  const handlePayLater = () => {
+    dispatch(
+      openAlert({
+        type: 'success',
+        title: 'ສຳເລັດ',
+        message: 'ໃບບິນຖືກສ້າງແລ້ວ ທ່ານສາມາດຊຳລະໄດ້ທີຫຼັງ',
+      }),
+    );
 
+    onClose?.();
 
-return (
+    onRefresh?.();
+  };
+
+  return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl max-w-3xl w-full max-h-[95vh] overflow-y-auto">
         {/* Header - Hidden on print */}
@@ -596,7 +903,7 @@ return (
 
           <div className="flex justify-end">
             <div className="w-full max-w-md">
-              <div className="bg-gray-50 p-6 space-y-4 print:bg-white  print:p-4 print:space-y-2">
+              <div className="bg-blue-50 p-4 space-y-2 print:bg-white mb-4  print:p-4 print:space-y-2">
                 {/* Subtotals */}
                 {services.length > 0 && (
                   <div className="flex justify-between text-sm print:text-sm">
@@ -655,370 +962,356 @@ return (
             </div>
           </div>
 
-          <div className="flex justify-end mt-6 print:hidden">
-            <button
-              onClick={() => setShowPaymentPopup(true)}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded"
-            >
-              ຊຳລະເງິນ
-            </button>
-          </div>
+          {shouldShowPaymentButtons && (
+            <div className="flex justify-end gap-4">
+                  <button
+                onClick={handlePayLater}
+                className="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded"
+              >
+                ຊຳລະພາຍຫຼັງ
+              </button>
+              <button
+                onClick={() => setShowPaymentPopup(true)}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded"
+              >
+                ຊຳລະເງິນ
+              </button>
+
+          
+            </div>
+          )}
 
           {/* Payment Popup */}
           {showPaymentPopup && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60 print:hidden">
-              <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold">ຊຳລະເງິນ</h3>
-                  <button onClick={() => setShowPaymentPopup(false)}>
-                    <X size={20} />
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60 print:hidden p-4">
+              <div className="bg-white p-6 rounded max-w-4xl w-full max-h-[95vh] overflow-y-auto ">
+                <div className="flex justify-between items-center mb-4 border-b border-stroke pb-4">
+                  <h3 className="text-xl font-semibold text-form-input">
+                    ຊຳລະເງິນ
+                  </h3>
+                  <button
+                    onClick={() => setShowPaymentPopup(false)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <X size={24} />
                   </button>
                 </div>
 
-                {/* Payment Type Selection */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">
-                    ວິທີຊຳລະ
-                  </label>
-                  <div className="flex gap-2 flex-wrap">
-                    <button
-                      onClick={() => {
-                        setPaymentType('cash');
-                        setIsMixedPayment(false);
-                        setCashAmount('');
-                        setTransferAmount('');
-                        setDisplayCashAmount('');
-                        setDisplayTransferAmount('');
-                      }}
-                      className={`px-4 py-2 rounded ${
-                        paymentType === 'cash' && !isMixedPayment
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-200'
-                      }`}
-                    >
-                      ສົດ
-                    </button>
-                    <button
-                      onClick={() => {
-                        setPaymentType('transfer');
-                        setIsMixedPayment(false);
-                        setCashAmount('');
-                        setTransferAmount('');
-                        setDisplayCashAmount('');
-                        setDisplayTransferAmount('');
-                      }}
-                      className={`px-4 py-2 rounded ${
-                        paymentType === 'transfer' && !isMixedPayment
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-200'
-                      }`}
-                    >
-                      ໂອນ
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsMixedPayment(true);
-                        setDisplayAmount('');
-                        setReceivedAmount('');
-                      }}
-                      className={`px-4 py-2 rounded ${
-                        isMixedPayment
-                          ? 'bg-purple-500 text-white'
-                          : 'bg-gray-200'
-                      }`}
-                    >
-                      ສົດ + ໂອນ
-                    </button>
-                  </div>
-                </div>
-
-                {/* Currency Selection */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">
-                    ເລືອກສະກຸນເງິນ
-                  </label>
-                  <div className="flex gap-2 mb-2">
-                    <button
-                      onClick={() => {
-                        setSelectedCurrency('KIP');
-                        setSelectedExType(null);
-                        // Clear all amounts when currency changes
-                        setDisplayAmount('');
-                        setReceivedAmount('');
-                        setCashAmount('');
-                        setTransferAmount('');
-                        setDisplayCashAmount('');
-                        setDisplayTransferAmount('');
-                      }}
-                      className={`px-4 py-2 rounded ${
-                        selectedCurrency === 'KIP'
-                          ? 'bg-green-500 text-white'
-                          : 'bg-gray-200'
-                      }`}
-                    >
-                      ກີບ
-                    </button>
-                  </div>
-
-                  <SelectBoxId
-                    label="ປະເພດເງິນ (ອື່ນໆ)"
-                    name="currency"
-                    value={selectedExType || ''}
-                    options={exchange
-                      .filter((ex) => ex.ex_type !== 'KIP')
-                      .map((ex) => ({
-                        label: `${ex.ex_type} (Rate: ${ex.ex_rate})`,
-                        value: ex.ex_id,
-                      }))}
-                    onSelect={(e) => {
-                      handleExchangeSelect(e);
-                      // Clear all amounts when currency changes
-                      setDisplayAmount('');
-                      setReceivedAmount('');
-                      setCashAmount('');
-                      setTransferAmount('');
-                      setDisplayCashAmount('');
-                      setDisplayTransferAmount('');
-                    }}
-                    disabled={selectedCurrency === 'KIP'}
-                  />
-                </div>
-
-                {/* Amount Input - Single Payment */}
-                {!isMixedPayment && (
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium mb-2">
-                      ຈຳນວນເງິນທີ່ຮັບ ({selectedCurrency})
-                    </label>
-                    <input
-                      type="text"
-                      value={displayAmount}
-                      onChange={(e) => {
-                        const rawValue = e.target.value.replace(/,/g, '');
-
-                        const isValidInput =
-                          selectedCurrency === 'KIP'
-                            ? /^\d*$/.test(rawValue)
-                            : /^\d*\.?\d*$/.test(rawValue);
-
-                        if (isValidInput) {
-                          let formattedValue;
-
-                          if (selectedCurrency === 'KIP') {
-                            formattedValue =
-                              Number(rawValue).toLocaleString('en-US');
-                          } else {
-                            const parts = rawValue.split('.');
-                            const integerPart = Number(
-                              parts[0] || 0,
-                            ).toLocaleString('en-US');
-                            formattedValue =
-                              parts.length > 1
-                                ? `${integerPart}.${parts[1]}`
-                                : integerPart;
-                          }
-
-                          setDisplayAmount(formattedValue);
-                          setReceivedAmount(rawValue);
-                        }
-                      }}
-                      className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder={selectedCurrency === 'KIP' ? '0' : '0.00'}
-                    />
-                  </div>
-                )}
-
-                {/* Mixed Payment Input */}
-                {isMixedPayment && (
-                  <div className="mb-4 space-y-3">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Left Column */}
+                  <div className="space-y-4">
+                    {/* Total Amount Display - Show all currencies */}
                     <div>
-                      <label className="block text-sm font-medium mb-2">
-                        ຈຳນວນເງິນສົດ ({selectedCurrency})
-                      </label>
-                      <input
-                        type="text"
-                        value={displayCashAmount}
-                        onChange={(e) => {
-                          const rawValue = e.target.value.replace(/,/g, '');
-
-                          const isValidInput =
-                            selectedCurrency === 'KIP'
-                              ? /^\d*$/.test(rawValue)
-                              : /^\d*\.?\d*$/.test(rawValue);
-
-                          if (isValidInput) {
-                            let formattedValue;
-
-                            if (selectedCurrency === 'KIP') {
-                              formattedValue =
-                                Number(rawValue).toLocaleString('en-US');
-                            } else {
-                              const parts = rawValue.split('.');
-                              const integerPart = Number(
-                                parts[0] || 0,
-                              ).toLocaleString('en-US');
-                              formattedValue =
-                                parts.length > 1
-                                  ? `${integerPart}.${parts[1]}`
-                                  : integerPart;
-                            }
-
-                            setDisplayCashAmount(formattedValue);
-                            setCashAmount(rawValue);
-                          }
-                        }}
-                        className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder={selectedCurrency === 'KIP' ? '0' : '0.00'}
-                      />
+                      <h4 className="text-md font-medium mb-2 text-form-input">
+                        ຍອດທີ່ຕ້ອງຊຳລະ
+                      </h4>
+                      <div className="space-y-2">
+                        {Object.entries(allCurrencyAmounts).map(
+                          ([currency, amount]) => (
+                            <div
+                              key={currency}
+                              className={`flex justify-between items-center p-2 rounded border ${
+                                currency === 'KIP'
+                                  ? ' bg-gradient-to-r from-blue-50 to-indigo-50 border-stroke text-lg'
+                                  : ' border-stroke'
+                              }`}
+                            >
+                              <span className="font-medium text-gray-700 text-sm">
+                                {currency}:
+                              </span>
+                              <span className="font-bold text-form-strokedark">
+                                {formatCurrency(amount, currency)}
+                              </span>
+                            </div>
+                          ),
+                        )}
+                      </div>
                     </div>
 
+                    {/* Payment Type Selection */}
                     <div>
-                      <label className="block text-sm font-medium mb-2">
-                        ຈຳນວນເງິນໂອນ ({selectedCurrency})
+                      <label className="block text-sm font-medium mb-2 text-form-input">
+                        ເລືອກປະເພດການຊຳລະ
                       </label>
-                      <input
-                        type="text"
-                        value={displayTransferAmount}
-                        onChange={(e) => {
-                          const rawValue = e.target.value.replace(/,/g, '');
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          onClick={() => {
+                            setPaymentType('cash');
+                            setIsMixedPayment(false);
+                            setCashAmount('');
+                            setTransferAmount('');
+                            setDisplayCashAmount('');
+                            setDisplayTransferAmount('');
+                          }}
+                          className={`flex flex-col items-center p-3 rounded border-2 transition-all ${
+                            paymentType === 'cash' && !isMixedPayment
+                              ? 'border-green-500 bg-green-50 text-green-700'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <Banknote size={20} className="mb-1" />
+                          <span className="text-xs font-medium">ເງິນສົດ</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setPaymentType('transfer');
+                            setIsMixedPayment(false);
+                            setCashAmount('');
+                            setTransferAmount('');
+                            setDisplayCashAmount('');
+                            setDisplayTransferAmount('');
+                          }}
+                          className={`flex flex-col items-center p-3 rounded border-2 transition-all ${
+                            paymentType === 'transfer' && !isMixedPayment
+                              ? 'border-blue-500 bg-blue-50 text-blue-700'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <TransferIcon size={20} className="mb-1" />
+                          <span className="text-xs font-medium">ໂອນເງິນ</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsMixedPayment(true);
+                            setDisplayAmount('');
+                            setReceivedAmount('');
+                          }}
+                          className={`flex flex-col items-center p-3 rounded border-2 transition-all ${
+                            isMixedPayment
+                              ? 'border-purple-500 bg-purple-50 text-purple-700'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex mb-1">
+                            <Banknote size={14} />
+                            <span className="text-xs mx-1">+</span>
+                            <TransferIcon size={14} />
+                          </div>
+                          <span className="text-xs font-medium">
+                            ເງີນສົດ + ໂອນ
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
 
-                          const isValidInput =
-                            selectedCurrency === 'KIP'
-                              ? /^\d*$/.test(rawValue)
-                              : /^\d*\.?\d*$/.test(rawValue);
+                  {/* Right Column */}
+                  <div className="space-y-4">
+                    {/* Amount Input - Single Payment */}
+                    {!isMixedPayment && (
+                      <div>
+                        <label className="block text-sm font-medium mb-2 text-form-input">
+                          ຈຳນວນເງິນທີ່ຮັບ
+                        </label>
+                        <input
+                          type="text"
+                          value={displayAmount}
+                          onChange={(e) => {
+                            const rawValue = e.target.value.replace(/,/g, '');
+                            const isValidInput = /^\d*$/.test(rawValue);
 
-                          if (isValidInput) {
-                            let formattedValue;
-
-                            if (selectedCurrency === 'KIP') {
-                              formattedValue =
+                            if (isValidInput) {
+                              const formattedValue =
                                 Number(rawValue).toLocaleString('en-US');
-                            } else {
-                              const parts = rawValue.split('.');
-                              const integerPart = Number(
-                                parts[0] || 0,
-                              ).toLocaleString('en-US');
-                              formattedValue =
-                                parts.length > 1
-                                  ? `${integerPart}.${parts[1]}`
-                                  : integerPart;
+                              setDisplayAmount(formattedValue);
+                              setReceivedAmount(rawValue);
                             }
+                          }}
+                          className="w-full border-2 border-gray-300 rounded px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="0"
+                        />
 
-                            setDisplayTransferAmount(formattedValue);
-                            setTransferAmount(rawValue);
-                          }
-                        }}
-                        className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder={selectedCurrency === 'KIP' ? '0' : '0.00'}
-                      />
-                    </div>
-
-                    {/* Mixed Payment Summary */}
-                    <div className="bg-gray-50 p-3 rounded border">
-                      <div className="text-sm text-gray-600 mb-1">
-                        ລວມຈຳນວນທີ່ຮັບ:
+                        {/* Exact Amount Button */}
+                        <button
+                          onClick={() => {
+                            const exactAmount =
+                              Math.ceil(grandTotal).toString();
+                            const formattedAmount =
+                              Number(exactAmount).toLocaleString('en-US');
+                            setDisplayAmount(formattedAmount);
+                            setReceivedAmount(exactAmount);
+                          }}
+                          className="w-full mt-3 py-2 px-4 bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white font-medium rounded transition-all duration-200 shadow-md hover:shadow-lg"
+                        >
+                          ຮັບເງິນເຕັມຈຳນວນ (
+                          {formatCurrency(Math.ceil(grandTotal), 'KIP')})
+                        </button>
                       </div>
-                      <div className="font-semibold text-blue-600">
-                        {formatCurrency(
-                          Math.ceil(totalMixedAmount),
-                          selectedCurrency,
-                        )}{' '}
-                        {selectedCurrency}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                    )}
 
-                {/* Total Amount Display */}
-                <div className="mb-4">
-                  <h4 className="text-sm font-medium mb-2">ຍອດທີ່ຕ້ອງຊຳລະ</h4>
-                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="text-lg font-bold text-blue-700">
-                      {formatCurrency(
-                        Math.ceil(totalInSelectedCurrency),
-                        selectedCurrency,
-                      )}{' '}
-                      {selectedCurrency}
-                    </div>
-                  </div>
-                </div>
+                    {/* Mixed Payment Input */}
+                    {isMixedPayment && (
+                      <div className="p-4 bg-slate-50 rounded border border-stroke">
+                        <h4 className="font-medium text-md mb-3">
+                          💳 ການຊຳລະເງິນຫຼາຍຊ່ອງທາງ
+                        </h4>
 
-                {/* Change Amount Display - Only show if amount is sufficient */}
-                {isAmountSufficient && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium mb-2">ເງິນທອນ</h4>
-                    <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                      <div className="font-semibold text-green-700">
-                        {(() => {
-                          const totalReceived = isMixedPayment
-                            ? totalMixedAmount
-                            : parseFloat(receivedAmount || 0);
-                          const changeAmount =
-                            totalReceived - totalInSelectedCurrency;
-                          let changeInKIP;
+                        <div className="space-y-3">
+                          <div>
+                            <label className="block text-sm font-medium mb-2 text-gray-600">
+                              ເງິນສົດ
+                            </label>
+                            <input
+                              type="text"
+                              value={displayCashAmount}
+                              onChange={(e) => {
+                                const rawValue = e.target.value.replace(
+                                  /,/g,
+                                  '',
+                                );
+                                const isValidInput = /^\d*$/.test(rawValue);
 
-                          if (selectedCurrency === 'KIP') {
-                            changeInKIP = changeAmount;
-                          } else {
-                            const currentEx = exchange.find(
-                              (ex) => ex.ex_id === selectedExType,
-                            );
-                            const rate = currentEx ? currentEx.ex_rate : 1;
-                            changeInKIP = Math.ceil(changeAmount * rate);
-                          }
+                                if (isValidInput) {
+                                  const formattedValue =
+                                    Number(rawValue).toLocaleString('en-US');
+                                  setDisplayCashAmount(formattedValue);
+                                  setCashAmount(rawValue);
+                                }
+                              }}
+                              className="w-full border-2 border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                              placeholder="0"
+                            />
+                          </div>
 
-                          return formatCurrency(changeInKIP, 'KIP');
-                        })()}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                          <div>
+                            <label className="block text-sm font-medium mb-2 text-gray-600">
+                              ເງິນໂອນ
+                            </label>
+                            <input
+                              type="text"
+                              value={displayTransferAmount}
+                              onChange={(e) => {
+                                const rawValue = e.target.value.replace(
+                                  /,/g,
+                                  '',
+                                );
+                                const isValidInput = /^\d*$/.test(rawValue);
 
-                {/* Warning for insufficient amount */}
-                {!isAmountSufficient &&
-                  (isMixedPayment
-                    ? cashAmount || transferAmount
-                    : receivedAmount) && (
-                    <div className="mb-4">
-                      <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-                        <div className="flex items-center gap-2 text-red-700 font-semibold">
-                          <span className="text-red-500">⚠️</span>
-                          <span>ເງິນບໍ່ພໍ</span>
+                                if (isValidInput) {
+                                  const formattedValue =
+                                    Number(rawValue).toLocaleString('en-US');
+                                  setDisplayTransferAmount(formattedValue);
+                                  setTransferAmount(rawValue);
+                                }
+                              }}
+                              className="w-full border-2 border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="0"
+                            />
+                          </div>
                         </div>
-                        <div className="text-sm mt-1 text-red-600">
-                          ຂາດອີກ:{' '}
-                          {(() => {
-                            const totalReceived = isMixedPayment
-                              ? totalMixedAmount
-                              : parseFloat(receivedAmount || 0);
-                            const shortage =
-                              totalInSelectedCurrency - totalReceived;
-                            return formatCurrency(
-                              Math.ceil(shortage),
-                              selectedCurrency,
-                            );
-                          })()}{' '}
-                          {selectedCurrency}
+
+                        {/* Exact Amount Button for Mixed Payment */}
+                        <button
+                          onClick={() => {
+                            const exactAmount =
+                              Math.ceil(grandTotal).toString();
+                            const formattedAmount =
+                              Number(exactAmount).toLocaleString('en-US');
+                            setDisplayCashAmount(formattedAmount);
+                            setCashAmount(exactAmount);
+                            setDisplayTransferAmount('0');
+                            setTransferAmount('0');
+                          }}
+                          className="w-full mt-3 py-2 px-4 bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white font-medium rounded transition-all duration-200 shadow-md hover:shadow-lg"
+                        >
+                          💰 ຮັບເງິນເຕັມຈຳນວນ (
+                          {formatCurrency(Math.ceil(grandTotal), 'KIP')})
+                        </button>
+
+                        {/* Mixed Payment Summary */}
+                        <div className="mt-3 p-3 bg-white rounded border border-stroke">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">
+                              ລວມທີ່ຮັບ:
+                            </span>
+                            <span className="font-semibold text-form-input">
+                              {formatCurrency(
+                                Math.ceil(totalMixedAmount),
+                                'KIP',
+                              )}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                <button
-                  onClick={handlePaymentConfirm}
-                  disabled={isProcessing || !isAmountSufficient}
-                  className={`w-full py-3 rounded text-white ${
-                    isProcessing || !isAmountSufficient
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-green-600 hover:bg-green-700'
-                  }`}
-                >
-                  {isProcessing
-                    ? 'ກຳລັງດຳເນີນການ...'
-                    : !isAmountSufficient
-                      ? 'ເງິນບໍ່ພໍ'
-                      : 'ຢືນຢັນການຊຳລະ'}
-                </button>
+                    {/* Change Amount Display */}
+                    {isAmountSufficient && (
+                      <div>
+                        <h4 className="text-sm font-medium mb-2 text-form-input">
+                          ເງິນທອນ
+                        </h4>
+                        <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded border border-green-200">
+                          <div className="text-center">
+                            <span className="text-xl font-bold text-green-700">
+                              {(() => {
+                                const totalReceived = isMixedPayment
+                                  ? totalMixedAmount
+                                  : parseFloat(receivedAmount || 0);
+                                const changeAmount = totalReceived - grandTotal; // Always calculate change in KIP
+                                return formatCurrency(
+                                  Math.max(0, Math.ceil(changeAmount)),
+                                  'KIP',
+                                );
+                              })()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Warning for insufficient amount */}
+                    {!isAmountSufficient &&
+                      (isMixedPayment
+                        ? cashAmount || transferAmount
+                        : receivedAmount) && (
+                        <div>
+                          <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded border border-red-200">
+                            <div className="flex items-center gap-3 text-red-700">
+                              <span className="text-xl">⚠️</span>
+                              <div>
+                                <div className="font-semibold">
+                                  ເງິນຍັງບໍ່ຄົບຈຳນວນ!
+                                </div>
+                                <div className="text-sm mt-1">
+                                  ຂາດອີກ:{' '}
+                                  {(() => {
+                                    const totalReceived = isMixedPayment
+                                      ? totalMixedAmount
+                                      : parseFloat(receivedAmount || 0);
+                                    const shortage = grandTotal - totalReceived; // Calculate shortage in KIP
+                                    return formatCurrency(
+                                      Math.ceil(shortage),
+                                      'KIP',
+                                    );
+                                  })()}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                  </div>
+                </div>
+
+                {/* Confirm Button - Full Width at Bottom */}
+                <div className="mt-6 pt-4 border-t border-stroke">
+                  <button
+                    onClick={handlePaymentConfirm}
+                    disabled={isProcessing || !isAmountSufficient}
+                    className={`w-full py-3 rounded text-white font-semibold text-lg transition-all ${
+                      isProcessing || !isAmountSufficient
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-green-600 hover:bg-green-700 shadow-lg hover:shadow-xl'
+                    }`}
+                  >
+                    {isProcessing
+                      ? 'ກຳລັງດຳເນີນການ....'
+                      : !isAmountSufficient
+                        ? ' ເງິນບໍ່ຄົບຈຳນວນ'
+                        : ' ຢືນຢັນການຊຳລະ'}
+                  </button>
+                </div>
               </div>
             </div>
           )}

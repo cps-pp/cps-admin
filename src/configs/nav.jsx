@@ -150,6 +150,37 @@ const iconCalenderWhite = (
     />
   </svg>
 );
+export const iconInvoice = (
+  <svg
+    className="w-6 h-6 text-gray-800 dark:text-white"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path d="M19 2H5a2 2 0 00-2 2v18l4-2 4 2 4-2 4 2V4a2 2 0 00-2-2zm-2 14H7v-2h10v2zm0-4H7v-2h10v2zm0-4H7V6h10v2z" />
+  </svg>
+);
+
+export const iconPayment = (
+  <svg
+    className="w-6 h-6 text-gray-800 dark:text-white"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path d="M20 4H4a2 2 0 00-2 2v3h20V6a2 2 0 00-2-2zM2 18a2 2 0 002 2h16a2 2 0 002-2v-7H2v7zm6-3h8v2H8v-2z" />
+  </svg>
+);
+export const iconDetail = (
+  <svg
+    className="w-6 h-6 text-gray-800 dark:text-white"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm1 14H9v-2h6v2zm0-4H9v-2h6v2zm-1-5V3.5L18.5 8H14z" />
+  </svg>
+);
 
 export const MENU = [
   {
@@ -212,24 +243,30 @@ export const MENU = [
 export const SERVICE = [
   {
     name: 'ບໍລິການ',
-    path: 'treatment',
-    icon: iconVolunteers,
-  },
-    {
-    name: 'ລາຍລະອຽດໃບບິນ',
-    path: 'invoice',
-    icon: iconVolunteers,
-  },
-    {
-    name: 'ລາຍລະອຽດຊຳລະເງິນ',
-    path: 'pay',
+    path: 'treatment-service',
     icon: iconVolunteers,
   },
   {
-    name: 'ລາຍລະອຽດ',
-    path: 'patdetail',
-    icon: iconResume,
+    name: 'ລາຍລະອຽດການບໍລິການ',
+    path: 'list-detail',
+    icon: iconDetail,
   },
+  // {
+  //   name: 'ແກ້ໄຂລາຍການບໍລິການ',
+  //   path: 'tredetail',
+  //   icon: iconDetail,
+  // },
+    {
+    name: 'ລາຍການໃບບິນ',
+    path: 'invoice',
+    icon: iconInvoice,
+  },
+    {
+    name: 'ລາຍການຊຳລະເງິນ',
+    path: 'list-pay',
+    icon: iconPayment,
+  },
+  
 ];
 export const FOLLOW = [
   {
@@ -281,7 +318,7 @@ export const REPORTALL = [
       },
       {
         name: 'ຕິດຕາມການປິ່ນປົວ',
-        path: '/report/follow',
+        path: '/report/follow-inspection',
       },
       {
         name: 'ການນຳເຂົ້າການຢາ',

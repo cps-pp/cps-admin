@@ -38,7 +38,9 @@ const ExchangePage = () => {
   const fetchExchanges = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:4000/src/manager/exchange`);
+      const response = await fetch(
+        `http://localhost:4000/src/manager/exchange`,
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -50,7 +52,6 @@ const ExchangePage = () => {
       // ✅ เก็บรหัสทั้งหมดไว้
       const ids = data.data.map((exchange) => exchange.ex_id);
       setExistingIds(ids);
-
     } catch (error) {
       console.error('Error fetching categories:', error);
     } finally {
@@ -123,7 +124,7 @@ const ExchangePage = () => {
         `http://localhost:4000/src/manager/exchange/${selectedExchangeId}`,
         {
           method: 'DELETE',
-        }
+        },
       );
 
       if (!response.ok) {
@@ -131,7 +132,9 @@ const ExchangePage = () => {
       }
 
       setExchanges((prevExchanges) =>
-        prevExchanges.filter((exchange) => exchange.ex_id !== selectedExchangeId)
+        prevExchanges.filter(
+          (exchange) => exchange.ex_id !== selectedExchangeId,
+        ),
       );
 
       setShowModal(false);
@@ -141,7 +144,7 @@ const ExchangePage = () => {
           type: 'success',
           title: 'ລົບຂໍ້ມູນສຳເລັດ',
           message: 'ລົບຂໍ້ມູນອັດຕາແລກປ່ຽນສຳເລັດແລ້ວ',
-        })
+        }),
       );
     } catch (error) {
       dispatch(
@@ -149,7 +152,7 @@ const ExchangePage = () => {
           type: 'error',
           title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
           message: 'ເກີດຂໍ້ຜິດພາດໃນການລົບຂໍ້ມູນ',
-        })
+        }),
       );
     }
   };
@@ -181,7 +184,7 @@ const ExchangePage = () => {
 
   const paginatedEx = filteredExchanges.slice(
     page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+    page * rowsPerPage + rowsPerPage,
   );
 
   return (
@@ -262,7 +265,7 @@ const ExchangePage = () => {
                       {(exchange.ex_rate * 1).toLocaleString()}
                     </td>
                     <td className="px-4 py-4">
-                      {new Date(exchange.ex_date).toLocaleDateString('en-US', {
+                      {new Date(exchange.ex_date).toLocaleDateString('en-GB', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
@@ -373,5 +376,3 @@ const ExchangePage = () => {
 };
 
 export default ExchangePage;
-
-

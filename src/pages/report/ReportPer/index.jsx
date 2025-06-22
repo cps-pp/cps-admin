@@ -110,13 +110,14 @@ const ReportPer = () => {
     >
       <td className="px-4 py-4">{item.med_id || '-'}</td>
       <td className="px-4 py-4">{item.med_name || '-'}</td>
-      <td className="px-4 py-4">
+      <td className="px-4 py-4">{item.qty || '-'}</td>
+      {/* <td className="px-4 py-4">
         <span
           className={`font-medium ${(item.qty || 0) < 10 ? 'text-red-600' : 'text-green-600'}`}
         >
           {item.qty || 0}
         </span>
-      </td>
+      </td> */}
       <td className="px-4 py-4">
         {item.price != null ? item.price.toLocaleString('en-US') : '-'}
       </td>
@@ -125,68 +126,71 @@ const ReportPer = () => {
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 2xl:gap-7.5 w-full mb-6">
-        <div className="rounded-sm border border-stroke bg-white p-4 ">
-          <div className="flex items-center">
-            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900">
-              <svg
-                className="w-6 h-6"
+     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 2xl:gap-7.5 w-full mb-6">
+      <div className="rounded-sm border border-stroke bg-white p-4 ">
+        <div className="flex items-center">
+          <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-blue-100 ">
+               <svg
+                class="w-[25px] h-[25px] text-form-strokedark"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
                 fill="none"
-                stroke="currentColor"
                 viewBox="0 0 24 24"
               >
                 <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2.1"
+                  d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 5h6m-6 4h6M10 3v4h4V3h-4Z"
                 />
               </svg>
-            </div>
-            <div className="ml-4">
-              <h4 className="text-lg font-semibold text-strokedark dark:text-white">
-                ຈຳນວນການຈ່າຍຢາ
-              </h4>
-              <p className="text-xl font-bold text-yellow-500 dark:text-yellow-300">
-                {filteredData
-                  .filter((item) => item.medtype_id === 'M1')
-                  .reduce((sum, item) => sum + (item.qty || 0), 0)}
-              </p>
-            </div>
           </div>
-        </div>
-
-        {/* จำนวนอุปกรณ์ */}
-        <div className="rounded-sm border border-stroke bg-white p-4 ">
-          <div className="flex items-center">
-            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"
-                />
-              </svg>
-            </div>
-            <div className="ml-4">
-              <h4 className="text-lg font-semibold text-strokedark dark:text-white">
-                ຈຳນວນການຈ່າຍອຸປະກອນ
-              </h4>
-              <p className="text-xl font-bold text-blue-500 dark:text-blue-300">
-                {filteredData
-                  .filter((item) => item.medtype_id === 'M2')
-                  .reduce((sum, item) => sum + (item.qty || 0), 0)}
-              </p>
-            </div>
+          <div className="ml-4">
+            <h4 className="text-lg font-semibold text-strokedark ">
+              {activeTab === 'medicine' ? 'ຈຳນວນ' : 'ຈຳນວນ'}
+            </h4>
+            <p className="text-xl font-bold text-blue-700 ">
+              {filteredData.length} ລາຍການ
+            </p>
           </div>
         </div>
       </div>
+
+    
+      <div className="rounded-sm border border-stroke bg-white p-4 ">
+        <div className="flex items-center">
+          <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-orange-100">
+            <svg
+              className="w-6 h-6 text-orange-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+              />
+            </svg>
+          </div>
+           <div className="ml-4">
+            <h4 className="text-lg font-semibold text-strokedark dark:text-white">
+              {activeTab === 'medicine' ? 'ຈຳນວນການຈ່າຍຢາ' : 'ຈຳນວນການຈ່າຍອຸປະກອນ'}
+            </h4>
+            <p className="text-xl font-bold text-orange-600">
+              {filteredData.reduce((sum, item) => sum + (item.qty || 0), 0)}
+            </p>
+          </div>
+         
+        </div>
+      </div>
+    </div>
+
+ 
 
       <div className="rounded bg-white pt-4 dark:bg-boxdark">
         <Alerts />
