@@ -8,12 +8,11 @@ import { iconAdd } from '@/configs/icon';
 import { OrderHeaders } from './column/order';
 import { openAlert } from '@/redux/reducer/alert';
 import { useAppDispatch } from '@/redux/hook';
-
-// Import Components
+import { Eye, Plus } from 'lucide-react';
 import OrderCreate from './create';
 import EditPreorder from './edit';
 import ViewPreorder from './view';
-import AddDetailPreorder from './create_detail'; // ปรับ path ตามโครงสร้างโฟลเดอร์
+import AddDetailPreorder from './create_detail'; 
 
 const OrderPage = () => {
   const [orders, setOrders] = useState([]);
@@ -68,7 +67,6 @@ const OrderPage = () => {
       const ids = data.data.map((preorder) => preorder.preorder_id);
       console.log('Extracted IDs:', ids);
       setExistingIds(ids);
-
     } catch (error) {
       console.error('Error fetching categories:', error);
     } finally {
@@ -96,18 +94,19 @@ const OrderPage = () => {
     fetchDoctor();
   }, []);
 
-  
   // ดึงข้อมูลผู้สะหนอง
   useEffect(() => {
     const fetchSup = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:4000/src/manager/supplier');
+        const response = await fetch(
+          'http://localhost:4000/src/manager/supplier',
+        );
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
-        console.log("Supplier Data:", data.data);
+        console.log('Supplier Data:', data.data);
         setSupName(data.data);
       } catch (error) {
         console.error('Error fetching sup data:', error);
@@ -124,12 +123,14 @@ const OrderPage = () => {
     const fetchMedicine = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:4000/src/manager/medicines');
+        const response = await fetch(
+          'http://localhost:4000/src/manager/medicines',
+        );
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
-        console.log("Medicine Data:", data.data);
+        console.log('Medicine Data:', data.data);
         setMedName(data.data);
       } catch (error) {
         console.error('Error fetching medicine data:', error);
@@ -156,9 +157,7 @@ const OrderPage = () => {
   const getSupName = (sup_id) => {
     const sup = supName.find((s) => s.sup_id === sup_id);
     return sup ? (
-      <>
-        {sup.company_name}
-      </>
+      <>{sup.company_name}</>
     ) : (
       <span className="text-purple-600">-</span>
     );
@@ -168,9 +167,7 @@ const OrderPage = () => {
   const getMedName = (med_id) => {
     const med = medName.find((m) => m.med_id === med_id);
     return med ? (
-      <>
-        {med.med_name}
-      </>
+      <>{med.med_name}</>
     ) : (
       <span className="text-purple-600">-</span>
     );
@@ -184,25 +181,25 @@ const OrderPage = () => {
   const handleSortById = () => {
     const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
     setSortOrder(newSortOrder);
-    
+
     const sortedOrders = [...orders].sort((a, b) => {
       const extractNumber = (id) => {
         const match = id.match(/\d+/);
         return match ? parseInt(match[0]) : 0;
       };
-      
+
       const numA = extractNumber(a.preorder_id);
       const numB = extractNumber(b.preorder_id);
-      
+
       if (newSortOrder === 'asc') {
-        return numA - numB; 
+        return numA - numB;
       } else {
-        return numB - numA; 
+        return numB - numA;
       }
     });
-    
+
     setOrders(sortedOrders);
-    
+
     // ปรับปรุง filteredOrder ด้วยเงื่อนไขการกรองปัจจุบัน
     applyFiltersToSortedData(sortedOrders);
   };
@@ -226,7 +223,9 @@ const OrderPage = () => {
     // กรองตามเดือน
     if (selectedMonth !== '') {
       filtered = filtered.filter((order) => {
-        const orderMonth = new Date(order.preorder_date).toISOString().slice(0, 7);
+        const orderMonth = new Date(order.preorder_date)
+          .toISOString()
+          .slice(0, 7);
         return orderMonth === selectedMonth;
       });
     }
@@ -238,7 +237,9 @@ const OrderPage = () => {
 
     // กรองตามพนักงาน
     if (selectedEmployee !== '') {
-      filtered = filtered.filter((order) => order.emp_id_create === selectedEmployee);
+      filtered = filtered.filter(
+        (order) => order.emp_id_create === selectedEmployee,
+      );
     }
 
     setFilteredOrder(filtered);
@@ -253,7 +254,6 @@ const OrderPage = () => {
       filtered = filtered.filter((order) =>
         order.preorder_id.toLowerCase().includes(searchQuery.toLowerCase()),
       );
-
     }
 
     // กรองตามผู้สะหนอง
@@ -264,7 +264,9 @@ const OrderPage = () => {
     // กรองตามเดือน
     if (selectedMonth !== '') {
       filtered = filtered.filter((order) => {
-        const orderMonth = new Date(order.preorder_date).toISOString().slice(0, 7);
+        const orderMonth = new Date(order.preorder_date)
+          .toISOString()
+          .slice(0, 7);
         return orderMonth === selectedMonth;
       });
     }
@@ -276,7 +278,9 @@ const OrderPage = () => {
 
     // กรองตามพนักงาน
     if (selectedEmployee !== '') {
-      filtered = filtered.filter((order) => order.emp_id_create === selectedEmployee);
+      filtered = filtered.filter(
+        (order) => order.emp_id_create === selectedEmployee,
+      );
     }
 
     setFilteredOrder(filtered);
@@ -284,7 +288,14 @@ const OrderPage = () => {
 
   useEffect(() => {
     applyFilters();
-  }, [searchQuery, orders, selectedSupplier, selectedMonth, selectedStatus, selectedEmployee]);
+  }, [
+    searchQuery,
+    orders,
+    selectedSupplier,
+    selectedMonth,
+    selectedStatus,
+    selectedEmployee,
+  ]);
 
   const openDeleteModal = (id) => () => {
     setSelectedOrderId(id);
@@ -310,7 +321,7 @@ const OrderPage = () => {
           type: 'success',
           title: 'ລົບຂໍ້ມູນສຳເລັດ',
           message: 'ລົບຂໍ້ມູນສັ່ງຊື້ສຳເລັດແລ້ວ',
-        })
+        }),
       );
     } catch (error) {
       dispatch(
@@ -318,7 +329,7 @@ const OrderPage = () => {
           type: 'error',
           title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
           message: error.message || 'ເກີດຂໍ້ຜິດພາດໃນການລົບຂໍ້ມູນ',
-        })
+        }),
       );
     }
   };
@@ -359,10 +370,9 @@ const OrderPage = () => {
     setSearchQuery('');
   };
 
-
   const paginatedOrder = filteredOrder.slice(
     page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+    page * rowsPerPage + rowsPerPage,
   );
 
   return (
@@ -412,7 +422,6 @@ const OrderPage = () => {
             })}
           </select>
 
-          {/* ตัวกรองตามสถานะ */}
           <select
             className="border border-stroke dark:border-strokedark rounded p-2"
             value={selectedStatus}
@@ -426,24 +435,26 @@ const OrderPage = () => {
             ))}
           </select>
 
-          {/* ตัวกรองตามพนักงาน */}
           <select
             className="border border-stroke dark:border-strokedark rounded p-2"
             value={selectedEmployee}
             onChange={(e) => setSelectedEmployee(e.target.value)}
           >
             <option value="">-- ກອງຕາມພະນັກງານ --</option>
-            {[...new Set(orders.map((order) => order.emp_id_create))].map((empId) => {
-              const employee = empName.find((emp) => emp.emp_id === empId);
-              return (
-                <option key={empId} value={empId}>
-                  {employee ? `${employee.emp_name} ${employee.emp_surname}` : empId}
-                </option>
-              );
-            })}
+            {[...new Set(orders.map((order) => order.emp_id_create))].map(
+              (empId) => {
+                const employee = empName.find((emp) => emp.emp_id === empId);
+                return (
+                  <option key={empId} value={empId}>
+                    {employee
+                      ? `${employee.emp_name} ${employee.emp_surname}`
+                      : empId}
+                  </option>
+                );
+              },
+            )}
           </select>
 
-          {/* ตัวกรองตามเดือน */}
           <input
             type="month"
             className="border border-stroke dark:border-strokedark rounded p-2"
@@ -451,7 +462,6 @@ const OrderPage = () => {
             onChange={(e) => setSelectedMonth(e.target.value)}
           />
 
-          {/* ปุ่มล้างตัวกรอง */}
           <Button
             onClick={clearFilters}
             className="bg-graydark hover:bg-graydark"
@@ -477,13 +487,10 @@ const OrderPage = () => {
                 >
                   <div className="flex items-center gap-2">
                     {header.name}
-                    {/* ✅ เพิ่มไอคอนลูกศรสำหรับการเรียงลำดับ (เฉพาะคอลัมน์ ID) */}
                     {header.id === 'id' && (
                       <span
                         className={`ml-1 inline-block text-md font-semibold transition-colors duration-200 ${
-                          sortOrder === 'asc'
-                            ? 'text-green-500'
-                            : 'text-black'
+                          sortOrder === 'asc' ? 'text-green-500' : 'text-black'
                         }`}
                       >
                         {sortOrder === 'asc' ? '↑' : '↓'}
@@ -508,15 +515,16 @@ const OrderPage = () => {
                       month: '2-digit',
                       year: 'numeric',
                     })}
-                  </td>
+                  </td> 
                   <td className="px-4 py-3">
                     <span
-                      className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${order.status === 'ລໍຖ້າຈັດສົ່ງ'
-                        ? 'bg-amber-300 text-amber-700'
-                        : order.status === 'ສຳເລັດ'
-                          ? 'bg-green-300 text-green-700'
-                          : 'bg-gray-100 text-gray-700'
-                        }`}
+                      className={`inline-block rounded-full px-3 mt-3 py-1 text-center text-sm font-medium  ${
+                        order.status === 'ລໍຖ້າຈັດສົ່ງ'
+                          ? 'bg-amber-100 text-amber-700'
+                          : order.status === 'ສຳເລັດ'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-gray-100 text-gray-700'
+                      }`}
                     >
                       {order.status}
                     </span>
@@ -527,11 +535,25 @@ const OrderPage = () => {
                   <td className="px-4 py-4">
                     {getDoctorName(order.emp_id_create)}
                   </td>
-                  <td className="px-3 py-4 text-center">
-                    <TableAction
-                      onAdd={() => handleAdd_detail(order.preorder_id)}
-                      onView={() => handleView(order.preorder_id)}
-                    />
+                  <td className="px-3 py-4 ">
+                    <div className="flex gap-2 ">
+                      <button
+                        onClick={() => handleAdd_detail(order.preorder_id)}
+                        className="flex items-center gap-2 bg-secondary text-white px-4 py-1 rounded shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                      >
+                        <Plus className="w-4 h-4" />
+                        ເພີ່ມ
+                      </button>
+
+
+                      <button
+                        onClick={() => handleView(order.preorder_id)}
+                        className="flex items-center gap-2 bg-blue-500 text-white px-4 py-1 rounded shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                      >
+                        <Eye className="w-4 h-4" />
+                        ເບີ່ງລາຍລະອຽດ
+                      </button>
+                    </div>
                   </td>
 
                   <td className="px-3 py-4 text-center">
@@ -701,4 +723,3 @@ const OrderPage = () => {
 };
 
 export default OrderPage;
-

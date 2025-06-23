@@ -59,15 +59,14 @@ const SelectPatientPopup = ({ patients, onClose, onSelect, callback }) => {
       }
 
       const data = await response.json();
-      console.log('Inspection created:', data);
+      // console.log('Inspection created:', data);
       callback(data?.data);
 
-      // ส่งข้อมูลคนเจ็บพร้อมกับ inspection ID และวันที่กลับไป
       if (onSelect) {
         onSelect({
           ...selectedPatient,
-          inspectionId: data.in_id || data.id, // ส่ง inspection ID ที่ได้จาก API
-          inspectionDate: new Date().toISOString().split('T')[0], // ส่งวันที่ปัจจุบัน
+          inspectionId: data.in_id || data.id, 
+          inspectionDate: new Date().toISOString().split('T')[0], 
         });
       }
 

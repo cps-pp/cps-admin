@@ -1,12 +1,11 @@
 import { Table } from 'antd';
 import React from 'react';
 import { iconTrash } from '@/configs/icon';
+import useStoreDisease from '../../../../store/selectDis';
 
-export default function SumDiseases({
-  selectedServices,
-  removeServices,
-  tapDetail,
-}) {
+export default function SumDiseases() {
+  const { removeDisease, dis } = useStoreDisease();
+
   const columns = [
     {
       title: 'ລະຫັດ',
@@ -23,7 +22,7 @@ export default function SumDiseases({
       key: 'action',
       render: (_, record) => (
         <button
-          onClick={() => removeService(record)}
+          onClick={() => removeDisease(record)}
           className="text-red-500 hover:text-red-600 p-1 rounded"
         >
           {iconTrash}
@@ -32,25 +31,14 @@ export default function SumDiseases({
     },
   ];
 
-  const totalPrice =
-    selectedServices?.reduce((sum, service) => sum + (service.price || 0), 0) ||
-    0;
-
   return (
     <div>
       <Table
         columns={columns}
-        dataSource={selectedServices}
-        pagination={{ pageSize: 4, size: 'middle' }}
-          locale={{ emptyText: 'ບໍ່ມີຂໍ້ມູນ' }}
-
+        dataSource={dis}
+         locale={{ emptyText: 'ບໍ່ມີຂໍ້ມູນ' }}
+        size="small"
       />
-
-      {/* <div className="mt-4 p-3 bg-gray-100 rounded">
-        <div className="text-right">
-          <strong>Total: {totalPrice.toLocaleString()} Kip</strong>
-        </div>
-      </div> */}
     </div>
   );
 }

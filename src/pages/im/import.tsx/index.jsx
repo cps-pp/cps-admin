@@ -14,6 +14,7 @@ import Alerts from '@/components/Alerts';
 import EditImport from './edit';
 import ViewImport from './view';
 import AddDetailImport from './create_detail';
+import { Eye, Plus } from 'lucide-react';
 
 const ImportPage = () => {
   const [filterIm, setFilterIm] = useState([]);
@@ -101,25 +102,25 @@ const ImportPage = () => {
   const handleSortById = () => {
     const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
     setSortOrder(newSortOrder);
-    
+
     const sortedImports = [...Im].sort((a, b) => {
       const extractNumber = (id) => {
         const match = id.match(/\d+/);
         return match ? parseInt(match[0]) : 0;
       };
-      
+
       const numA = extractNumber(a.im_id);
       const numB = extractNumber(b.im_id);
-      
+
       if (newSortOrder === 'asc') {
-        return numA - numB; 
+        return numA - numB;
       } else {
-        return numB - numA; 
+        return numB - numA;
       }
     });
-    
+
     setIm(sortedImports);
-    
+
     // ถ้ามีการค้นหาหรือกรองอยู่ ให้ใช้ข้อมูลที่เรียงแล้วมากรองใหม่
     applyFiltersWithData(sortedImports);
   };
@@ -134,9 +135,8 @@ const ImportPage = () => {
         Object.values(item)
           .join(' ')
           .toLowerCase()
-          .includes(searchQuery.toLowerCase())
+          .includes(searchQuery.toLowerCase()),
       );
-      
     }
 
     // กรองตามเดือน
@@ -190,7 +190,7 @@ const ImportPage = () => {
         `http://localhost:4000/src/im/import/${selectedId}`,
         {
           method: 'DELETE',
-        }
+        },
       );
 
       if (!response.ok) throw new Error('ບໍ່ສາມາດລົບລາຍການນຳເຂົ້າໄດ້');
@@ -204,7 +204,7 @@ const ImportPage = () => {
           type: 'success',
           title: 'ລົບຂໍ້ມູນສຳເລັດ',
           message: 'ລົບຂໍ້ມູນລາຍການນຳເຂົ້າສຳເລັດແລ້ວ',
-        })
+        }),
       );
     } catch (error) {
       dispatch(
@@ -212,7 +212,7 @@ const ImportPage = () => {
           type: 'error',
           title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
           message: 'ເກີດຂໍ້ຜິດພາດໃນການລົບຂໍ້ມູນ',
-        })
+        }),
       );
     }
   };
@@ -276,7 +276,6 @@ const ImportPage = () => {
 
       // ✅ เปิดไฟล์ในหน้าใหม่
       window.open(fileUrl, '_blank');
-
     } catch (error) {
       console.error('Error viewing file:', error);
       alert('เกิดข้อผิดพลาดในการเปิดไฟล์');
@@ -330,7 +329,6 @@ const ImportPage = () => {
             ))}
           </select>
 
-
           {/* ตัวกรองตามพนักงาน */}
           <select
             className="border border-stroke dark:border-strokedark rounded p-2"
@@ -342,7 +340,9 @@ const ImportPage = () => {
               const employee = empName.find((emp) => emp.emp_id === empId);
               return (
                 <option key={empId} value={empId}>
-                  {employee ? `${employee.emp_name} ${employee.emp_surname}` : empId}
+                  {employee
+                    ? `${employee.emp_name} ${employee.emp_surname}`
+                    : empId}
                 </option>
               );
             })}
@@ -365,8 +365,8 @@ const ImportPage = () => {
           </Button>
         </div>
       </div>
-       <div className="overflow-x-auto  shadow-md">
-          <table className="w-full min-w-max table-auto  ">
+      <div className="overflow-x-auto  shadow-md">
+        <table className="w-full min-w-max table-auto  ">
           <thead>
             <tr className="text-left bg-gray border border-stroke ">
               {HeadersImport.map((header, index) => (
@@ -384,9 +384,7 @@ const ImportPage = () => {
                     {header.id === 'id' && (
                       <span
                         className={`ml-1 inline-block text-md font-semibold transition-colors duration-200 ${
-                          sortOrder === 'asc'
-                            ? 'text-green-500'
-                            : 'text-black'
+                          sortOrder === 'asc' ? 'text-green-500' : 'text-black'
                         }`}
                       >
                         {sortOrder === 'asc' ? '↑' : '↓'}
@@ -402,7 +400,7 @@ const ImportPage = () => {
               filterIm.map((im, index) => (
                 <tr
                   key={index}
-                  className="border-b text-sm border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="border-b text-md border-stroke dark:border-strokedark hover:bg-gray-50 "
                 >
                   {/* ລະຫັດນຳເຂົ້າ */}
                   <td className="px-4 py-4">{im.im_id}</td>
@@ -418,21 +416,21 @@ const ImportPage = () => {
 
                   {/* ລະຫັດສັ່ງຊື້ */}
                   <td className="px-4 py-4">
-                    {im.preorder_id || <span className="text-purple-600">-</span>}
+                    {im.preorder_id || (
+                      <span className="text-purple-600">-</span>
+                    )}
                   </td>
 
-
-                  {/* ໄຟລ */}
                   <td className="px-4 py-4">
                     {im?.file ? (
-                      <span
+                      <button
                         onClick={() => handleViewFileAdvanced(im.file)}
-                        style={{ color: 'blue', cursor: 'pointer', textDecoration: 'underline' }}
+                        className="bg-yellow-500 text-white px-4 py-1 rounded hover:bg-yellow-600 transition duration-200"
                       >
-                        open
-                      </span>
+                        Open File
+                      </button>
                     ) : (
-                      <span className="text-purple-600">ບໍ່ພົບໄຟລ</span>
+                      <span className="text-gray-400 italic">ບໍ່ພົບໄຟລ</span>
                     )}
                   </td>
 
@@ -441,16 +439,33 @@ const ImportPage = () => {
                     {getEmployeeName(im.emp_id_create)}
                   </td>
 
+                  <td className="px-4 py-4">{im.node}</td>
 
-                  {/* ຫມາຍເຫດ */}
-                  <td className="px-4 py-4">{im.note}</td>
+                  <td className="px-3 py-4 ">
+                    <div className="flex gap-2 ">
+                      <button
+                        onClick={() => handleAdd_detail(im.im_id)}
+                        className="flex items-center gap-2 bg-secondary text-white px-4 py-1 rounded shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                      >
+                        <Plus className="w-4 h-4" />
+                        ເພີ່ມ
+                      </button>
 
-                  <td className="px-3 py-4 text-center">
+                      <button
+                        onClick={() => handleViewImport(im.im_id)}
+                        className="flex items-center gap-2 bg-blue-500 text-white px-4 py-1 rounded shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                      >
+                        <Eye className="w-4 h-4" />
+                        ເບີ່ງລາຍລະອຽດ
+                      </button>
+                    </div>
+                  </td>
+                  {/* <td className="px-3 py-4 text-center">
                     <TableAction
                       onView={() => handleViewImport(im.im_id)}
                       onAdd={() => handleAdd_detail(im.im_id)}
                     />
-                  </td>
+                  </td> */}
 
                   {/* Actions - เพิ่ม onView ให้กับ TableAction */}
                   <td className="px-3 py-4 text-center">
@@ -620,4 +635,3 @@ const ImportPage = () => {
 };
 
 export default ImportPage;
-

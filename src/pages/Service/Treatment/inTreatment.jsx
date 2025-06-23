@@ -61,9 +61,7 @@ const InTreatmentService = ({
   };
 
   const handlePatientSelect = async (patientData) => {
-    console.log('Selected patient:', patientData);
     setSelectedPatient(patientData);
-
     setFormData((prev) => ({
       ...prev,
       patient_id: patientData.patient_id,
@@ -75,22 +73,32 @@ const InTreatmentService = ({
       );
       const result = await res.json();
 
-      console.log('Inspection API response:', result);
 
       if (res.ok && result?.data?.in_id) {
         const inspection = result.data;
-        setInspectionId(inspection.in_id);
-        setFormData((prev) => ({
-          ...prev,
-          in_id: inspection.in_id,
-          date: inspection.date,
-        }));
-        console.log('Inspection ID set:', inspection.in_id);
-      } else {
-        console.warn('No inspection data found or invalid response:', result);
+  setInspectionId(inspection.in_id);
+        let formattedDate = '';
+        if (inspection.date) {
+          const date = new Date(inspection.date);
+
+          if (!isNaN(date.getTime())) {
+            formattedDate = date.toISOString().split('T')[0];
+            console.log('Formatted date:', formattedDate);
+          }
+        }
+
+        setFormData((prev) => {
+          const newData = {
+            ...prev,
+            in_id: inspection.in_id,
+            date: formattedDate,
+          };
+          // console.log('Setting new formData:', newData);
+          return newData;
+        });
       }
     } catch (err) {
-      console.error('Error fetching inspection data:', err);
+      console.error('Error:', err);
     }
   };
 
@@ -102,6 +110,11 @@ const InTreatmentService = ({
       setIdPatient(idPatient);
     }
   }, [checkID]);
+  useEffect(() => {
+    if (formData.date) {
+      setValue('date', formData.date);
+    }
+  }, [formData.date, setValue]);
 
   return (
     <div className="">
@@ -165,16 +178,18 @@ const InTreatmentService = ({
           />
         </div>
 
-        <BoxDate
-          select=""
-          register={register}
-          errors={errors}
-          name="date"
-          label="ວັນທີປິ່ນປົວ"
-          formOptions={{ required: false }}
-          setValue={setValue}
-          onChange={(newDate) => setFormData({ ...formData, date: newDate })}
-        />
+        <div>
+          <label className="text-sm text-gray-600 mb-1 block">
+            ວັນທີປິ່ນປົວ
+          </label>
+          <input
+            type="date"
+            className="w-full mb-2 appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary text-black capitalize"
+            value={formData.date || ''}
+            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+            disabled
+          />
+        </div>
 
         <AntdTextArea
           label="ອາການເບື່ອງຕົ້ນ (Symptom)"
@@ -208,16 +223,15 @@ const InTreatmentService = ({
           }
           value={intivalue.diseases_now}
         />
-
       </div>
-        <AntdTextArea
-          label="ໝາຍເຫດ"
-          name="note"
-          rows={2}
-          placeholder="ປ້ອນລາຍລະອຽດເພີ່ມເຕີມຖ້າມີ"
-          onChange={(e) => setIntivalue({ ...intivalue, note: e.target.value })}
-          value={intivalue.note}
-        />
+      <AntdTextArea
+        label="ໝາຍເຫດ"
+        name="note"
+        rows={2}
+        placeholder="ປ້ອນລາຍລະອຽດເພີ່ມເຕີມຖ້າມີ"
+        onChange={(e) => setIntivalue({ ...intivalue, note: e.target.value })}
+        value={intivalue.note}
+      />
 
       <div className="overflow-x-auto  mb-4">
         <TypeService />

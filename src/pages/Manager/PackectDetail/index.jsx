@@ -16,6 +16,7 @@ import EditServicerList from './edit.jsx';
 import CreateServiceList from './create.jsx';
 import ViewService from './view.jsx';
 import AddDetailPacket from './create_detail.jsx';
+import { Eye, Plus } from 'lucide-react';
 
 const ServicePage = () => {
   const [services, setServices] = useState([]);
@@ -277,6 +278,26 @@ const ServicePage = () => {
                       {(service.price * 1).toLocaleString()}
                     </td>
                     <td className="px-4 py-4">{service.ispackage}</td>
+<td className="px-3 py-4 ">
+                    <div className="flex gap-2 ">
+                      <button
+                        onClick={() => handleAdd_detail(service.ser_id)}
+                        className="flex items-center gap-2 bg-secondary text-white px-4 py-1 rounded shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                      >
+                        <Plus className="w-4 h-4" />
+                        ເພີ່ມ
+                      </button>
+
+
+                      <button
+                        onClick={() => handleView(service.ser_id)}
+                        className="flex items-center gap-2 bg-blue-500 text-white px-4 py-1 rounded shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                      >
+                        <Eye className="w-4 h-4" />
+                        ເບີ່ງລາຍລະອຽດ
+                      </button>
+                    </div>
+                  </td>
 
                     <td className="px-3 py-4 text-center">
                       <TableAction

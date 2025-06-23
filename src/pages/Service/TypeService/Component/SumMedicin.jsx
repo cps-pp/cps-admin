@@ -18,7 +18,6 @@ const handleQtyChange = async (med_id, newQty) => {
     const res = await fetch('http://localhost:4000/src/stock/checkstock', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // ส่งข้อมูลจำนวนที่จะตัด/เพิ่มสต็อก (ถ้า delta เป็น + ตัดสต็อก ถ้า - อาจจะเพิ่มสต็อกกลับ)
       body: JSON.stringify({ data: [{ med_id, med_qty: delta }] }),
     });
     const result = await res.json();
@@ -46,7 +45,7 @@ const handleQtyChange = async (med_id, newQty) => {
       key: 'med_name',
     },
     {
-      title: 'Qty',
+      title: 'ຈຳນວນ',
       dataIndex: 'qty',
       key: 'qty',
       render: (_, record) => (
@@ -57,6 +56,7 @@ const handleQtyChange = async (med_id, newQty) => {
         />
       ),
     },
+    
     {
       title: 'ລາຄາ',
       dataIndex: 'price',
@@ -92,6 +92,7 @@ const handleQtyChange = async (med_id, newQty) => {
         dataSource={medicines}
         pagination={{ pageSize: 4, size: 'middle' }}
           locale={{ emptyText: 'ບໍ່ມີຂໍ້ມູນ' }}
+        size="small"
 
       />
     </div>

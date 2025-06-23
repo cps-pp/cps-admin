@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Space, Table } from 'antd';
+import useStoreDisease from '../../../../store/selectDis';
 
 export default function ListDis({ selectService, tapService }) {
   const [dataMed, setDataMed] = useState([]);
+  const { addDisease, dis } = useStoreDisease();
 
   const fetchDisList = async () => {
     try {
@@ -19,7 +21,6 @@ export default function ListDis({ selectService, tapService }) {
       fetchDisList();
     }
   }, [tapService]);
-
   const columns = [
     {
       title: 'ລະຫັດພະຍາດ',
@@ -39,9 +40,8 @@ export default function ListDis({ selectService, tapService }) {
         <button
           type="button"
           onClick={() => {
-            // console.log('Selecting:', record);
             selectService(record);
-            // selectionMedicine(record);
+            selectionDisease(record);
           }}
           className="bg-secondary2 text-white px-3 py-1 rounded hover:bg-secondary"
         >
@@ -50,8 +50,8 @@ export default function ListDis({ selectService, tapService }) {
       ),
     },
   ];
-  const selectionMedicine = async (record) => {
-    await addMedicine(record);
+  const selectionDisease = async (record) => {
+    await addDisease(record);
   };
   return (
     <div>
@@ -59,8 +59,7 @@ export default function ListDis({ selectService, tapService }) {
         columns={columns}
         dataSource={dataMed}
         pagination={{ pageSize: 3, size: 'middle' }}
-          locale={{ emptyText: 'ບໍ່ມີຂໍ້ມູນ' }}
-
+        locale={{ emptyText: 'ບໍ່ມີຂໍ້ມູນ' }}
         size="small"
       />
     </div>

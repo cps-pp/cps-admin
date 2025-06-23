@@ -155,6 +155,11 @@ const handleAddMedicine = async (record) => {
       dataIndex: 'qty',
       key: 'qty',
     },
+     {
+      title: 'ຫົວໜ່ວຍ',
+      dataIndex: 'unit',
+      key: 'unit',
+    },
     {
       title: 'ລາຄາ',
       dataIndex: 'price',

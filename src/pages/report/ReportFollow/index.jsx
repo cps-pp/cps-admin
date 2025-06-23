@@ -16,6 +16,7 @@ const columns = [
   { key: 'checkup', name: 'ກວດພົບ' },
   { key: 'diseases_now', name: 'ພະຍາດປັດຈຸບັນ' },
   { key: 'note', name: 'ໝາຍເຫດ' },
+  { key: 'action', name: 'ຈັດການ' },
 ];
 
 const ReportFollowAll = () => {

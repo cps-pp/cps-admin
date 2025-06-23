@@ -26,26 +26,27 @@ const InvoicePage = () => {
   const [selectedInvoiceId, setSelectedInvoiceId] = useState(null);
   const [selectedInvoiceData, setSelectedInvoiceData] = useState(null);
   const [showBillPopup, setShowBillPopup] = useState(false);
-  const [billData, setBillData] = useState(null); 
-  
-  const fetchInvoices = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('http://localhost:4000/src/invoice/invoice');
-      const data = await response.json();
-      setInvoices(data.data || []);
-    } catch (error) {
-      dispatch(
-        openAlert({
-          type: 'error',
-          title: 'ດຶງຂໍ້ມູນບໍ່ສຳເລັດ',
-          message: error.message || 'ເກີດຂໍ້ຜິດພາດ',
-        }),
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [billData, setBillData] = useState(null);
+  const [inspectionDetails, setInspectionDetails] = useState(null);
+  const [isRefundMode, setIsRefundMode] = useState(false);
+  // const fetchInvoices = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const response = await fetch('http://localhost:4000/src/invoice/invoice');
+  //     const data = await response.json();
+  //     setInvoices(data.data || []);
+  //   } catch (error) {
+  //     dispatch(
+  //       openAlert({
+  //         type: 'error',
+  //         title: 'ດຶງຂໍ້ມູນບໍ່ສຳເລັດ',
+  //         message: error.message || 'ເກີດຂໍ້ຜິດພາດ',
+  //       }),
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   useEffect(() => {
     fetchInvoices();
@@ -87,16 +88,39 @@ const InvoicePage = () => {
       setSelectedInvoiceId(null);
     }
   };
+  const fetchInvoices = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:4000/src/invoice/invoice');
+      const data = await response.json();
+      setInvoices(data.data || []);
+    } catch (error) {
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ດຶງຂໍ້ມູນບໍ່ສຳເລັດ',
+          message: error.message || 'ເກີດຂໍ້ຜິດພາດ',
+        }),
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchInvoiceDetail = async (invoiceId) => {
     try {
       const res = await fetch(
         `http://localhost:4000/src/invoice/invoice/${invoiceId}`,
       );
-
       const json = await res.json();
+
       if (json.resultCode === '200') {
         setBillData(json.data);
+
+        if (json.data?.in_id) {
+          await fetchInspectionDetails(json.data.in_id);
+        }
+
         setShowBillPopup(true);
         setSelectedInvoiceData(json.data);
       } else {
@@ -119,6 +143,68 @@ const InvoicePage = () => {
     }
   };
 
+  // const fetchInvoiceDetail = async (invoiceId) => {
+  //   try {
+  //     const res = await fetch(
+  //       `http://localhost:4000/src/invoice/invoice/${invoiceId}`,
+  //     );
+
+  //     const json = await res.json();
+  //     if (json.resultCode === '200') {
+  //       setBillData(json.data);
+  //       setShowBillPopup(true);
+  //       setSelectedInvoiceData(json.data);
+  //     } else {
+  //       dispatch(
+  //         openAlert({
+  //           type: 'error',
+  //           title: 'ດຶງໃບບິນບໍ່ສຳເລັດ',
+  //           message: json.message || 'ຂໍອະໄພ ເກີດຂໍ້ຜິດພາດ',
+  //         }),
+  //       );
+  //     }
+  //   } catch (error) {
+  //     dispatch(
+  //       openAlert({
+  //         type: 'error',
+  //         title: 'ເກີດຂໍ້ຜິດພາດ',
+  //         message: error.message,
+  //       }),
+  //     );
+  //   }
+  // };
+  const fetchInspectionDetails = async (inspectionId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:4000/src/report/inspection`,
+      );
+      const data = await response.json();
+
+      if (response.ok) {
+        let inspection = null;
+
+        if (data.detail && Array.isArray(data.detail)) {
+          inspection = data.detail.find((item) => item.in_id === inspectionId);
+        } else if (data.data && Array.isArray(data.data)) {
+          inspection = data.data.find((item) => item.in_id === inspectionId);
+        } else if (Array.isArray(data)) {
+          inspection = data.find((item) => item.in_id === inspectionId);
+        }
+
+        console.log('Found inspection:', inspection);
+        setInspectionDetails(inspection);
+
+        if (inspection) {
+          setBillData((prevData) => ({
+            ...prevData,
+            ...inspection,
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching inspection details:', error);
+    }
+  };
   const filteredInvoices = useMemo(() => {
     return invoices.filter((invoice) =>
       invoice.invoice_id?.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -253,10 +339,12 @@ const InvoicePage = () => {
                                   onClick={() => {
                                     setSelectedInvoiceId(invoice.invoice_id);
                                     fetchInvoiceDetail(invoice.invoice_id);
+                                    setIsRefundMode(true); // ตั้งค่าเป็น refund mode
+                                    setShowBillPopup(true); // เปิด popup
                                   }}
-                                  className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 text-sm rounded "
+                                  className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 text-sm rounded"
                                 >
-                                  ຊຳລະເງິນ
+                                  ຊຳລະເງີນ
                                 </button>
                               )}
 
@@ -291,13 +379,17 @@ const InvoicePage = () => {
       {showBillPopup && billData && (
         <BillPopup
           isOpen={showBillPopup}
-          onClose={() => setShowBillPopup(false)}
-          patientData={null}
-          inspectionData={null}
+          onClose={() => {
+            setShowBillPopup(false);
+            setInspectionDetails(null);
+            setIsRefundMode(false); // รีเซ็ต refund mode
+          }}
+          patientData={billData}
+          inspectionData={inspectionDetails || billData}
           services={billData?.services || []}
           medicines={billData?.medicines || []}
           invoiceData={billData}
-          
+          isRefundMode={isRefundMode}
         />
       )}
 

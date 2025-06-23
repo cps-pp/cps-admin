@@ -6,6 +6,7 @@ import LoginForm from './components/LoginForm';
 import NotFound from './pages/NotFound';
 import PageTitle from './components/PageTitle';
 import { useAuth } from './AuthContext';
+import HomePreOrder from './pages/Manager/test/HomePreOrder';
 
 function App() {
   const { pathname } = useLocation();
@@ -48,6 +49,7 @@ useEffect(() => {
 
   return (
     <Routes>
+      {/* <Route path="/test" element={<HomePreOrder />} /> */}
       <Route path="/login" element={<LoginForm />} />
 
       {token && (

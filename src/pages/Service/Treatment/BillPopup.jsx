@@ -350,7 +350,7 @@ const BillPopup = ({
   inspectionData,
   services = [],
   medicines = [],
-
+isRefundMode = false,
   invoiceData,
 }) => {
   if (!isOpen) return null;
@@ -531,16 +531,6 @@ const BillPopup = ({
     }).format(amount);
   };
 
-  const handleExchangeSelect = (e) => {
-    const selectedExId = e.target.value;
-    setSelectedExType(selectedExId);
-
-    const selectedEx = exchange.find((ex) => ex.ex_id == selectedExId);
-    if (selectedEx) {
-      setSelectedCurrency(selectedEx.ex_type);
-    }
-  };
-
   const handlePaymentConfirm = async () => {
     setIsProcessing(true);
     const selectedEx = exchange.find((ex) => ex.ex_id == selectedExType);
@@ -548,10 +538,8 @@ const BillPopup = ({
 
     try {
       if (isMixedPayment) {
-        // สำหรับการชำระแบบผสม - ส่ง 2 รายการ
         const payments = [];
 
-        // เพิ่มการชำระด้วยเงินสดถ้ามี
         if (parseFloat(cashAmount || 0) > 0) {
           payments.push({
             invoice_id: invoiceData.invoice_id,
@@ -562,7 +550,6 @@ const BillPopup = ({
           });
         }
 
-        // เพิ่มการชำระด้วยการโอนถ้ามี
         if (parseFloat(transferAmount || 0) > 0) {
           payments.push({
             invoice_id: invoiceData.invoice_id,
@@ -573,13 +560,11 @@ const BillPopup = ({
           });
         }
 
-        // ส่ง payment แต่ละรายการทีละรายการ (Sequential)
         for (let i = 0; i < payments.length; i++) {
           const payment = payments[i];
 
-          // Add a small delay between requests to ensure different timestamps
           if (i > 0) {
-            await new Promise((resolve) => setTimeout(resolve, 100)); // 100ms delay
+            await new Promise((resolve) => setTimeout(resolve, 100)); 
           }
 
           const response = await fetch(
@@ -595,7 +580,6 @@ const BillPopup = ({
             const errorData = await response.json();
             console.error('Payment error:', errorData);
 
-            // Show specific error message to user
             alert(`ການຊຳລະລົ້ມເຫລວ: ${errorData.message || 'Unknown error'}`);
             return;
           }
@@ -604,7 +588,6 @@ const BillPopup = ({
           console.log(`Payment ${i + 1} successful:`, result);
         }
       } else {
-        // การชำระแบบปกติ (แค่วิธีเดียว)
         const response = await fetch(
           'http://localhost:4000/src/payment/payment',
           {
@@ -696,7 +679,7 @@ const BillPopup = ({
 
             <div className="text-right print:text-right print:max-w-md">
               <h1 className="text-2xl font-bold text-form-input mb-4 text-left print:text-left">
-                ໃບບິນການປິ່ນປົວ
+                ໃບບິນ
               </h1>
               <div className="space-y-2 text-sm print:space-y-2">
                 <div className="flex justify-between items-center min-w-[200px] print:justify-between print:items-center">
@@ -767,23 +750,23 @@ const BillPopup = ({
                   </span>
                 </div>
                 <div className="flex justify-between print:text-sm">
-                  <span className="text-form-strokedark">ການວິເຄາະ:</span>
+                  <span className="text-form-strokedark">ພະຍາດປັດຈຸບັດ:</span>
                   <span className="font-medium text-form-input">
                     {inspectionData?.diseases_now}
                   </span>
                 </div>
                 <div className="flex justify-between print:text-sm">
-                  <span className="text-form-strokedark">ການກວດ:</span>
+                  <span className="text-form-strokedark">ບົ່ງມະຕິ:</span>
                   <span className="font-medium text-form-input">
                     {inspectionData?.checkup}
                   </span>
                 </div>
+              
               </div>
             </div>
           </div>
 
-          {/* Combined Services and Medicines Table */}
-          <div className="mb-8 print:mb-4">
+          <div className="mb-4 print:mb-4">
             <h3 className="font-semibold text-form-input mb-4 text-lg print:text-base print:mb-2">
               ລາຍການບໍລິການທັງໝົດ:
             </h3>
@@ -887,19 +870,19 @@ const BillPopup = ({
             </div>
           </div>
 
-          {/* Notes */}
           {inspectionData?.note && (
-            <div className="mb-8 print:mb-4">
+            <div className="mb-4 print:mb-4">
               <h3 className="font-semibold text-form-input mb-3 text-lg print:text-base print:mb-2">
                 ໝາຍເຫດ:
               </h3>
-              <div className="bg-purple-50 border border-purple-200 p-4 rounded print:bg-white print:border-gray-300 print:p-2">
+              <div className="bg-blue-50 border border-blue-200 p-4 rounded print:bg-white print:border-gray-300 print:p-2">
                 <p className="text-form-strokedark leading-relaxed print:text-sm">
                   {inspectionData.note}
                 </p>
               </div>
             </div>
           )}
+         
 
           <div className="flex justify-end">
             <div className="w-full max-w-md">
@@ -962,24 +945,25 @@ const BillPopup = ({
             </div>
           </div>
 
-          {shouldShowPaymentButtons && (
-            <div className="flex justify-end gap-4">
-                  <button
-                onClick={handlePayLater}
-                className="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded"
-              >
-                ຊຳລະພາຍຫຼັງ
-              </button>
-              <button
-                onClick={() => setShowPaymentPopup(true)}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded"
-              >
-                ຊຳລະເງິນ
-              </button>
-
-          
-            </div>
-          )}
+           {shouldShowPaymentButtons && (
+    <div className="flex justify-end gap-4">
+      {!isRefundMode && (
+        <button
+          onClick={handlePayLater}
+          className="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded"
+        >
+          ຊຳລະພາຍຫຼັງ
+        </button>
+      )}
+      
+      <button
+        onClick={() => setShowPaymentPopup(true)}
+        className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded"
+      >
+        ຊຳລະເງິນ
+      </button>
+    </div>
+  )}
 
           {/* Payment Popup */}
           {showPaymentPopup && (
