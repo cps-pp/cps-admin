@@ -196,9 +196,9 @@ const CategoryPage = () => {
             <Button
               onClick={() => setShowAddCategoryModal(true)}
               icon={iconAdd}
-              className="bg-secondary2"
+              className="bg-emerald-600 hover:bg-emerald-700"
             >
-              ເພີ່ມຂໍ້ມູນຢາ
+              ເພີ່ມປະເພດ
             </Button>
           </div>
         </div>

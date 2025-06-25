@@ -43,6 +43,7 @@ const useStoreDisease = create((set) => ({
           : med
       ),
     })),
+       clearDisease: () => set({ dis: [] }),
 }))
 
 export default useStoreDisease;

@@ -1,16 +1,20 @@
 // TypeService.jsx
 import { Tabs } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ListService from './Component/ListService';
 import ListDis from './Component/ListDis';
 import SumService from './Component/SumService';
 import SumDiseases from './Component/SumDis';
 import { CopyPlus, Activity } from 'lucide-react';
-export default function TypeService({ selectService, value }) {
+export default function TypeService({ selectService, value ,refreshKey }) {
   const [selectedServices, setSelectedServices] = useState([]);
   const [selectedDis, setSelectedDis] = useState([]);
   const [allSelectedItems, setAllSelectedItems] = useState([]);
-
+  useEffect(() => {
+    setSelectedServices([]);
+    setSelectedDis([]);
+    setAllSelectedItems([]);
+  }, [refreshKey]);
   const handleSelectService = (service) => {
     if (!selectedServices.find((item) => item.ser_id === service.ser_id)) {
       const serviceWithType = { ...service, itemType: 'service' };

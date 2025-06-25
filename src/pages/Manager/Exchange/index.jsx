@@ -196,15 +196,15 @@ const ExchangePage = () => {
           <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
             ຈັດການຂໍ້ມູນອັດຕາແລກປ່ຽນ
           </h1>
-          <div className="flex items-center gap-2">
+          {/* <div className="flex items-center gap-2">
             <Button
               onClick={() => setShowAddModal(true)}
               icon={iconAdd}
-              className="bg-secondary2"
+              className="bg-emerald-600 hover:bg-emerald-700"
             >
               ເພີ່ມອັດຕາແລກປ່ຽນ
             </Button>
-          </div>
+          </div> */}
         </div>
 
         <div className="grid w-full gap-4 p-4">

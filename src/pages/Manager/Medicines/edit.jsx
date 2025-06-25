@@ -9,7 +9,7 @@ import InputBox from '../../../components/Forms/Input_new';
 
 import SelectBoxId from '../../../components/Forms/SelectID';
 import BoxDate from '../../../components/Date';
-
+import SelectBox from '../../../components/Forms/Select';
 
 const EditMedicines = ({ id, setShow, getList }) => {
   const {
@@ -46,7 +46,7 @@ const EditMedicines = ({ id, setShow, getList }) => {
 
         if (catRes.ok) {
           const data = await catRes.json();
-          console.log('Categories data:', data);
+          // console.log('Categories data:', data);
           setCategories(
             data.data.map((c) => ({
               medtype_id: c.medtype_id,
@@ -57,7 +57,7 @@ const EditMedicines = ({ id, setShow, getList }) => {
 
         if (empRes.ok) {
           const data = await empRes.json();
-          console.log('Employees data:', data);
+          // console.log('Employees data:', data);
           setEmployees(
             data.data.map((e) => ({
               id: e.emp_id,
@@ -74,105 +74,97 @@ const EditMedicines = ({ id, setShow, getList }) => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    async function fetchMedicine() {
+      if (!id) {
+        // console.log('No ID provided');
+        return;
+      }
 
-useEffect(() => {
-  async function fetchMedicine() {
-    if (!id) {
-      console.log('No ID provided');
-      return;
-    }
+      setLoading(true);
+      setDataLoaded(false);
 
-    setLoading(true);
-    setDataLoaded(false);
+      try {
+        // console.log('Fetching medicine with med_id:', id);
 
-    try {
-      console.log('Fetching medicine with med_id:', id);
-      
-      const res = await fetch(
-        `http://localhost:4000/src/manager/medicine-list/${id}`,
-      );
-      
-      const result = await res.json();
-      console.log('API Response:', result);
+        const res = await fetch(
+          `http://localhost:4000/src/manager/medicine-list/${id}`,
+        );
 
-      if (res.ok && result.data) {
-        // ✅ ตอนนี้ result.data จะเป็น object เดียว ไม่ใช่ array แล้ว
-        const med = result.data;
-        
-        console.log('Medicine data:', med);
+        const result = await res.json();
+        // console.log('API Response:', result);
 
-        // Format dates if needed
-        const formattedExpired = med.expired
-          ? med.expired.includes('T')
-            ? med.expired.split('T')[0]
-            : med.expired
-          : '';
+        if (res.ok && result.data) {
+          const med = result.data;
 
-        const formattedCreatedAt = med.created_at
-          ? med.created_at.includes('T')
-            ? med.created_at.split('T')[0]
-            : med.created_at
-          : '';
+          // console.log('Medicine data:', med);
 
-        const formData = {
-          med_name: med.med_name || '',
-          qty: med.qty || '',
-          price: med.price || '',
-          unit: med.unit || '',
-          expired: formattedExpired,
-          medtype_id: med.medtype_id || '',
-          emp_id_create: med.emp_id_create || '',
-          created_at: formattedCreatedAt,
-        };
+          const formattedExpired = med.expired
+            ? med.expired.includes('T')
+              ? med.expired.split('T')[0]
+              : med.expired
+            : '';
 
-        console.log('Form data to reset:', formData);
+          const formattedCreatedAt = med.created_at
+            ? med.created_at.includes('T')
+              ? med.created_at.split('T')[0]
+              : med.created_at
+            : '';
 
-        // Reset form with fetched data
-        reset(formData);
+          const formData = {
+            med_name: med.med_name || '',
+            qty: med.qty || '',
+            price: med.price || '',
+            unit: med.unit || '',
+            expired: formattedExpired,
+            medtype_id: med.medtype_id || '',
+            emp_id_create: med.emp_id_create || '',
+            created_at: formattedCreatedAt,
+            status: med.status || '',
+          };
 
-        // Set individual field values explicitly
-        setValue('price', med.price || '');
-        setValue('medtype_id', med.medtype_id || '');
-        setValue('emp_id_create', med.emp_id_create || '');
-        setValue('created_at', formattedCreatedAt);
+          // console.log('Form data to reset:', formData);
 
-        // Set state values
-        setSelectedMedType(med.medtype_id || '');
-        setSelectEmpCreate(med.emp_id_create || '');
-        setCreatedAt(formattedCreatedAt);
-
-        setDataLoaded(true);
-      } else {
-        console.error('API Error Details:', result);
+          reset(formData);
+          setValue('price', med.price || '');
+          setValue('medtype_id', med.medtype_id || '');
+          setValue('emp_id_create', med.emp_id_create || '');
+          setValue('created_at', formattedCreatedAt);
+          setSelectedMedType(med.medtype_id || '');
+          setSelectEmpCreate(med.emp_id_create || '');
+          setCreatedAt(formattedCreatedAt);
+          setStatus(med.status || '');
+          setDataLoaded(true);
+        } else {
+          console.error('API Error Details:', result);
+          dispatch(
+            openAlert({
+              type: 'error',
+              title: 'ເກີດຂໍ້ຜິດພາດ',
+              message: 'ບໍ່ສາມາດດຶງຂໍ້ມູນຢາໄດ້',
+            }),
+          );
+        }
+      } catch (err) {
+        console.error('Error fetching medicine:', err);
         dispatch(
           openAlert({
             type: 'error',
             title: 'ເກີດຂໍ້ຜິດພາດ',
-            message: result.message || 'ບໍ່ສາມາດດຶງຂໍ້ມູນຢາໄດ້',
+            message: 'ເກີດຂໍ້ຜິດພາດໃນການດຶງຂໍ້ມູນ',
           }),
         );
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error('Error fetching medicine:', err);
-      dispatch(
-        openAlert({
-          type: 'error',
-          title: 'ເກີດຂໍ້ຜິດພາດ',
-          message: err.message || 'ເກີດຂໍ້ຜິດພາດໃນການດຶງຂໍ້ມູນ',
-        }),
-      );
-    } finally {
-      setLoading(false);
     }
-  }
 
-  fetchMedicine();
-}, [id, reset, dispatch, setValue]);
+    fetchMedicine();
+  }, [id, reset, dispatch, setValue]);
   const handleSave = async (formData) => {
     setLoading(true);
 
     try {
-
       const payload = {
         ...formData,
 
@@ -223,6 +215,11 @@ useEffect(() => {
     }
   };
 
+  useEffect(() => {
+    if (status) {
+      setValue('status', status);
+    }
+  }, [status, setValue]);
   // // Show loader while fetching data
   // if (loading && !dataLoaded) {
   //   return <Loader />;
@@ -241,8 +238,6 @@ useEffect(() => {
         onSubmit={handleSubmit(handleSave)}
         className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 px-4"
       >
-
-
         <InputBox
           label="ຊື່ຢາ"
           name="med_name"
@@ -261,14 +256,12 @@ useEffect(() => {
           errors={errors}
         />
 
-
         <InputBox
           label="ລາຄາ"
           name="price"
           type="number"
           step="0.01"
           register={register}
-
           formOptions={{
             required: 'ກະລຸນາປ້ອນລາຄາ',
             min: { value: 0, message: 'ລາຄາຕ້ອງຫຼາຍກວ່າ 0' },
@@ -295,18 +288,15 @@ useEffect(() => {
           select={getValues('expired')}
           setValue={setValue}
         />
-
         <SelectBox
           label="ສະຖານະ"
-          name="ສະຖານະ"
+          name="status"
           options={['ຍັງມີ', 'ໝົດ']}
           register={register}
           errors={errors}
           value={status}
           onSelect={(e) => setStatus(e.target.value)}
         />
-
-
 
         <SelectBoxId
           label="ປະເພດ"
@@ -361,14 +351,11 @@ useEffect(() => {
         />
 
         <div className="flex justify-end space-x-4 col-span-full py-4">
-
           <Button variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </Button>
-
         </div>
       </form>
-
     </div>
   );
 };

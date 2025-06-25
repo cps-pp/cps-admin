@@ -295,8 +295,8 @@ const AddDetailImport = ({ id, setShow, getList, onClose }) => {
 
  return (
   <div className="rounded bg-white pt-4 dark:bg-strokedark">
-    <div className="flex items-center justify-between border-b border-stroke dark:border-strokedark pb-4">
-      <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
+    <div className="flex items-center justify-between border-b border-stroke  pb-4">
+      <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark  px-4">
         ເພີ່ມລາຍລະອຽດສິນຄ້ານຳເຂົ້າ - ໃບນຳເຂົ້າ: {id}
       </h1>
     </div>
@@ -309,10 +309,10 @@ const AddDetailImport = ({ id, setShow, getList, onClose }) => {
     </div> */}
     {importDetails.length > 0 && (
       <div className="mt-4 px-4">
-        <h3 className="text-lg font-medium mb-2">ລາຍການສິນຄ້ານຳເຂົ້າທີ່ມີຢູ່ແລ້ວ:</h3>
-        <div className="overflow-x-auto shadow">
-          <table className="w-full min-w-max table-auto">
-            <thead>
+            <h3 className="text-lg font-medium mb-2">ລາຍການສິນຄ້າທີ່ມີຢູ່ແລ້ວ:</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-stroke">
+              <thead>
               <tr className="text-left bg-gray border border-stroke">
                 <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-stroke">ລະຫັດລາຍລະອຽດ</th>
                 <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-stroke">ຊື່ຢາ</th>
@@ -347,13 +347,11 @@ const AddDetailImport = ({ id, setShow, getList, onClose }) => {
       </div>
     )}
 
-    {/* ฟอร์มเพิ่มรายการใหม่ */}
     <form onSubmit={handleSubmit(handleSave)} className="mt-6 px-4">
       {/* <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded mb-6">
         <h3 className="text-lg font-medium mb-2 text-green-800 dark:text-green-200">ເພີ່ມສິນຄ້ານຳເຂົ້າໃໝ່:</h3>
       </div> */}
       
-      {/* เลือกยา */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           ເລືອກຢາ 

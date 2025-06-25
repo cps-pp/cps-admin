@@ -6,7 +6,7 @@ import useStoreServices from '../../../../store/selectServices';
 export default function SumService() {
 
   const { removeService: removeServiceStore, services } = useStoreServices();
-
+const { clearServices } = useStoreServices();
 
 
   const columns = [
@@ -45,7 +45,6 @@ export default function SumService() {
     },
   ];
 
-  // console.log(services)
 
   return (
     <div>

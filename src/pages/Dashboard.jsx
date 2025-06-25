@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, } from 'recharts';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Legend,
+  Tooltip,
+} from 'recharts';
 import CardDataStats from '../components/CardDataStats';
 import MonthChart from '../components/Charts/MonthChart';
 import { getAppointments } from '@/api/getAppointments';
@@ -7,9 +14,14 @@ import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { useNavigate } from 'react-router-dom';
 import { FollowHeader } from './Follow/column/follow';
 import ExchangeRateModal from '../components/exchange_chack/ExchangeRateModal'; // เพิ่ม import
-
-
+import { Calendar, Badge, List, Typography, Card } from 'antd';
+const { Text, Title } = Typography;
 const Dashboard = () => {
+  const onPanelChange = (value, mode) => {
+    console.log(value.format('YYYY-MM-DD'), mode);
+  };
+  const [selectedDate, setSelectedDate] = useState(null);
+
   const [patients, setPatients] = useState(null);
   const [patient, setPatient] = useState(0); // ถ้ามี
   const [filteredPatients, setFilteredPatients] = useState([]);
@@ -18,19 +30,22 @@ const Dashboard = () => {
   const [patientName, setPatientName] = useState([]);
   const [empName, setEmpName] = useState([]);
   const [appointments, setAppointments] = useState([]);
-  const [todayAppointments, setTodayAppointments] = useState([]); // เพิ่มตัวแปรนี้
   const [totalCount, setTotalCount] = useState(0);
   const [doneCount, setDoneCount] = useState(0);
   const [waitingCount, setWaitingCount] = useState(0);
   const [doctorCount, setDoctorCount] = useState(0);
-  const [exchangeRates, setExchangeRates] = useState({ baht: 0, yuan: 0, dollar: 0 });
-  const [exchangeData, setExchangeData] = useState([]); // เพิ่มตัวแปรนี้
+  const [exchangeRates, setExchangeRates] = useState({
+    baht: 0,
+    yuan: 0,
+    dollar: 0,
+  });
+  const [exchangeData, setExchangeData] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const navigate = useNavigate();
   const [patientsList, setPatientsList] = useState([]);
 
-    // เพิ่ม state สำหรับยา
+  // เพิ่ม state สำหรับยา
   const [medicines, setMedicines] = useState([]);
   const [medicineTypes, setMedicineTypes] = useState([]);
   const [lowStockMedicines, setLowStockMedicines] = useState([]);
@@ -41,227 +56,242 @@ const Dashboard = () => {
   const [showExchangeModal, setShowExchangeModal] = useState(false);
   const [missingExchangeRates, setMissingExchangeRates] = useState([]);
   const [exchangeCheckLoading, setExchangeCheckLoading] = useState(false);
-// แก้ไขฟังก์ชัน checkTodayExchangeRates
-const checkTodayExchangeRates = async () => {
-  try {
-    setExchangeCheckLoading(true);
-    const today = new Date().toISOString().split('T')[0];
-    const response = await fetch(`http://localhost:4000/src/manager/today/${today}`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    console.log('Today exchange rates check:', data);
-    
-    const requiredCurrencies = ['BATH', 'Dollar', 'YUAN'];
-    const existingCurrencies = data.data ? data.data.map(item => item.ex_type) : [];
-    const missing = requiredCurrencies.filter(currency => !existingCurrencies.includes(currency));
-    
-    if (missing.length > 0) {
-      setMissingExchangeRates(missing);
-      setShowExchangeModal(true);
-    } else {
-      // บันทึกว่าตรวจสอบวันนี้แล้ว
-      localStorage.setItem('lastExchangeCheck', today);
-      await fetchExchangeRates();
-    }
-    
-  } catch (error) {
-    console.error('Error checking today exchange rates:', error);
-    setMissingExchangeRates(['BATH', 'Dollar', 'YUAN']);
-    setShowExchangeModal(true);
-  } finally {
-    setExchangeCheckLoading(false);
-  }
-};
-
-// แก้ไขฟังก์ชัน handleSubmitExchangeRates
-const handleSubmitExchangeRates = async (rates) => {
-  const mapToCode = {
-    'BATH': 'BATH',
-    'Dollar': 'Dollar',
-    'YUAN': 'YUAN'
-  };
-
-  const payload = {
-    rates: Object.entries(rates).map(([label, rate]) => ({
-      ex_type: mapToCode[label],
-      ex_rate: parseFloat(rate)
-    }))
-  };
-
-  try {
-    const res = await fetch(`http://localhost:4000/src/manager/update-rates`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) throw new Error('บันทึกไม่สำเร็จ');
-
-    // บันทึกว่าตรวจสอบวันนี้แล้ว
-    const today = new Date().toISOString().split('T')[0];
-    localStorage.setItem('lastExchangeCheck', today);
-    
-    // ปิด modal และดึงข้อมูลใหม่
-    setShowExchangeModal(false);
-    await fetchExchangeRates();
-    
-  } catch (error) {
-    console.error('Error submitting exchange rates:', error);
-    throw error;
-  }
-};
-
-// ฟังก์ชันดึงข้อมูลอัตราแลกเปลี่ยน
-const fetchExchangeRates = async () => {
-  try {
-    const response = await fetch('http://localhost:4000/src/manager/exchange');
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-    const data = await response.json();
-    
-    console.log('Raw API Response:', data);
-    
-    if (data && data.data) {
-      const rates = { baht: 0, yuan: 0, dollar: 0 };
-      
-      data.data.forEach((item, index) => {
-        const typeCheck = item.ex_type?.trim();
-        
-        switch(typeCheck) {
-          case 'BATH':
-            rates.baht = item.ex_rate || 0;
-            break;
-          case 'Dollar':
-            rates.dollar = item.ex_rate || 0;
-            break;
-          case 'YUAN':
-            rates.yuan = item.ex_rate || 0;
-            break;
-        }
-      });
-      
-      setExchangeRates(rates);
-      setExchangeData(data.data);
-    }
-  } catch (error) {
-    console.error('Error fetching exchange rates:', error);
-    setExchangeRates({ baht: 0, dollar: 0, yuan: 0 });
-    setExchangeData([]);
-  }
-};  
-
-// ฟังก์ชันตรวจสอบว่าควรเช็คอัตราแลกเปลี่ยนหรือไม่ (เช็คจากฐานข้อมูล)
-const shouldCheckExchangeRates = async () => {
-  try {
-    const today = new Date().toISOString().split('T')[0];
-    
-    console.log('Checking database for today rates:', today);
-    
-    const response = await fetch(`http://localhost:4000/src/exchange/today/${today}`);
-    
-    if (!response.ok) {
-      console.log('API error, assume need to check');
-      return true;
-    }
-    
-    const data = await response.json();
-    console.log('Database check result:', data);
-    
-    const requiredCurrencies = ['BATH', 'Dollar', 'YUAN'];
-    const existingCurrencies = data.data ? data.data.map(item => item.ex_type) : [];
-    const missing = requiredCurrencies.filter(currency => !existingCurrencies.includes(currency));
-    
-    const needToCheck = missing.length > 0;
-    console.log('Required:', requiredCurrencies, 'Existing:', existingCurrencies, 'Missing:', missing, 'Need to check:', needToCheck);
-    
-    return needToCheck;
-    
-  } catch (error) {
-    console.error('Error checking database:', error);
-    return true; // ถ้า error ให้เช็ค
-  }
-}; 
-
-// useEffect หลัก - เรียกทุกครั้งที่ component mount หรือ re-render
-useEffect(() => {
-  const initializeApp = async () => {
-    console.log('App initializing...');
-    
-    const needToCheck = await shouldCheckExchangeRates();
-    
-    if (needToCheck) {
-      console.log('Need to check exchange rates');
-      await checkTodayExchangeRates();
-    } else {
-      console.log('Already have rates for today, fetching existing rates');
-      await fetchExchangeRates();
-    }
-  };
-  
-  initializeApp();
-}, []); // ไม่มี dependency เพื่อให้รันแค่ครั้งเดียวตอน mount
-
-// เพิ่ม useEffect สำหรับตรวจสอบเมื่อผู้ใช้กลับมาที่หน้า
-useEffect(() => {
-  const handleVisibilityChange = async () => {
-    if (!document.hidden) {
-      const needToCheck = await shouldCheckExchangeRates();
-      if (needToCheck) {
-        console.log('Page became visible and need to check rates');
-        await checkTodayExchangeRates();
-      }
-    }
-  };
-
-  const handleFocus = async () => {
-    const needToCheck = await shouldCheckExchangeRates();
-    if (needToCheck) {
-      console.log('Window focused and need to check rates');  
-      await checkTodayExchangeRates();
-    }
-  };
-
-  // ตรวจสอบเมื่อหน้าเว็บ visible อีกครั้ง
-  document.addEventListener('visibilitychange', handleVisibilityChange);
-  
-  // ตรวจสอบเมื่อ window ได้รับ focus
-  window.addEventListener('focus', handleFocus);
-  
-  return () => {
-    document.removeEventListener('visibilitychange', handleVisibilityChange);
-    window.removeEventListener('focus', handleFocus);
-  };
-}, []);
-
-  
-
-  useEffect(() => {
-  const fetchPatients = async () => {
+  // แก้ไขฟังก์ชัน checkTodayExchangeRates
+  const checkTodayExchangeRates = async () => {
     try {
-      setLoading(true);
-      const response = await fetch('http://localhost:4000/src/manager/patient/dashboard');
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      setExchangeCheckLoading(true);
+      const today = new Date().toISOString().split('T')[0];
+      const response = await fetch(
+        `http://localhost:4000/src/manager/today/${today}`,
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      // console.log('Today exchange rates check:', data);
+
+      const requiredCurrencies = ['BATH', 'Dollar', 'YUAN'];
+      const existingCurrencies = data.data
+        ? data.data.map((item) => item.ex_type)
+        : [];
+      const missing = requiredCurrencies.filter(
+        (currency) => !existingCurrencies.includes(currency),
+      );
+
+      if (missing.length > 0) {
+        setMissingExchangeRates(missing);
+        setShowExchangeModal(true);
+      } else {
+        localStorage.setItem('lastExchangeCheck', today);
+        await fetchExchangeRates();
+      }
+    } catch (error) {
+      console.error('Error checking today exchange rates:', error);
+      setMissingExchangeRates(['BATH', 'Dollar', 'YUAN']);
+      setShowExchangeModal(true);
+    } finally {
+      setExchangeCheckLoading(false);
+    }
+  };
+
+  const handleSubmitExchangeRates = async (rates) => {
+    const mapToCode = {
+      BATH: 'BATH',
+      Dollar: 'Dollar',
+      YUAN: 'YUAN',
+    };
+
+    const payload = {
+      rates: Object.entries(rates).map(([label, rate]) => ({
+        ex_type: mapToCode[label],
+        ex_rate: parseFloat(rate),
+      })),
+    };
+
+    try {
+      const res = await fetch(
+        `http://localhost:4000/src/manager/update-rates`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      if (!res.ok) throw new Error('บันทึกไม่สำเร็จ');
+
+      // บันทึกว่าตรวจสอบวันนี้แล้ว
+      const today = new Date().toISOString().split('T')[0];
+      localStorage.setItem('lastExchangeCheck', today);
+
+      // ปิด modal และดึงข้อมูลใหม่
+      setShowExchangeModal(false);
+      await fetchExchangeRates();
+    } catch (error) {
+      console.error('Error submitting exchange rates:', error);
+      throw error;
+    }
+  };
+
+  const fetchExchangeRates = async () => {
+    try {
+      const response = await fetch(
+        'http://localhost:4000/src/manager/exchange',
+      );
+      if (!response.ok)
+        throw new Error(`HTTP error! Status: ${response.status}`);
       const data = await response.json();
 
-      // กำหนดจำนวนผู้ป่วย
-      setPatient(data.data.length);
+      console.log('Raw API Response:', data);
 
-      // กำหนดข้อมูลที่แสดงในตาราง
-      setFilteredPatients(data.data);
+      if (data && data.data) {
+        const rates = { baht: 0, yuan: 0, dollar: 0 };
+
+        data.data.forEach((item, index) => {
+          const typeCheck = item.ex_type?.trim();
+
+          switch (typeCheck) {
+            case 'BATH':
+              rates.baht = item.ex_rate || 0;
+              break;
+            case 'Dollar':
+              rates.dollar = item.ex_rate || 0;
+              break;
+            case 'YUAN':
+              rates.yuan = item.ex_rate || 0;
+              break;
+          }
+        });
+
+        setExchangeRates(rates);
+        setExchangeData(data.data);
+      }
     } catch (error) {
-      console.error('Error fetching patients:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error fetching exchange rates:', error);
+      setExchangeRates({ baht: 0, dollar: 0, yuan: 0 });
+      setExchangeData([]);
     }
   };
 
-  fetchPatients();
-}, []);
+  const shouldCheckExchangeRates = async () => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+
+      console.log('Checking database for today rates:', today);
+
+      const response = await fetch(
+        `http://localhost:4000/src/exchange/today/${today}`,
+      );
+
+      if (!response.ok) {
+        console.log('API error, assume need to check');
+        return true;
+      }
+
+      const data = await response.json();
+      console.log('Database check result:', data);
+
+      const requiredCurrencies = ['BATH', 'Dollar', 'YUAN'];
+      const existingCurrencies = data.data
+        ? data.data.map((item) => item.ex_type)
+        : [];
+      const missing = requiredCurrencies.filter(
+        (currency) => !existingCurrencies.includes(currency),
+      );
+
+      const needToCheck = missing.length > 0;
+      console.log(
+        'Required:',
+        requiredCurrencies,
+        'Existing:',
+        existingCurrencies,
+        'Missing:',
+        missing,
+        'Need to check:',
+        needToCheck,
+      );
+
+      return needToCheck;
+    } catch (error) {
+      console.error('Error checking database:', error);
+      return true; // ถ้า error ให้เช็ค
+    }
+  };
+
+  useEffect(() => {
+    const initializeApp = async () => {
+      // console.log('App initializing...');
+
+      const needToCheck = await shouldCheckExchangeRates();
+
+      if (needToCheck) {
+        // console.log('Need to check exchange rates');
+        await checkTodayExchangeRates();
+      } else {
+        // console.log('Already have rates for today, fetching existing rates');
+        await fetchExchangeRates();
+      }
+    };
+
+    initializeApp();
+  }, []);
+
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (!document.hidden) {
+        const needToCheck = await shouldCheckExchangeRates();
+        if (needToCheck) {
+          // console.log('Page became visible and need to check rates');
+          await checkTodayExchangeRates();
+        }
+      }
+    };
+
+    const handleFocus = async () => {
+      const needToCheck = await shouldCheckExchangeRates();
+      if (needToCheck) {
+        // console.log('Window focused and need to check rates');
+        await checkTodayExchangeRates();
+      }
+    };
+
+    // ตรวจสอบเมื่อหน้าเว็บ visible อีกครั้ง
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // ตรวจสอบเมื่อ window ได้รับ focus
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
+
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          'http://localhost:4000/src/manager/patient/dashboard',
+        );
+        if (!response.ok)
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        const data = await response.json();
+        setPatient(data.data.length);
+        setFilteredPatients(data.data);
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPatients();
+  }, []);
 
   useEffect(() => {
     const fetchPatient = async () => {
@@ -274,7 +304,6 @@ useEffect(() => {
           throw new Error(`HTTP error! Status: ${response.status}`);
         const data = await response.json();
         setPatients(data.data.length);
-        
       } catch (error) {
         console.error('Error fetching patient data:', error);
       } finally {
@@ -284,15 +313,17 @@ useEffect(() => {
     fetchPatient();
   }, []);
 
-  // ✅ ย้าย useEffect นี้ไปไว้หลัง fetchPatientName เพื่อให้ข้อมูลพร้อม
   useEffect(() => {
     const fetchPatientName = async () => {
       try {
-        const response = await fetch('http://localhost:4000/src/manager/patient');
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const response = await fetch(
+          'http://localhost:4000/src/manager/patient',
+        );
+        if (!response.ok)
+          throw new Error(`HTTP error! Status: ${response.status}`);
         const data = await response.json();
         setPatientName(data.data);
-        setPatientsList(data.data);  
+        setPatientsList(data.data);
       } catch (error) {
         console.error('Error fetching patient names:', error);
       }
@@ -300,94 +331,156 @@ useEffect(() => {
     fetchPatientName();
   }, []);
 
+  useEffect(() => {
+    const fetchMedicines = async () => {
+      try {
+        setMedicineLoading(true);
+        const response = await fetch(
+          'http://localhost:4000/src/manager/medicines',
+        );
+        if (!response.ok)
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        const data = await response.json();
 
-// เพิ่ม useEffect สำหรับดึงข้อมูลยา
-useEffect(() => {
-  const fetchMedicines = async () => {
-    try {
-      setMedicineLoading(true);
-      const response = await fetch('http://localhost:4000/src/manager/medicines');
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      const data = await response.json();
-      
-      if (data && data.data) {
-        setMedicines(data.data);
-        
-        // แยกยาที่ใกล้หมดและหมด
-        const lowStock = data.data.filter(med => med.status === 'ໃກ້ໝົດ');
-        const outOfStock = data.data.filter(med => med.status === 'ໝົດ');
-        
-        setLowStockMedicines(lowStock);
-        setOutOfStockMedicines(outOfStock);
+        if (data && data.data) {
+          setMedicines(data.data);
+
+          // กำหนดเกณฑ์สำหรับยาที่ใกล้หมด (เช่น น้อยกว่าหรือเท่ากับ 50)
+          const LOW_STOCK_THRESHOLD = 50;
+
+          // แยกยาตามจำนวน (qty) แทนที่จะดูจากสถานะ
+          const lowStock = data.data.filter((med) => {
+            const qty = parseInt(med.qty) || 0;
+            return (
+              qty > 0 && qty <= LOW_STOCK_THRESHOLD && med.status === 'ຍັງມີ'
+            );
+          });
+
+          const outOfStock = data.data.filter((med) => {
+            const qty = parseInt(med.qty) || 0;
+            return qty === 0 || med.status === 'ໝົດ';
+          });
+
+          console.log('ยาที่ใกล้หมด (qty <= 50):', lowStock);
+          console.log('ยาที่หมด (qty = 0):', outOfStock);
+
+          setLowStockMedicines(lowStock);
+          setOutOfStockMedicines(outOfStock);
+        }
+      } catch (error) {
+        console.error('Error fetching medicines:', error);
+        setMedicines([]);
+        setLowStockMedicines([]);
+        setOutOfStockMedicines([]);
+      } finally {
+        setMedicineLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching medicines:', error);
-      setMedicines([]);
-      setLowStockMedicines([]);
-      setOutOfStockMedicines([]);
-    } finally {
-      setMedicineLoading(false);
+    };
+    fetchMedicines();
+  }, []);
+  const getTypeName = (medtype_id) => {
+    const type = medicineTypes.find((type) => type.medtype_id === medtype_id);
+    return type ? type.type_name : 'ບໍ່ພົບປະເພດ';
+  };
+
+  useEffect(() => {
+    const fetchMedicineTypes = async () => {
+      try {
+        const response = await fetch(
+          'http://localhost:4000/src/manager/category',
+        );
+        if (!response.ok)
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        const data = await response.json();
+
+        if (data && data.data) {
+          setMedicineTypes(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching medicine types:', error);
+        setMedicineTypes([]);
+      }
+    };
+    fetchMedicineTypes();
+  }, []);
+
+  const getStatusByQty = (qty, originalStatus) => {
+    const quantity = parseInt(qty) || 0;
+
+    if (quantity === 0 || originalStatus === 'ໝົດ') {
+      return 'ໝົດ';
+    } else if (quantity <= 50) {
+      return 'ໃກ້ໝົດ';
+    } else {
+      return 'ຍັງມີ';
     }
   };
-  fetchMedicines();
-}, []);
 
-// เพิ่ม useEffect สำหรับดึงข้อมูลประเภทยา
-useEffect(() => {
-  const fetchMedicineTypes = async () => {
-    try {
-      const response = await fetch('http://localhost:4000/src/manager/category');
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      const data = await response.json();
-      
-      if (data && data.data) {
-        setMedicineTypes(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching medicine types:', error);
-      setMedicineTypes([]);
+  const getStatusClass = (qty, originalStatus) => {
+    const status = getStatusByQty(qty, originalStatus);
+
+    switch (status) {
+      case 'ຍັງມີ':
+        return 'bg-green-100 text-green-800';
+      case 'ໃກ້ໝົດ':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'ໝົດ':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
-  fetchMedicineTypes();
-}, []);
 
-// ปรับปรุงฟังก์ชัน getExchangeRateDisplay ให้แสดงผลแบบกระชับขึ้น
-const getExchangeRateDisplay = () => {
-  const rates = [];
-  
-  if (exchangeRates.baht > 0) {
-    rates.push(`฿${exchangeRates.baht.toLocaleString()}`);
-  }
-  
-  if (exchangeRates.dollar > 0) {
-    rates.push(`$${exchangeRates.dollar.toLocaleString()}`);
-  }
+  // ปรับปรุงฟังก์ชัน getExchangeRateDisplay ให้แสดงผลแบบกระชับขึ้น
+  const getExchangeRateDisplay = () => {
+    const rates = [];
 
-  if (exchangeRates.yuan > 0) {
-    rates.push(`¥${exchangeRates.yuan.toLocaleString()}`);
-  }
+    if (exchangeRates.baht > 0) {
+      rates.push(`฿${exchangeRates.baht.toLocaleString()}`);
+    }
 
-  if (rates.length === 0) {
-    return 'ບໍ່ມີຂໍ້ມູນ';
-  }
-  
-  // แสดงแบบแยกบรรทัดด้วย <br />
-  return rates.join('|');
-};
+    if (exchangeRates.dollar > 0) {
+      rates.push(`$${exchangeRates.dollar.toLocaleString()}`);
+    }
+
+    if (exchangeRates.yuan > 0) {
+      rates.push(`¥${exchangeRates.yuan.toLocaleString()}`);
+    }
+
+    if (rates.length === 0) {
+      return 'ບໍ່ມີຂໍ້ມູນ';
+    }
+
+    // แสดงแบบแยกบรรทัดด้วย <br />
+    return rates.join('|');
+  };
 
   // ✅ ปรับปรุงฟังก์ชัน getTodayPendingAppointments ให้เรียงลำดับตามเวลา
   const getTodayPendingAppointments = () => {
     if (!appointments || appointments.length === 0) return [];
 
     const today = new Date();
-    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+    const todayStart = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
+    const todayEnd = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+      23,
+      59,
+      59,
+    );
 
-    const todayAppts = appointments.filter(appointment => {
+    const todayAppts = appointments.filter((appointment) => {
       const appointmentDate = new Date(appointment.date_addmintted);
-      return appointmentDate >= todayStart &&
+      return (
+        appointmentDate >= todayStart &&
         appointmentDate <= todayEnd &&
-        appointment.status === 'ລໍຖ້າ';
+        appointment.status === 'ລໍຖ້າ'
+      );
     });
 
     // ✅ เรียงลำดับตามเวลา (จากเวลาน้อยไปมาก)
@@ -445,8 +538,6 @@ const getExchangeRateDisplay = () => {
     fetchDoctors();
   }, []);
 
-
-
   useEffect(() => {
     const fetchDoctor = async () => {
       try {
@@ -465,83 +556,28 @@ const getExchangeRateDisplay = () => {
     fetchDoctor();
   }, []);
 
-
-
-  // Get today's date in YYYY-MM-DD format
   const getTodayDate = () => {
     const today = new Date();
-    return today.toISOString().split('T')[0];
+    return today.toLocaleDateString('en-GB', {
+      year: 'numeric',
+      month: '2-digit',
+      day: 'numeric',
+    });
   };
 
-const formatPhoneNumbers = (phone1) => {
-  const phones = [];
-  if (phone1?.trim()) phones.push(phone1.trim());
-  return phones.length ? phones : '-';
-};
-
-const getPatientById = (id) => {
-  return patientsList.find((p) => p.patient_id === id);
-};
-
-const getPatientPhones = (id) => {
-  const patient = getPatientById(id);
-  return patient ? formatPhoneNumbers(patient.phone1, patient.phone2) : '-';
-};
-
- // เพิ่มฟังก์ชันสำหรับหาชื่อประเภทยา
-  const getTypeName = (medtype_id) => {
-    const type = medicineTypes.find((type) => type.medtype_id === medtype_id);
-    return type ? type.type_name : 'ບໍ່ພົບປະເພດ';
+  const formatPhoneNumbers = (phone1) => {
+    const phones = [];
+    if (phone1?.trim()) phones.push(phone1.trim());
+    return phones.length ? phones : '-';
   };
 
-  // ฟังก์ชันสำหรับสถานะยา
-  const getStatusClass = (status) => {
-    switch (status) {
-      case 'ໃກ້ໝົດ':
-        return 'bg-yellow-100 text-yellow-700';
-      case 'ໝົດ':
-        return 'bg-red-100 text-red-700';
-      default:
-        return 'bg-green-100 text-green-700';
-    }
+  const getPatientById = (id) => {
+    return patientsList.find((p) => p.patient_id === id);
   };
 
-
-
-  // ฟังก์ชันจัดรูปแบบที่อยู่
-  const formatAddress = (village, district, province) => {
-    const addressParts = [];
-
-    if (village && village.trim()) {
-      addressParts.push(`ບ້ານ${village.trim()}`);
-    }
-
-    if (district && district.trim()) {
-      addressParts.push(`ເມືອງ${district.trim()}`);
-    }
-
-    if (province && province.trim()) {
-      addressParts.push(`ແຂວງ${province.trim()}`);
-    }
-
-    return addressParts.length > 0 ? addressParts.join(', ') : '-';
-  };
-
-  // ฟังก์ชันจัดรูปแบบที่อยู่แบบย่อ (สำหรับตาราง)
-  const formatAddressShort = (village, district, province) => {
-    const parts = [];
-
-    if (village && village.trim()) {
-      parts.push(village.trim());
-    }
-    if (district && district.trim()) {
-      parts.push(district.trim());
-    }
-    if (province && province.trim()) {
-      parts.push(province.trim());
-    }
-
-    return parts.length > 0 ? parts.join(', ') : '-';
+  const getPatientPhones = (id) => {
+    const patient = getPatientById(id);
+    return patient ? formatPhoneNumbers(patient.phone1, patient.phone2) : '-';
   };
 
   const getPatientName = (patient_id) => {
@@ -556,17 +592,10 @@ const getPatientPhones = (id) => {
     return emp ? `${emp.emp_name} ${emp.emp_surname}` : 'ບໍ່ພົບຊື່';
   };
 
-
-
-
-
   const paginated = filteredAppointments.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage,
   );
-
-
-
 
   const handlePatientManagement = () => {
     navigate('/manager/patient');
@@ -582,8 +611,6 @@ const getPatientPhones = (id) => {
 
   return (
     <>
-
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
         <CardDataStats
           title="ລາຍຮັບທັງໝົດ"
@@ -604,8 +631,6 @@ const getPatientPhones = (id) => {
           </svg>
         </CardDataStats>
 
-        
-        {/* Card อัตราแลกเปลี่ยน - ปรับปรุงให้แสดงข้อมูลจริง */}
         <div onClick={handleExchangeManagement} className="cursor-pointer">
           <CardDataStats
             title="ອັດຕາແລກປ່ຽນມື້ນີ້"
@@ -632,85 +657,82 @@ const getPatientPhones = (id) => {
         </div>
 
         {/* 2. Card คนเจ็บ */}
-          <div onClick={handlePatientManagement} className="cursor-pointer">
-            <CardDataStats
-              title="ຄົນເຈັບທັງໝົດ"
-              total={
-                <span className="text-2xl text-black-2">
-                  {patients !== null ? `${patients} ຄົນ` : 'ກຳລັງໂຫຼດ...'}
-                </span>
-              }
+        <div onClick={handlePatientManagement} className="cursor-pointer">
+          <CardDataStats
+            title="ຄົນເຈັບທັງໝົດ"
+            total={
+              <span className="text-2xl text-black-2">
+                {patients !== null ? `${patients} ຄົນ` : 'ກຳລັງໂຫຼດ...'}
+              </span>
+            }
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1.7em"
+              height="1.7em"
+              viewBox="0 0 24 24"
+              className="text-primary dark:text-white"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="1.7em"
-                height="1.7em"
-                viewBox="0 0 24 24"
-                className="text-primary dark:text-white"
+              <g
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.5"
               >
-                <g
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="1.5"
-                >
-                  <path d="M14 3.5c3.771 0 5.657 0 6.828 1.245S22 7.993 22 12s0 6.01-1.172 7.255S17.771 20.5 14 20.5h-4c-3.771 0-5.657 0-6.828-1.245S2 16.007 2 12s0-6.01 1.172-7.255S6.229 3.5 10 3.5z" />
-                  <path d="M5 15.5c1.609-2.137 5.354-2.254 7 0m-1.751-5.25a1.75 1.75 0 1 1-3.5 0a1.75 1.75 0 0 1 3.5 0M15 9.5h4m-4 4h2" />
-                </g>
-              </svg>
-            </CardDataStats>
-          </div>
-
-          {/* 3. Card ท่านหมอ */}
-          <div onClick={handleDoctorManagement} className="cursor-pointer">
-            <CardDataStats
-              title="ທ່ານຫມໍທັງໝົດ"
-              total={
-                <span className="2xl text-black-2">
-                  {doctorCount !== 0 ? `${doctorCount} ຄົນ` : 'ກຳລັງໂຫຼດ...'}
-                </span>
-              }
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="text-primary"
-                width="1.7em"
-                height="1.7em"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M14.84,16.26C17.86,16.83 20,18.29 20,20V22H4V20C4,18.29 6.14,16.83 9.16,16.26L12,21L14.84,16.26M8,8H16V10A4,4 0 0,1 12,14A4,4 0 0,1 8,10V8M8,7L8.41,2.9C8.46,2.39 8.89,2 9.41,2H14.6C15.11,2 15.54,2.39 15.59,2.9L16,7H8M12,3H11V4H10V5H11V6H12V5H13V4H12V3Z" />
-              </svg>
-            </CardDataStats>
-          </div>
+                <path d="M14 3.5c3.771 0 5.657 0 6.828 1.245S22 7.993 22 12s0 6.01-1.172 7.255S17.771 20.5 14 20.5h-4c-3.771 0-5.657 0-6.828-1.245S2 16.007 2 12s0-6.01 1.172-7.255S6.229 3.5 10 3.5z" />
+                <path d="M5 15.5c1.609-2.137 5.354-2.254 7 0m-1.751-5.25a1.75 1.75 0 1 1-3.5 0a1.75 1.75 0 0 1 3.5 0M15 9.5h4m-4 4h2" />
+              </g>
+            </svg>
+          </CardDataStats>
         </div>
 
-      <div className="grid grid-cols-2 gap-8 mt-6">
-
-        {/* Appointments Section - Right Side */}
+        <div onClick={handleDoctorManagement} className="cursor-pointer">
+          <CardDataStats
+            title="ທ່ານຫມໍທັງໝົດ"
+            total={
+              <span className="2xl text-black-2">
+                {doctorCount !== 0 ? `${doctorCount} ຄົນ` : 'ກຳລັງໂຫຼດ...'}
+              </span>
+            }
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="text-primary"
+              width="1.7em"
+              height="1.7em"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M14.84,16.26C17.86,16.83 20,18.29 20,20V22H4V20C4,18.29 6.14,16.83 9.16,16.26L12,21L14.84,16.26M8,8H16V10A4,4 0 0,1 12,14A4,4 0 0,1 8,10V8M8,7L8.41,2.9C8.46,2.39 8.89,2 9.41,2H14.6C15.11,2 15.54,2.39 15.59,2.9L16,7H8M12,3H11V4H10V5H11V6H12V5H13V4H12V3Z" />
+            </svg>
+          </CardDataStats>
+        </div>
+      </div>
+      {/* Appointments */}
+      <div className="grid grid-cols-1 gap-8 mt-6">
         <div className="rounded bg-white pt-1 shadow-md ">
-          <div className="flex items-center justify-between px-4 pb-4">
+          <div className="flex items-center justify-between px-4 py-3 ">
             <h2 className="text-md md:text-lg lg:text-xl font-medium text-strokedark ">
               ນັດໝາຍມື້ນີ້ ({getTodayDate()})
             </h2>
-            <div className="text-sm text-yellow-600 dark:text-gray-400">
-              ລໍຖ້າກວດ: {todayPendingAppointments.length} ລາຍການ
-            </div>
-            <button
-              onClick={() => navigate('/followpat')}
-              className="bg-secondary hover:bg-secondary2 text-white px-4 py-2  text-sm rounded transition-colors duration-200 flex items-center gap-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-              ກວດສອບນັດໝາຍ
-            </button>
-          </div>
+              <div className="flex items-center gap-4">
+        <div className="text-md text-yellow-600">
+          ລໍຖ້າກວດ: {todayPendingAppointments.length} ລາຍການ
+        </div>
 
-    <div className="overflow-x-auto  ">
-          <table className="w-full min-w-max table-auto  ">
+        <button
+          onClick={() => navigate('/followpat')}
+          className="bg-secondary hover:bg-secondary2 text-white px-4 py-2 text-sm rounded transition-colors duration-200 flex items-center gap-2"
+        >
+         
+          ກວດສອບນັດໝາຍ
+        </button>
+      </div>
+    </div>
+
+          <div className="overflow-x-auto  ">
+            <table className="w-full min-w-max table-auto  ">
               <thead>
                 <tr className="text-left bg-gray border border-stroke">
                   <th className="px-4 py-3 text-form-input  font-semibold">
@@ -722,9 +744,10 @@ const getPatientPhones = (id) => {
                   <th className="px-4 py-3 text-form-input  font-semibold">
                     ວັທີ່ນັດໝາຍ
                   </th>
-             {/*     <th className="px-4 py-3 text-form-input  font-semibold">
-                    ສະຖານະ
-                  </th> */}
+
+                  <th className="px-4 py-3 text-form-input  font-semibold">
+                    ລາຍລະອຽດ
+                  </th>
                   <th className="px-4 py-3 text-form-input  font-semibold">
                     ຊື່ທ່ານໝໍ
                   </th>
@@ -746,7 +769,6 @@ const getPatientPhones = (id) => {
                       key={index}
                       className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
                     >
-  
                       <td className="px-4 py-4">
                         {getPatientName(appointment.patient_id)}
                       </td>
@@ -754,15 +776,20 @@ const getPatientPhones = (id) => {
                         {getPatientPhones(appointment.patient_id)}
                       </td>
                       <td className="px-4 py-4">
-                        {new Date(appointment.date_addmintted).toLocaleString('en-US',
-                          { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Bangkok' }
+                        {new Date(appointment.date_addmintted).toLocaleString(
+                          'en-GB',
+                          {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false,
+                            timeZone: 'Asia/Bangkok',
+                          },
                         )}
                       </td>
-                 {/*     <td className="px-4 py-3">
-                        <span className="inline-block rounded-full px-3 py-1 text-sm font-medium bg-yellow-100 text-yellow-800">
-                          {appointment.status}
-                        </span>
-                      </td> */}
+                      <td className="px-4 py-4">{appointment.description}</td>
                       <td className="px-4 py-4">
                         {getDoctorName(appointment.emp_id)}
                       </td>
@@ -782,94 +809,25 @@ const getPatientPhones = (id) => {
             </table>
           </div>
         </div>
-        {/* Patient Section - Left Side */}
-        <div className="rounded bg-white pt-4 shadow-md  ">
-          <div className="flex items-center justify-between  px-4 pb-4 ">
-            <h2 className="text-md md:text-lg lg:text-xl font-medium text-strokedark ">
-              ລາຍຊື່ຄົນເຈັບເພີ່ມລ່າສຸດ
-            </h2>
-          </div>
-
-         <div className="overflow-x-auto  ">
-          <table className="w-full min-w-max table-auto  ">
-              <thead>
-                <tr className="text-left bg-gray border border-stroke">
-                  <th className="px-4 py-3 text-form-input  font-semibold">
-                    ລະຫັດຄົນເຈັບ
-                  </th>
-                  <th className="px-4 py-3 text-form-input  font-semibold">
-                    ຊື່-ນາມສະກຸນ
-                  </th>
-                  <th className="px-4 py-3 text-form-input  font-semibold">
-                    ເພດ
-                  </th>
-                  <th className="px-4 py-3 text-form-input  font-semibold">
-                    ທີ່ຢູ່
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-gray-500">
-                      ກຳລັງໂຫຼດຂໍ້ມູນ...
-                    </td>
-                  </tr>
-                ) : filteredPatients.length > 0 ? (
-                  filteredPatients.slice(0, 3).map((patient, index) => (
-                    <tr key={index} className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <td className="px-4 py-4">{patient.patient_id}</td>
-                      <td className="px-4 py-4">{patient.patient_name} {patient.patient_surname}</td>
-                      <td className="px-4 py-4">{patient.gender}</td>
-                      <td className="px-4 py-4" title={formatAddress(patient.village, patient.district, patient.province)}>
-                        {formatAddressShort(patient.village, patient.district, patient.province)}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="py-4 text-center text-gray-500">
-                      ບໍ່ມີຂໍ້ມູນຄົນເຈັບ
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Link to view all patients */}
-          <div className="px-4 py-3  flex justify-center">
-            <button
-              onClick={handlePatientManagement}
-              className="text-primary hover:text-primary-dark text-md font-semibold hover:underline transition-colors duration-200"
-            >
-              ເບຶ່ງຄົນເຈັບທັງໝົດ →
-            </button>
-          </div>
-        </div>
       </div>
-      
-      {/* Medicines Section */}
       <div className="grid grid-cols-2 gap-8 mt-6">
         <div className="rounded bg-white pt-1 shadow-md col-span-2">
-          <div className="flex items-center justify-between px-4 pb-4">
+          <div className="flex items-center justify-between px-4 py-4">
             <h2 className="text-md md:text-lg lg:text-xl font-medium text-strokedark">
-              ⚠️ລາຍການຢາ ແລະ ອຸປະກອນທີ່ໃກ້ໝົດ ແລະ ໝົດແລ້ວ
+              ລາຍການຢາ ແລະ ອຸປະກອນທີ່ໃກ້ໝົດ ແລະ ໝົດແລ້ວ
             </h2>
             <div className="flex items-center gap-4">
-              <div className="text-sm text-yellow-600 dark:text-gray-400">
+              <div className="text-md text-yellow-600 dark:text-gray-400">
                 ໃກ້ໝົດ: {lowStockMedicines.length} ລາຍການ
               </div>
-              <div className="text-sm text-red-600">
+              <div className="text-md text-red-600">
                 ໝົດ: {outOfStockMedicines.length} ລາຍການ
               </div>
               <button
                 onClick={() => navigate('/perorder')}
                 className="bg-secondary hover:bg-secondary2 text-white px-4 py-2 text-sm rounded transition-colors duration-200 flex items-center gap-2"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.781 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                </svg>
+            
                 ສັ່ງຊື້ຢາ ແລະ ອຸປະກອນ
               </button>
             </div>
@@ -879,12 +837,24 @@ const getPatientPhones = (id) => {
             <table className="w-full min-w-max table-auto">
               <thead>
                 <tr className="text-left bg-gray border border-stroke">
-                  <th className="px-4 py-3 text-form-input font-semibold">ລະຫັດຢາ</th>
-                  <th className="px-4 py-3 text-form-input font-semibold">ຊື່ຢາ</th>
-                  <th className="px-4 py-3 text-form-input font-semibold">ປະເພດຢາ</th>
-                  <th className="px-4 py-3 text-form-input font-semibold">ຈຳນວນ</th>
-                  <th className="px-4 py-3 text-form-input font-semibold">ຫົວໜ່ວຍ</th>
-                  <th className="px-4 py-3 text-form-input font-semibold">ສະຖານະ</th>
+                  <th className="px-4 py-3 text-form-input font-semibold">
+                    ລະຫັດຢາ
+                  </th>
+                  <th className="px-4 py-3 text-form-input font-semibold">
+                    ຊື່ຢາ
+                  </th>
+                  <th className="px-4 py-3 text-form-input font-semibold">
+                    ປະເພດຢາ
+                  </th>
+                  <th className="px-4 py-3 text-form-input font-semibold">
+                    ຈຳນວນ
+                  </th>
+                  <th className="px-4 py-3 text-form-input font-semibold">
+                    ຫົວໜ່ວຍ
+                  </th>
+                  <th className="px-4 py-3 text-form-input font-semibold">
+                    ສະຖານະ
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -895,27 +865,29 @@ const getPatientPhones = (id) => {
                     </td>
                   </tr>
                 ) : (
-                  [...lowStockMedicines, ...outOfStockMedicines].map((medicine, index) => (
-                    <tr
-                      key={index}
-                      className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
-                    >
-                      <td className="px-4 py-4">{medicine.med_id}</td>
-                      <td className="px-4 py-4">{medicine.med_name}</td>
-                      <td className="px-4 py-4">{getTypeName(medicine.medtype_id)}</td>
-                      <td className="px-4 py-4">{medicine.qty}</td>
-                      <td className="px-4 py-4">{medicine.unit}</td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${getStatusClass(medicine.status)}`}
-                        >
-                          {medicine.status}
-                        </span>
-                      </td>
-
-                    </tr>
-                  ))
-
+                  [...lowStockMedicines, ...outOfStockMedicines].map(
+                    (medicine, index) => (
+                      <tr
+                        key={index}
+                        className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
+                      >
+                        <td className="px-4 py-4">{medicine.med_id}</td>
+                        <td className="px-4 py-4">{medicine.med_name}</td>
+                        <td className="px-4 py-4">
+                          {getTypeName(medicine.medtype_id)}
+                        </td>
+                        <td className="px-4 py-4">{medicine.qty}</td>
+                        <td className="px-4 py-4">{medicine.unit}</td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${getStatusClass(medicine.qty, medicine.status)}`}
+                          >
+                            {getStatusByQty(medicine.qty, medicine.status)}
+                          </span>
+                        </td>
+                      </tr>
+                    ),
+                  )
                 )}
               </tbody>
             </table>
@@ -923,7 +895,6 @@ const getPatientPhones = (id) => {
         </div>
       </div>
 
-       {/* Loading indicator สำหรับการตรวจสอบอัตราแลกเปลี่ยน */}
       {exchangeCheckLoading && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
@@ -931,7 +902,6 @@ const getPatientPhones = (id) => {
               <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
               <span>ກຳລັງຕົວດສອບອັດຕາແລກປ່ຽນ...</span>
             </div>
-
           </div>
         </div>
       )}
@@ -942,11 +912,9 @@ const getPatientPhones = (id) => {
         onClose={() => setShowExchangeModal(false)}
         onSubmit={handleSubmitExchangeRates}
         missingRates={missingExchangeRates}
-      />         
-
+      />
     </>
   );
 };
 
 export default Dashboard;
-

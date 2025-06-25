@@ -34,7 +34,7 @@ const PriceInputBox = ({
           const formValue = getValues(name);
           if (formValue) valueToUse = formValue;
         } catch (e) {
-          console.log('Error getting value from form:', e);
+          // console.log('Error getting value from form:', e);
         }
       }
 
@@ -69,7 +69,7 @@ const PriceInputBox = ({
     <div>
       {label && (
         <label
-          className="mb-1 block text-sm font-medium text-strokedark dark:text-bodydark3"
+          className="mb-1 block text-sm font-medium text-strokedark "
           htmlFor={name}
         >
           {label}

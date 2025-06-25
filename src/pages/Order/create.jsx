@@ -261,16 +261,15 @@ const OrderCreate = ({ setShow, getList, existingIds, onCloseCallback }) => {
         onSubmit={handleSubmit(handleSave)}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 pt-4"
       >
-        {/* ✅ แทนที่ InputBox ด้วย read-only input แบบ auto-generate */}
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2 text-black dark:text-white">
+          <label className="block text-sm font-medium mb-2 text-black ">
             ລະຫັດອໍເດີ້
           </label>
           <input
             type="text"
             value={nextPreorderId}
             readOnly
-            className="w-full rounded-lg border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
+            className="w-full rounded border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
           />
           {/* Hidden input สำหรับส่งค่าไปกับฟอร์ม */}
           <input type="hidden" {...register('preorder_id')} />
@@ -320,12 +319,13 @@ const OrderCreate = ({ setShow, getList, existingIds, onCloseCallback }) => {
           onSelect={(e) => setSelectEmpCreate(e.target.value)}
         />
         
-        <div className="mt-4 flex justify-end space-x-4  py-4">
+      
+         <div className="flex justify-end  col-span-full  py-4">
 
-          <ButtonBox variant="save" type="submit" disabled={loading}>
-            {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
-          </ButtonBox>
-        </div>
+    <ButtonBox variant="save" type="submit" disabled={loading}>
+      {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
+    </ButtonBox>
+  </div>
       </form>
     </div>
   );

@@ -43,7 +43,7 @@ export default function ListDis({ selectService, tapService }) {
             selectService(record);
             selectionDisease(record);
           }}
-          className="bg-secondary2 text-white px-3 py-1 rounded hover:bg-secondary"
+          className="bg-secondary text-white px-3 py-1 rounded hover:bg-secondary2"
         >
           ເພີ່ມ
         </button>

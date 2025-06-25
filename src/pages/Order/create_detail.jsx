@@ -289,38 +289,35 @@ const AddDetailPreorder = ({ id, setShow, getList, onClose }) => {
         </h1>
       </div>
 
-      {/* ✅ แสดงข้อมูลพื้นฐานของใบสั่ง */}
-      <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800">
+      {/* <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800">
         <p className="text-sm text-gray-600 dark:text-gray-300">
           <strong>ລະຫັດໃບສັ່ງ:</strong> {id} 
           <span className="ml-4"><strong>ສະຖານະ:</strong> ກຳລັງເພີ່ມລາຍລະອຽດສິນຄ້າໃນໃບສັ່ງຊື້</span>
         </p>
-      </div>
+      </div> */}
 
-      {/* แสดงรายการที่มีอยู่แล้ว */}
       {preorderDetails.length > 0 && (
         <div className="mt-4 px-4">
           <h3 className="text-lg font-medium mb-2">ລາຍການສິນຄ້າທີ່ມີຢູ່ແລ້ວ:</h3>
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-300">
+            <table className="w-full border-collapse border border-stroke">
               <thead>
-                <tr className="bg-gray-100">
-                  <th className="border border-gray-300 px-4 py-2 text-left">ລະຫັດລາຍລະອຽດ</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">ຊື່ຢາ</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">ຈຳນວນ</th>
-                  <th className="border border-gray-300 px-4 py-2 text-center">ຈັດການ</th>
+                <tr className="text-left bg-gray border border-stroke">
+                  <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-stroke">ລະຫັດລາຍລະອຽດ</th>
+                  <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-stroke">ຊື່ຢາ</th>
+                  <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-stroke">ຈຳນວນ</th>
+                  <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-stroke">ຈັດການ</th>
                 </tr>
               </thead>
               <tbody>
                 {preorderDetails.map((detail, index) => (
-                  <tr key={`${detail.detail_id}-${index}`} className="hover:bg-gray-50">
-                    <td className="border border-gray-300 px-4 py-2">{detail.detail_id}</td>
-                    <td className="border border-gray-300 px-4 py-2">
+                  <tr key={`${detail.detail_id}-${index}`} className="border-b text-md border-stroke">
+                    <td className="px-4 py-2  border-r border-stroke">{detail.detail_id}</td>
+                    <td className="px-4 py-2  border-r border-stroke">
                       {getMedicineName(detail.med_id)} ({detail.med_id})
                     </td>
-                    <td className="border border-gray-300 px-4 py-2 text-center">{detail.qty}</td>
-                    <td className="border border-gray-300 px-4 py-2 text-center">
-                      {/* ✅ เรียกใช้ handleDeleteClick แทน handleDeleteDetail */}
+                    <td className="px-4 py-2  border-r border-stroke">{detail.qty}</td>
+                    <td className="px-4 py-2  border-l border-stroke">
                       <button
                         onClick={() => handleDeleteClick(detail.detail_id)}
                         className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
@@ -337,12 +334,8 @@ const AddDetailPreorder = ({ id, setShow, getList, onClose }) => {
         </div>
       )}
 
-      {/* ฟอร์มเพิ่มรายการใหม่ */}
       <form onSubmit={handleSubmit(handleSave)} className="mt-6 px-4">
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-6">
-          <h3 className="text-lg font-medium mb-2 text-green-800 dark:text-green-200">ເພີ່ມສິນຄ້າໃໝ່:</h3>
-        </div>
-        
+       
         {/* เลือกยา */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -350,7 +343,7 @@ const AddDetailPreorder = ({ id, setShow, getList, onClose }) => {
           </label>
           <select
             {...register('med_id', { required: 'ກະລຸນາເລືອກຢາ' })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="text-strokedark dark:text-stroke relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary  capitalize"
           >
             <option value="">-- ເລືອກຢາ --</option>
             {medicines.map((medicine) => (
@@ -376,7 +369,7 @@ const AddDetailPreorder = ({ id, setShow, getList, onClose }) => {
             })}
             type="number"
             placeholder="ປ້ອນຈຳນວນ"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="text-strokedark dark:text-stroke relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary  capitalize"
           />
           {errors.qty && (
             <span className="text-red-500 text-sm">{errors.qty.message}</span>

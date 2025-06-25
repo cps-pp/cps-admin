@@ -11,13 +11,11 @@ const ReportPer = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [prescriptionId, setPrescriptionId] = useState('');
   const dispatch = useAppDispatch();
-
-  // Pagination
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // Summary stats
   const [summaryStats, setSummaryStats] = useState({
     totalMedicines: 0,
     totalEquipment: 0,
@@ -27,9 +25,8 @@ const ReportPer = () => {
   const fetchReportData = async () => {
     setLoading(true);
     try {
-      // กำหนด medtype_id ตาม tab
-      const medtypeId = activeTab === 'medicine' ? 'M1' : 'M2';
-      const url = `http://localhost:4000/src/report/prescription?id=${medtypeId}`;
+      const medType = activeTab === 'medicine' ? 'M1' : activeTab === 'equipment' ? 'M2' : '';
+      const url = `http://localhost:4000/src/report/prescription?id=${prescriptionId}&med_type=${medType}`;
 
       const response = await fetch(url);
       if (!response.ok) {
@@ -37,13 +34,11 @@ const ReportPer = () => {
       }
       const data = await response.json();
 
-      // สมมติ backend ส่งมาเป็น { detail: [...] }
       const list = data.detail || [];
 
       setReportData(list);
       setFilteredData(list);
 
-      // สรุปจำนวน
       setSummaryStats({
         totalMedicines: list.filter((i) => i.medtype_id === 'M1').length,
         totalEquipment: list.filter((i) => i.medtype_id === 'M2').length,
@@ -80,12 +75,12 @@ const ReportPer = () => {
     }
   }, [searchQuery, reportData]);
 
-  // Fetch data when tab changes
+  // Fetch data when tab changes or prescription ID changes
   useEffect(() => {
     fetchReportData();
     setPage(0);
     setSearchQuery('');
-  }, [activeTab]);
+  }, [activeTab, prescriptionId]);
 
   // Pagination handlers
   const handlePageChange = (_, newPage) => {
@@ -106,18 +101,11 @@ const ReportPer = () => {
   const renderTableRow = (item, index) => (
     <tr
       key={index}
-      className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
+      className="border-b border-stroke  hover:bg-gray-50 "
     >
       <td className="px-4 py-4">{item.med_id || '-'}</td>
       <td className="px-4 py-4">{item.med_name || '-'}</td>
       <td className="px-4 py-4">{item.qty || '-'}</td>
-      {/* <td className="px-4 py-4">
-        <span
-          className={`font-medium ${(item.qty || 0) < 10 ? 'text-red-600' : 'text-green-600'}`}
-        >
-          {item.qty || 0}
-        </span>
-      </td> */}
       <td className="px-4 py-4">
         {item.price != null ? item.price.toLocaleString('en-US') : '-'}
       </td>
@@ -190,8 +178,6 @@ const ReportPer = () => {
       </div>
     </div>
 
- 
-
       <div className="rounded bg-white pt-4 dark:bg-boxdark">
         <Alerts />
         <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
@@ -200,7 +186,22 @@ const ReportPer = () => {
           </h1>
         </div>
 
-        <div className="flex gap-4 px-4 mt-4 ">
+        <div className="px-4 mt-4">
+          <div className="mb-4">
+            <label className="mb-2 block text-sm font-medium text-strokedark dark:text-white">
+              Prescription ID
+            </label>
+            <input
+              type="text"
+              value={prescriptionId}
+              onChange={(e) => setPrescriptionId(e.target.value)}
+              className="w-full rounded border border-stroke bg-transparent px-3 py-2 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+              placeholder="กรอก Prescription ID"
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-4 px-4 ">
           <button
             onClick={() => setActiveTab('medicine')}
             className={`px-4 py-2 ${

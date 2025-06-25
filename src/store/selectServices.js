@@ -43,6 +43,9 @@ const useStoreServices = create((set) => ({
       }
     });
   },
+    clearServices: () => {
+    set({ services: [] });
+  },
 }))
 
 export default useStoreServices;

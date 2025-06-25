@@ -350,8 +350,9 @@ const BillPopup = ({
   inspectionData,
   services = [],
   medicines = [],
-isRefundMode = false,
+  isRefundMode = false,
   invoiceData,
+   onRefresh,
 }) => {
   if (!isOpen) return null;
   // Payment states
@@ -359,7 +360,7 @@ isRefundMode = false,
   const isInvoicePaid = invoiceData?.status === 'PAID';
   const shouldShowPaymentButtons = !isInvoiceCancelled && !isInvoicePaid;
   const dispatch = useDispatch();
-
+const [refreshKey, setRefreshKey] = useState(0);
   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
   const [paymentType, setPaymentType] = useState('cash');
   const [paymentStatus, setPaymentStatus] = useState('pending');
@@ -564,7 +565,7 @@ isRefundMode = false,
           const payment = payments[i];
 
           if (i > 0) {
-            await new Promise((resolve) => setTimeout(resolve, 100)); 
+            await new Promise((resolve) => setTimeout(resolve, 100));
           }
 
           const response = await fetch(
@@ -761,7 +762,6 @@ isRefundMode = false,
                     {inspectionData?.checkup}
                   </span>
                 </div>
-              
               </div>
             </div>
           </div>
@@ -882,7 +882,6 @@ isRefundMode = false,
               </div>
             </div>
           )}
-         
 
           <div className="flex justify-end">
             <div className="w-full max-w-md">
@@ -945,27 +944,26 @@ isRefundMode = false,
             </div>
           </div>
 
-           {shouldShowPaymentButtons && (
-    <div className="flex justify-end gap-4">
-      {!isRefundMode && (
-        <button
-          onClick={handlePayLater}
-          className="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded"
-        >
-          ຊຳລະພາຍຫຼັງ
-        </button>
-      )}
-      
-      <button
-        onClick={() => setShowPaymentPopup(true)}
-        className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded"
-      >
-        ຊຳລະເງິນ
-      </button>
-    </div>
-  )}
+          {shouldShowPaymentButtons && (
+            <div className="flex justify-end gap-4">
+              {!isRefundMode && (
+                <button
+                  onClick={handlePayLater}
+                  className="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded"
+                >
+                  ຊຳລະພາຍຫຼັງ
+                </button>
+              )}
 
-          {/* Payment Popup */}
+              <button
+                onClick={() => setShowPaymentPopup(true)}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded"
+              >
+                ຊຳລະເງິນ
+              </button>
+            </div>
+          )}
+
           {showPaymentPopup && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60 print:hidden p-4">
               <div className="bg-white p-6 rounded max-w-4xl w-full max-h-[95vh] overflow-y-auto ">

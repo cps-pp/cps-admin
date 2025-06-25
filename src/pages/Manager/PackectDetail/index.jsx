@@ -207,15 +207,15 @@ const ServicePage = () => {
 
         <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
           <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
-            ຈັດການຂໍ້ມູນລາຍການບໍລິການ
+            ຈັດການຂໍ້ມູນລາຍການບໍລິການແພັກແກັດ
           </h1>
           <div className="flex items-center gap-2">
             <Button
               onClick={() => setShowAddModal(true)}
               icon={iconAdd}
-              className="bg-secondary2"
+              className="bg-emerald-600 hover:bg-emerald-700"
             >
-              ເພີ່ມຂໍ້ມູນລາຍການ
+              ເພີ່ມຂໍ້ມູນແພັກແກັດ
             </Button>
           </div>
         </div>

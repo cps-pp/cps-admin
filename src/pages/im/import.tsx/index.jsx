@@ -295,7 +295,7 @@ const ImportPage = () => {
           <Button
             onClick={() => setShowAddModal(true)}
             icon={iconAdd}
-            className="bg-secondary2"
+            className="bg-emerald-600 hover:bg-emerald-700"
           >
             ເພີ່ມລາຍການ
           </Button>
@@ -400,14 +400,12 @@ const ImportPage = () => {
               filterIm.map((im, index) => (
                 <tr
                   key={index}
-                  className="border-b text-md border-stroke dark:border-strokedark hover:bg-gray-50 "
+                  className="border-b text-md border-stroke  hover:bg-gray-50 "
                 >
-                  {/* ລະຫັດນຳເຂົ້າ */}
                   <td className="px-4 py-4">{im.im_id}</td>
 
-                  {/* ມື້ນຳເຂົ້າ */}
                   <td className="px-4 py-4">
-                    {new Date(im.im_date).toLocaleDateString('en-US', {
+                    {new Date(im.im_date).toLocaleDateString('en-GB', {
                       day: '2-digit',
                       month: '2-digit',
                       year: 'numeric',
@@ -425,16 +423,15 @@ const ImportPage = () => {
                     {im?.file ? (
                       <button
                         onClick={() => handleViewFileAdvanced(im.file)}
-                        className="bg-yellow-500 text-white px-4 py-1 rounded hover:bg-yellow-600 transition duration-200"
+                        className="bg-emerald-600  text-white px-4 py-1 rounded hover:bg-emerald-700 transition duration-200"
                       >
-                        Open File
+                        ເປີດໄຟລ
                       </button>
                     ) : (
                       <span className="text-gray-400 italic">ບໍ່ພົບໄຟລ</span>
                     )}
                   </td>
 
-                  {/* ຄົນນຳເຂົ້າ */}
                   <td className="px-4 py-4">
                     {getEmployeeName(im.emp_id_create)}
                   </td>

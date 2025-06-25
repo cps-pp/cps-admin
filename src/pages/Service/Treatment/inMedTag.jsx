@@ -13,6 +13,7 @@ const InMedTag = ({
   loading,
   inspectionId,
   isMedicineSaved,
+    refreshKey,
 }) => {
   const { medicines } = useStoreMed();
   const { equipment } = useStoreQi();
@@ -176,10 +177,9 @@ const InMedTag = ({
 
   return (
     <>
+    <div></div>
       <Alerts />
-      <TypeMedicine medicines={allMedicines} />
-
-      {/* ปุ่มบันทึกการจ่ายยา */}
+    <TypeMedicine refreshKey={refreshKey} medicines={allMedicines} />
         <div className="py-4 flex justify-end">
           <button
             onClick={handleSubmit}

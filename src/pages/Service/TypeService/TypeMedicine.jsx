@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Tabs } from 'antd';
 import ListMed from './Component/ListMed';
 import ListQi from './Component/ListQi';
 import SumMedicin from './Component/SumMedicin';
 import SumQil from './Component/SumQi';
 import { CopyPlus, Pill } from 'lucide-react';
-export default function TypeMedicine({ selectService, value }) {
+export default function TypeMedicine({ selectService, value ,refreshKey}) {
   const [selectedMedicin, setSelectedMedicin] = useState([]);
   const [selectedQi, setSelectedQi] = useState([]);
+  useEffect(() => {
+    setSelectedMedicin([]);
+    setSelectedQi([]);
+  }, [refreshKey]);
 
   const handleSelectMedicin = (item) => {
     const exist = selectedMedicin.find((m) => m.med_id === item.med_id);

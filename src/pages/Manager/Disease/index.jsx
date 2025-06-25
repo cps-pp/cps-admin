@@ -181,7 +181,7 @@ const handleSortById = () => {
             <Button
               onClick={() => setShowAddDiseaseModal(true)}
               icon={iconAdd}
-              className="bg-secondary2"
+              className="bg-emerald-600 hover:bg-emerald-700"
             >
               ເພີ່ມຂໍ້ມູນພະຍາດແຂ້ວ
             </Button>

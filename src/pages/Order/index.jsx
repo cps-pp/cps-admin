@@ -130,7 +130,7 @@ const OrderPage = () => {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
-        console.log('Medicine Data:', data.data);
+        // console.log('Medicine Data:', data.data);
         setMedName(data.data);
       } catch (error) {
         console.error('Error fetching medicine data:', error);
@@ -386,7 +386,7 @@ const OrderPage = () => {
           <Button
             onClick={() => setShowAddModal(true)}
             icon={iconAdd}
-            className="bg-secondary2"
+            className="bg-emerald-600 hover:bg-emerald-700"
           >
             ເພີ່ມລາຍການ
           </Button>
@@ -395,7 +395,6 @@ const OrderPage = () => {
 
       <div className="grid w-full gap-4 p-4">
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          {/* ช่องค้นหา */}
           <Search
             type="text"
             name="search"
@@ -405,7 +404,6 @@ const OrderPage = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
 
-          {/* ตัวกรองตามผู้สะหนอง */}
           <select
             className="border border-stroke dark:border-strokedark rounded p-2"
             value={selectedSupplier}
@@ -510,7 +508,7 @@ const OrderPage = () => {
                 >
                   <td className="px-4 py-4">{order.preorder_id}</td>
                   <td className="px-4 py-4">
-                    {new Date(order.preorder_date).toLocaleDateString('en-US', {
+                    {new Date(order.preorder_date).toLocaleDateString('en-GB', {
                       day: '2-digit',
                       month: '2-digit',
                       year: 'numeric',
