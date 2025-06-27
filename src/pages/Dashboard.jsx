@@ -602,11 +602,11 @@ const Dashboard = () => {
   };
 
   const handleDoctorManagement = () => {
-    navigate('/manager/emp'); // เปลี่ยนเส้นทางตามที่ต้องการ
+    navigate('/manager/employee'); 
   };
 
   const handleExchangeManagement = () => {
-    navigate('/manager/exchange'); // เปลี่ยนเส้นทางไปหน้าจัดการอัตราแลกเปลี่ยน
+    navigate('/manager/exchange'); 
   };
 
   return (
@@ -709,7 +709,7 @@ const Dashboard = () => {
           </CardDataStats>
         </div>
       </div>
-      {/* Appointments */}
+
       <div className="grid grid-cols-1 gap-8 mt-6">
         <div className="rounded bg-white pt-1 shadow-md ">
           <div className="flex items-center justify-between px-4 py-3 ">

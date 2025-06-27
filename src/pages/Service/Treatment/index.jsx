@@ -95,7 +95,7 @@ const Treatment = () => {
         const invoice = resData.data;
         console.log('Invoice generated:', invoice);
         setInvoiceData(invoice);
-        setIsInvoiceGenerated(true); // ตั้งค่าว่าสร้าง invoice แล้ว
+        setIsInvoiceGenerated(true); 
         return invoice;
       }
     } catch (error) {
@@ -103,6 +103,7 @@ const Treatment = () => {
       return null;
     }
   };
+
   const handleRefresh = () => {
     setRefreshKey((prev) => prev + 1);
 
@@ -136,68 +137,7 @@ const Treatment = () => {
     setLoading(false);
   };
 
-  // const handleShowBill = async () => {
-  //   try {
-  //     if (!invoiceData || !isInvoiceGenerated) {
-  //       console.log('Creating new invoice...');
-  //       const newInvoice = await generateInvoice();
-  //       if (newInvoice) {
-  //         setShowBillPopup(true);
-  //       }
-  //     } else {
-  //       setShowBillPopup(true);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error in handleShowBill:', error);
-  //   }
-  // };
 
-  // // เมื่อมีการเปลี่ยนแปลง inspection, services, หรือ medicines ให้รีเซ็ต invoice
-  // useEffect(() => {
-  //   if (savedServices.length > 0 || savedMedicines.length > 0) {
-  //     setIsInvoiceGenerated(false); // รีเซ็ตสถานะการสร้าง invoice
-  //     setInvoiceData(null); // เคลียร์ invoice เดิม
-  //   }
-  // }, [savedServices, savedMedicines, inspectionId]);
-
-  // const generateInvoice = async () => {
-  //   const totalServiceCost = savedServices.reduce(
-  //     (total, service) => total + service.price * service.qty,
-  //     0,
-  //   );
-  //   const totalMedicineCost = savedMedicines.reduce(
-  //     (total, medicine) => total + medicine.price * medicine.qty,
-  //     0,
-  //   );
-  //   const grandTotal = totalServiceCost + totalMedicineCost;
-
-  //   try {
-  //     const response = await fetch(
-  //       'http://localhost:4000/src/invoice/invoice',
-  //       {
-  //         method: 'POST',
-  //         headers: { 'Content-Type': 'application/json' },
-  //         body: JSON.stringify({
-  //           total: grandTotal,
-  //           in_id: inspectionId,
-  //         }),
-  //       },
-  //     );
-
-  //     if (response.ok) {
-  //       const resData = await response.json();
-  //       const invoice = resData.data;
-  //       console.log('Invoice generated:', invoice);
-  //       setInvoiceData(invoice);
-  //       return invoice;
-  //     }
-  //   } catch (error) {
-  //     console.error('Failed to generate invoice:', error);
-  //     return null;
-  //   }
-  // };
-
-  // ฟังก์ชันบันทึกการรักษา
   const handleTreatmentSubmit = async () => {
     console.log('Starting treatment submit...');
     setLoading(true);
@@ -266,7 +206,6 @@ const Treatment = () => {
     }
   };
 
-  // ฟังก์ชันบันทึกการจ่ายยา
   const handleMedicineSubmit = async () => {
     console.log('Starting medicine submit...');
     setLoading(true);
@@ -456,6 +395,7 @@ const Treatment = () => {
           loading={loading}
           isTreatmentSaved={isTreatmentSaved}
           // refreshKey={refreshKey}
+           dispatch={dispatch}
         />
       ),
     },
@@ -470,6 +410,7 @@ const Treatment = () => {
           loading={loading}
           inspectionId={inspectionId}
           isMedicineSaved={isMedicineSaved}
+     
           //  refreshKey={refreshKey}
         />
       ),
@@ -503,6 +444,7 @@ const Treatment = () => {
           medicines={savedMedicines}
           invoiceData={invoiceData}
           onRefresh={handleRefresh}
+          
         />
 
         <Alerts />

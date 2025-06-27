@@ -203,7 +203,7 @@ const PatientPage = () => {
       </div>
       <div className="rounded bg-white pt-4 dark:bg-boxdark">
         <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark ">
             ຈັດການຂໍ້ມູນຄົນເຈັບ
           </h1>
           <div className="flex items-center gap-2">

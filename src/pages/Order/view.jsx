@@ -3,11 +3,11 @@ import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import Loader from '@/common/Loader';
 import Alerts from '@/components/Alerts';
+import { Empty } from 'antd';
 
 const ViewPreorder = ({ id, onClose, setShow }) => {
   const [loading, setLoading] = useState(false);
   const [preorderData, setPreorderData] = useState(null);
-  const [preorderDetails, setPreorderDetails] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [medicines, setMedicines] = useState([]);
@@ -120,7 +120,7 @@ const ViewPreorder = ({ id, onClose, setShow }) => {
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('th-TH', {
+    return new Date(dateString).toLocaleDateString('en-GB', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -144,11 +144,8 @@ const ViewPreorder = ({ id, onClose, setShow }) => {
 
       <div className="p-4">
         {preorderData && (
-          
-
-          
           <div className=" pb-6 border-b border-stroke mt-2">
-             <h2 className="text-lg font-semibold mb-4 text-strokedark dark:text-bodydark3">
+            <h2 className="text-lg font-semibold mb-4 text-strokedark dark:text-bodydark3">
               ຂໍ້ມູນການສັ່ງຊື້
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -215,7 +212,7 @@ const ViewPreorder = ({ id, onClose, setShow }) => {
 
         <div className="mt-4">
           <h2 className="text-lg font-semibold mb-4 text-form-input">
-            ລາຍການຢາທີ່ສັ່ງຊື້
+            ລາຍການທີ່ສັ່ງຊື້
           </h2>
 
           {preorderDetails.length > 0 ? (
@@ -228,13 +225,13 @@ const ViewPreorder = ({ id, onClose, setShow }) => {
                         ລຳດັບ
                       </th>
                       <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">
-                        ຊື່ຢາ
+                        ຊື່ລາຍການ
                       </th>
                       <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">
                         ຈຳນວນ
                       </th>
                       <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">
-                        ປະເພດ
+                        ຫົວໜ່ວຍ
                       </th>
                     </tr>
                   </thead>
@@ -263,17 +260,17 @@ const ViewPreorder = ({ id, onClose, setShow }) => {
               </div>
             </>
           ) : (
-            <div className="text-center py-8 text-gray-500 ">
-              <p className="text-lg">ບໍ່ມີລາຍການຢາທີ່ສັ່ງຊື້</p>
-              <p className="text-sm mt-2">
-                ກະລຸນາເພີ່ມລາຍການຢາໃຫ້ກັບການສັ່ງຊື້ນີ້
-              </p>
+            <div className="text-center py-2 text-gray-500 dark:text-gray-400">
+              <div className="w-32 h-32 flex items-center justify-center mx-auto ">
+                <Empty description={false} />
+              </div>
+              <p className="text-lg">ບໍ່ມີລາຍການ</p>
+              <p className="text-sm mt-2">ກະລຸນາເພີ່ມລາຍການສັ່ງຊື້ກ່ອນ</p>
             </div>
           )}
         </div>
 
-        {/* ปุ่มปิด */}
-        <div className="flex justify-end  ">
+        <div className="flex justify-end mt-6  border-t border-stroke  ">
           <button
             onClick={() => setShow(false)}
             className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"

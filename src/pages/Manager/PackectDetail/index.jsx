@@ -35,10 +35,8 @@ const ServicePage = () => {
   const dispatch = useAppDispatch();
 
   const [existingIds, setExistingIds] = useState([]);
-  // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
   const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
 
-  // ✅ เพิ่ม state สำหรับการเรียงลำดับ ID
   const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
 
   const fetchServiceList = async () => {
@@ -299,12 +297,12 @@ const ServicePage = () => {
                     </div>
                   </td>
 
-                    <td className="px-3 py-4 text-center">
+                    {/* <td className="px-3 py-4 text-center">
                       <TableAction
                         onAdd={() => handleAdd_detail(service.ser_id)}
                         onView={() => handleView(service.ser_id)}
                       />
-                    </td>
+                    </td> */}
 
                     <td className="px-3 py-4 text-center">
                       <TableAction

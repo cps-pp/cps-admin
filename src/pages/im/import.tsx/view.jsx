@@ -3,6 +3,7 @@ import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import Loader from '@/common/Loader';
 import Alerts from '@/components/Alerts';
+import { Empty } from 'antd';
 
 const ViewImport = ({ id, onClose, setShow }) => {
   const [loading, setLoading] = useState(false);
@@ -52,8 +53,10 @@ const ViewImport = ({ id, onClose, setShow }) => {
       setLoading(true);
       try {
         // ดึงข้อมูล import หลัก
-        const importRes = await fetch(`http://localhost:4000/src/im/import/${id}`);
-        
+        const importRes = await fetch(
+          `http://localhost:4000/src/im/import/${id}`,
+        );
+
         if (importRes.ok) {
           const importResult = await importRes.json();
           setImportData(importResult.data);
@@ -62,8 +65,10 @@ const ViewImport = ({ id, onClose, setShow }) => {
         }
 
         // ดึงข้อมูล import_detail
-        const detailRes = await fetch(`http://localhost:4000/src/im_detail/import-detail/${id}`);
-        
+        const detailRes = await fetch(
+          `http://localhost:4000/src/im_detail/import-detail/${id}`,
+        );
+
         if (detailRes.ok) {
           const detailResult = await detailRes.json();
           setImportDetails(detailResult.data || []);
@@ -71,7 +76,6 @@ const ViewImport = ({ id, onClose, setShow }) => {
           // ถ้าไม่มี detail ก็ไม่เป็นไร
           setImportDetails([]);
         }
-
       } catch (error) {
         console.error('Error fetching import data:', error);
         dispatch(
@@ -91,12 +95,12 @@ const ViewImport = ({ id, onClose, setShow }) => {
 
   // Helper functions
   const getEmployeeName = (emp_id) => {
-    const employee = employees.find(e => e.emp_id === emp_id);
+    const employee = employees.find((e) => e.emp_id === emp_id);
     return employee ? `${employee.emp_name} ${employee.emp_surname}` : '-';
   };
 
   const getMedicineName = (med_id) => {
-    const medicine = medicines.find(m => m.med_id === med_id);
+    const medicine = medicines.find((m) => m.med_id === med_id);
     if (!medicine) {
       console.warn('ไม่พบ med_id นี้ใน medicines:', med_id);
     }
@@ -104,7 +108,7 @@ const ViewImport = ({ id, onClose, setShow }) => {
   };
 
   const getMedicineUnit = (med_id) => {
-    const medicine = medicines.find(m => m.med_id === med_id);
+    const medicine = medicines.find((m) => m.med_id === med_id);
     if (!medicine) {
       console.warn('ไม่พบ med_id นี้ใน medicines:', med_id);
     }
@@ -112,7 +116,7 @@ const ViewImport = ({ id, onClose, setShow }) => {
   };
 
   const getPreorderInfo = (preorder_id) => {
-    const preorder = preorders.find(p => p.preorder_id === preorder_id);
+    const preorder = preorders.find((p) => p.preorder_id === preorder_id);
     return preorder ? preorder.preorder_id : '-';
   };
 
@@ -132,7 +136,7 @@ const ViewImport = ({ id, onClose, setShow }) => {
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
       <Alerts />
-      
+
       {/* Header */}
       <div className="flex items-center border-b border-stroke dark:border-strokedark pb-4 px-4">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
@@ -142,19 +146,12 @@ const ViewImport = ({ id, onClose, setShow }) => {
 
       <div className="p-4">
         {importData && (
-
-
-
-
-
-
-
           <div className="pb-6 border-b border-stroke mt-2">
             <h2 className="text-lg font-semibold mb-4 text-strokedark dark:text-bodydark3">
               ຂໍ້ມູນການນຳເຂົ້າ
             </h2>
-             <div className="grid grid-cols-2 gap-4">
-              <div className='space-y-1.5'>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
                 <label className="block text-sm font-medium text-slate-6002">
                   ລະຫັດນຳເຂົ້າ
                 </label>
@@ -162,8 +159,8 @@ const ViewImport = ({ id, onClose, setShow }) => {
                   {importData.im_id}
                 </p>
               </div>
-              
-               <div className='space-y-1.5'>
+
+              <div className="space-y-1.5">
                 <label className="block text-sm font-medium text-black-2">
                   ວັນທີນຳເຂົ້າ
                 </label>
@@ -172,20 +169,20 @@ const ViewImport = ({ id, onClose, setShow }) => {
                 </p>
               </div>
 
-             <div className='space-y-1.5'>
+              <div className="space-y-1.5">
                 <label className="block text-sm font-medium text-black-2">
                   ລະຫັດສັ່ງຊື້
                 </label>
-                 <p className="text-base font-mono text-form-strokedark  border border-stroke px-3 py-2 rounded">
+                <p className="text-base font-mono text-form-strokedark  border border-stroke px-3 py-2 rounded">
                   {getPreorderInfo(importData.preorder_id)}
                 </p>
               </div>
 
-              <div className='space-y-1.5'>
+              <div className="space-y-1.5">
                 <label className="block text-sm font-medium text-black-2">
                   ພະນັກງານຜູ້ສ້າງ
                 </label>
-                 <p className="text-base font-mono text-form-strokedark  border border-stroke px-3 py-2 rounded">
+                <p className="text-base font-mono text-form-strokedark  border border-stroke px-3 py-2 rounded">
                   {getEmployeeName(importData.emp_id_create)}
                 </p>
               </div>
@@ -193,42 +190,65 @@ const ViewImport = ({ id, onClose, setShow }) => {
           </div>
         )}
 
-        <div className='mt-4'>
-          <h2 className="text-lg font-semibold mb-4 text-strokedark dark:text-bodydark3">
-            ລາຍການຢາທີ່ນຳເຂົ້າ
+        <div className="mt-4">
+          <h2 className="text-lg font-semibold mb-4 text-strokedark ">
+            ລາຍການທີ່ນຳເຂົ້າ
           </h2>
-          
+
           {importDetails.length > 0 ? (
             <>
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse border border-slate-300">
                   <thead>
                     <tr className="text-left bg-slate-200 border border-stroke">
-                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">ລຳດັບ</th>
-                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">ຊື່ຢາ</th>
-                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">ຈຳນວນ</th>
-                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">ປະເພດ</th>
-                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">ວັນໝົດອາຍຸ</th>
+                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">
+                        ລຳດັບ
+                      </th>
+                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">
+                        ຊື່ລາຍການ
+                      </th>
+                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">
+                        ຈຳນວນ
+                      </th>
+                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">
+                        ຫົວໜ່ວຍ
+                      </th>
+                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">
+                        ວັນໝົດອາຍຸ
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {importDetails.map((detail, index) => (
                       <tr
                         key={detail.detail_id || index}
-                         className="border-b text-md border-stroke"
+                        className="border-b text-md border-stroke"
                       >
-                        <td className="px-4 py-2 border-r border-stroke">{index + 1}</td>
-                        <td className="px-4 py-2 border-r border-stroke">{getMedicineName(detail.med_id)}</td>
-                        <td className="px-4 py-2 border-r border-stroke ">{detail.qty?.toLocaleString() || 0}</td>
-                        <td className="px-4 py-2 border-r border-stroke">{getMedicineUnit(detail.med_id)}</td>
+                        <td className="px-4 py-2 border-r border-stroke">
+                          {index + 1}
+                        </td>
+                        <td className="px-4 py-2 border-r border-stroke">
+                          {getMedicineName(detail.med_id)}
+                        </td>
+                        <td className="px-4 py-2 border-r border-stroke ">
+                          {detail.qty?.toLocaleString() || 0}
+                        </td>
+                        <td className="px-4 py-2 border-r border-stroke">
+                          {getMedicineUnit(detail.med_id)}
+                        </td>
                         <td className="px-4 py-3 border-r border-stroke">
-                          <span className={`px-2 py-1 rounded text-md ${
-                            new Date(detail.expired_date) < new Date()
-                              ? 'bg-red-100 text-red-800'
-                              : new Date(detail.expired_date) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-green-100 text-green-800'
-                          }`}>
+                          <span
+                            className={`px-2 py-1 rounded text-md ${
+                              new Date(detail.expired_date) < new Date()
+                                ? 'bg-red-100 text-red-800'
+                                : new Date(detail.expired_date) <
+                                    new Date(
+                                      Date.now() + 30 * 24 * 60 * 60 * 1000,
+                                    )
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-green-100 text-green-800'
+                            }`}
+                          >
                             {formatDate(detail.expired_date)}
                           </span>
                         </td>
@@ -236,18 +256,20 @@ const ViewImport = ({ id, onClose, setShow }) => {
                     ))}
                   </tbody>
                 </table>
-              </div>             
+              </div>
             </>
           ) : (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              <p className="text-lg">ບໍ່ມີລາຍການຢາທີ່ນຳເຂົ້າ</p>
-              <p className="text-sm mt-2">ກະລຸນາເພີ່ມລາຍການຢາໃຫ້ກັບການນຳເຂົ້ານີ້</p>
+            <div className="text-center py-2 text-gray-500 dark:text-gray-400">
+              <div className="w-32 h-32 flex items-center justify-center mx-auto ">
+                <Empty description={false} />
+              </div>
+              <p className="text-lg">ບໍ່ມີລາຍການ</p>
+              <p className="text-sm mt-2">ກະລຸນາເພີ່ມລາຍການນຳເຂົ້າ</p>
             </div>
           )}
         </div>
 
-        {/* ปุ่มปิด */}
-        <div className="flex justify-end mt-6 pt-4 border-t border-stroke dark:border-strokedark">
+        <div className="flex justify-end mt-6  border-t border-stroke ">
           <button
             onClick={() => setShow(false)}
             className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"

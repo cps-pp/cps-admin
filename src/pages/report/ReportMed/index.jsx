@@ -161,7 +161,7 @@ const ReportMed = () => {
     return (
       <tr
         key={index}
-        className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
+        className="border-b border-stroke "
       >
         <td className="px-4 py-4">{item.med_id || '-'}</td>
         <td className="px-4 py-4">{item.med_name || '-'}</td>
@@ -220,7 +220,7 @@ const ReportMed = () => {
                   stroke="currentColor"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  stroke-width="2.1"
+                  strokeWidth="2.1"
                   d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 5h6m-6 4h6M10 3v4h4V3h-4Z"
                 />
               </svg>
@@ -292,7 +292,7 @@ const ReportMed = () => {
               </svg>
             </div>
             <div className="ml-4">
-              <h4 className="text-lg font-semibold text-strokedark dark:text-white">
+              <h4 className="text-lg font-semibold text-strokedark ">
                 {activeTab === 'medicine' ? 'ຢາໃກ້ໝົດ' : 'ອຸປະກອນໃກ້ໝົດ'}
               </h4>
               <p className="text-xl font-bold text-red-500 dark:text-red-300">
@@ -308,7 +308,7 @@ const ReportMed = () => {
 
         {/* Header */}
         <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 ">
+          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark ">
             ລາຍງານການຢາແລະອຸປະກອນ
           </h1>
         </div>

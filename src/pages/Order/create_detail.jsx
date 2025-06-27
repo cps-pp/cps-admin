@@ -298,7 +298,7 @@ const AddDetailPreorder = ({ id, setShow, getList, onClose }) => {
 
       {preorderDetails.length > 0 && (
         <div className="mt-4 px-4">
-          <h3 className="text-lg font-medium mb-2">ລາຍການສິນຄ້າທີ່ມີຢູ່ແລ້ວ:</h3>
+          <h3 className="text-lg font-medium text-form-input mb-2">ລາຍການສິນຄ້າທີ່ມີຢູ່ແລ້ວ:</h3>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse border border-stroke">
               <thead>

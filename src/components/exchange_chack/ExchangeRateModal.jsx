@@ -116,8 +116,8 @@ const ExchangeRateModal = ({ isOpen, onClose, onSubmit, missingRates }) => {
       <div className="bg-white rounded shadow-xl max-w-md w-full mx-4">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-800">
-              📊 ອັບເດດອັດຕາແລກປ່ຽນ
+            <h2 className="text-xl font-semibold text-form-strokedark">
+               ອັບເດດອັດຕາແລກປ່ຽນ
             </h2>
             <div className="text-sm text-red-600 font-medium">
               * ບັງຄັບໃສ່ຂໍ້ມູນ
@@ -156,7 +156,7 @@ const ExchangeRateModal = ({ isOpen, onClose, onSubmit, missingRates }) => {
                     min="0"
                     value={rates[currency]}
                     onChange={(e) => handleInputChange(currency, e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                       errors[currency] ? 'border-red-500' : 'border-gray-300'
                     }`}
                     placeholder={currentRates[currency] ? 
@@ -183,7 +183,7 @@ const ExchangeRateModal = ({ isOpen, onClose, onSubmit, missingRates }) => {
                 className={`px-6 py-2 rounded text-white font-medium transition-colors ${
                   loading 
                     ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700'
+                    : 'bg-green-600 hover:bg-green-700'
                 }`}
               >
                 {loading ? (
@@ -192,7 +192,7 @@ const ExchangeRateModal = ({ isOpen, onClose, onSubmit, missingRates }) => {
                     <span>ກຳລັງບັນທຶກ...</span>
                   </div>
                 ) : (
-                  '✅ ບັນທຶກອັດຕາແລກປ່ຽນ'
+                  'ບັນທຶກອັດຕາແລກປ່ຽນ'
                 )}
               </button>
             </div>

@@ -194,7 +194,7 @@ export const iconUser = (
     height="24"
     fill="none"
     stroke="currentColor"
-    stroke-width="2"
+    strokeWidth="2"
     stroke-linecap="round"
     stroke-linejoin="round"
     opacity="0.5"
@@ -212,7 +212,7 @@ export const iconPhone = (
     height="24"
     fill="none"
     stroke="currentColor"
-    stroke-width="2"
+    strokeWidth="2"
     stroke-linecap="round"
     stroke-linejoin="round"
     opacity="0.5"
@@ -230,7 +230,7 @@ export const iconConfirmPass = (
     height="24"
     fill="none"
     stroke="currentColor"
-    stroke-width="2"
+    strokeWidth="2"
     stroke-linecap="round"
     stroke-linejoin="round"
   >
@@ -250,7 +250,7 @@ export const iconHeadphone = (
     viewBox="0 0 512 512"
     fill="#000000"
   >
-    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
     <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
     <g id="SVGRepo_iconCarrier">
       {' '}
@@ -268,7 +268,7 @@ export const iconSearch = (
     <path
       d="M18.0837 18.2767L15.1507 15.2614M14.7317 8.79981C14.7317 9.59178 14.58 10.376 14.2852 11.1077C13.9904 11.8394 13.5584 12.5042 13.0137 13.0642C12.469 13.6242 11.8223 14.0684 11.1106 14.3715C10.399 14.6746 9.63619 14.8306 8.86587 14.8306C8.09556 14.8306 7.33278 14.6746 6.6211 14.3715C5.90942 14.0684 5.26277 13.6242 4.71807 13.0642C4.17338 12.5042 3.7413 11.8394 3.44651 11.1077C3.15173 10.376 3 9.59178 3 8.79981C3 7.20035 3.61801 5.6664 4.71807 4.53541C5.81814 3.40443 7.31015 2.76904 8.86587 2.76904C10.4216 2.76904 11.9136 3.40443 13.0137 4.53541C14.1137 5.6664 14.7317 7.20035 14.7317 8.79981Z"
       stroke="#626161"
-      stroke-width="2"
+      strokeWidth="2"
       stroke-linecap="round"
       
     />
@@ -303,7 +303,7 @@ export const iconArrowBack = (
 
 export const iconGrid = (
   <svg width="21px" height="20px" viewBox="0 0 21 20" version="1.1" xmlns="http://www.w3.org/2000/svg">
-    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fillRule="evenodd">
+    <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
       <g id="Dribbble-Light-Preview" transform="translate(-99.000000, -200.000000)" fill="#000000">
         <g id="icons" transform="translate(56.000000, 160.000000)">
           <path
@@ -342,7 +342,7 @@ export const iconList = (
   <svg width="19px" height="16px" viewBox="0 0 19 16" version="1.1" xmlns="http://www.w3.org/2000/svg">
     <title>format_list_bulleted</title>
     <desc>Created with Sketch.</desc>
-    <g id="Icons" stroke="none" stroke-width="1" fill="none" fillRule="evenodd">
+    <g id="Icons" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
       <g id="Rounded" transform="translate(-612.000000, -2106.000000)">
         <g id="Editor" transform="translate(100.000000, 1960.000000)">
           <g id="-Round-/-Editor-/-format_list_bulleted" transform="translate(510.000000, 142.000000)">
@@ -377,7 +377,7 @@ export const iconBackVert = (
     <path
       d="M1 5H14C15.3261 5 16.5979 5.52678 17.5355 6.46447C18.4732 7.40215 19 8.67392 19 10C19 11.3261 18.4732 12.5979 17.5355 13.5355C16.5979 14.4732 15.3261 15 14 15H5M1 5L5 1M1 5L5 9"
       stroke="white"
-      stroke-width="2"
+      strokeWidth="2"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
@@ -389,14 +389,14 @@ export const iconLocation = (
     <path
       d="M12 13C12.7956 13 13.5587 12.6839 14.1213 12.1213C14.6839 11.5587 15 10.7956 15 10C15 9.20435 14.6839 8.44129 14.1213 7.87868C13.5587 7.31607 12.7956 7 12 7C11.2044 7 10.4413 7.31607 9.87868 7.87868C9.31607 8.44129 9 9.20435 9 10C9 10.7956 9.31607 11.5587 9.87868 12.1213C10.4413 12.6839 11.2044 13 12 13Z"
       stroke="#3434CF"
-      stroke-width="2"
+      strokeWidth="2"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
     <path
       d="M17.7998 13.9372H17.7888C18.5106 12.8792 18.9284 11.6434 18.9964 10.3643C19.0645 9.08534 18.7804 7.81216 18.175 6.68345C17.5696 5.55475 16.6661 4.61378 15.5629 3.96302C14.4597 3.31226 13.1991 2.97665 11.9184 2.99274C10.6377 3.00883 9.38595 3.37599 8.29946 4.05426C7.21298 4.73252 6.33341 5.69589 5.75653 6.83944C5.17966 7.983 4.9276 9.26291 5.0278 10.5398C5.128 11.8167 5.57662 13.0416 6.32481 14.0812H6.30881L6.44881 14.2522C6.54881 14.3792 6.64881 14.5032 6.74881 14.6232L11.9998 20.9992L17.1298 14.7512C17.3238 14.5422 17.5038 14.3222 17.6698 14.0922L17.7998 13.9372Z"
       stroke="#3434CF"
-      stroke-width="2"
+      strokeWidth="2"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
@@ -408,7 +408,7 @@ export const iconCart = (
     <path
       d="M5 4H6.5L9 16M9 16H17M9 16C8.46957 16 7.96086 16.2107 7.58579 16.5858C7.21071 16.9609 7 17.4696 7 18C7 18.5304 7.21071 19.0391 7.58579 19.4142C7.96086 19.7893 8.46957 20 9 20C9.53043 20 10.0391 19.7893 10.4142 19.4142C10.7893 19.0391 11 18.5304 11 18C11 17.4696 10.7893 16.9609 10.4142 16.5858C10.0391 16.2107 9.53043 16 9 16ZM17 16C16.4696 16 15.9609 16.2107 15.5858 16.5858C15.2107 16.9609 15 17.4696 15 18C15 18.5304 15.2107 19.0391 15.5858 19.4142C15.9609 19.7893 16.4696 20 17 20C17.5304 20 18.0391 19.7893 18.4142 19.4142C18.7893 19.0391 19 18.5304 19 18C19 17.4696 18.7893 16.9609 18.4142 16.5858C18.0391 16.2107 17.5304 16 17 16ZM8.5 13H17.75L19 7H18M8 7H7.312M13 5V9M11 7H15"
       stroke="#3434CF"
-      stroke-width="2"
+      strokeWidth="2"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
@@ -460,7 +460,7 @@ export const iconCancelRounded = (
     <path
       d="M16.3333 11.6667L11.6667 16.3333M11.6667 11.6667L16.3333 16.3333M21 14C21 14.9193 20.8189 15.8295 20.4672 16.6788C20.1154 17.5281 19.5998 18.2997 18.9497 18.9497C18.2997 19.5998 17.5281 20.1154 16.6788 20.4672C15.8295 20.8189 14.9193 21 14 21C13.0807 21 12.1705 20.8189 11.3212 20.4672C10.4719 20.1154 9.70026 19.5998 9.05025 18.9497C8.40024 18.2997 7.88463 17.5281 7.53284 16.6788C7.18106 15.8295 7 14.9193 7 14C7 12.1435 7.7375 10.363 9.05025 9.05025C10.363 7.7375 12.1435 7 14 7C15.8565 7 17.637 7.7375 18.9497 9.05025C20.2625 10.363 21 12.1435 21 14Z"
       stroke="white"
-      stroke-width="2"
+      strokeWidth="2"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
@@ -481,7 +481,7 @@ export const iconCheck = (
     <path
       d="M4.1665 9.93474L8.10317 13.7539L15.8332 6.25391"
       stroke="white"
-      stroke-width="2"
+      strokeWidth="2"
       stroke-linecap="round"
       stroke-linejoin="round"
     />

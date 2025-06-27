@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import dayjs from "dayjs";
 import { useNavigate } from 'react-router-dom';
 import Button from '@/components/Button';
 import Search from '@/components/Forms/Search';
@@ -35,14 +36,19 @@ const FollowPage = () => {
   const [newDate, setNewDate] = useState('');
   const dispatch = useAppDispatch();
 
-    // ✅ เพิ่ม state สำหรับการเรียงลำดับ ID (คัดลอกจาก CategoryPage)
-  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
+  const [sortOrder, setSortOrder] = useState('asc'); 
 
-  // Get today's date in YYYY-MM-DD format
-  const getTodayDate = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  };
+ const getTodayDate = () => {
+  const today = new Date();
+  return today.toISOString().split('T')[0];
+};
+
+const isSameDate = () => {
+  const localDate = new Date(dateString).toLocaleDateString('en-CA'); // en-CA format: YYYY-MM-DD
+  return localDate === targetDate;
+};
+
+
 
   const fetchAppointments = async () => {
     try {
@@ -65,13 +71,13 @@ const FollowPage = () => {
       const allAppointments = data.data;
       const today = getTodayDate();
 
-      // Filter today's appointments - เฉพาะวันนี้และสถานะ "ລໍຖ້າ" เท่านั้น
-      const todayAppts = allAppointments.filter((appointment) => {
-        const appointmentDate = new Date(appointment.date_addmintted)
-          .toISOString()
-          .split('T')[0];
-        return appointmentDate === today && appointment.status === 'ລໍຖ້າ';
-      });
+const todayAppts = allAppointments.filter((appointment) => {
+  if (!appointment.date_addmintted) return false;
+  return (
+    isSameDate(appointment.date_addmintted, today) &&
+    appointment.status === 'ລໍຖ້າ'
+  );
+});
 
       // ✅ เรียงลำดับตามเวลา (จากเวลาน้อยไปมาก)
       const sortedTodayAppts = todayAppts.sort((a, b) => {
@@ -116,7 +122,6 @@ const FollowPage = () => {
     }
   }, [searchQuery, appointments, patientName, empName]);
 
-  // ✅ ฟังก์ชันสำหรับเรียงลำดับ ID (คัดลอกจาก CategoryPage และปรับให้เหมาะกับ appointment)
   const handleSortById = () => {
     const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
     setSortOrder(newSortOrder);
@@ -293,7 +298,6 @@ const FollowPage = () => {
     }
   };
 
-  // Handle completing appointment (change status to ກວດແລ້ວ)
   const handleCompleteAppointment = async (appointmentId) => {
     try {
       const response = await fetch(
@@ -338,7 +342,6 @@ const FollowPage = () => {
     }
   };
 
-  // Handle postponing appointment
   const openPostponeModal = (appointmentId) => {
     setPostponeAppointmentId(appointmentId);
     setNewDate('');
@@ -374,11 +377,10 @@ const FollowPage = () => {
         openAlert({
           type: 'success',
           title: 'ເລື່ອນນັດໝາຍສຳເລັດ',
-          message: 'ເປັ່ຽນວັນທີ່ນັດໝາຍສຳເລັດແລ້ວ',
+          message: 'ປຽນວັນທີ່ນັດໝາຍສຳເລັດແລ້ວ',
         }),
       );
 
-      // 🟢 เพิ่มบรรทัดนี้เพื่อแจ้งให้ Header รีเฟรชข้อมูล
     window.dispatchEvent(new Event('refresh-notifications'));
     } catch (error) {
       dispatch(
@@ -415,7 +417,6 @@ const FollowPage = () => {
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 2xl:gap-7.5 w-full mb-6">
-        {/* All Appointments */}
         <div className="rounded-sm border border-stroke bg-white p-4 ">
           <div className="flex items-center">
             <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-Third dark:bg-secondary">
@@ -432,7 +433,7 @@ const FollowPage = () => {
                   stroke="currentColor"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  stroke-width="1.5"
+                  strokeWidth="1.5"
                   d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z"
                 />
               </svg>
@@ -478,7 +479,6 @@ const FollowPage = () => {
             </div>
           </div>
         </div>
-        {/* Done Appointments */}
         <div className="rounded-sm border border-stroke bg-white p-4 dark:border-strokedark dark:bg-boxdark">
           <div className="flex items-center">
             <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
@@ -512,11 +512,10 @@ const FollowPage = () => {
         </div>
       </div>
 
-      {/* Today's Appointments Section - แสดงเฉพาะสถานะ "ລໍຖ້າ" และเรียงตามเวลา */}
       <div className="rounded bg-white pt-4  mb-6">
         <div className="flex items-center justify-between border-stroke px-4 pb-4 ">
           <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark">
-            ນັດໝາຍມື້ນີ້ທີ່ລໍຖ້າກວດ ({getTodayDate()}) - ເລ່ຍງຕາມເວລາ
+            ນັດໝາຍມື້ນີ້ທີ່ລໍຖ້າກວດ ({getTodayDate()}) 
           </h1>
           <div className="text-sm text-gray-600 dark:text-gray-400">
             ລໍຖ້າກວດ: {todayAppointments.length} ລາຍການ
@@ -552,18 +551,18 @@ const FollowPage = () => {
                       {getPatientPhone(appointment.patient_id)}
                     </td>
                     <td className="px-4 py-4">
-                      {new Date(appointment.date_addmintted).toLocaleString(
-                        'en-US',
-                        {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          hour12: false,
-                          timeZone: 'Asia/Bangkok',
-                        },
-                      )}
+                   {/* {new Date(appointment.date_addmintted).toLocaleString('en-GB', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+})} */}
+
+{dayjs(appointment.date_addmintted).format("MM/DD/YYYY HH:mm")}
+
+
                     </td>
                     <td className="px-4 py-3">
                       <span className="inline-block rounded-full px-3 py-1 text-sm font-medium bg-yellow-100 text-yellow-800">
@@ -611,17 +610,17 @@ const FollowPage = () => {
       </div>
 
       <div className="rounded bg-white pt-4 dark:bg-boxdark">
-        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
+        <div className=" border-b border-stroke px-4 pb-4 dark:border-strokedark">
           {/* <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
             ຈັດການນັດໝາຍ
           </h1> */}
-          <div className="flex items-center gap-2">
+          <div className="flex justify-end gap-2">
             <Button
               onClick={() => setShowAddModal(true)}
-              className="bg-secondary"
+              className="bg-emerald-600 hover:bg-emerald-700"
                 icon={iconAdd}
             >
-              ເພີ່ມ
+              ເພີ່ມນັດໝາຍ
             </Button>
           </div>
         </div>
@@ -688,15 +687,13 @@ const FollowPage = () => {
                     </td>
                     <td className="px-4 py-4">
                       {new Date(appointment.date_addmintted).toLocaleString(
-                        'en-US',
+                        'en-GB',
                         {
                           day: '2-digit',
                           month: '2-digit',
                           year: 'numeric',
                           hour: '2-digit',
                           minute: '2-digit',
-                          hour12: false,
-                          timeZone: 'Asia/Bangkok',
                         },
                       )}
                     </td>

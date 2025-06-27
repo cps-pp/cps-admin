@@ -6,11 +6,11 @@ import {
   FileText,
   User,
   CreditCard,
-  Hash,
-  Receipt,
-  CheckCircle,
+  Wallet ,
+ Clock,
   Banknote,
   CreditCard as TransferIcon,
+  BanknoteIcon,
 } from 'lucide-react';
 import SelectBoxId from '../../../components/Forms/SelectID';
 import { useDispatch } from 'react-redux';
@@ -352,7 +352,7 @@ const BillPopup = ({
   medicines = [],
   isRefundMode = false,
   invoiceData,
-   onRefresh,
+  onRefresh,
 }) => {
   if (!isOpen) return null;
   // Payment states
@@ -360,20 +360,15 @@ const BillPopup = ({
   const isInvoicePaid = invoiceData?.status === 'PAID';
   const shouldShowPaymentButtons = !isInvoiceCancelled && !isInvoicePaid;
   const dispatch = useDispatch();
-const [refreshKey, setRefreshKey] = useState(0);
   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
   const [paymentType, setPaymentType] = useState('cash');
-  const [paymentStatus, setPaymentStatus] = useState('pending');
   const [exchange, setExchange] = useState([]);
   const [selectedExType, setSelectedExType] = useState(null);
   const [receivedAmount, setReceivedAmount] = useState('');
   const [displayAmount, setDisplayAmount] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-
-  // Exchange rates (default values)
   const [exchangeRates, setExchangeRates] = useState({});
   const [selectedCurrency, setSelectedCurrency] = useState('KIP');
-
   const [isMixedPayment, setIsMixedPayment] = useState(false);
   const [cashAmount, setCashAmount] = useState('');
   const [transferAmount, setTransferAmount] = useState('');
@@ -385,28 +380,21 @@ const [refreshKey, setRefreshKey] = useState(0);
     0,
   );
 
-  // const totalMedicineCost = medicines.reduce(
-  //   (total, medicine) => total + (medicine.total || 0),
-  //   0,
-  // );
-
   const totalMedicineCost = medicines.reduce(
     (total, medicine) => total + medicine.price * medicine.qty,
     0,
   );
   const grandTotal = totalServiceCost + totalMedicineCost;
 
-  // Helper function to round currency properly
   const roundCurrency = (amount, currency) => {
     if (currency === 'KIP') {
-      return Math.ceil(amount); // Always round up for KIP
+      return Math.ceil(amount);
     } else if (currency === 'THB' || currency === 'USD') {
-      // For THB and USD, round up if decimal >= 0.5
       const decimalPart = amount - Math.floor(amount);
       if (decimalPart >= 0.5) {
         return Math.ceil(amount);
       } else {
-        return parseFloat(amount.toFixed(2)); // Keep original decimal if < 0.5
+        return parseFloat(amount.toFixed(2));
       }
     }
     return parseFloat(amount.toFixed(2));
@@ -421,14 +409,12 @@ const [refreshKey, setRefreshKey] = useState(0);
     return roundCurrency(convertedAmount, selectedCurrency);
   })();
 
-  // Calculate amounts in all currencies for display
   const getAmountInAllCurrencies = () => {
     const kipAmount = grandTotal;
     const currencies = {};
 
     currencies['KIP'] = Math.ceil(kipAmount);
 
-    // Add other currencies
     exchange.forEach((ex) => {
       if (ex.ex_type !== 'KIP') {
         const convertedAmount = kipAmount / ex.ex_rate;
@@ -440,28 +426,15 @@ const [refreshKey, setRefreshKey] = useState(0);
   };
 
   const allCurrencyAmounts = getAmountInAllCurrencies();
-
-  // Now we can use totalInSelectedCurrency safely
   const totalMixedAmount =
     parseFloat(cashAmount || 0) + parseFloat(transferAmount || 0);
   const isAmountSufficient = isMixedPayment
     ? totalMixedAmount >= totalInSelectedCurrency
     : parseFloat(receivedAmount || 0) >= totalInSelectedCurrency;
-
-  // Calculate change amount
   const changeAmount = receivedAmount
     ? Math.max(0, parseFloat(receivedAmount) - totalInSelectedCurrency)
     : 0;
 
-  // Calculate change in KIP for display
-  const changeAmountInKIP =
-    selectedCurrency === 'KIP'
-      ? changeAmount
-      : changeAmount * (exchangeRates[selectedCurrency] || 1);
-
-  // ลบ useEffect ที่เรียก generateInvoice ออก เพราะตอนนี้รับ invoiceData จาก parent แล้ว
-
-  // Fetch exchange rates
   useEffect(() => {
     const fetchEx = async () => {
       try {
@@ -612,13 +585,11 @@ const [refreshKey, setRefreshKey] = useState(0);
         }
 
         const result = await response.json();
-        console.log('Payment successful:', result);
       }
+      onRefresh?.();
 
-      console.log('All payments completed successfully');
       setShowPaymentPopup(false);
       onClose();
-
       setPaymentType('cash');
       setIsMixedPayment(false);
       setCashAmount('');
@@ -784,7 +755,7 @@ const [refreshKey, setRefreshKey] = useState(0);
                       ຈຳນວນ
                     </th>
                     <th className="border-b border-stroke px-4 py-3 text-form-input font-semibold text-left print:px-2 print:py-2">
-                      ລາຄາ/ຫົວ
+                      ລາຄາ
                     </th>
                     <th className="border-b border-stroke px-4 py-3 text-form-input font-semibold text-left print:px-2 print:py-2">
                       ລາຄາລວມ
@@ -803,13 +774,13 @@ const [refreshKey, setRefreshKey] = useState(0);
                       <td className="px-4 py-3 text-form-input font-medium print:px-2 print:py-1">
                         {service.name || service.ser_name || 'N/A'}
                       </td>
-                      <td className="px-4 py-3 text-center text-form-strokedark print:px-2 print:py-1">
+                      <td className="px-4 py-3 text-left text-form-strokedark print:px-2 print:py-1">
                         {service.qty}
                       </td>
-                      <td className="px-4 py-3 text-right text-form-strokedark print:px-2 print:py-1">
+                      <td className="px-4 py-3 text-left text-form-strokedark print:px-2 print:py-1">
                         {formatCurrency(service.price)}
                       </td>
-                      <td className="px-4 py-3 text-right text-form-input font-semibold print:px-2 print:py-1">
+                      <td className="px-4 py-3 text-left text-form-input font-semibold print:px-2 print:py-1">
                         {formatCurrency(service.price * service.qty)}
                       </td>
                     </tr>
@@ -824,20 +795,21 @@ const [refreshKey, setRefreshKey] = useState(0);
             <div className="overflow-x-auto border border-stroke rounded">
               <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded print:text-sm">
                 <thead>
-                  <tr className="text-left bg-gray border border-stroke print:bg-gray-100">
-                    <th className="border-b border-stroke px-4 py-3 text-form-input font-semibold text-left print:px-2 print:py-2">
+                  <tr className="text-left bg-slate-300 border border-slate-300 print:bg-gray-100">
+                    <th className="border-b border-slate-300 px-4 py-3 text-form-input font-semibold text-left print:px-2 print:py-2">
                       ລຳດັບ
                     </th>
-                    <th className="border-b border-stroke px-4 py-3 text-form-input font-semibold text-left print:px-2 print:py-2">
+                    <th className="border-b border-slate-300 px-4 py-3 text-form-input font-semibold text-left print:px-2 print:py-2">
                       ລາຍການ
                     </th>
-                    <th className="border-b border-stroke px-4 py-3 text-form-input font-semibold text-left print:px-2 print:py-2">
+                    <th className="border-b border-slate-300 px-4 py-3 text-form-input font-semibold text-left print:px-2 print:py-2">
                       ຈຳນວນ
                     </th>
-                    <th className="border-b border-stroke px-4 py-3 text-form-input font-semibold text-left print:px-2 print:py-2">
-                      ລາຄາ/ຫົວ
+                    <th className="border-b border-slate-300 px-4 py-3 text-form-input font-semibold text-left print:px-2 print:py-2">
+                      ລາຄາ
                     </th>
-                    <th className="border-b border-stroke px-4 py-3 text-form-input font-semibold text-left print:px-2 print:py-2">
+                   
+                    <th className="border-b border-slate-300 px-4 py-3 text-form-input font-semibold text-left print:px-2 print:py-2">
                       ລາຄາລວມ
                     </th>
                   </tr>
@@ -854,13 +826,14 @@ const [refreshKey, setRefreshKey] = useState(0);
                       <td className="px-4 py-3 text-form-input font-medium print:px-2 print:py-1">
                         {medicine.name || medicine.med_name}
                       </td>
-                      <td className="px-4 py-3 text-center text-form-strokedark print:px-2 print:py-1">
+                      <td className="px-4 py-3 text-left text-form-strokedark print:px-2 print:py-1">
                         {medicine.qty}
                       </td>
-                      <td className="px-4 py-3 text-right text-form-strokedark print:px-2 print:py-1">
+                      <td className="px-4 py-3 text-left text-form-strokedark print:px-2 print:py-1">
                         {formatCurrency(medicine.price)}
                       </td>
-                      <td className="px-4 py-3 text-right text-form-input font-semibold print:px-2 print:py-1">
+                     
+                      <td className="px-4 py-3 text-left text-form-input font-semibold print:px-2 print:py-1">
                         {formatCurrency(medicine.price * medicine.qty)}
                       </td>
                     </tr>
@@ -885,10 +858,10 @@ const [refreshKey, setRefreshKey] = useState(0);
 
           <div className="flex justify-end">
             <div className="w-full max-w-md">
-              <div className="bg-blue-50 p-4 space-y-2 print:bg-white mb-4  print:p-4 print:space-y-2">
+              <div className=" p-4 space-y-2 print:bg-white mb-4  print:p-4 print:space-y-2">
                 {/* Subtotals */}
                 {services.length > 0 && (
-                  <div className="flex justify-between text-sm print:text-sm">
+                  <div className="flex justify-between text-md print:text-sm">
                     <span className="text-form-strokedark">ລວມບໍລິການ:</span>
                     <span className="font-semibold text-form-input">
                       {formatCurrency(totalServiceCost)}
@@ -897,7 +870,7 @@ const [refreshKey, setRefreshKey] = useState(0);
                 )}
 
                 {medicines.length > 0 && (
-                  <div className="flex justify-between text-sm print:text-sm">
+                  <div className="flex justify-between text-md print:text-sm">
                     <span className="text-form-strokedark">ລວມຢາ:</span>
                     <span className="font-semibold text-form-input">
                       {formatCurrency(totalMedicineCost)}
@@ -918,11 +891,11 @@ const [refreshKey, setRefreshKey] = useState(0);
 
                 {invoiceData && (
                   <>
-                    <div className="border-t border-gray-300 pt-4 ">
+                    <div className="border-t border-gray-300  ">
                       <div className="flex justify-between items-center pt-2 ">
                         <span className="text-form-strokedark ">ສະຖານະ:</span>
                         <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold  ${
+                          className={`px-3 py-2 rounded-full text-xs font-semibold  ${
                             invoiceData.status === 'paid'
                               ? 'bg-green-100 text-green-800 '
                               : invoiceData.status === 'partial'
@@ -944,25 +917,28 @@ const [refreshKey, setRefreshKey] = useState(0);
             </div>
           </div>
 
-          {shouldShowPaymentButtons && (
-            <div className="flex justify-end gap-4">
-              {!isRefundMode && (
-                <button
-                  onClick={handlePayLater}
-                  className="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded"
-                >
-                  ຊຳລະພາຍຫຼັງ
-                </button>
-              )}
+        {shouldShowPaymentButtons && (
+  <div className="flex justify-end gap-4 mt-2">
+    {!isRefundMode && (
+      <button
+        onClick={handlePayLater}
+        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded flex items-center gap-2"
+      >
+        <Clock className="w-5 h-5" />
+        ຊຳລະພາຍຫຼັງ
+      </button>
+    )}
 
-              <button
-                onClick={() => setShowPaymentPopup(true)}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded"
-              >
-                ຊຳລະເງິນ
-              </button>
-            </div>
-          )}
+    <button
+      onClick={() => setShowPaymentPopup(true)}
+      className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded flex items-center gap-2"
+    >
+      <BanknoteIcon  className="w-5 h-5" />
+      ຊຳລະເງິນ
+    </button>
+  </div>
+)}
+
 
           {showPaymentPopup && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60 print:hidden p-4">

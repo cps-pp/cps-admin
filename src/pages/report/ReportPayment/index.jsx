@@ -146,7 +146,7 @@ const ReportPay = () => {
                   stroke="currentColor"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  stroke-width="2.1"
+                  strokeWidth="2.1"
                   d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 5h6m-6 4h6M10 3v4h4V3h-4Z"
                 />
               </svg>
@@ -176,7 +176,7 @@ const ReportPay = () => {
                   stroke="currentColor"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  stroke-width="2.4"
+                  strokeWidth="2.4"
                   d="M5 11.917 9.724 16.5 19 7.5"
                 />
               </svg>

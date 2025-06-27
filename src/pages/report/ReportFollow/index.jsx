@@ -4,8 +4,8 @@ import Alerts from '@/components/Alerts';
 import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
-  import { useNavigate } from 'react-router-dom';
-import { Eye } from 'lucide-react'
+import { useNavigate } from 'react-router-dom';
+import { Eye } from 'lucide-react';
 const columns = [
   { key: 'in_id', name: 'ລະຫັດປິນປົວ' },
   { key: 'date', name: 'ວັນທີ' },
@@ -35,8 +35,8 @@ const ReportFollowAll = () => {
       if (!res.ok)
         throw new Error(data.error || 'Error fetching report inspection');
 
-      setAppointments(data.detail);
-      setFilteredAppointments(data.detail);
+      setAppointments(data.data);
+      setFilteredAppointments(data.data);
     } catch (error) {
       console.error('Error:', error);
       dispatch(
@@ -72,7 +72,7 @@ const ReportFollowAll = () => {
     page * rowsPerPage + rowsPerPage,
   );
   const navigate = useNavigate();
- const handleViewPatient = (id) => {
+  const handleViewPatient = (id) => {
     navigate(`/follow-inspection/detail/${id}`);
   };
   return (
@@ -134,16 +134,15 @@ const ReportFollowAll = () => {
                   <td className="px-4 py-3">{item.checkup}</td>
                   <td className="px-4 py-3">{item.diseases_now}</td>
                   <td className="px-4 py-3">{item.note}</td>
-                <td className="px-4 py-3">
-  <button
-    onClick={() => handleViewPatient(item.patient_id)}
-    className="text-blue-600 hover:text-blue-800 transition duration-200"
-    title="View"
-  >
-    <Eye size={20} />
-  </button>
-</td>
-                 
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => handleViewPatient(item.patient_id)}
+                      className="text-blue-600 hover:text-blue-800 transition duration-200"
+                      title="View"
+                    >
+                      <Eye size={20} />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

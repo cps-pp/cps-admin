@@ -1,17 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { FileText } from 'lucide-react';
-import Button from '@/components/Button';
 import TypeService from '../TypeService/TypeService';
-import { useForm } from 'react-hook-form';
 import SelectPatientPopup from '../TypeService/Component/SelectPatientPopup';
 import AntdTextArea from '../../../components/Forms/AntdTextArea';
-import BoxDate from '../../../components/Date';
-import InputBox from '../../../components/Forms/Input_new';
 import useStoreServices from '../../../store/selectServices';
-import BillPopup from './BillPopup';
 import useStoreMed from '../../../store/selectMed';
 import useStoreQi from '../../../store/selectQi';
-
+import Alerts from '@/components/Alerts';
+import { useAppDispatch } from '@/redux/hook';
+import { openAlert } from '@/redux/reducer/alert';
 import { CheckCircle, Save } from 'lucide-react';
 
 const InTreatmentService = ({
@@ -25,7 +21,7 @@ const InTreatmentService = ({
   setIntivalue,
   setValue,
   register,
-  errors,
+  dispatch,
   onTreatmentSubmit,
   loading,
     refreshKey,
@@ -41,9 +37,18 @@ const InTreatmentService = ({
     if (gender === 'female') return 'ຍິງ';
     return '';
   };
-
-  const getDob = (dob) => {
-    return dob ? dob : '';
+ const handleClick = () => {
+    if (!inspectionId) {
+      dispatch(
+        openAlert({
+          type: 'warning',
+          title: 'ກະລຸນາເລືອກຄົນເຈັບ',
+          message: 'ກ່ອນບັນທຶກການປິ່ນປົວ ກະລຸນາເລືອກຄົນເຈັບກ່ອນ',
+        })
+      );
+      return;
+    }
+    onTreatmentSubmit();
   };
 
   useEffect(() => {
@@ -236,20 +241,20 @@ const InTreatmentService = ({
       <div className="overflow-x-auto  mb-4">
        <TypeService refreshKey={refreshKey} />
       </div>
-      <div className=" flex justify-end">
-        <button
-          onClick={onTreatmentSubmit}
-          disabled={loading || !inspectionId}
-          className={`px-6 py-2 rounded flex items-center gap-2 transition  ${
-            loading || !inspectionId
-              ? 'bg-gray-400 text-white cursor-not-allowed'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
-          }`}
-        >
-          <Save className="w-5 h-5" />
-          {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກການປິ່ນປົວ'}
-        </button>
-      </div>
+     <div className="flex justify-end mt-6">
+  <button
+        onClick={handleClick}
+        className={`px-6 py-2 rounded flex items-center gap-2 transition duration-200 ${
+          loading
+            ? 'bg-gray-300 text-gray-600'
+            : 'bg-blue-600 text-white hover:bg-blue-700'
+        }`}
+      >
+        <Save className="w-5 h-5" />
+        {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກການປິ່ນປົວ'}
+      </button>
+</div>
+
     </div>
   );
 };
