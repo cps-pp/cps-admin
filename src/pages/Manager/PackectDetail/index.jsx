@@ -280,18 +280,18 @@ const ServicePage = () => {
                     <div className="flex gap-2 ">
                       <button
                         onClick={() => handleAdd_detail(service.ser_id)}
-                        className="flex items-center gap-2 bg-secondary text-white px-4 py-1 rounded shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                        className="inline-flex items-center px-3 py-1  text-md font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded hover:bg-emerald-100 hover:text-emerald-800 transition-colors"
                       >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-4 h-4 mr-1" />
                         ເພີ່ມ
                       </button>
 
 
                       <button
                         onClick={() => handleView(service.ser_id)}
-                        className="flex items-center gap-2 bg-blue-500 text-white px-4 py-1 rounded shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                        className="inline-flex items-center px-3 py-1  text-md font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 hover:text-blue-700 transition-colors"
                       >
-                        <Eye className="w-4 h-4" />
+                        <Eye className="w-4 h-4 mr-1" />
                         ເບີ່ງລາຍລະອຽດ
                       </button>
                     </div>

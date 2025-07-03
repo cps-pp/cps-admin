@@ -1,14 +1,8 @@
 import { Table } from 'antd';
 import React from 'react';
 import { iconTrash } from '@/configs/icon';
-import useStoreServices from '../../../../store/selectServices';
 
-export default function SumService() {
-
-  const { removeService: removeServiceStore, services } = useStoreServices();
-const { clearServices } = useStoreServices();
-
-
+export default function SumService({ selectedServices, removeService }) {
   const columns = [
     {
       title: 'ລະຫັດ',
@@ -36,7 +30,7 @@ const { clearServices } = useStoreServices();
       key: 'action',
       render: (_, record) => (
         <button
-          onClick={() => removeServiceStore(record)}
+          onClick={() => removeService(record)}
           className="text-red-500 hover:text-red-600 p-1 rounded"
         >
           {iconTrash}
@@ -45,18 +39,14 @@ const { clearServices } = useStoreServices();
     },
   ];
 
-
   return (
-    <div>
-      <Table
-        columns={columns}
-        dataSource={services}
-        pagination={{ pageSize: 4, size: 'middle' }}
-        rowKey="ser_id"
-        size="small"
-          locale={{ emptyText: 'ບໍ່ມີຂໍ້ມູນ' }}
-      // rowKey={getRowKey}
-      />
-    </div>
+    <Table
+      columns={columns}
+      dataSource={selectedServices}
+      pagination={{ pageSize: 4, size: 'middle' }}
+      rowKey="ser_id"
+      size="small"
+      locale={{ emptyText: 'ບໍ່ມີຂໍ້ມູນ' }}
+    />
   );
 }

@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { iconAdd } from '@/configs/icon';
-import Button from '@/components/Button';
 import Search from '@/components/Forms/Search';
-import { TableAction } from '@/components/Tables/TableAction';
 import Alerts from '@/components/Alerts';
 import TablePaginationDemo from '@/components/Tables/Pagination_two';
+import { Eye } from 'lucide-react';
+
 
 const DetailPatientService = () => {
   const navigate = useNavigate();
@@ -22,9 +21,10 @@ const DetailPatientService = () => {
       const res = await fetch('http://localhost:4000/src/report/inspection');
       const data = await res.json();
 
-      console.log('Full API Response:', data); // Debug line
+      // console.log('Full API Response:', data); // Debug line
 
-      const safeData = Array.isArray(data.detail) ? data.detail : [];
+     const safeData = Array.isArray(data.data) ? data.data : [];
+
 
       setInspections(safeData);
       setFilteredInspections(safeData);
@@ -152,9 +152,10 @@ const DetailPatientService = () => {
                     <td className="px-4 py-4 ">
                       <button
                         onClick={() => handleRowClick(item)}
-                        className=" bg-blue-500 rounded text-white  px-4 py-2 text-xs hover:text-white hover:bg-blue-600"
+                        className=" inline-flex items-center px-3 py-1  text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 hover:text-blue-700 transition-colors"
                         title="View"
                       >
+                          <Eye className="w-4 h-4 mr-1" />
                         ເບີ່ງຂໍ້ມູນ
                       </button>
                     </td>

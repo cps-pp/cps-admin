@@ -5,30 +5,34 @@ import useStoreMed from '../../../../store/selectMed';
 export default function SumMedicin() {
   const { removeMedicine, medicines, updateQty } = useStoreMed();
 
-  const handleQtyChange = async (med_id, newQty) => {
-    const med = medicines.find((m) => m.med_id === med_id);
-    if (!med) return;
+  // const handleQtyChange = async (med_id, newQty) => {
+  //   const med = medicines.find((m) => m.med_id === med_id);
+  //   if (!med) return;
 
-    const delta = newQty - med.qty; 
+  //   const delta = newQty - med.qty; 
 
-    if (delta === 0) return; 
-    try {
-      const res = await fetch('http://localhost:4000/src/stock/checkstock', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: [{ med_id, med_qty: delta }] }),
-      });
-      const result = await res.json();
+  //   if (delta === 0) return; 
+  //   try {
+  //     const res = await fetch('http://localhost:4000/src/stock/checkstock', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ data: [{ med_id, med_qty: delta }] }),
+  //     });
+  //     const result = await res.json();
 
-      if (res.ok) {
-        updateQty(med_id, newQty);
-      } else {
-        alert(result.message || 'ไม่สามารถปรับจำนวนยาได้เนื่องจากสต็อกไม่พอ');
-      }
-    } catch (error) {
-      console.error(error);
-      alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
-    }
+  //     if (res.ok) {
+  //       updateQty(med_id, newQty);
+  //     } else {
+  //       alert(result.message || 'ไม่สามารถปรับจำนวนยาได้เนื่องจากสต็อกไม่พอ');
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //     alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+  //   }
+  // };
+  
+    const handleQtyChange = (med_id, newQty) => {
+    updateQty(med_id, newQty);
   };
   const columns = [
     {

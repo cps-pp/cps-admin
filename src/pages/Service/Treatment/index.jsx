@@ -1,11 +1,6 @@
 import {
   FileText,
-  User,
-  Pill,
-  Stethoscope,
-  Calendar,
-  AlertCircle,
-  CheckCircle,
+ 
 } from 'lucide-react';
 import { Tabs } from 'antd';
 import InTreatmentService from './inTreatment';
@@ -23,12 +18,13 @@ import useStoreDisease from '../../../store/selectDis';
 
 
 const Treatment = () => {
-  const [activeTab, setActiveTab] = useState('1');
 
   const [loading, setLoading] = useState(false);
   const { services } = useStoreServices();
   const { medicines } = useStoreMed();
   const { equipment } = useStoreQi();
+  const { dis } = useStoreDisease();
+
   const [showBillPopup, setShowBillPopup] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [inspectionId, setInspectionId] = useState(null);
@@ -206,8 +202,8 @@ const Treatment = () => {
     }
   };
 
-  const handleMedicineSubmit = async () => {
-    console.log('Starting medicine submit...');
+ const handleMedicineSubmit = async () => {
+    // console.log('Starting medicine submit...');
     setLoading(true);
 
     const medicineData = [
@@ -223,7 +219,6 @@ const Treatment = () => {
       })),
     ];
 
-    console.log(medicineData);
 
     const sendMed = { data: medicineData };
 
@@ -332,7 +327,6 @@ const Treatment = () => {
       setLoading(false);
     }
   };
-
   const handleShowBill = async () => {
     if (!inspectionId) {
       dispatch(

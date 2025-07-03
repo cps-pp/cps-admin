@@ -6,8 +6,8 @@ import {
   FileText,
   User,
   CreditCard,
-  Wallet ,
- Clock,
+  Wallet,
+  Clock,
   Banknote,
   CreditCard as TransferIcon,
   BanknoteIcon,
@@ -618,35 +618,37 @@ const BillPopup = ({
 
     onRefresh?.();
   };
-
+  // เพิ่ม console.log เพื่อตรวจสอบข้อมูล
+  // console.log('Medicines data:', medicines);
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl max-w-3xl w-full max-h-[95vh] overflow-y-auto">
-        {/* Header - Hidden on print */}
-        <div className="flex justify-between items-center p-6 border-b border-gray-50 print:hidden">
+        <div className="flex justify-between items-center p-4 border-b border-stroke print:hidden">
           <div className="flex space-x-3">
             <button
               onClick={handlePrint}
-              className="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded flex items-center transition-colors duration-200"
+              className="flex items-center gap-2 px-4 py-2 rounded bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
             >
-              <Printer className="mr-2" size={16} />
-              ພິມ
+              <Printer size={18} />
+              <span className="text-sm font-medium">ພິມບີນ</span>
             </button>
             <button
               onClick={onClose}
-              className="text-form-strokedark hover:text-form-input p-2 rounded transition-colors duration-200"
+              className="flex items-center justify-center  px-4 py-2 rounded bg-red-100 hover:bg-red-200 text-red-600 shadow hover:shadow-md transition-all duration-200"
+              title="ປິດ"
             >
-              <X size={24} />
+              <X size={20} />
+              <span className="text-md font-medium">ອອກ</span>
             </button>
           </div>
         </div>
 
         {/* Bill Content */}
-        <div className="p-8 print:p-6">
+        <div className="p-8 print:p-4 print:max-w-2xl">
           {/* Header Section */}
           <div className="flex justify-between items-start pb-2 print:justify-between print:items-start">
             <div className="flex-shrink-0 print:flex-shrink-0">
-              <img src={Logo} alt="CPS Logo" width={200} className="h-auto" />
+              <img src={Logo} alt="CPS Logo" width={180} className="h-auto" />
             </div>
 
             <div className="text-right print:text-right print:max-w-md">
@@ -808,7 +810,7 @@ const BillPopup = ({
                     <th className="border-b border-slate-300 px-4 py-3 text-form-input font-semibold text-left print:px-2 print:py-2">
                       ລາຄາ
                     </th>
-                   
+
                     <th className="border-b border-slate-300 px-4 py-3 text-form-input font-semibold text-left print:px-2 print:py-2">
                       ລາຄາລວມ
                     </th>
@@ -827,14 +829,16 @@ const BillPopup = ({
                         {medicine.name || medicine.med_name}
                       </td>
                       <td className="px-4 py-3 text-left text-form-strokedark print:px-2 print:py-1">
-                        {medicine.qty}
+                        {medicine.qty ?? 0}
                       </td>
                       <td className="px-4 py-3 text-left text-form-strokedark print:px-2 print:py-1">
-                        {formatCurrency(medicine.price)}
+                        {formatCurrency(medicine.price ?? 0)}
                       </td>
-                     
+
                       <td className="px-4 py-3 text-left text-form-input font-semibold print:px-2 print:py-1">
-                        {formatCurrency(medicine.price * medicine.qty)}
+                        {formatCurrency(
+                          medicine.total || medicine.qty * medicine.price,
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -891,7 +895,7 @@ const BillPopup = ({
 
                 {invoiceData && (
                   <>
-                    <div className="border-t border-gray-300  ">
+                    <div className="border-t border-gray-300 print:hidden ">
                       <div className="flex justify-between items-center pt-2 ">
                         <span className="text-form-strokedark ">ສະຖານະ:</span>
                         <span
@@ -917,28 +921,27 @@ const BillPopup = ({
             </div>
           </div>
 
-        {shouldShowPaymentButtons && (
-  <div className="flex justify-end gap-4 mt-2">
-    {!isRefundMode && (
-      <button
-        onClick={handlePayLater}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded flex items-center gap-2"
-      >
-        <Clock className="w-5 h-5" />
-        ຊຳລະພາຍຫຼັງ
-      </button>
-    )}
+          {shouldShowPaymentButtons && (
+            <div className="flex justify-end gap-4 mt-2 print:hidden">
+              {!isRefundMode && (
+                <button
+                  onClick={handlePayLater}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded flex items-center gap-2"
+                >
+                  <Clock className="w-5 h-5" />
+                  ຊຳລະພາຍຫຼັງ
+                </button>
+              )}
 
-    <button
-      onClick={() => setShowPaymentPopup(true)}
-      className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded flex items-center gap-2"
-    >
-      <BanknoteIcon  className="w-5 h-5" />
-      ຊຳລະເງິນ
-    </button>
-  </div>
-)}
-
+              <button
+                onClick={() => setShowPaymentPopup(true)}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded flex items-center gap-2"
+              >
+                <BanknoteIcon className="w-5 h-5" />
+                ຊຳລະເງິນ
+              </button>
+            </div>
+          )}
 
           {showPaymentPopup && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60 print:hidden p-4">

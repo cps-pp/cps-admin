@@ -53,12 +53,11 @@ const ReportPer = () => {
         );
       });
 
-      console.log('Extracted medicines:', allMedicines);
+      console.log('Exxxxxxxxxxxxtracted medicines:', allMedicines);
 
       setAllData(allMedicines);
       setFilteredData(allMedicines);
 
-      // Group data by inspection ID
       const grouped = inspections.map(inspection => ({
         in_id: inspection.in_id,
         ...inspection,
@@ -157,7 +156,7 @@ const ReportPer = () => {
 
   // Render table row for grouped data
   const renderTableRow = (item, index) => (
-    <tr key={index} className="border-b border-stroke hover:bg-gray-50">
+    <tr key={index} className="border-b border-stroke hover:bg-gray-50 ">
       <td className="px-4 py-3">{item.in_id || '-'}</td>
       <td className="px-4 py-3 ">
         <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">

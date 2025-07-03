@@ -1,87 +1,89 @@
-import React from 'react';
-import useStoreMed from '../../../store/selectMed';
-import useStoreQi from '../../../store/selectQi';
+import React, { useState, useEffect } from 'react';
 import TypeMedicine from '../TypeService/TypeMedicine';
-import { openAlert } from '@/redux/reducer/alert';
-import { useAppDispatch } from '@/redux/hook';
-import Alerts from '@/components/Alerts';
-import ButtonBox from '../../../components/Button';
-import { Save } from 'lucide-react';
 
-const InMedicine = ({
-  onMedicineSubmit,
-  loading,
-  inspectionId,
-  isMedicineSaved,
-}) => {
-  const { medicines } = useStoreMed();
-  const { equipment } = useStoreQi();
-  const dispatch = useAppDispatch();
-
-  const allMedicines = [
-    ...medicines.map((med) => ({
-      ...med,
-      name: med.med_name || med.name,
-    })),
-    ...equipment.map((item) => ({
-      ...item,
-      name: item.med_name || item.name,
-    })),
-  ];
-
-  const handleSubmit = () => {
-    if (!inspectionId) {
-      dispatch(
-        openAlert({
-          type: 'warning',
-          title: 'ກະລຸນາເລືອກຄົນເຈັບກ່ອນ',
-          message:
-            'ທ່ານຕ້ອງເລືອກຄົນເຈັບແລະມີຂໍ້ມູນການປິ່ນປົວກ່ອນບັນທຶກການຈ່າຍຢາ',
-        }),
-      );
-      return;
+const InMedicine = ({ inspectionId, patientId,  refreshKey, medicines = [] }) => {
+  const [allMedicines, setAllMedicines] = useState([]);
+  const [usedMedicines, setUsedMedicines] = useState([]);
+  const [loadingMedicines, setLoadingMedicines] = useState(false);
+ const [filteredMedicines, setFilteredMedicines] = useState([]);
+   const [loading, setLoading] = useState(false);
+ 
+  const [prescriptionData, setPrescriptionData] = useState([]);
+  const fetchAllMedicines = async () => {
+    try {
+      const res = await fetch('http://localhost:4000/src/manager/medicines');
+      const data = await res.json();
+      if (data.success) {
+        setAllMedicines(data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching all medicines:', error);
     }
+  };
+  const fetchPrescriptionData = async (id) => {
+        if (!patientId || !inspectionId) return;
 
-    if (medicines.length === 0 && equipment.length === 0) {
-      dispatch(
-        openAlert({
-          type: 'warning',
-          title: 'ບໍ່ມີລາຍການຢາ',
-          message: 'ກະລຸນາເລືອກຢາຫຼືອຸປະກອນກ່ອນບັນທຶກ',
-        }),
-      );
-      return;
+    
+    setLoading(true);
+    setError('');
+    
+    try {
+      const response = await fetch(`http://localhost:4000/src/report/prescription?id=${inspectionId}`);
+      const json = await response.json();
+
+      if (!response.ok) {
+        throw new Error(json.message || 'Error fetching prescription data');
+      }
+
+      setPrescriptionData(json.detail || []);
+      setFilteredMedicines(json.detail || []);
+    } catch (error) {
+      console.error('Fetch prescription error:', error);
+      setError('ບໍ່ສາມາດດຶງຂໍ້ມູນລາຍການຢາໄດ້');
+      setPrescriptionData([]);
+      setFilteredMedicines([]);
+    } finally {
+      setLoading(false);
     }
-
-    onMedicineSubmit();
   };
 
-  return (
-    <>
-      <Alerts />
-      <TypeMedicine medicines={allMedicines} />
+ 
 
-        <div className="py-4 flex justify-end">
-          <button
-            onClick={handleSubmit}
-            disabled={
-              loading ||
-              !inspectionId ||
-              (medicines.length === 0 && equipment.length === 0)
-            }
-            className={`px-6 py-2 rounded flex items-center gap-2 transition ${
-              loading ||
-              !inspectionId ||
-              (medicines.length === 0 && equipment.length === 0)
-                ? 'bg-gray-400 text-white cursor-not-allowed'
-                : 'bg-green-600 text-white hover:bg-green-700'
-            }`}
-          >
-            <Save className="w-5 h-5" />
-            {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
-          </button>
+  useEffect(() => {
+    fetchAllMedicines();
+  }, []);
+
+  useEffect(() => {
+    if (patientId && inspectionId) {
+      fetchUsedMedicines();
+    }
+  }, [patientId, inspectionId, refreshKey]);
+
+  const displayMedicines = medicines.length > 0 ? medicines : usedMedicines;
+
+  const refreshMedicines = () => {
+    fetchPrescriptionData();
+  };
+
+  if (loading || loadingMedicines) {
+    return (
+      <div className="flex justify-center items-center h-32">
+        <div className="text-gray-500">ກຳລັງໂຫລດຂໍ້ມູນຢາ...</div>
       </div>
-    </>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <TypeMedicine 
+        selectService={() => {}}
+        value={allMedicines}
+        refreshKey={refreshKey}
+        usedMedicines={displayMedicines} 
+        inspectionId={inspectionId}
+        onMedicineUpdate={refreshMedicines}
+      />
+    </div>
   );
 };
 

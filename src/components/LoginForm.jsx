@@ -60,7 +60,7 @@ const LoginForm = () => {
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <input
               type="text"
-              placeholder="ຊື່ຜູ້ໃຊ້"
+              placeholder="ປ້ອນຊື່ຜູ້ໃຊ້"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               disabled={isLoading}
@@ -69,7 +69,7 @@ const LoginForm = () => {
 
             <input
               type="password"
-              placeholder="ລະຫັດຜ່ານ"
+              placeholder="ປ້ອນລະຫັດຜ່ານ"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
@@ -96,7 +96,7 @@ const LoginForm = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="bg-purple-700 hover:bg-purple-800 disabled:bg-purple-400 text-white font-medium p-4 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100 shadow-md hover:shadow-lg disabled:cursor-not-allowed flex items-center justify-center"
+              className="bg-purple-700 hover:bg-purple-800 disabled:bg-purple-400 text-white font-medium p-4 rounded transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100 shadow-md hover:shadow-lg disabled:cursor-not-allowed flex items-center justify-center"
             >
               {isLoading ? (
                 <>

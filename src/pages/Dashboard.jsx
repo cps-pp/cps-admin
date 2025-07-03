@@ -709,7 +709,7 @@ const Dashboard = () => {
           </CardDataStats>
         </div>
       </div>
-
+{/* -------------- */}
       <div className="grid grid-cols-1 gap-8 mt-6">
         <div className="rounded bg-white pt-1 shadow-md ">
           <div className="flex items-center justify-between px-4 py-3 ">
@@ -717,20 +717,20 @@ const Dashboard = () => {
               ນັດໝາຍມື້ນີ້ ({getTodayDate()})
             </h2>
               <div className="flex items-center gap-4">
-        <div className="text-md text-yellow-600">
+        <div className="text-md text-slate-500">
           ລໍຖ້າກວດ: {todayPendingAppointments.length} ລາຍການ
         </div>
 
         <button
           onClick={() => navigate('/followpat')}
-          className="bg-secondary hover:bg-secondary2 text-white px-4 py-2 text-sm rounded transition-colors duration-200 flex items-center gap-2"
+          className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm rounded transition-colors duration-200 flex items-center gap-2"
         >
          
           ກວດສອບນັດໝາຍ
         </button>
       </div>
     </div>
-
+{/* -------------- */}
           <div className="overflow-x-auto  ">
             <table className="w-full min-w-max table-auto  ">
               <thead>
@@ -817,7 +817,7 @@ const Dashboard = () => {
               ລາຍການຢາ ແລະ ອຸປະກອນທີ່ໃກ້ໝົດ ແລະ ໝົດແລ້ວ
             </h2>
             <div className="flex items-center gap-4">
-              <div className="text-md text-yellow-600 dark:text-gray-400">
+              <div className="text-md text-slate-500">
                 ໃກ້ໝົດ: {lowStockMedicines.length} ລາຍການ
               </div>
               <div className="text-md text-red-600">
@@ -825,7 +825,7 @@ const Dashboard = () => {
               </div>
               <button
                 onClick={() => navigate('/perorder')}
-                className="bg-secondary hover:bg-secondary2 text-white px-4 py-2 text-sm rounded transition-colors duration-200 flex items-center gap-2"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm rounded transition-colors duration-200 flex items-center gap-2"
               >
             
                 ສັ່ງຊື້ຢາ ແລະ ອຸປະກອນ

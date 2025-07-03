@@ -5,9 +5,12 @@ module.exports = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   darkMode: 'class',
   theme: {
-    fontFamily: {
-      lao: ['"Noto Sans Lao"', 'sans-serif'],
-    },
+  fontFamily: {
+    lao: ['"Noto Sans Lao"', 'sans-serif'],
+    en: ['"Poppins"', 'sans-serif'],
+    sans: ['"Poppins"', '"Noto Sans Lao"', 'sans-serif'],
+  },
+
     screens: {
       '2xsm': '375px',
       xsm: '425px',
@@ -31,7 +34,7 @@ module.exports = {
         Third: '#EEEBFF',
 
         stroke: '#E2E8F0',
-        gray: '#EFF4FB',
+        gray: '#F1F5F9',
         graydark: '#333A48',
         'gray-2': '#F7F9FC',
         'gray-3': '#FAFAFA',

@@ -29,7 +29,7 @@ const PaymentPage = () => {
         openAlert({
           type: 'error',
           title: 'ດຶງຂໍ້ມູນບໍ່ສຳເລັດ',
-          message: error.message || 'ເກີດຂໍ້ຜິດພາດ',
+          message: 'ເກີດຂໍ້ຜິດພາດ',
         }),
       );
     } finally {
@@ -58,17 +58,44 @@ const PaymentPage = () => {
 
   // ตัวอย่างปุ่มลบหรือจัดการอื่น ๆ (ถ้าต้องการ)
   const handleDeletePayment = () => {
-    // ตัวอย่าง placeholder - ถ้าไม่มีต้องการให้ลบเอาออกได้เลย
     setShowModal(false);
     setSelectedPayId(null);
+  };
+  const getPayTypeBadge = () => {
+    switch (type.toUpperCase()) {
+      case 'CASH':
+        return (
+          <span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-3 py-1 rounded-full">
+            Cash
+          </span>
+        );
+      case 'TRANSFER':
+        return (
+          <span className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">
+            Transfer
+          </span>
+        );
+      case 'REFUND':
+        return (
+          <span className="inline-block bg-yellow-100 text-yellow-800 text-xs font-medium px-3 py-1 rounded-full">
+            Refund
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full">
+            {type}
+          </span>
+        );
+    }
   };
 
   return (
     <>
-      <div className="rounded bg-white pt-4 dark:bg-boxdark">
+      <div className="rounded bg-white pt-4">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 ">
+          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark ">
             ຈັດການການຊໍາລະເງິນທັງໝົດ
           </h1>
         </div>
@@ -78,103 +105,106 @@ const PaymentPage = () => {
           <Search
             type="text"
             name="search"
-            placeholder="ຄົ້ນຫາ pay_id ຫຼື invoice_id..."
-            className="rounded border border-stroke dark:border-strokedark"
+            placeholder="ຄົ້ນຫາ..."
+            className="rounded border border-stroke "
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
         {/* Table */}
-         <div className="overflow-x-auto  shadow-md">
+        <div className="overflow-x-auto  shadow-md">
           <table className="w-full min-w-max table-auto  ">
-              <thead>
-                <tr className="text-left bg-gray border border-stroke">
-                  {Payheader.map((header, index) => (
-                    <th
-                      key={index}
-                      className="px-4 py-3 tracking-wide text-form-input  font-semibold"
+            <thead>
+              <tr className="text-left bg-gray border border-stroke">
+                {Payheader.map((header, index) => (
+                  <th
+                    key={index}
+                    className="px-4 py-3 tracking-wide text-form-input  font-semibold"
+                  >
+                    {header.name}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedPayments.length > 0 ? (
+                paginatedPayments.map((pay, idx) => (
+                  <tr key={idx} className="border-b text-md border-stroke  ">
+                    <td className="px-4 py-4  ">{pay.pay_id}</td>
+                    <td className="px-4 py-2">{pay.invoice_id}</td>
+                    <td className="px-4 py-4">
+                      {new Date(pay.pay_date).toLocaleString('en-GB', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false,
+                      })}
+                    </td>
+
+                    <td className="px-4 py-2">
+                      {Number(pay.paid_amount).toLocaleString()} ກີບ
+                    </td>
+                    <td
+                      className={`inline-block rounded-full px-3 mt-3 py-1 text-center text-sm font-medium ${
+                        pay.status === 'SUCCESS'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-500'
+                      }`}
                     >
-                      {header.name}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedPayments.length > 0 ? (
-                  paginatedPayments.map((pay, idx) => (
-                    <tr
-                      key={idx}
-                      className="border-b text-md border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
-                    >
-                      <td className="px-4 py-4">{pay.pay_id}</td>
-                          <td className="px-4 py-2">{pay.invoice_id}</td>
-                      <td className="px-4 py-4">
-                        {new Date(pay.pay_date).toLocaleString('en-US', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          second: '2-digit',
-                          hour12: false,
-                        })}
-                      </td>
-                      
-                      <td className="px-4 py-2">
-                        {Number(pay.paid_amount).toLocaleString()}
-                      </td>
-    <td
-                        className={`inline-block rounded-full px-3 mt-3 py-1 text-center text-sm font-medium ${
-                          pay.status === 'SUCCESS'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-500'
-                        }`}
-                      >
-                        {pay.status}
-                      </td>
-                  
-                      <td className="px-4 py-2">{pay.pay_type}</td>
-                      {/* <td className="px-4 py-2">{pay.ex_id || '-'}</td>
-                      <td className="px-4 py-2">    {(pay.ex_rate * 1).toLocaleString()}</td> */}
-                  
-                      {/* <td className="px-4 py-2">
-                        <Button
-                          onClick={() => {
-                            setSelectedPayId(pay.pay_id);
-                            setShowModal(true);
-                          }}
-                          className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 text-sm rounded"
-                        >
-                          Delete
-                        </Button>
-                      </td> */}
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={8} className="text-center py-4 text-gray-500">
-                      ບໍ່ພົບຂໍ້ມູນ
+                      {pay.status}
+                    </td>
+
+                    <td className="px-4 py-2">
+                      {pay.pay_type?.toUpperCase() === 'CASH' && (
+                        <span className="inline-block bg-green-100 text-green-800 text-sm  px-3 py-1 rounded-full">
+                          CASH
+                        </span>
+                      )}
+                      {pay.pay_type?.toUpperCase() === 'TRANSFER' && (
+                        <span className="inline-block bg-blue-100 text-blue-800 text-sm  px-3 py-1 rounded-full">
+                          TRANSFER
+                        </span>
+                      )}
+                      {pay.pay_type?.toUpperCase() === 'REFUND' && (
+                        <span className="inline-block bg-yellow-100 text-yellow-800 text-sm  px-3 py-1 rounded-full">
+                          Refund
+                        </span>
+                      )}
+                      {!['CASH', 'TRANSFER', 'REFUND'].includes(
+                        pay.pay_type?.toUpperCase(),
+                      ) && (
+                        <span className="inline-block bg-gray-100 text-gray-700 text-sm  px-3 py-1 rounded-full">
+                          {pay.pay_type}
+                        </span>
+                      )}
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={8} className="text-center py-4 text-gray-500">
+                    ບໍ່ພົບຂໍ້ມູນ
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-
-        {/* Pagination */}
-      
       </div>
-  
-          <TablePaginationDemo
-            count={filteredPayments.length}
-            page={page}
-            rowsPerPage={rowsPerPage}
-            onPageChange={(_, newPage) => setPage(newPage)}
-            onRowsPerPageChange={(e) => {
-              setRowsPerPage(parseInt(e.target.value, 10));
-              setPage(0);
-            }}
-          />
+
+      <TablePaginationDemo
+        count={filteredPayments.length}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        onPageChange={(_, newPage) => setPage(newPage)}
+        onRowsPerPageChange={(e) => {
+          setRowsPerPage(parseInt(e.target.value, 10));
+          setPage(0);
+        }}
+      />
       <ConfirmModal
         show={showModal}
         setShow={setShowModal}

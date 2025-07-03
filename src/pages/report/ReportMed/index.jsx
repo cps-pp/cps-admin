@@ -6,7 +6,7 @@ import { openAlert } from '@/redux/reducer/alert';
 import Alerts from '@/components/Alerts';
 
 const ReportMed = () => {
-  const [activeTab, setActiveTab] = useState('medicine'); // medicine, equipment
+  const [activeTab, setActiveTab] = useState('all'); // all, medicine, equipment
   const [reportData, setReportData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -24,34 +24,36 @@ const ReportMed = () => {
     totalEquipment: 0,
     totalEquipmentStock: 0,
     lowStockItems: 0,
+    totalItems: 0,
+    totalStock: 0,
   });
 
-  const fetchMedicinesWithStock = async () => {
+  const fetchAllData = async () => {
     try {
       setLoading(true);
 
-      const medicineURL =
-        activeTab === 'medicine'
-          ? 'http://localhost:4000/src/manager/medicines/M1'
-          : 'http://localhost:4000/src/manager/medicines/M2';
-
-      // ดึงข้อมูลรายการยา/อุปกรณ์ตาม tab
-      const response = await fetch(medicineURL);
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      // ดึงข้อมูลยา
+      const medicineResponse = await fetch('http://localhost:4000/src/manager/medicines/M1');
+      if (!medicineResponse.ok) {
+        throw new Error(`HTTP error! Status: ${medicineResponse.status}`);
       }
-      const medicineData = await response.json();
+      const medicineData = await medicineResponse.json();
+
+      // ดึงข้อมูลอุปกรณ์
+      const equipmentResponse = await fetch('http://localhost:4000/src/manager/medicines/M2');
+      if (!equipmentResponse.ok) {
+        throw new Error(`HTTP error! Status: ${equipmentResponse.status}`);
+      }
+      const equipmentData = await equipmentResponse.json();
 
       // ดึงข้อมูล stock
-      const stockResponse = await fetch(
-        'http://localhost:4000/src/report/stock',
-      );
+      const stockResponse = await fetch('http://localhost:4000/src/report/stock');
       if (!stockResponse.ok) {
         throw new Error(`HTTP error! Status: ${stockResponse.status}`);
       }
       const stockData = await stockResponse.json();
 
-      // รวม stock เข้ากับ medicines
+      // รวม stock เข้ากับ medicines และ equipment
       const medicinesWithStock = (medicineData.data || []).map((item) => {
         const stockInfo = (stockData.data || []).find(
           (stock) => stock.medicine_id === item.med_id,
@@ -61,36 +63,65 @@ const ReportMed = () => {
           quantity: stockInfo ? stockInfo.quantity : 0,
           unit: stockInfo ? stockInfo.unit : '-',
           category: stockInfo ? stockInfo.category : item.medtype_id,
+          type: 'medicine', // เพิ่ม type เพื่อแยกประเภท
+          displayType: 'ຢາ'
         };
       });
 
-      setReportData(medicinesWithStock);
-      setFilteredData(medicinesWithStock);
+      const equipmentWithStock = (equipmentData.data || []).map((item) => {
+        const stockInfo = (stockData.data || []).find(
+          (stock) => stock.medicine_id === item.med_id,
+        );
+        return {
+          ...item,
+          quantity: stockInfo ? stockInfo.quantity : 0,
+          unit: stockInfo ? stockInfo.unit : '-',
+          category: stockInfo ? stockInfo.category : item.medtype_id,
+          type: 'equipment', // เพิ่ม type เพื่อแยกประเภท
+          displayType: 'ອຸປະກອນ'
+        };
+      });
 
-      // สรุปผลรวม
-      const totalStock = medicinesWithStock.reduce(
+      // คำนวณสถิติ
+      const totalMedicineStock = medicinesWithStock.reduce(
         (sum, item) => sum + (item.quantity || 0),
         0,
       );
-      const lowStock = medicinesWithStock.filter(
+      const totalEquipmentStock = equipmentWithStock.reduce(
+        (sum, item) => sum + (item.quantity || 0),
+        0,
+      );
+      const lowStockMedicines = medicinesWithStock.filter(
+        (item) => (item.quantity || 0) < 10,
+      ).length;
+      const lowStockEquipment = equipmentWithStock.filter(
         (item) => (item.quantity || 0) < 10,
       ).length;
 
-      if (activeTab === 'medicine') {
-        setSummaryStats((prev) => ({
-          ...prev,
-          totalMedicines: medicinesWithStock.length,
-          totalMedicineStock: totalStock,
-          lowStockItems: lowStock,
-        }));
-      } else {
-        setSummaryStats((prev) => ({
-          ...prev,
-          totalEquipment: medicinesWithStock.length,
-          totalEquipmentStock: totalStock,
-          lowStockItems: lowStock,
-        }));
+      // อัปเดตสถิติ
+      setSummaryStats({
+        totalMedicines: medicinesWithStock.length,
+        totalMedicineStock: totalMedicineStock,
+        totalEquipment: equipmentWithStock.length,
+        totalEquipmentStock: totalEquipmentStock,
+        lowStockItems: lowStockMedicines + lowStockEquipment,
+        totalItems: medicinesWithStock.length + equipmentWithStock.length,
+        totalStock: totalMedicineStock + totalEquipmentStock,
+      });
+
+      // กำหนดข้อมูลตาม tab ที่เลือก
+      let dataToSet = [];
+      if (activeTab === 'all') {
+        dataToSet = [...medicinesWithStock, ...equipmentWithStock];
+      } else if (activeTab === 'medicine') {
+        dataToSet = medicinesWithStock;
+      } else if (activeTab === 'equipment') {
+        dataToSet = equipmentWithStock;
       }
+
+      setReportData(dataToSet);
+      setFilteredData(dataToSet);
+
     } catch (error) {
       console.error('Error fetching data:', error);
       dispatch(
@@ -110,8 +141,6 @@ const ReportMed = () => {
     setActiveTab(tab);
     setPage(0);
     setSearchQuery('');
-    // Refetch data for the new tab
-    fetchMedicinesWithStock();
   };
 
   // Search functionality
@@ -124,12 +153,18 @@ const ReportMed = () => {
         return (
           (item.med_name && item.med_name.toLowerCase().includes(searchStr)) ||
           (item.med_id && item.med_id.toLowerCase().includes(searchStr)) ||
-          (item.medtype_id && item.medtype_id.toLowerCase().includes(searchStr))
+          (item.medtype_id && item.medtype_id.toLowerCase().includes(searchStr)) ||
+          (item.displayType && item.displayType.toLowerCase().includes(searchStr))
         );
       });
       setFilteredData(filtered);
     }
   }, [searchQuery, reportData]);
+
+  // Load data when activeTab changes
+  useEffect(() => {
+    fetchAllData();
+  }, [activeTab]);
 
   // Pagination handlers
   const handlePageChange = (_, newPage) => {
@@ -148,11 +183,11 @@ const ReportMed = () => {
 
   // Table headers
   const getTableHeaders = () => {
+    if (activeTab === 'all') {
+      return [ 'ປະເພດ','ລະຫັດ', 'ຊື່', 'ຈຳນວນຄົງເຫຼືອ', 'ສະຖານະ'];
+    }
     return ['ລະຫັດ', 'ຊື່', 'ຈຳນວນຄົງເຫຼືອ', 'ສະຖານະ'];
   };
-  useEffect(() => {
-    fetchMedicinesWithStock();
-  }, [activeTab]);
 
   // Render table row
   const renderTableRow = (item, index) => {
@@ -163,9 +198,21 @@ const ReportMed = () => {
         key={index}
         className="border-b border-stroke "
       >
+        {activeTab === 'all' && (
+          <td className="px-4 py-4">
+            <span
+              className={`inline-block rounded-full px-2 py-1 text-xs font-medium ${
+                item.type === 'medicine'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'bg-green-100 text-green-700'
+              }`}
+            >
+              {item.displayType}
+            </span>
+          </td>
+        )}
         <td className="px-4 py-4">{item.med_id || '-'}</td>
         <td className="px-4 py-4">{item.med_name || '-'}</td>
-     
         <td className="px-4 py-4">
           <span
             className={`font-medium ${(item.qty || 0) < 10 ? 'text-red-600' : 'text-green-600'}`}
@@ -196,7 +243,7 @@ const ReportMed = () => {
 
   // Load initial data
   useEffect(() => {
-    fetchMedicinesWithStock();
+    fetchAllData();
   }, []);
 
   return (
@@ -208,7 +255,7 @@ const ReportMed = () => {
           <div className="flex items-center">
             <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-blue-100">
               <svg
-                class="w-[25px] h-[25px] text-form-strokedark"
+                className="w-[25px] h-[25px] text-form-strokedark"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -218,8 +265,8 @@ const ReportMed = () => {
               >
                 <path
                   stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   strokeWidth="2.1"
                   d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 5h6m-6 4h6M10 3v4h4V3h-4Z"
                 />
@@ -227,25 +274,29 @@ const ReportMed = () => {
             </div>
             <div className="ml-4">
               <h4 className="text-lg font-semibold text-strokedark">
-                {activeTab === 'medicine'
-                  ? 'ຈຳນວນຢາທັງໝົດ'
-                  : 'ຈຳນວນອຸປະກອນທັງໝົດ'}
+                {activeTab === 'all'
+                  ? 'ຈຳນວນທັງໝົດ'
+                  : activeTab === 'medicine'
+                    ? 'ຈຳນວນຢາທັງໝົດ'
+                    : 'ຈຳນວນອຸປະກອນທັງໝົດ'}
               </h4>
-              <p className="text-xl font-bold text-blue-700">
-                {activeTab === 'medicine'
-                  ? summaryStats.totalMedicines
-                  : summaryStats.totalEquipment}
+              <p className="text-xl font-bold text-blue-700"> 
+                {activeTab === 'all' 
+                  ? summaryStats.totalItems
+                  : activeTab === 'medicine'
+                    ? summaryStats.totalMedicines
+                    : summaryStats.totalEquipment} ລາຍການ
               </p>
             </div>
           </div>
         </div>
 
         {/* Total Stock */}
-        {/* <div className="rounded-sm border border-stroke bg-white p-4 ">
+        {/* <div className="rounded-sm border border-stroke bg-white p-4">
           <div className="flex items-center">
-            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900">
+            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-green-100">
               <svg
-                className="w-6 h-6"
+                className="w-6 h-6 text-green-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -254,20 +305,24 @@ const ReportMed = () => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
                 />
               </svg>
             </div>
             <div className="ml-4">
-              <h4 className="text-lg font-semibold text-strokedark dark:text-white">
-                {activeTab === 'medicine'
-                  ? 'ຈຳນວນຢາຄົງເຫຼືອ'
-                  : 'ຈຳນວນອຸປະກອນຄົງເຫຼືອ'}
+              <h4 className="text-lg font-semibold text-strokedark">
+                {activeTab === 'all'
+                  ? 'ສະຕັອກທັງໝົດ'
+                  : activeTab === 'medicine'
+                    ? 'ສະຕັອກຢາ'
+                    : 'ສະຕັອກອຸປະກອນ'}
               </h4>
-              <p className="text-xl font-bold text-yellow-500 dark:text-yellow-300">
-                {activeTab === 'medicine'
-                  ? summaryStats.totalMedicineStock
-                  : summaryStats.totalEquipmentStock}
+              <p className="text-xl font-bold text-green-600">
+                {activeTab === 'all'
+                  ? summaryStats.totalStock
+                  : activeTab === 'medicine'
+                    ? summaryStats.totalMedicineStock
+                    : summaryStats.totalEquipmentStock}
               </p>
             </div>
           </div>
@@ -293,10 +348,14 @@ const ReportMed = () => {
             </div>
             <div className="ml-4">
               <h4 className="text-lg font-semibold text-strokedark ">
-                {activeTab === 'medicine' ? 'ຢາໃກ້ໝົດ' : 'ອຸປະກອນໃກ້ໝົດ'}
+                {activeTab === 'all'
+                  ? 'ສິນຄ້າໃກ້ໝົດ'
+                  : activeTab === 'medicine' 
+                    ? 'ຢາໃກ້ໝົດ' 
+                    : 'ອຸປະກອນໃກ້ໝົດ'}
               </h4>
               <p className="text-xl font-bold text-red-500 dark:text-red-300">
-                {summaryStats.lowStockItems}
+                {summaryStats.lowStockItems} ລາຍການ
               </p>
             </div>
           </div>
@@ -315,14 +374,32 @@ const ReportMed = () => {
 
         <div className="flex gap-4 px-4 mt-4 ">
           <button
-            onClick={() => setActiveTab('medicine')}
-            className={`px-4 py-2 ${activeTab === 'medicine' ? 'bg-blue-500 text-white rounded' : 'bg-gray-200'}`}
+            onClick={() => handleTabChange('all')}
+            className={`px-4 py-2 rounded transition-colors ${
+              activeTab === 'all' 
+                        ? 'bg-slate-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            ທັງໝົດ
+          </button>
+          <button
+            onClick={() => handleTabChange('medicine')}
+            className={`px-4 py-2 rounded transition-colors ${
+              activeTab === 'medicine' 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-gray-200 hover:bg-gray-300'
+            }`}
           >
             ຢາ
           </button>
           <button
-            onClick={() => setActiveTab('equipment')}
-            className={`px-4 py-2 ${activeTab === 'equipment' ? 'bg-blue-500 text-white rounded' : 'bg-gray-200'}`}
+            onClick={() => handleTabChange('equipment')}
+            className={`px-4 py-2 rounded transition-colors ${
+              activeTab === 'equipment' 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-gray-200 hover:bg-gray-300'
+            }`}
           >
             ອຸປະກອນ
           </button>
@@ -338,6 +415,7 @@ const ReportMed = () => {
               const query = e.target.value;
               setSearchQuery(query);
             }}
+            value={searchQuery}
           />
         </div>
 
