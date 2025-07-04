@@ -5,7 +5,7 @@ const AuthContext = createContext({
   user: null,
   isAuthenticated: false,
   login: async () => false,
-  logout: () => {},
+  logout: () => { },
   loading: false
 });
 
@@ -19,27 +19,27 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       // ตั้งค่า axios default header
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
-      axios.get('http://localhost:4000/src/auth/authen/profile')
-      .then(res => {
-        if (res.data?.result === 'ok') {
-          setUser(res.data.user);
-          console.log('🔐 Loaded user:', res.data.user); 
-        } else {
-          // Token ไม่ valid
+
+      axios.get(`${URLBaseLocal}/src/auth/authen/profile`)
+        .then(res => {
+          if (res.data?.result === 'ok') {
+            setUser(res.data.user);
+            console.log('🔐 Loaded user:', res.data.user);
+          } else {
+            // Token ไม่ valid
+            localStorage.removeItem('token');
+            delete axios.defaults.headers.common['Authorization'];
+          }
+        })
+        .catch((error) => {
+          console.error('Profile load error:', error);
           localStorage.removeItem('token');
           delete axios.defaults.headers.common['Authorization'];
-        }
-      })
-      .catch((error) => {
-        console.error('Profile load error:', error);
-        localStorage.removeItem('token');
-        delete axios.defaults.headers.common['Authorization'];
-        setUser(null);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+          setUser(null);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     } else {
       setLoading(false);
     }
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     try {
       setLoading(true);
-      const response = await axios.post('http://localhost:4000/src/auth/authen/login', {
+      const response = await axios.post('https://zkk8zxq6-4000.asse.devtunnels.ms/src/auth/authen/login', {
         username,
         password
       });
@@ -56,16 +56,16 @@ export const AuthProvider = ({ children }) => {
       if (response.data.result === 'ok') {
         const token = response.data.token;
         const userData = response.data.user;
-        
+
         // เก็บ token
         localStorage.setItem('token', token);
-        
+
         // ตั้งค่า axios default header
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        
+
         // ตั้งค่า user
         setUser(userData);
-        
+
         return { success: true, message: 'Login successful' };
       } else {
         return { success: false, message: response.data.message || 'Login failed' };
@@ -73,13 +73,13 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Login failed:', error);
       let errorMessage = 'Server error';
-      
+
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       return { success: false, message: errorMessage };
     } finally {
       setLoading(false);

@@ -14,7 +14,7 @@ const DetailFollow = () => {
   const fetchPatientDetail = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:4000/src/report/inspection/${id}`);
+      const res = await fetch(`${URLBaseLocal}/src/report/inspection/${id}`);
       const data = await res.json();
 
       if (!res.ok) {
@@ -81,7 +81,7 @@ const DetailFollow = () => {
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
       <Alerts />
-      
+
       {/* Header */}
       <div className="flex items-center justify-between border-b border-stroke px-4 pb-4">
         <div className="flex items-center gap-4">
@@ -113,7 +113,7 @@ const DetailFollow = () => {
       {/* Patient Detail Content */}
       <div className="p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
+
           {/* Patient Information Card */}
           <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 border border-stroke">
             <h2 className="text-lg font-semibold mb-4 text-strokedark border-b border-stroke pb-2">
@@ -134,7 +134,7 @@ const DetailFollow = () => {
                   <p className="text-strokedark font-medium">{patientDetail.patient_id}</p>
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-form-input mb-1">
                   ຊື່ ແລະ ນາມສະກຸນ
@@ -143,7 +143,7 @@ const DetailFollow = () => {
                   {patientDetail.patient_name} {patientDetail.patient_surname}
                 </p>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-form-input mb-1">
@@ -175,7 +175,7 @@ const DetailFollow = () => {
                   <p className="text-strokedark">{patientDetail.symptom || 'ບໍ່ມີຂໍ້ມູນ'}</p>
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-form-input mb-1">
                   ກວດພົບ
@@ -184,7 +184,7 @@ const DetailFollow = () => {
                   <p className="text-strokedark">{patientDetail.checkup || 'ບໍ່ມີຂໍ້ມູນ'}</p>
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-form-input mb-1">
                   ພະຍາດປັດຈຸບັນ

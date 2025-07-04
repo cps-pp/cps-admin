@@ -6,6 +6,7 @@ import Search from '@/components/Forms/Search';
 import { TableAction } from '@/components/Tables/TableAction';
 import Alerts from '@/components/Alerts';
 import TablePaginationDemo from '@/components/Tables/Pagination_two';
+import { URLBaseLocal } from '../../../lib/MyURLAPI';
 
 const DetailPatientService = () => {
   const navigate = useNavigate();
@@ -16,15 +17,21 @@ const DetailPatientService = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+
+
+  useEffect(() => {
+    fetchInspections();
+  }, []);
+
   const fetchInspections = async () => {
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:4000/src/report/inspection');
+      const res = await fetch(`${URLBaseLocal}/src/report/inspection`);
       const data = await res.json();
+      // console.log(data)
+      // console.log('Full API Response:', data); // Debug line
 
-      console.log('Full API Response:', data); // Debug line
-
-      const safeData = Array.isArray(data.detail) ? data.detail : [];
+      const safeData = Array.isArray(data?.data) ? data?.data : [];
 
       setInspections(safeData);
       setFilteredInspections(safeData);
@@ -36,10 +43,6 @@ const DetailPatientService = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchInspections();
-  }, []);
 
   useEffect(() => {
     if (searchQuery.trim() === '') {
@@ -68,9 +71,9 @@ const DetailPatientService = () => {
 
   const paginatedInspections = Array.isArray(filteredInspections)
     ? filteredInspections.slice(
-        page * rowsPerPage,
-        page * rowsPerPage + rowsPerPage,
-      )
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage,
+    )
     : [];
 
   const headers = [

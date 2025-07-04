@@ -10,6 +10,7 @@ import Search from '@/components/Forms/Search';
 import { Plus, CreditCard } from 'lucide-react';
 import ConfirmModal from '@/components/Modal';
 import BillPopup from '../Service/Treatment/BillPopup';
+import { URLBaseLocal } from '../../lib/MyURLAPI';
 
 const InvoicePage = () => {
   const [invoices, setInvoices] = useState([]);
@@ -176,7 +177,7 @@ const InvoicePage = () => {
   const fetchInspectionDetails = async (inspectionId) => {
     try {
       const response = await fetch(
-        `http://localhost:4000/src/report/inspection`,
+        `${URLBaseLocal}/src/report/inspection`,
       );
       const data = await response.json();
 
@@ -301,11 +302,10 @@ const InvoicePage = () => {
 
                       <td className="px-4 py-2 text-left">
                         <span
-                          className={`inline-block rounded-full px-3 mt-3 py-1 text-center text-sm font-medium ${
-                            invoice.status === 'UNPAID'
+                          className={`inline-block rounded-full px-3 mt-3 py-1 text-center text-sm font-medium ${invoice.status === 'UNPAID'
                               ? 'bg-green-100 text-green-700'
                               : 'bg-red-100 text-red-500'
-                          }`}
+                            }`}
                         >
                           {statusInfo.text}
                         </span>
