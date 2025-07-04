@@ -1,16 +1,62 @@
 // TypeService.jsx
 import { Tabs } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ListService from './Component/ListService';
 import ListDis from './Component/ListDis';
 import SumService from './Component/SumService';
 import SumDiseases from './Component/SumDis';
 import { CopyPlus, Activity } from 'lucide-react';
-export default function TypeService({ selectService, value }) {
+export default function TypeService({ selectService, value ,refreshKey,inspectionId  }) {
   const [selectedServices, setSelectedServices] = useState([]);
   const [selectedDis, setSelectedDis] = useState([]);
   const [allSelectedItems, setAllSelectedItems] = useState([]);
+  // useEffect(() => {
+  //   setSelectedServices([]);
+  //   setSelectedDis([]);
+  //   setAllSelectedItems([]);
+  // }, [refreshKey]);
+  useEffect(() => {
+    if (!inspectionId) {
+      setSelectedServices([]);
+      setSelectedDis([]);
+      setAllSelectedItems([]);
+      return;
+    }
 
+    async function loadExistingData() {
+      try {
+        const res = await fetch(`http://localhost:4000/src/report/inspection/${inspectionId}`);
+        const data = await res.json();
+
+        if (data.resultCode === '200' && data.data) {
+          const servicesFromAPI = data.data.services || []; // สมมติโครงสร้าง
+          const diseasesFromAPI = data.data.diseases || [];
+
+          setSelectedServices(servicesFromAPI);
+          setSelectedDis(diseasesFromAPI);
+
+          setAllSelectedItems([
+            ...servicesFromAPI.map(s => ({ ...s, itemType: 'service' })),
+            ...diseasesFromAPI.map(d => ({ ...d, itemType: 'disease' })),
+          ]);
+        } else {
+          setSelectedServices([]);
+          setSelectedDis([]);
+          setAllSelectedItems([]);
+        }
+      } catch (error) {
+        console.error('Error loading existing data:', error);
+        setSelectedServices([]);
+        setSelectedDis([]);
+        setAllSelectedItems([]);
+      }
+    }
+
+    loadExistingData();
+  }, [inspectionId, refreshKey]);
+
+
+  
   const handleSelectService = (service) => {
     if (!selectedServices.find((item) => item.ser_id === service.ser_id)) {
       const serviceWithType = { ...service, itemType: 'service' };

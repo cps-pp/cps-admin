@@ -5,6 +5,6 @@ export const ServiceHeaders = [
   { id: 'name', name: 'ຊື່ລາຍການ', sortable: true },
   { id: 'price', name: 'ລາຄາ', sortable: true },
   { id: 'description', name: 'ລາຍການ', sortable: true },
-  { id: 'ເພີ່ມແລະເບິ່ງລາຍລະອຽດແພັກເກັດ', name: 'ເພີ່ມແລະເບິ່ງລາຍລະອຽດແພັກເກັດ', sortable: true },
-  { id: 'action', name: 'ກິດຈະກຳ', sortable: true },
+  { id: 'ເພີ່ມແລະເບິ່ງລາຍລະອຽດແພັກເກັດ', name: 'ເພີ່ມ ແລະ ເບິ່ງລາຍລະອຽດແພັກເກັດ', sortable: true },
+  { id: 'action', name: 'ຈັດການ', sortable: true },
 ];

@@ -13,6 +13,7 @@ import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import SearchBox from '../../../components/Forms/Search_New';
+import { Empty } from 'antd';
 
 const PatientPage = () => {
   const [patients, setPatients] = useState([]);
@@ -203,14 +204,14 @@ const PatientPage = () => {
       </div>
       <div className="rounded bg-white pt-4 dark:bg-boxdark">
         <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark ">
             ຈັດການຂໍ້ມູນຄົນເຈັບ
           </h1>
           <div className="flex items-center gap-2">
             <Button
               onClick={() => setShowAddModal(true)}
               icon={iconAdd}
-              className="bg-secondary2"
+              className="bg-emerald-600 hover:bg-emerald-700"
             >
               ເພີ່ມຂໍ້ມູນຜູ່ປ່ວຍ
             </Button>
@@ -293,7 +294,12 @@ const PatientPage = () => {
               ) : (
                 <tr>
                   <td colSpan={11} className="px-4 py-6  text-gray-500">
-                    ບໍ່ມີຂໍ້ມູນ
+                     <div className="text-center ">
+                      <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                        <Empty description={false} />
+                      </div>
+                      <p className="text-lg">ບໍ່ພົບຂໍ້ມູນ</p>
+                    </div>
                   </td>
                 </tr>
               )}

@@ -12,6 +12,7 @@ import EditDisease from './edit';
 import { openAlert } from '@/redux/reducer/alert';
 import { useAppDispatch } from '@/redux/hook';
 import TablePaginationDemo from '@/components/Tables/Pagination_two';
+import { Empty } from 'antd';
 
 const DiseasePage = () => {
   const [diseases, setDiseases] = useState([]);
@@ -181,7 +182,7 @@ const handleSortById = () => {
             <Button
               onClick={() => setShowAddDiseaseModal(true)}
               icon={iconAdd}
-              className="bg-secondary2"
+              className="bg-emerald-600 hover:bg-emerald-700"
             >
               ເພີ່ມຂໍ້ມູນພະຍາດແຂ້ວ
             </Button>
@@ -255,7 +256,12 @@ const handleSortById = () => {
               ) : (
                 <tr>
                   <td colSpan={5} className="py-4 text-center text-gray-500">
-                    ບໍ່ມີຂໍ້ມູນ
+                   <div className="text-center ">
+                      <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                        <Empty description={false} />
+                      </div>
+                      <p className="text-lg">ບໍ່ພົບຂໍ້ມູນ</p>
+                    </div>
                   </td>
                 </tr>
               )}

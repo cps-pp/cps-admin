@@ -177,7 +177,6 @@ const Header = (props) => {
     window.location.href = '/login';
   };
 
-  // คำนวณจำนวนแจ้งเตือนทั้งหมด
   const totalNotifications = notifications.appointments + notifications.nearExpiry + notifications.expired;
 
 
@@ -190,17 +189,17 @@ const Header = (props) => {
               e.stopPropagation();
               props.setSidebarOpen(!props.sidebarOpen);
             }}
-            className="lg:hidden p-2 rounded-lg bg-purple-100  hover:from-purple-100 hover:to-indigo-100 border border-purple-200/50 transition-all duration-300 hover:shadow-md group"
+            className="lg:hidden p-2 rounded-md bg-slate-100  hover:from-slate-100 hover:to-indigo-100 border border-slate-200 transition-all duration-300 hover:shadow-sm group"
           >
             {props.sidebarOpen ? (
-              <X className="h-5 w-5 text-primary transition-transform duration-300 group-hover:rotate-90" />
+              <X className="h-5 w-5 text-slate-400 transition-transform duration-300 group-hover:rotate-90" />
             ) : (
-              <Menu className="h-5 w-5 text-primary transition-transform duration-300 group-hover:scale-110" />
+              <Menu className="h-5 w-5 text-slate-400 transition-transform duration-300 group-hover:scale-110" />
             )}
           </button>
 
-          <div className="hidden lg:flex items-center gap-2 border border-stroke px-4 py-1 rounded shadow-sm bg-gray-50">
-            <Clock className="w-4 h-4 text-blue-500" />
+          <div className="hidden lg:flex items-center gap-2 border border-stroke px-4 py-2 rounded bg-gray-50">
+            <Clock className="w-5 h-5 text-secondary2" />
             <span className="text-base text-form-strokedark font-semibold">
               {formatDateTime(currentTime)}
             </span>

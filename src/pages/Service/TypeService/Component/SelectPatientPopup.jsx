@@ -181,7 +181,7 @@ const SelectPatientPopup = ({ patients, onClose, onSelect, callback }) => {
                         </div>
 
                         {selectedPatient?.patient_id === patient.patient_id && (
-                          <CheckCircle className="w-5 h-5 text-purple-500" />
+                          <CheckCircle className="w-5 h-5 text-form-input" />
                         )}
                       </div>
                     </div>

@@ -5,8 +5,7 @@ import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import { useNavigate } from 'react-router-dom';
-import { Eye } from 'lucide-react'
-import { URLBaseLocal } from '../../../lib/MyURLAPI';
+import { Eye } from 'lucide-react';
 const columns = [
   { key: 'in_id', name: 'ລະຫັດປິນປົວ' },
   { key: 'date', name: 'ວັນທີ' },
@@ -30,14 +29,14 @@ const ReportFollowAll = () => {
 
   const fetchAppointments = async () => {
     try {
-      const res = await fetch(`${URLBaseLocal}/src/report/inspection`);
+      const res = await fetch('http://localhost:4000/src/report/inspection');
       const data = await res.json();
 
       if (!res.ok)
         throw new Error(data.error || 'Error fetching report inspection');
 
-      setAppointments(data.detail);
-      setFilteredAppointments(data.detail);
+      setAppointments(data.data);
+      setFilteredAppointments(data.data);
     } catch (error) {
       console.error('Error:', error);
       dispatch(
@@ -144,7 +143,6 @@ const ReportFollowAll = () => {
                       <Eye size={20} />
                     </button>
                   </td>
-
                 </tr>
               ))}
             </tbody>

@@ -3,7 +3,7 @@ import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import Loader from '@/common/Loader';
 import Alerts from '@/components/Alerts';
-
+import { Empty } from 'antd';
 const ViewService = ({ id, onClose, setShow }) => {
   const [loading, setLoading] = useState(false);
   const [serviceData, setServiceData] = useState(null);
@@ -11,7 +11,6 @@ const ViewService = ({ id, onClose, setShow }) => {
   const [medicines, setMedicines] = useState([]);
   const dispatch = useAppDispatch();
 
-  // ฟังก์ชันดึงข้อมูลเริ่มต้น (medicines)
   useEffect(() => {
     async function fetchInitialData() {
       try {
@@ -28,7 +27,6 @@ const ViewService = ({ id, onClose, setShow }) => {
     fetchInitialData();
   }, []);
 
-  // ฟังก์ชันดึงข้อมูล service และ packet_detail
   useEffect(() => {
     async function fetchServiceData() {
       if (!id) return;
@@ -45,14 +43,12 @@ const ViewService = ({ id, onClose, setShow }) => {
           throw new Error('ไม่สามารถดึงข้อมูลบริการได้');
         }
 
-        // ดึงข้อมูล packet_detail (จะมีข้อมูลแน่นอนเพราะกรองจาก API แล้ว)
         const detailRes = await fetch(`http://localhost:4000/src/manager/packet-detail/${id}`);
         
         if (detailRes.ok) {
           const detailResult = await detailRes.json();
           setPacketDetails(detailResult.data || []);
         } else {
-          // ถ้าไม่สามารถดึงข้อมูลได้
           console.warn('ไม่สามารถดึงข้อมูล packet detail ได้');
           setPacketDetails([]);
         }
@@ -74,7 +70,6 @@ const ViewService = ({ id, onClose, setShow }) => {
     fetchServiceData();
   }, [id, dispatch]);
 
-  // Helper functions
   const getMedicineName = (med_id) => {
     const medicine = medicines.find(m => m.med_id === med_id);
     if (!medicine) {
@@ -112,73 +107,70 @@ const ViewService = ({ id, onClose, setShow }) => {
       </div>
 
       <div className="p-4">
-        {/* ข้อมูลบริการหลัก */}
         {serviceData && (
-          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6">
+         <div className="pb-6 border-b border-stroke mt-2">
             <h2 className="text-lg font-semibold mb-4 text-strokedark dark:text-bodydark3">
-              ຂໍ້ມູນແພັກເກັດ
+              ຂໍ້ມູນການລາຍການແພັກແກັດ
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-black-2">
+               <div className='space-y-1.5'>
+                <label className="block text-sm font-medium text-slate-600">
                   ລະຫັດແພັກເກັດ
                 </label>
-                <p className="mt-1 text-sm text-black">
+                <p className="text-base font-mono text-form-strokedark  border border-stroke px-3 py-2 rounded">
                   {serviceData.ser_id}
                 </p>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-black-2">
+               <div className='space-y-1.5'>
+                <label className="block text-sm font-medium text-slate-6002">
                   ຊື່แພັກເກັດ
                 </label>
-                <p className="mt-1 text-sm text-black">
+                <p className="text-base font-mono text-form-strokedark  border border-stroke px-3 py-2 rounded">
                   {serviceData.ser_name}
                 </p>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-black-2">
+               <div className='space-y-1.5'>
+                <label className="block text-sm font-medium text-slate-6002">
                   ລາຄາ
                 </label>
-                <p className="mt-1 text-sm text-black">
-                  <span className="font-semibold text-primary">
+                <p className="text-base font-mono text-form-strokedark  border border-stroke px-3 py-2 rounded">
                     {formatPrice(serviceData.price)} ກີບ
-                  </span>
                 </p>
               </div>
             </div>
           </div>
         )}
 
-        {/* ตารางรายละเอียดแพ็กเกจ */}
         <div>
           <h2 className="text-lg font-semibold mb-4 text-strokedark dark:text-bodydark3">
-            ລາຍການຢາໃນແພັກເກັດ
+            ລາຍລະອຽດຢາ ແລະ ອຸປະກອນໃນແພັກແກັດ
           </h2>
+          
           
           {packetDetails.length > 0 ? (
             <>
-              <div className="overflow-x-auto rounded-lg shadow-md">
-                <table className="w-full min-w-max table-auto border-collapse">
+               <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-slate-300">
                   <thead>
-                    <tr className="bg-strokedark text-white">
-                      <th className="px-4 py-3 text-left font-medium">ລຳດັບ</th>
-                      <th className="px-4 py-3 text-left font-medium">ຊື່ຢາ</th>
-                      <th className="px-4 py-3 text-right font-medium">ຈຳນວນ</th>
-                      <th className="px-4 py-3 text-left font-medium">ປະເພດ</th>
+                    <tr className="text-left bg-slate-200 border border-stroke ">
+                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">ລຳດັບ</th>
+                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">ຊື່ຢາ</th>
+                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">ຈຳນວນ</th>
+                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">ຫົວໜ່ວຍ</th>
                     </tr>
                   </thead>
                   <tbody>
                     {packetDetails.map((detail, index) => (
                       <tr
                         key={detail.packetdetail_id || index}
-                        className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 text-black-2"
+                        className="border-b text-md border-stroke"
                       >
-                        <td className="px-4 py-4">{index + 1}</td>
-                        <td className="px-4 py-4">{getMedicineName(detail.med_id)}</td>
-                        <td className="px-4 py-4 text-right">{detail.qty?.toLocaleString() || 0}</td>
-                        <td className="px-4 py-4">{getMedicineUnit(detail.med_id)}</td>
+                        <td className="px-4 py-2 border  border-stroke">{index + 1}</td>
+                        <td className="px-4 py-2 border-r border-stroke">{getMedicineName(detail.med_id)}</td>
+                        <td className="px-4 py-2 border-r border-stroke ">{detail.qty?.toLocaleString() || 0}</td>
+                        <td className="px-4 py-2 border-r border-stroke">{getMedicineUnit(detail.med_id)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -187,14 +179,13 @@ const ViewService = ({ id, onClose, setShow }) => {
             
             </>
           ) : (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v1M9 4V3a1 1 0 011-1h4a1 1 0 011 1v1" />
-                </svg>
+            <div className="text-center py-2 text-gray-500 dark:text-gray-400">
+              <div className="w-32 h-32 flex items-center justify-center mx-auto ">
+                <Empty description={false} />
               </div>
               <p className="text-lg">ບໍ່ມີລາຍການຢາໃນແພັກເກັດ</p>
               <p className="text-sm mt-2">ກະລຸນາເພີ່ມລາຍການຢາໃຫ້ກັບແພັກເກັດນີ້</p>
+              
             </div>
           )}
         </div>

@@ -31,7 +31,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   //   subs: filterSubs(menu.subs),
   // }));
 
-const adminRestrictedPaths = [
+  const adminRestrictedPaths = [
     '/manager/employee',
     '/manager/servicelist',
     '/manager/packetdetail',
@@ -42,7 +42,7 @@ const adminRestrictedPaths = [
     if (role === 'admin' && adminRestrictedPaths.includes(menu.path)) {
       return false;
     }
-    
+
     // ถ้ามี submenu ให้กรอง submenu ด้วย
     if (menu.subs) {
       menu.subs = menu.subs.filter((sub) => {
@@ -51,43 +51,39 @@ const adminRestrictedPaths = [
         }
         return true;
       });
-      
+
       // ถ้า submenu ถูกกรองหมดแล้ว ให้ซ่อน parent menu ด้วย
       if (menu.subs.length === 0) {
         return false;
       }
     }
-    
+
     return true;
   });
 
+  const filterMenuByRole = (menuList) => {
+    return menuList
+      .map((menu) => {
+        const filteredSubs = menu.subs
+          ? filterMenuByRole(menu.subs)
+          : undefined;
 
+        if (
+          role === 'admin' &&
+          (adminRestrictedPaths.includes(menu.path) ||
+            (filteredSubs && filteredSubs.length === 0 && !menu.path))
+        ) {
+          return null;
+        }
 
-const filterMenuByRole = (menuList) => {
-  return menuList
-    .map((menu) => {
-      const filteredSubs = menu.subs ? filterMenuByRole(menu.subs) : undefined;
+        return {
+          ...menu,
+          subs: filteredSubs,
+        };
+      })
+      .filter(Boolean);
+  };
 
-      if (
-        role === 'admin' &&
-        (adminRestrictedPaths.includes(menu.path) || 
-         (filteredSubs && filteredSubs.length === 0 && !menu.path))
-      ) {
-        return null;
-      }
-
-      return {
-        ...menu,
-        subs: filteredSubs,
-      };
-    })
-    .filter(Boolean); 
-};
-
-
-
-
-  
   useEffect(() => {
     const clickHandler = (e) => {
       if (!sidebar.current || !trigger.current) return;
@@ -130,9 +126,17 @@ const filterMenuByRole = (menuList) => {
       }`}
     >
       {/* Header */}
-      <div className="flex items-center justify-center px-6 py-8">
-        <NavLink to="/dashboard">
+      <div className="flex items-center justify-center px-6 py-4 bg-">
+        {/* <NavLink to="/dashboard">
           <img src={Logo} alt="Logo" width={140} />
+        </NavLink> */}
+        <NavLink
+          to="/dashboard"
+          className=" text-2xl font-bold text-primary  transition-colors duration-300 no-underline"
+        >
+          <h1 className="m-0 bg-gradient-to-r from-Third2 to-secondary2 bg-clip-text text-transparent font-en">
+            CPS Dental
+          </h1>
         </NavLink>
         <button
           ref={trigger}
@@ -159,7 +163,7 @@ const filterMenuByRole = (menuList) => {
         <section className="mb-6">
           <h3 className="px-2 text-sm font-semibold text-gray-400">ເມນູ</h3>
           <ul className="mt-2 space-y-1">
-             {filteredMENU.map((menu) => (
+            {filteredMENU.map((menu) => (
               <SidebarTemplate
                 key={menu.path}
                 menu={menu}
@@ -189,9 +193,7 @@ const filterMenuByRole = (menuList) => {
 
         {/* FOLLOW */}
         <section className="mb-6">
-          <h3 className="px-2 text-sm font-semibold text-gray-400">
-            ນັດໝາຍ
-          </h3>
+          <h3 className="px-2 text-sm font-semibold text-gray-400">ນັດໝາຍ</h3>
           <ul className="mt-2 space-y-1">
             {FOLLOW.map((menu) => (
               <SidebarTemplate

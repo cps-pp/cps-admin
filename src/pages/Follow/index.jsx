@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import Button from '@/components/Button';
 import Search from '@/components/Forms/Search';
@@ -9,8 +10,10 @@ import CreateFollow from '@/pages/Follow/create';
 import EditFollow from './edit';
 import { openAlert } from '@/redux/reducer/alert';
 import { useAppDispatch } from '@/redux/hook';
-import {  FollowHeader } from './column/follow';
+import { FollowHeader } from './column/follow';
 import { iconAdd } from '@/configs/icon';
+import { Empty } from 'antd';
+import ModernTodayAppointments from './ModernTodayAppointments';
 const FollowPage = () => {
   const [appointments, setAppointments] = useState([]);
   const [filteredAppointments, setFilteredAppointments] = useState([]);
@@ -35,13 +38,19 @@ const FollowPage = () => {
   const [newDate, setNewDate] = useState('');
   const dispatch = useAppDispatch();
 
-    // ✅ เพิ่ม state สำหรับการเรียงลำดับ ID (คัดลอกจาก CategoryPage)
-  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Get today's date in YYYY-MM-DD format
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
+  };
+
+  // ✅ แก้ไขฟังก์ชัน isSameDate ให้รับ parameters ที่ถูกต้อง
+  const isSameDate = (dateString, targetDate) => {
+    if (!dateString || !targetDate) return false;
+    const localDate = new Date(dateString).toLocaleDateString('en-CA'); // en-CA format: YYYY-MM-DD
+    return localDate === targetDate;
   };
 
   const fetchAppointments = async () => {
@@ -65,12 +74,13 @@ const FollowPage = () => {
       const allAppointments = data.data;
       const today = getTodayDate();
 
-      // Filter today's appointments - เฉพาะวันนี้และสถานะ "ລໍຖ້າ" เท่านั้น
+      // ✅ แก้ไขการใช้งาน isSameDate function
       const todayAppts = allAppointments.filter((appointment) => {
-        const appointmentDate = new Date(appointment.date_addmintted)
-          .toISOString()
-          .split('T')[0];
-        return appointmentDate === today && appointment.status === 'ລໍຖ້າ';
+        if (!appointment.date_addmintted) return false;
+        return (
+          isSameDate(appointment.date_addmintted, today) &&
+          appointment.status === 'ລໍຖ້າ'
+        );
       });
 
       // ✅ เรียงลำดับตามเวลา (จากเวลาน้อยไปมาก)
@@ -96,7 +106,6 @@ const FollowPage = () => {
     }
   };
 
-
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setFilteredAppointments(appointments);
@@ -105,50 +114,63 @@ const FollowPage = () => {
         const patientName = getPatientName(appointment.patient_id);
         const doctorName = getDoctorName(appointment.emp_id);
         return (
-          appointment.appoint_id.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+          appointment.appoint_id
+            .toString()
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
           patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
           doctorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          appointment.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          appointment.description.toLowerCase().includes(searchQuery.toLowerCase())
+          appointment.status
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          appointment.description
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
         );
       });
       setFilteredAppointments(filtered);
     }
   }, [searchQuery, appointments, patientName, empName]);
 
-  // ✅ ฟังก์ชันสำหรับเรียงลำดับ ID (คัดลอกจาก CategoryPage และปรับให้เหมาะกับ appointment)
   const handleSortById = () => {
     const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
     setSortOrder(newSortOrder);
-    
+
     const sortedAppointments = [...appointments].sort((a, b) => {
       const extractNumber = (id) => {
         const match = id.toString().match(/\d+/);
         return match ? parseInt(match[0]) : 0;
       };
-      
+
       const numA = extractNumber(a.appoint_id);
       const numB = extractNumber(b.appoint_id);
-      
+
       if (newSortOrder === 'asc') {
-        return numA - numB; 
+        return numA - numB;
       } else {
-        return numB - numA; 
+        return numB - numA;
       }
     });
-    
+
     setAppointments(sortedAppointments);
-    
+
     if (searchQuery.trim() !== '') {
-      const filtered = sortedAppointments.filter(appointment => {
+      const filtered = sortedAppointments.filter((appointment) => {
         const patientName = getPatientName(appointment.patient_id);
         const doctorName = getDoctorName(appointment.emp_id);
         return (
-          appointment.appoint_id.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+          appointment.appoint_id
+            .toString()
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
           patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
           doctorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          appointment.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          appointment.description.toLowerCase().includes(searchQuery.toLowerCase())
+          appointment.status
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          appointment.description
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
         );
       });
       setFilteredAppointments(filtered);
@@ -218,19 +240,18 @@ const FollowPage = () => {
   };
 
   const getPatientName = (patient_id) => {
-   const patient = patientName.find((pat) => pat.patient_id === patient_id);
+    const patient = patientName.find((pat) => pat.patient_id === patient_id);
     return patient
-    ? `${patient.patient_name} ${patient.patient_surname}`
-    : 'ບໍ່ພົບຊື່';
-};
+      ? `${patient.patient_name} ${patient.patient_surname}`
+      : 'ບໍ່ພົບຊື່';
+  };
 
   const getPatientPhone = (patient_id) => {
-   const patient = patientName.find((pat) => pat.patient_id === patient_id);
+    const patient = patientName.find((pat) => pat.patient_id === patient_id);
     return patient
-    ? ` ${patient.phone1 || ''}${patient.phone2 ? ' / ' + patient.phone2 : ''}`
-    : 'ບໍ່ພົບເບີໂທ';
-};
-
+      ? ` ${patient.phone1 || ''}${patient.phone2 ? ' / ' + patient.phone2 : ''}`
+      : 'ບໍ່ພົບເບີໂທ';
+  };
 
   const openDeleteModal = (id) => () => {
     setSelectedAppointmentId(id);
@@ -280,8 +301,7 @@ const FollowPage = () => {
       );
 
       // 🟢 เพิ่มบรรทัดนี้เพื่อแจ้งให้ Header รีเฟรชข้อมูล
-    window.dispatchEvent(new Event('refresh-notifications'));
-
+      window.dispatchEvent(new Event('refresh-notifications'));
     } catch (error) {
       dispatch(
         openAlert({
@@ -293,7 +313,6 @@ const FollowPage = () => {
     }
   };
 
-  // Handle completing appointment (change status to ກວດແລ້ວ)
   const handleCompleteAppointment = async (appointmentId) => {
     try {
       const response = await fetch(
@@ -325,8 +344,7 @@ const FollowPage = () => {
       );
 
       // 🟢 เพิ่มบรรทัดนี้เพื่อแจ้งให้ Header รีเฟรชข้อมูล
-    window.dispatchEvent(new Event('refresh-notifications'));
-
+      window.dispatchEvent(new Event('refresh-notifications'));
     } catch (error) {
       dispatch(
         openAlert({
@@ -338,7 +356,6 @@ const FollowPage = () => {
     }
   };
 
-  // Handle postponing appointment
   const openPostponeModal = (appointmentId) => {
     setPostponeAppointmentId(appointmentId);
     setNewDate('');
@@ -374,12 +391,11 @@ const FollowPage = () => {
         openAlert({
           type: 'success',
           title: 'ເລື່ອນນັດໝາຍສຳເລັດ',
-          message: 'ເປັ່ຽນວັນທີ່ນັດໝາຍສຳເລັດແລ້ວ',
+          message: 'ປຽນວັນທີ່ນັດໝາຍສຳເລັດແລ້ວ',
         }),
       );
 
-      // 🟢 เพิ่มบรรทัดนี้เพื่อแจ้งให้ Header รีเฟรชข้อมูล
-    window.dispatchEvent(new Event('refresh-notifications'));
+      window.dispatchEvent(new Event('refresh-notifications'));
     } catch (error) {
       dispatch(
         openAlert({
@@ -390,8 +406,6 @@ const FollowPage = () => {
       );
     }
   };
-
-
 
   const handlePageChange = (event, newPage) => {
     setPage(newPage);
@@ -415,7 +429,6 @@ const FollowPage = () => {
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 2xl:gap-7.5 w-full mb-6">
-        {/* All Appointments */}
         <div className="rounded-sm border border-stroke bg-white p-4 ">
           <div className="flex items-center">
             <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-Third dark:bg-secondary">
@@ -432,7 +445,7 @@ const FollowPage = () => {
                   stroke="currentColor"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  stroke-width="1.5"
+                  strokeWidth="1.5"
                   d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z"
                 />
               </svg>
@@ -478,7 +491,6 @@ const FollowPage = () => {
             </div>
           </div>
         </div>
-        {/* Done Appointments */}
         <div className="rounded-sm border border-stroke bg-white p-4 dark:border-strokedark dark:bg-boxdark">
           <div className="flex items-center">
             <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
@@ -511,117 +523,29 @@ const FollowPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Today's Appointments Section - แสดงเฉพาะสถานะ "ລໍຖ້າ" และเรียงตามเวลา */}
-      <div className="rounded bg-white pt-4  mb-6">
-        <div className="flex items-center justify-between border-stroke px-4 pb-4 ">
-          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark">
-            ນັດໝາຍມື້ນີ້ທີ່ລໍຖ້າກວດ ({getTodayDate()}) - ເລ່ຍງຕາມເວລາ
-          </h1>
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            ລໍຖ້າກວດ: {todayAppointments.length} ລາຍການ
-          </div>
-        </div>
-
-        <div className="overflow-x-auto  shadow-md">
-          <table className="w-full min-w-max table-auto  ">
-            <thead>
-              <tr className="text-left bg-gray border border-stroke">
-                {FollowHeader.map((header, index) => (
-                  <th
-                    key={index}
-                    className="px-4 py-3 tracking-wide text-form-input  font-semibold"
-                  >
-                    {header.name}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {todayAppointments.length > 0 ? (
-                todayAppointments.map((appointment, index) => (
-                  <tr
-                    key={index}
-                    className="border-b border-stroke  hover:bg-slate-50 "
-                  >
-                    <td className="px-4 py-4">{appointment.appoint_id}</td>
-                    <td className="px-4 py-4">
-                      {getPatientName(appointment.patient_id)}
-                    </td>
-                    <td className="px-4 py-4">
-                      {getPatientPhone(appointment.patient_id)}
-                    </td>
-                    <td className="px-4 py-4">
-                      {new Date(appointment.date_addmintted).toLocaleString(
-                        'en-US',
-                        {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          hour12: false,
-                          timeZone: 'Asia/Bangkok',
-                        },
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="inline-block rounded-full px-3 py-1 text-sm font-medium bg-yellow-100 text-yellow-800">
-                        {appointment.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4">
-                      {getDoctorName(appointment.emp_id)}
-                    </td>
-                    <td className="px-4 py-4">{appointment.description}</td>
-                    <td className="px-3 py-4 text-center">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          onClick={() =>
-                            handleCompleteAppointment(appointment.appoint_id)
-                          }
-                          className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
-                          title="ສຳເລັດ"
-                        >
-                          ສຳເລັດ
-                        </button>
-                        <button
-                          onClick={() =>
-                            openPostponeModal(appointment.appoint_id)
-                          }
-                          className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
-                          title="ເລື່ອນນັດໝາຍ"
-                        >
-                          ເລື່ອນນັດໝາຍ
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={7} className="py-8 text-center text-gray-500">
-                    ບໍ່ມີນັດໝາຍທີ່ລໍຖ້າກວດສຳລັບມື້ນີ້
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      <div className="mb-4">
+        <h1 className='text-lg text-form-input mb-2'> ນັດໝາຍມື້ນີ້</h1>
+        <ModernTodayAppointments
+          todayAppointments={todayAppointments}
+          handleCompleteAppointment={handleCompleteAppointment}
+          openPostponeModal={openPostponeModal}
+          currentTime={currentTime}
+          setCurrentTime={setCurrentTime}
+        />
       </div>
 
       <div className="rounded bg-white pt-4 dark:bg-boxdark">
-        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
+        <div className=" border-b border-stroke px-4 pb-4 dark:border-strokedark">
           {/* <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
             ຈັດການນັດໝາຍ
           </h1> */}
-          <div className="flex items-center gap-2">
+          <div className="flex justify-end gap-2">
             <Button
               onClick={() => setShowAddModal(true)}
-              className="bg-secondary"
-                icon={iconAdd}
+              className="bg-emerald-600 hover:bg-emerald-700"
+              icon={iconAdd}
             >
-              ເພີ່ມ
+              ເພີ່ມນັດໝາຍ
             </Button>
           </div>
         </div>
@@ -635,12 +559,11 @@ const FollowPage = () => {
             onChange={(e) => {
               const query = e.target.value;
               setSearchQuery(query);
-
             }}
           />
         </div>
 
-           <div className="overflow-x-auto  shadow-md">
+        <div className="overflow-x-auto  shadow-md">
           <table className="w-full min-w-max table-auto  ">
             <thead>
               <tr className="text-left bg-gray border border-stroke">
@@ -688,15 +611,13 @@ const FollowPage = () => {
                     </td>
                     <td className="px-4 py-4">
                       {new Date(appointment.date_addmintted).toLocaleString(
-                        'en-US',
+                        'en-GB',
                         {
                           day: '2-digit',
                           month: '2-digit',
                           year: 'numeric',
                           hour: '2-digit',
                           minute: '2-digit',
-                          hour12: false,
-                          timeZone: 'Asia/Bangkok',
                         },
                       )}
                     </td>
@@ -730,7 +651,12 @@ const FollowPage = () => {
               ) : (
                 <tr>
                   <td colSpan={7} className="py-4 text-center text-gray-500">
-                    ບໍ່ມີຂໍ້ມູນ
+                    <div className="text-center ">
+                      <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                        <Empty description={false} />
+                      </div>
+                      <p className="text-lg">ບໍ່ພົບຂໍ້ມູນການນັດໝາຍ</p>
+                    </div>
                   </td>
                 </tr>
               )}

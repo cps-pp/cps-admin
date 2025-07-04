@@ -15,6 +15,7 @@ import EditImport from './edit';
 import ViewImport from './view';
 import AddDetailImport from './create_detail';
 import { Eye, Plus } from 'lucide-react';
+import { Empty } from 'antd';
 
 const ImportPage = () => {
   const [filterIm, setFilterIm] = useState([]);
@@ -295,7 +296,7 @@ const ImportPage = () => {
           <Button
             onClick={() => setShowAddModal(true)}
             icon={iconAdd}
-            className="bg-secondary2"
+            className="bg-emerald-600 hover:bg-emerald-700"
           >
             ເພີ່ມລາຍການ
           </Button>
@@ -400,14 +401,12 @@ const ImportPage = () => {
               filterIm.map((im, index) => (
                 <tr
                   key={index}
-                  className="border-b text-md border-stroke dark:border-strokedark hover:bg-gray-50 "
+                  className="border-b text-md border-stroke  hover:bg-gray-50 "
                 >
-                  {/* ລະຫັດນຳເຂົ້າ */}
                   <td className="px-4 py-4">{im.im_id}</td>
 
-                  {/* ມື້ນຳເຂົ້າ */}
                   <td className="px-4 py-4">
-                    {new Date(im.im_date).toLocaleDateString('en-US', {
+                    {new Date(im.im_date).toLocaleDateString('en-GB', {
                       day: '2-digit',
                       month: '2-digit',
                       year: 'numeric',
@@ -425,16 +424,15 @@ const ImportPage = () => {
                     {im?.file ? (
                       <button
                         onClick={() => handleViewFileAdvanced(im.file)}
-                        className="bg-yellow-500 text-white px-4 py-1 rounded hover:bg-yellow-600 transition duration-200"
+                        className="bg-emerald-600  text-white px-4 py-1 rounded hover:bg-emerald-700 transition duration-200"
                       >
-                        Open File
+                        ເປີດໄຟລ
                       </button>
                     ) : (
                       <span className="text-gray-400 italic">ບໍ່ພົບໄຟລ</span>
                     )}
                   </td>
 
-                  {/* ຄົນນຳເຂົ້າ */}
                   <td className="px-4 py-4">
                     {getEmployeeName(im.emp_id_create)}
                   </td>
@@ -445,7 +443,7 @@ const ImportPage = () => {
                     <div className="flex gap-2 ">
                       <button
                         onClick={() => handleAdd_detail(im.im_id)}
-                        className="flex items-center gap-2 bg-secondary text-white px-4 py-1 rounded shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                        className="inline-flex items-center px-3 py-1  text-md font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded hover:bg-emerald-100 hover:text-emerald-800 transition-colors"
                       >
                         <Plus className="w-4 h-4" />
                         ເພີ່ມ
@@ -453,9 +451,9 @@ const ImportPage = () => {
 
                       <button
                         onClick={() => handleViewImport(im.im_id)}
-                        className="flex items-center gap-2 bg-blue-500 text-white px-4 py-1 rounded shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                        className="inline-flex items-center px-3 py-1  text-md font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 hover:text-blue-700 transition-colors"
                       >
-                        <Eye className="w-4 h-4" />
+                        <Eye className="w-4 h-4 mr-1" />
                         ເບີ່ງລາຍລະອຽດ
                       </button>
                     </div>
@@ -479,7 +477,12 @@ const ImportPage = () => {
             ) : (
               <tr>
                 <td colSpan={8} className="py-4 text-center text-gray-500">
-                  ບໍ່ມີຂໍ້ມູນ
+                  <div className="text-center ">
+                    <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                      <Empty description={false} />
+                    </div>
+                    <p className="text-lg">ບໍ່ພົບຂໍ້ມູນການນຳເຂົ້າ</p>
+                  </div>
                 </td>
               </tr>
             )}

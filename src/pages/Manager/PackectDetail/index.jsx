@@ -17,6 +17,7 @@ import CreateServiceList from './create.jsx';
 import ViewService from './view.jsx';
 import AddDetailPacket from './create_detail.jsx';
 import { Eye, Plus } from 'lucide-react';
+import { Empty } from 'antd';
 
 const ServicePage = () => {
   const [services, setServices] = useState([]);
@@ -35,10 +36,8 @@ const ServicePage = () => {
   const dispatch = useAppDispatch();
 
   const [existingIds, setExistingIds] = useState([]);
-  // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
   const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
 
-  // ✅ เพิ่ม state สำหรับการเรียงลำดับ ID
   const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
 
   const fetchServiceList = async () => {
@@ -207,15 +206,15 @@ const ServicePage = () => {
 
         <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
           <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
-            ຈັດການຂໍ້ມູນລາຍການບໍລິການ
+            ຈັດການຂໍ້ມູນລາຍການບໍລິການແພັກແກັດ
           </h1>
           <div className="flex items-center gap-2">
             <Button
               onClick={() => setShowAddModal(true)}
               icon={iconAdd}
-              className="bg-secondary2"
+              className="bg-emerald-600 hover:bg-emerald-700"
             >
-              ເພີ່ມຂໍ້ມູນລາຍການ
+              ເພີ່ມຂໍ້ມູນແພັກແກັດ
             </Button>
           </div>
         </div>
@@ -282,29 +281,29 @@ const ServicePage = () => {
                     <div className="flex gap-2 ">
                       <button
                         onClick={() => handleAdd_detail(service.ser_id)}
-                        className="flex items-center gap-2 bg-secondary text-white px-4 py-1 rounded shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                        className="inline-flex items-center px-3 py-1  text-md font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded hover:bg-emerald-100 hover:text-emerald-800 transition-colors"
                       >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-4 h-4 mr-1" />
                         ເພີ່ມ
                       </button>
 
 
                       <button
                         onClick={() => handleView(service.ser_id)}
-                        className="flex items-center gap-2 bg-blue-500 text-white px-4 py-1 rounded shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                        className="inline-flex items-center px-3 py-1  text-md font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 hover:text-blue-700 transition-colors"
                       >
-                        <Eye className="w-4 h-4" />
+                        <Eye className="w-4 h-4 mr-1" />
                         ເບີ່ງລາຍລະອຽດ
                       </button>
                     </div>
                   </td>
 
-                    <td className="px-3 py-4 text-center">
+                    {/* <td className="px-3 py-4 text-center">
                       <TableAction
                         onAdd={() => handleAdd_detail(service.ser_id)}
                         onView={() => handleView(service.ser_id)}
                       />
-                    </td>
+                    </td> */}
 
                     <td className="px-3 py-4 text-center">
                       <TableAction
@@ -318,7 +317,12 @@ const ServicePage = () => {
               ) : (
                 <tr>
                   <td colSpan={5} className="py-4 text-center text-gray-500">
-                    ບໍ່ມີຂໍ້ມູນ
+                     <div className="text-center ">
+                      <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                        <Empty description={false} />
+                      </div>
+                      <p className="text-lg">ບໍ່ພົບຂໍ້ມູນ</p>
+                    </div>
                   </td>
                 </tr>
               )}

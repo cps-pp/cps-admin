@@ -12,6 +12,7 @@ import { openAlert } from '@/redux/reducer/alert';
 import { useAppDispatch } from '@/redux/hook';
 import Alerts from '@/components/Alerts';
 import FilterSelect from './dropdowncate/filterselect';
+import { Empty } from 'antd';
 
 const MedicinesPage = () => {
   const [medicines, setMedicines] = useState([]);
@@ -55,7 +56,6 @@ const MedicinesPage = () => {
       // ✅ เก็บรหัสทั้งหมดไว้
       const ids = data.data.map((medicine) => medicine.med_id);
       setExistingIds(ids);
-
     } catch (error) {
       console.error('Error fetching medicines:', error);
     } finally {
@@ -95,18 +95,23 @@ const MedicinesPage = () => {
     let filtered = [...data];
 
     if (searchQuery.trim() !== '') {
-      filtered = filtered.filter((medicine) =>
-        medicine.med_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        medicine.med_id.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (medicine) =>
+          medicine.med_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          medicine.med_id.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
 
     if (selectedCategory !== '') {
-      filtered = filtered.filter((medicine) => medicine.medtype_id === selectedCategory);
+      filtered = filtered.filter(
+        (medicine) => medicine.medtype_id === selectedCategory,
+      );
     }
 
     if (selectedStatus !== '') {
-      filtered = filtered.filter((medicine) => medicine.status === selectedStatus);
+      filtered = filtered.filter(
+        (medicine) => medicine.status === selectedStatus,
+      );
     }
 
     setFilteredMedicines(filtered);
@@ -147,7 +152,7 @@ const MedicinesPage = () => {
     });
 
     setMedicines(sortedMedicines);
-    
+
     applyFiltersWithData(sortedMedicines);
   };
 
@@ -156,39 +161,42 @@ const MedicinesPage = () => {
     setShowModal(true);
   };
 
-const handleDeleteMedicine = async () => {
-  if (!selectedMedicineId) return;
+  const handleDeleteMedicine = async () => {
+    if (!selectedMedicineId) return;
 
-  try {
-    const response = await fetch(
-      `http://localhost:4000/src/manager/medicines/${selectedMedicineId}`,
-      { method: 'DELETE' }
-    );
-    const result = await response.json();
+    try {
+      const response = await fetch(
+        `http://localhost:4000/src/manager/medicines/${selectedMedicineId}`,
+        { method: 'DELETE' },
+      );
+      const result = await response.json();
 
-    if (!response.ok) {
-      throw new Error(result.error || 'Delete failed');
+      if (!response.ok) {
+        throw new Error(result.error || 'Delete failed');
+      }
+
+      await fetchMedicines();
+      dispatch(
+        openAlert({
+          type: 'success',
+          title: 'ລົບຂໍ້ມູນສໍາເລັດ',
+          message: 'ລົບຂໍ້ມູນສໍາເລັດແລ້ວ',
+        }),
+      );
+    } catch (error) {
+      console.error('Error deleting medicine:', error);
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ບໍ່ສາມດລົບຂໍ້ມູນໄດ້',
+          message: error.message,
+        }),
+      );
+    } finally {
+      setShowModal(false);
+      setSelectedMedicineId(null);
     }
-
-    await fetchMedicines(); 
-    dispatch(openAlert({
-      type: 'success',
-      title: 'ລົບຂໍ້ມູນສໍາເລັດ',
-      message: 'ລົບຂໍ້ມູນສໍາເລັດແລ້ວ',
-    }));
-  } catch (error) {
-    console.error('Error deleting medicine:', error);
-    dispatch(openAlert({
-      type: 'error',
-      title: 'ບໍ່ສາມດລົບຂໍ້ມູນໄດ້',
-      message: error.message,
-    }));
-  } finally {
-    setShowModal(false);
-    setSelectedMedicineId(null);
-  }
-};
-
+  };
 
   useEffect(() => {
     const fetchDoctor = async () => {
@@ -256,16 +264,15 @@ const handleDeleteMedicine = async () => {
   };
 
   const handleEditMedicine = (id) => {
-    console.log('Edit clicked with ID:', id, 'Type:', typeof id);
-    console.log(
-      'Medicine data for this ID:',
-      medicines.find((m) => m.med_id === id),
-    );
+    // console.log('Edit clicked with ID:', id, 'Type:', typeof id);
+    // console.log(
+    //   'Medicine data for this ID:',
+    //   medicines.find((m) => m.med_id === id),
+    // );
     setSelectedId(id);
     setShowEditModal(true);
   };
 
-  
   return (
     <>
       <div className="rounded bg-white pt-4 dark:bg-boxdark">
@@ -280,13 +287,13 @@ const handleDeleteMedicine = async () => {
             <Button
               onClick={() => setShowAddMedicinesModal(true)}
               icon={iconAdd}
-              className="bg-secondary2"
+              className="bg-emerald-600 hover:bg-emerald-700"
             >
               ເພີ່ມຂໍ້ມູນ
             </Button>
           </div>
         </div>
-    
+
         {/* ✅ ส่วนของตัวกรอง (คัดลอกจาก ImportPage) */}
         <div className="grid w-full gap-4 p-4">
           <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -322,7 +329,6 @@ const handleDeleteMedicine = async () => {
             >
               <option value="">-- ກອງຕາມສະຖານະ --</option>
               <option value="ຍັງມີ">ຍັງມີ</option>
-              <option value="ໃກ້ໝົດ">ໃກ້ໝົດ</option>
               <option value="ໝົດ">ໝົດ</option>
             </select>
 
@@ -383,11 +389,9 @@ const handleDeleteMedicine = async () => {
                         className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
                           medicine.status === 'ຍັງມີ'
                             ? 'bg-green-100 text-green-700'
-                            : medicine.status === 'ໃກ້ໝົດ'
-                              ? 'bg-yellow-100 text-yellow-700'
-                              : medicine.status === 'ໝົດ'
-                                ? 'bg-red-100 text-red-700'
-                                : 'bg-gray-100 text-gray-700'
+                            : medicine.status === 'ໝົດ'
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-gray-100 text-gray-700'
                         }`}
                       >
                         {medicine.status}
@@ -398,15 +402,30 @@ const handleDeleteMedicine = async () => {
                     </td>
                     <td className="px-4 py-4">{medicine.unit}</td>
                     <td className="px-4 py-4">
-                      {new Date(medicine.expired).toLocaleDateString('en-GB', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                      })}
+                      {medicine?.expired &&
+                      !isNaN(new Date(medicine.expired).getTime()) ? (
+                        new Date(medicine.expired).toLocaleDateString('en-GB', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                        })
+                      ) : (
+                        <span className="text-purple-600">-</span>
+                      )}
                     </td>
+
                     <td className="px-4 py-4">
-                      {getTypeName(medicine.medtype_id)}
+                      <span
+                        className={`
+      inline-block rounded-full px-3 py-1 text-sm font-medium
+      ${getTypeName(medicine.medtype_id) === 'ຢາ' ? 'bg-green-100 text-form-strokedark' : ''}
+      ${getTypeName(medicine.medtype_id) === 'ອຸປະກອນ' ? 'bg-yellow-100 text-form-strokedark' : ''}
+    `}
+                      >
+                        {getTypeName(medicine.medtype_id)}
+                      </span>
                     </td>
+
                     <td className="px-4 py-4">
                       {getDoctorName(medicine.emp_id_create)}{' '}
                     </td>
@@ -437,7 +456,12 @@ const handleDeleteMedicine = async () => {
               ) : (
                 <tr>
                   <td colSpan={11} className="py-4 text-center text-gray-500">
-                    ບໍ່ມີຂໍ້ມູນ
+                    <div className="text-center ">
+                      <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                        <Empty description={false} />
+                      </div>
+                      <p className="text-lg">ບໍ່ພົບຂໍ້ມູນ</p>
+                    </div>
                   </td>
                 </tr>
               )}

@@ -14,6 +14,7 @@ import { openAlert } from '@/redux/reducer/alert';
 import Alerts from '@/components/Alerts';
 import EditEmployee from './EditEmp';
 import Loader from '@/common/Loader';
+import { Empty } from 'antd';
 
 
 const EmployeePage = () => {
@@ -176,15 +177,15 @@ const EmployeePage = () => {
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
       <Alerts />
 
-      <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+      <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 ">
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark ">
           ຈັດການຂໍ້ມູນພະນັກງານ
         </h1>
         <div className="flex items-center gap-2">
           <Button
             onClick={() => setShowAddModal(true)}
             icon={iconAdd}
-            className="bg-secondary2"
+            className="bg-emerald-600 hover:bg-emerald-700"
           >
             ເພີ່ມພະນັກງານ
           </Button>
@@ -196,7 +197,7 @@ const EmployeePage = () => {
           type="text"
           name="search"
           placeholder="ຄົ້ນຫາຊື່..."
-          className="rounded border border-stroke dark:border-strokedark"
+          className="rounded border border-stroke "
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
@@ -268,7 +269,12 @@ const EmployeePage = () => {
               ) : (
                 <tr>
                   <td colSpan={5} className="py-4 text-center text-gray-500">
-                    ບໍ່ມີຂໍ້ມູນ
+                 <div className="text-center ">
+                      <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                        <Empty description={false} />
+                      </div>
+                      <p className="text-lg">ບໍ່ພົບຂໍ້ມູນ</p>
+                    </div>
                   </td>
                 </tr>
               )}

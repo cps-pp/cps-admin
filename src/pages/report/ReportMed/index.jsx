@@ -5,13 +5,17 @@ import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { openAlert } from '@/redux/reducer/alert';
 import Alerts from '@/components/Alerts';
 
+import { Empty } from 'antd';
+
 const ReportMed = () => {
-  const [activeTab, setActiveTab] = useState('medicine'); // medicine, equipment
+  const [activeTab, setActiveTab] = useState('all'); // all, medicine, equipment
   const [reportData, setReportData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const dispatch = useAppDispatch();
+  const [stockStatusFilter, setStockStatusFilter] = useState('all');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   // Pagination states
   const [page, setPage] = useState(0);
@@ -24,23 +28,31 @@ const ReportMed = () => {
     totalEquipment: 0,
     totalEquipmentStock: 0,
     lowStockItems: 0,
+    totalItems: 0,
+    totalStock: 0,
   });
 
-  const fetchMedicinesWithStock = async () => {
+  const fetchAllData = async () => {
     try {
       setLoading(true);
 
-      const medicineURL =
-        activeTab === 'medicine'
-          ? 'http://localhost:4000/src/manager/medicines/M1'
-          : 'http://localhost:4000/src/manager/medicines/M2';
-
-      // ดึงข้อมูลรายการยา/อุปกรณ์ตาม tab
-      const response = await fetch(medicineURL);
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      // ดึงข้อมูลยา
+      const medicineResponse = await fetch(
+        'http://localhost:4000/src/manager/medicines/M1',
+      );
+      if (!medicineResponse.ok) {
+        throw new Error(`HTTP error! Status: ${medicineResponse.status}`);
       }
-      const medicineData = await response.json();
+      const medicineData = await medicineResponse.json();
+
+      // ดึงข้อมูลอุปกรณ์
+      const equipmentResponse = await fetch(
+        'http://localhost:4000/src/manager/medicines/M2',
+      );
+      if (!equipmentResponse.ok) {
+        throw new Error(`HTTP error! Status: ${equipmentResponse.status}`);
+      }
+      const equipmentData = await equipmentResponse.json();
 
       // ดึงข้อมูล stock
       const stockResponse = await fetch(
@@ -51,7 +63,7 @@ const ReportMed = () => {
       }
       const stockData = await stockResponse.json();
 
-      // รวม stock เข้ากับ medicines
+      // รวม stock เข้ากับ medicines และ equipment
       const medicinesWithStock = (medicineData.data || []).map((item) => {
         const stockInfo = (stockData.data || []).find(
           (stock) => stock.medicine_id === item.med_id,
@@ -61,36 +73,64 @@ const ReportMed = () => {
           quantity: stockInfo ? stockInfo.quantity : 0,
           unit: stockInfo ? stockInfo.unit : '-',
           category: stockInfo ? stockInfo.category : item.medtype_id,
+          type: 'medicine', // เพิ่ม type เพื่อแยกประเภท
+          displayType: 'ຢາ',
         };
       });
 
-      setReportData(medicinesWithStock);
-      setFilteredData(medicinesWithStock);
+      const equipmentWithStock = (equipmentData.data || []).map((item) => {
+        const stockInfo = (stockData.data || []).find(
+          (stock) => stock.medicine_id === item.med_id,
+        );
+        return {
+          ...item,
+          quantity: stockInfo ? stockInfo.quantity : 0,
+          unit: stockInfo ? stockInfo.unit : '-',
+          category: stockInfo ? stockInfo.category : item.medtype_id,
+          type: 'equipment', // เพิ่ม type เพื่อแยกประเภท
+          displayType: 'ອຸປະກອນ',
+        };
+      });
 
-      // สรุปผลรวม
-      const totalStock = medicinesWithStock.reduce(
+      // คำนวณสถิติ
+      const totalMedicineStock = medicinesWithStock.reduce(
         (sum, item) => sum + (item.quantity || 0),
         0,
       );
-      const lowStock = medicinesWithStock.filter(
+      const totalEquipmentStock = equipmentWithStock.reduce(
+        (sum, item) => sum + (item.quantity || 0),
+        0,
+      );
+      const lowStockMedicines = medicinesWithStock.filter(
+        (item) => (item.quantity || 0) < 10,
+      ).length;
+      const lowStockEquipment = equipmentWithStock.filter(
         (item) => (item.quantity || 0) < 10,
       ).length;
 
-      if (activeTab === 'medicine') {
-        setSummaryStats((prev) => ({
-          ...prev,
-          totalMedicines: medicinesWithStock.length,
-          totalMedicineStock: totalStock,
-          lowStockItems: lowStock,
-        }));
-      } else {
-        setSummaryStats((prev) => ({
-          ...prev,
-          totalEquipment: medicinesWithStock.length,
-          totalEquipmentStock: totalStock,
-          lowStockItems: lowStock,
-        }));
+      // อัปเดตสถิติ
+      setSummaryStats({
+        totalMedicines: medicinesWithStock.length,
+        totalMedicineStock: totalMedicineStock,
+        totalEquipment: equipmentWithStock.length,
+        totalEquipmentStock: totalEquipmentStock,
+        lowStockItems: lowStockMedicines + lowStockEquipment,
+        totalItems: medicinesWithStock.length + equipmentWithStock.length,
+        totalStock: totalMedicineStock + totalEquipmentStock,
+      });
+
+      // กำหนดข้อมูลตาม tab ที่เลือก
+      let dataToSet = [];
+      if (activeTab === 'all') {
+        dataToSet = [...medicinesWithStock, ...equipmentWithStock];
+      } else if (activeTab === 'medicine') {
+        dataToSet = medicinesWithStock;
+      } else if (activeTab === 'equipment') {
+        dataToSet = equipmentWithStock;
       }
+
+      setReportData(dataToSet);
+      setFilteredData(dataToSet);
     } catch (error) {
       console.error('Error fetching data:', error);
       dispatch(
@@ -110,26 +150,57 @@ const ReportMed = () => {
     setActiveTab(tab);
     setPage(0);
     setSearchQuery('');
-    // Refetch data for the new tab
-    fetchMedicinesWithStock();
   };
-
-  // Search functionality
   useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredData(reportData);
-    } else {
-      const filtered = reportData.filter((item) => {
-        const searchStr = searchQuery.toLowerCase();
-        return (
+    let filtered = [...reportData];
+
+    if (searchQuery.trim() !== '') {
+      const searchStr = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (item) =>
           (item.med_name && item.med_name.toLowerCase().includes(searchStr)) ||
           (item.med_id && item.med_id.toLowerCase().includes(searchStr)) ||
-          (item.medtype_id && item.medtype_id.toLowerCase().includes(searchStr))
-        );
-      });
-      setFilteredData(filtered);
+          (item.medtype_id &&
+            item.medtype_id.toLowerCase().includes(searchStr)) ||
+          (item.displayType &&
+            item.displayType.toLowerCase().includes(searchStr)),
+      );
     }
-  }, [searchQuery, reportData]);
+
+    // 🔽 กรองสถานะตาม dropdown
+    if (stockStatusFilter === 'low') {
+      filtered = filtered.filter((item) => item.qty < 10);
+    } else if (stockStatusFilter === 'medium') {
+      filtered = filtered.filter((item) => item.qty >= 10 && item.qty < 50);
+    } else if (stockStatusFilter === 'sufficient') {
+      filtered = filtered.filter((item) => item.qty >= 50);
+    }
+
+    setFilteredData(filtered);
+  }, [searchQuery, reportData, stockStatusFilter]);
+
+  // Search functionality
+  // useEffect(() => {
+  //   if (searchQuery.trim() === '') {
+  //     setFilteredData(reportData);
+  //   } else {
+  //     const filtered = reportData.filter((item) => {
+  //       const searchStr = searchQuery.toLowerCase();
+  //       return (
+  //         (item.med_name && item.med_name.toLowerCase().includes(searchStr)) ||
+  //         (item.med_id && item.med_id.toLowerCase().includes(searchStr)) ||
+  //         (item.medtype_id && item.medtype_id.toLowerCase().includes(searchStr)) ||
+  //         (item.displayType && item.displayType.toLowerCase().includes(searchStr))
+  //       );
+  //     });
+  //     setFilteredData(filtered);
+  //   }
+  // }, [searchQuery, reportData]);
+
+  // Load data when activeTab changes
+  useEffect(() => {
+    fetchAllData();
+  }, [activeTab]);
 
   // Pagination handlers
   const handlePageChange = (_, newPage) => {
@@ -148,24 +219,33 @@ const ReportMed = () => {
 
   // Table headers
   const getTableHeaders = () => {
+    if (activeTab === 'all') {
+      return ['ປະເພດ', 'ລະຫັດ', 'ຊື່', 'ຈຳນວນຄົງເຫຼືອ', 'ສະຖານະ'];
+    }
     return ['ລະຫັດ', 'ຊື່', 'ຈຳນວນຄົງເຫຼືອ', 'ສະຖານະ'];
   };
-  useEffect(() => {
-    fetchMedicinesWithStock();
-  }, [activeTab]);
 
   // Render table row
   const renderTableRow = (item, index) => {
     const globalIndex = page * rowsPerPage + index + 1;
 
     return (
-      <tr
-        key={index}
-        className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
-      >
+      <tr key={index} className="border-b border-stroke ">
+        {activeTab === 'all' && (
+          <td className="px-4 py-4">
+            <span
+              className={`inline-block rounded-full px-2 py-1 text-xs font-medium ${
+                item.type === 'medicine'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'bg-green-100 text-green-700'
+              }`}
+            >
+              {item.displayType}
+            </span>
+          </td>
+        )}
         <td className="px-4 py-4">{item.med_id || '-'}</td>
         <td className="px-4 py-4">{item.med_name || '-'}</td>
-     
         <td className="px-4 py-4">
           <span
             className={`font-medium ${(item.qty || 0) < 10 ? 'text-red-600' : 'text-green-600'}`}
@@ -196,7 +276,7 @@ const ReportMed = () => {
 
   // Load initial data
   useEffect(() => {
-    fetchMedicinesWithStock();
+    fetchAllData();
   }, []);
 
   return (
@@ -208,7 +288,7 @@ const ReportMed = () => {
           <div className="flex items-center">
             <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-blue-100">
               <svg
-                class="w-[25px] h-[25px] text-form-strokedark"
+                className="w-[25px] h-[25px] text-form-strokedark"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -218,60 +298,32 @@ const ReportMed = () => {
               >
                 <path
                   stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2.1"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2.1"
                   d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 5h6m-6 4h6M10 3v4h4V3h-4Z"
                 />
               </svg>
             </div>
             <div className="ml-4">
               <h4 className="text-lg font-semibold text-strokedark">
-                {activeTab === 'medicine'
-                  ? 'ຈຳນວນຢາທັງໝົດ'
-                  : 'ຈຳນວນອຸປະກອນທັງໝົດ'}
+                {activeTab === 'all'
+                  ? 'ຈຳນວນທັງໝົດ'
+                  : activeTab === 'medicine'
+                    ? 'ຈຳນວນຢາທັງໝົດ'
+                    : 'ຈຳນວນອຸປະກອນທັງໝົດ'}
               </h4>
               <p className="text-xl font-bold text-blue-700">
-                {activeTab === 'medicine'
-                  ? summaryStats.totalMedicines
-                  : summaryStats.totalEquipment}
+                {activeTab === 'all'
+                  ? summaryStats.totalItems
+                  : activeTab === 'medicine'
+                    ? summaryStats.totalMedicines
+                    : summaryStats.totalEquipment}{' '}
+                ລາຍການ
               </p>
             </div>
           </div>
         </div>
-
-        {/* Total Stock */}
-        {/* <div className="rounded-sm border border-stroke bg-white p-4 ">
-          <div className="flex items-center">
-            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
-                />
-              </svg>
-            </div>
-            <div className="ml-4">
-              <h4 className="text-lg font-semibold text-strokedark dark:text-white">
-                {activeTab === 'medicine'
-                  ? 'ຈຳນວນຢາຄົງເຫຼືອ'
-                  : 'ຈຳນວນອຸປະກອນຄົງເຫຼືອ'}
-              </h4>
-              <p className="text-xl font-bold text-yellow-500 dark:text-yellow-300">
-                {activeTab === 'medicine'
-                  ? summaryStats.totalMedicineStock
-                  : summaryStats.totalEquipmentStock}
-              </p>
-            </div>
-          </div>
-        </div> */}
 
         {/* Low Stock Items */}
         <div className="rounded-sm border border-stroke bg-white p-4 ">
@@ -292,11 +344,15 @@ const ReportMed = () => {
               </svg>
             </div>
             <div className="ml-4">
-              <h4 className="text-lg font-semibold text-strokedark dark:text-white">
-                {activeTab === 'medicine' ? 'ຢາໃກ້ໝົດ' : 'ອຸປະກອນໃກ້ໝົດ'}
+              <h4 className="text-lg font-semibold text-strokedark ">
+                {activeTab === 'all'
+                  ? 'ສິນຄ້າໃກ້ໝົດ'
+                  : activeTab === 'medicine'
+                    ? 'ຢາໃກ້ໝົດ'
+                    : 'ອຸປະກອນໃກ້ໝົດ'}
               </h4>
               <p className="text-xl font-bold text-red-500 dark:text-red-300">
-                {summaryStats.lowStockItems}
+                {summaryStats.lowStockItems} ລາຍການ
               </p>
             </div>
           </div>
@@ -308,37 +364,92 @@ const ReportMed = () => {
 
         {/* Header */}
         <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 ">
+          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark ">
             ລາຍງານການຢາແລະອຸປະກອນ
           </h1>
         </div>
 
         <div className="flex gap-4 px-4 mt-4 ">
           <button
-            onClick={() => setActiveTab('medicine')}
-            className={`px-4 py-2 ${activeTab === 'medicine' ? 'bg-blue-500 text-white rounded' : 'bg-gray-200'}`}
+            onClick={() => handleTabChange('all')}
+            className={`px-4 py-2 rounded transition-colors ${
+              activeTab === 'all'
+                ? 'bg-slate-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            ທັງໝົດ
+          </button>
+          <button
+            onClick={() => handleTabChange('medicine')}
+            className={`px-4 py-2 rounded transition-colors ${
+              activeTab === 'medicine'
+                ? 'bg-secondary2 text-white'
+                : 'bg-gray-200 hover:bg-gray-300'
+            }`}
           >
             ຢາ
           </button>
           <button
-            onClick={() => setActiveTab('equipment')}
-            className={`px-4 py-2 ${activeTab === 'equipment' ? 'bg-blue-500 text-white rounded' : 'bg-gray-200'}`}
+            onClick={() => handleTabChange('equipment')}
+            className={`px-4 py-2 rounded transition-colors ${
+              activeTab === 'equipment'
+                ? 'bg-secondary2 text-white'
+                : 'bg-gray-200 hover:bg-gray-300'
+            }`}
           >
             ອຸປະກອນ
           </button>
         </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 py-2 my-2">
+          {/* Search */}
+          <div className="relative w-full">
+            <Search
+              type="text"
+              name="search"
+              placeholder="ຄົ້ນຫາ..."
+              className="rounded border border-stroke  "
+              onChange={(e) => setSearchQuery(e.target.value)}
+              value={searchQuery}
+            />
+          </div>
 
-        <div className="grid w-full gap-4 p-4">
-          <Search
-            type="text"
-            name="search"
-            placeholder="ຄົ້ນຫາ..."
-            className="rounded border border-stroke dark:border-strokedark"
-            onChange={(e) => {
-              const query = e.target.value;
-              setSearchQuery(query);
-            }}
-          />
+          {/* Dropdown with icon and toggle animation */}
+          <div className="relative ">
+            <select
+              value={stockStatusFilter}
+              onChange={(e) => setStockStatusFilter(e.target.value)}
+              onFocus={() => setDropdownOpen(true)}
+              onBlur={() => setDropdownOpen(false)}
+              className="appearance-none relative z-10 w-full  rounded border border-stroke bg-white  py-4.5 px-4 pr-10 text-sm text-black dark:text-white outline-none focus:border-primary transition"
+            >
+              <option value="all">ສະຖານະທັງໝົດ</option>
+              <option value="low">ກຳລັງຈະໝົດ</option>
+              <option value="medium">ໃກ້ໝົດ</option>
+              <option value="sufficient">ພຽງພໍ</option>
+            </select>
+
+            {/* Dropdown arrow icon */}
+            <div
+              className={`pointer-events-none absolute right-3 top-1/2 z-20 -translate-y-1/2 text-gray-500 dark:text-gray-300 transition-transform duration-200 ${
+                dropdownOpen ? 'rotate-180' : 'rotate-0'
+              }`}
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+          </div>
         </div>
 
         {/* Table */}
@@ -374,10 +485,17 @@ const ReportMed = () => {
                 <tr>
                   <td
                     colSpan={getTableHeaders().length}
-                    className="py-8 text-center text-gray-500"
+                    className="py-4 "
                   >
-                    <div className="flex flex-col items-center">
-                      <p>ບໍ່ມີຂໍ້ມູນ</p>
+                    <div className="text-center text-gray-500 ">
+                      <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                        <Empty description={false} />
+                      </div>
+                      <p className="text-lg">
+                        <span className="">
+                          ບໍ່ພົບຂໍ້ມູນລາຍງານການຈ່າຍຢາ ແລະ ອຸປະກອນ
+                        </span>
+                      </p>
                     </div>
                   </td>
                 </tr>

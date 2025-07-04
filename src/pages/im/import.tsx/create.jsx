@@ -251,12 +251,11 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
     }
   };
 
-  // ✅ กรอง preorder ที่ยังไม่ได้ใช้
   const availablePreorders = preorders.filter(preorder =>
     !usedPreorders.includes(preorder.preorder_id)
   );
 
-  if (loading || loadingNextId) return <Loader />; // ✅ เพิ่ม loadingNextId
+  if (loading || loadingNextId) return <Loader />; 
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
@@ -271,7 +270,6 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
         onSubmit={handleSubmit(handleSave)}
         className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 pt-4"
       >
-        {/* ✅ แสดงรหัส Import ที่สร้างอัตโนมัติ (แบบ read-only) */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2 text-black dark:text-white">
             ລະຫັດ Import (im_id)
@@ -282,11 +280,9 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
             readOnly
             className="w-full rounded-lg border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
           />
-          {/* ✅ Hidden input สำหรับส่งค่าไปกับฟอร์ม */}
           <input type="hidden" {...register('im_id')} />
         </div>
 
-        {/* ✅ ວັນທີ່ Import */}
         <BoxDate
           name="im_date"
           label="ວັນທີ່ Import"
@@ -296,8 +292,6 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
           errors={errors}
           formOptions={{ required: 'ກະລຸນາເລືອກວັນທີ່' }}
         />
-
-        {/* ✅ เลือก Preorder - แสดงเฉพาะที่ยังไม่ได้ใช้ */}
         <SelectBoxId
           label=" Preorder (ທີ່ຍັງບໍ່ໄດ້ນຳເຂົ້າ)"
           name="preorder"

@@ -13,6 +13,7 @@ import OrderCreate from './create';
 import EditPreorder from './edit';
 import ViewPreorder from './view';
 import AddDetailPreorder from './create_detail'; 
+import { Empty } from 'antd';
 
 const OrderPage = () => {
   const [orders, setOrders] = useState([]);
@@ -130,7 +131,7 @@ const OrderPage = () => {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
-        console.log('Medicine Data:', data.data);
+        // console.log('Medicine Data:', data.data);
         setMedName(data.data);
       } catch (error) {
         console.error('Error fetching medicine data:', error);
@@ -386,7 +387,7 @@ const OrderPage = () => {
           <Button
             onClick={() => setShowAddModal(true)}
             icon={iconAdd}
-            className="bg-secondary2"
+            className="bg-emerald-600 hover:bg-emerald-700"
           >
             ເພີ່ມລາຍການ
           </Button>
@@ -395,7 +396,6 @@ const OrderPage = () => {
 
       <div className="grid w-full gap-4 p-4">
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          {/* ช่องค้นหา */}
           <Search
             type="text"
             name="search"
@@ -405,7 +405,6 @@ const OrderPage = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
 
-          {/* ตัวกรองตามผู้สะหนอง */}
           <select
             className="border border-stroke dark:border-strokedark rounded p-2"
             value={selectedSupplier}
@@ -510,7 +509,7 @@ const OrderPage = () => {
                 >
                   <td className="px-4 py-4">{order.preorder_id}</td>
                   <td className="px-4 py-4">
-                    {new Date(order.preorder_date).toLocaleDateString('en-US', {
+                    {new Date(order.preorder_date).toLocaleDateString('en-GB', {
                       day: '2-digit',
                       month: '2-digit',
                       year: 'numeric',
@@ -539,7 +538,7 @@ const OrderPage = () => {
                     <div className="flex gap-2 ">
                       <button
                         onClick={() => handleAdd_detail(order.preorder_id)}
-                        className="flex items-center gap-2 bg-secondary text-white px-4 py-1 rounded shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                       className="inline-flex items-center px-3 py-1  text-md font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded hover:bg-emerald-100 hover:text-emerald-800 transition-colors"
                       >
                         <Plus className="w-4 h-4" />
                         ເພີ່ມ
@@ -548,9 +547,9 @@ const OrderPage = () => {
 
                       <button
                         onClick={() => handleView(order.preorder_id)}
-                        className="flex items-center gap-2 bg-blue-500 text-white px-4 py-1 rounded shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                      className="inline-flex items-center px-3 py-1  text-md font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 hover:text-blue-700 transition-colors"
                       >
-                        <Eye className="w-4 h-4" />
+                        <Eye className="w-4 h-4 mr-1" />
                         ເບີ່ງລາຍລະອຽດ
                       </button>
                     </div>
@@ -567,7 +566,12 @@ const OrderPage = () => {
             ) : (
               <tr>
                 <td colSpan={12} className="py-4 text-center text-gray-500">
-                  ບໍ່ມີຂໍ້ມູນ
+                  <div className="text-center ">
+                      <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                        <Empty description={false} />
+                      </div>
+                      <p className="text-lg">ບໍ່ພົບຂໍ້ມູນການສັ່ງຊື່</p>
+                    </div>
                 </td>
               </tr>
             )}

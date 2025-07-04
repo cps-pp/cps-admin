@@ -15,14 +15,12 @@ const ExchangeRateModal = ({ isOpen, onClose, onSubmit, missingRates }) => {
   const [loadingCurrentRates, setLoadingCurrentRates] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // ดึงข้อมูลอัตราแลกเปลี่ยนปัจจุบัน
   const fetchCurrentRates = async () => {
     setLoadingCurrentRates(true);
     try {
       const response = await fetch(`http://localhost:4000/src/manager/exchange`);
       if (response.ok) {
         const data = await response.json();
-        // แปลงข้อมูลที่ได้จาก API ให้เข้ากับ format ที่ใช้
         const formattedRates = {
           'BATH': data.baht || null,
           'Dollar': data.dollar || null,
@@ -37,7 +35,6 @@ const ExchangeRateModal = ({ isOpen, onClose, onSubmit, missingRates }) => {
     }
   };
 
-  // รีเซ็ตฟอร์มเมื่อเปิด modal และดึงข้อมูลปัจจุบัน
   useEffect(() => {
     if (isOpen) {
       setRates({
@@ -53,7 +50,6 @@ const ExchangeRateModal = ({ isOpen, onClose, onSubmit, missingRates }) => {
   const validateForm = () => {
     const newErrors = {};
     
-    // ตรวจสอบว่าใส่ข้อมูลครบหรือไม่
     Object.keys(rates).forEach(currency => {
       if (!rates[currency] || rates[currency].trim() === '') {
         newErrors[currency] = 'ກະລຸນາໃສ່ອັດຕາແລກປ່ຽນ';
@@ -117,11 +113,11 @@ const ExchangeRateModal = ({ isOpen, onClose, onSubmit, missingRates }) => {
   return (
   <>
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+      <div className="bg-white rounded shadow-xl max-w-md w-full mx-4">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-800">
-              📊 ອັບເດດອັດຕາແລກປ່ຽນ
+            <h2 className="text-xl font-semibold text-form-strokedark">
+               ອັບເດດອັດຕາແລກປ່ຽນ
             </h2>
             <div className="text-sm text-red-600 font-medium">
               * ບັງຄັບໃສ່ຂໍ້ມູນ
@@ -160,7 +156,7 @@ const ExchangeRateModal = ({ isOpen, onClose, onSubmit, missingRates }) => {
                     min="0"
                     value={rates[currency]}
                     onChange={(e) => handleInputChange(currency, e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                       errors[currency] ? 'border-red-500' : 'border-gray-300'
                     }`}
                     placeholder={currentRates[currency] ? 
@@ -184,10 +180,10 @@ const ExchangeRateModal = ({ isOpen, onClose, onSubmit, missingRates }) => {
                 type="button"
                 onClick={handleSubmit}
                 disabled={loading}
-                className={`px-6 py-2 rounded-md text-white font-medium transition-colors ${
+                className={`px-6 py-2 rounded text-white font-medium transition-colors ${
                   loading 
                     ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700'
+                    : 'bg-green-600 hover:bg-green-700'
                 }`}
               >
                 {loading ? (
@@ -196,7 +192,7 @@ const ExchangeRateModal = ({ isOpen, onClose, onSubmit, missingRates }) => {
                     <span>ກຳລັງບັນທຶກ...</span>
                   </div>
                 ) : (
-                  '✅ ບັນທຶກອັດຕາແລກປ່ຽນ'
+                  'ບັນທຶກອັດຕາແລກປ່ຽນ'
                 )}
               </button>
             </div>

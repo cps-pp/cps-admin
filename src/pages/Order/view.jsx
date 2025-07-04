@@ -3,17 +3,17 @@ import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import Loader from '@/common/Loader';
 import Alerts from '@/components/Alerts';
+import { Empty } from 'antd';
 
 const ViewPreorder = ({ id, onClose, setShow }) => {
   const [loading, setLoading] = useState(false);
   const [preorderData, setPreorderData] = useState(null);
-  const [preorderDetails, setPreorderDetails] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [medicines, setMedicines] = useState([]);
   const dispatch = useAppDispatch();
+const [preorderDetails, setPreorderDetails] = useState([]);
 
-  // ฟังก์ชันดึงข้อมูลเริ่มต้น (suppliers, employees, medicines)
   useEffect(() => {
     async function fetchInitialData() {
       try {
@@ -52,8 +52,10 @@ const ViewPreorder = ({ id, onClose, setShow }) => {
       setLoading(true);
       try {
         // ดึงข้อมูล preorder หลัก
-        const preorderRes = await fetch(`http://localhost:4000/src/preorder/preorder/${id}`);
-        
+        const preorderRes = await fetch(
+          `http://localhost:4000/src/preorder/preorder/${id}`,
+        );
+
         if (preorderRes.ok) {
           const preorderResult = await preorderRes.json();
           setPreorderData(preorderResult.data);
@@ -62,8 +64,10 @@ const ViewPreorder = ({ id, onClose, setShow }) => {
         }
 
         // ดึงข้อมูล preorder_detail
-        const detailRes = await fetch(`http://localhost:4000/src/preorder_detail/preorder-detail/${id}`);
-        
+        const detailRes = await fetch(
+          `http://localhost:4000/src/preorder_detail/preorder-detail/${id}`,
+        );
+
         if (detailRes.ok) {
           const detailResult = await detailRes.json();
           setPreorderDetails(detailResult.data || []);
@@ -71,7 +75,6 @@ const ViewPreorder = ({ id, onClose, setShow }) => {
           // ถ้าไม่มี detail ก็ไม่เป็นไร
           setPreorderDetails([]);
         }
-
       } catch (error) {
         console.error('Error fetching preorder data:', error);
         dispatch(
@@ -91,34 +94,33 @@ const ViewPreorder = ({ id, onClose, setShow }) => {
 
   // Helper functions
   const getSupplierName = (sup_id) => {
-    const supplier = suppliers.find(s => s.sup_id === sup_id);
+    const supplier = suppliers.find((s) => s.sup_id === sup_id);
     return supplier ? `${supplier.company_name} - ${supplier.address}` : '-';
   };
 
   const getEmployeeName = (emp_id) => {
-    const employee = employees.find(e => e.emp_id === emp_id);
+    const employee = employees.find((e) => e.emp_id === emp_id);
     return employee ? `${employee.emp_name} ${employee.emp_surname}` : '-';
   };
 
- const getMedicineName = (med_id) => {
-  const medicine = medicines.find(m => m.med_id === med_id);
-  if (!medicine) {
-    console.warn('ไม่พบ med_id นี้ใน medicines:', med_id);
-  }
-  return medicine ? medicine.med_name : '-';
-};
-const getMedicineunit = (med_id) => {
-  const medicine = medicines.find(m => m.med_id === med_id);
-  if (!medicine) {
-    console.warn('ไม่พบ med_id นี้ใน medicines:', med_id);
-  }
-  return medicine ? medicine.unit : '-';
-};
-
+  const getMedicineName = (med_id) => {
+    const medicine = medicines.find((m) => m.med_id === med_id);
+    if (!medicine) {
+      console.warn('ไม่พบ med_id นี้ใน medicines:', med_id);
+    }
+    return medicine ? medicine.med_name : '-';
+  };
+  const getMedicineunit = (med_id) => {
+    const medicine = medicines.find((m) => m.med_id === med_id);
+    if (!medicine) {
+      console.warn('ไม่พบ med_id นี้ใน medicines:', med_id);
+    }
+    return medicine ? medicine.unit : '-';
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('th-TH', {
+    return new Date(dateString).toLocaleDateString('en-GB', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -132,71 +134,75 @@ const getMedicineunit = (med_id) => {
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
       <Alerts />
-      
+
       {/* Header */}
-      <div className="flex items-center border-b border-stroke dark:border-strokedark pb-4 px-4">
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+      <div className="flex items-center border-b border-stroke   px-4">
+        <h1 className="text-md md:text-lg lg:text-xl font-medium mb-4 text-strokedark ">
           ລາຍລະອຽດສັ່ງຊື້ - {preorderData?.preorder_id}
         </h1>
       </div>
 
       <div className="p-4">
-        {/* ข้อมูลสั่งซื้อหลัก */}
         {preorderData && (
-          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6">
+          <div className=" pb-6 border-b border-stroke mt-2">
             <h2 className="text-lg font-semibold mb-4 text-strokedark dark:text-bodydark3">
               ຂໍ້ມູນການສັ່ງຊື້
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-black-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* ລະຫັດສັ່ງຊື້ */}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-slate-600">
                   ລະຫັດສັ່ງຊື້
                 </label>
-                <p className="mt-1 text-sm  text-black">
+                <p className="text-base font-mono text-form-strokedark  border border-stroke px-3 py-2 rounded">
                   {preorderData.preorder_id}
                 </p>
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium  text-black-2">
+
+              {/* ວັນທີສັ່ງຊື້ */}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-slate-600">
                   ວັນທີສັ່ງຊື້
                 </label>
-                <p className="mt-1 text-sm text-black">
+                <p className="text-base text-form-strokedark  border border-stroke px-3 py-2 rounded">
                   {formatDate(preorderData.preorder_date)}
                 </p>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-black-2">
+              {/* ສະຖານະ */}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-slate-600">
                   ສະຖານະ
                 </label>
-                <p className="mt-1 text-sm text-black">
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    preorderData.status === 'ສຳເລັດ' 
-                      ? 'bg-green-100 text-green-800' 
-                      : preorderData.status === 'ລໍຖ້າຈັດສົ່ງ'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {preorderData.status}
-                  </span>
-                </p>
+                <span
+                  className={`inline-block px-3 py-1 rounded-full text-sm font-medium border
+            ${
+              preorderData.status === 'ສຳເລັດ'
+                ? 'bg-green-50 text-green-700 border-green-200'
+                : preorderData.status === 'ລໍຖ້າຈັດສົ່ງ'
+                  ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                  : 'bg-slate-50 text-slate-700 border-stroke'
+            }`}
+                >
+                  {preorderData.status}
+                </span>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-black-2">
+              <div className="space-y-1.5 lg:col-span-2">
+                <label className="block text-sm font-medium text-slate-600">
                   ຜູ້ສະຫນອງ
                 </label>
-                <p className="mt-1 text-sm text-black">
+                <p className="text-base text-form-strokedark  border border-stroke px-3 py-2 rounded">
                   {getSupplierName(preorderData.sup_id)}
                 </p>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-black-2">
+              {/* ພະນັກງານຜູ້ສ້າງ */}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-slate-600">
                   ພະນັກງານຜູ້ສ້າງ
                 </label>
-                <p className="mt-1 text-sm text-black">
+                <p className="text-base text-form-strokedark border border-stroke px-3 py-2 rounded">
                   {getEmployeeName(preorderData.emp_id_create)}
                 </p>
               </div>
@@ -204,36 +210,49 @@ const getMedicineunit = (med_id) => {
           </div>
         )}
 
-        {/* ตารางรายละเอียดสั่งซื้อ */}
-        <div>
-          <h2 className="text-lg font-semibold mb-4 text-strokedark dark:text-bodydark3">
-            ລາຍການຢາທີ່ສັ່ງຊື້
+        <div className="mt-4">
+          <h2 className="text-lg font-semibold mb-4 text-form-input">
+            ລາຍການທີ່ສັ່ງຊື້
           </h2>
-          
-          
+
           {preorderDetails.length > 0 ? (
             <>
-              <div className="overflow-x-auto rounded-lg shadow-md">
-                <table className="w-full min-w-max table-auto border-collapse">
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-slate-300">
                   <thead>
-                    <tr className="bg-strokedark text-white">
-                      <th className="px-4 py-3 text-left font-medium">ລຳດັບ</th>
-                      <th className="px-4 py-3 text-left font-medium">ຊື່ຢາ</th>
-                      <th className="px-4 py-3 text-right font-medium">ຈຳນວນ</th>
-                      <th className="px-4 py-3 text-left font-medium">ປະເພດ</th>
+                    <tr className="text-left bg-slate-200 border border-stroke">
+                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">
+                        ລຳດັບ
+                      </th>
+                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">
+                        ຊື່ລາຍການ
+                      </th>
+                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">
+                        ຈຳນວນ
+                      </th>
+                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">
+                        ຫົວໜ່ວຍ
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    
                     {preorderDetails.map((detail, index) => (
                       <tr
                         key={detail.preorder_detail_id || index}
-                        className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 text-black-2"
+                        className="border-b text-md border-stroke"
                       >
-                        <td className="px-4 py-4">{index + 1}</td>
-                        <td className="px-4 py-4">{getMedicineName(detail.med_id)}</td>
-                        <td className="px-4 py-4 text-right">{detail.qty?.toLocaleString() || 0}</td>
-                        <td className="px-4 py-4 ">{getMedicineunit(detail.med_id)}</td>
+                        <td className="px-4 py-2 border-r border-stroke">
+                          {index + 1}
+                        </td>
+                        <td className="px-4 py-2 border-r border-stroke">
+                          {getMedicineName(detail.med_id)}
+                        </td>
+                        <td className="px-4 py-2 border-r border-stroke ">
+                          {detail.qty?.toLocaleString() || 0}
+                        </td>
+                        <td className="px-4 py-2 border-r border-stroke ">
+                          {getMedicineunit(detail.med_id)}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -241,15 +260,17 @@ const getMedicineunit = (med_id) => {
               </div>
             </>
           ) : (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              <p className="text-lg">ບໍ່ມີລາຍການຢາທີ່ສັ່ງຊື້</p>
-              <p className="text-sm mt-2">ກະລຸນາເພີ່ມລາຍການຢາໃຫ້ກັບການສັ່ງຊື້ນີ້</p>
+            <div className="text-center py-2 text-gray-500 dark:text-gray-400">
+              <div className="w-32 h-32 flex items-center justify-center mx-auto ">
+                <Empty description={false} />
+              </div>
+              <p className="text-lg">ບໍ່ມີລາຍການ</p>
+              <p className="text-sm mt-2">ກະລຸນາເພີ່ມລາຍການສັ່ງຊື້ກ່ອນ</p>
             </div>
           )}
         </div>
 
-        {/* ปุ่มปิด */}
-        <div className="flex justify-end mt-6 pt-4 border-t border-stroke dark:border-strokedark">
+        <div className="flex justify-end   ">
           <button
             onClick={() => setShow(false)}
             className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
