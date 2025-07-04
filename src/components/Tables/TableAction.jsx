@@ -32,7 +32,7 @@ export const TableAction = ({
         </button>
       )}
       {onDelete && (
-        <button onClick={onDelete} className="text-red-600 hover:text-red-800">
+        <button onClick={onDelete} className="text-red-600 hover:text-red-800 bg-red-100 rounded-full">
           {iconTrash}
         </button>
       )}

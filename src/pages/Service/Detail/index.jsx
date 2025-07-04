@@ -76,7 +76,7 @@ const DetailPatientService = () => {
   const headers = [
     'ລະຫັດການຮັກສາ',
     'ວັນທີ',
-    'ສະຖານະ',
+    // 'ສະຖານະ',
     'ຊື່ຄົນເຈັບ',
     'ອາການ',
     'ໂຣກທີ່ເປັນ',
@@ -141,7 +141,7 @@ const DetailPatientService = () => {
                         hour12: false,
                       })}
                     </td>
-                    <td className="px-4 py-4">{item.status}</td>
+                    {/* <td className="px-4 py-4">{item.status}</td> */}
                     <td className="px-4 py-4">
                       {item.patient_name} {item.patient_surname}
                     </td>

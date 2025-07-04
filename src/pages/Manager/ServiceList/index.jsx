@@ -11,6 +11,7 @@ import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { ServiceHeaders } from './column/service.js';
+import { Empty } from 'antd';
 
 const ServicePage = () => {
   const [services, setServices] = useState([]);
@@ -281,7 +282,12 @@ const ServicePage = () => {
               ) : (
                 <tr>
                   <td colSpan={5} className="py-4 text-center text-gray-500">
-                    ບໍ່ມີຂໍ້ມູນ
+                   <div className="text-center ">
+                      <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                        <Empty description={false} />
+                      </div>
+                      <p className="text-lg">ບໍ່ພົບຂໍ້ມູນ</p>
+                    </div>
                   </td>
                 </tr>
               )}

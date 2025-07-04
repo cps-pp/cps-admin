@@ -32,6 +32,7 @@ module.exports = {
         secondary2: '#51416B',
 
         Third: '#EEEBFF',
+        Third2: '#7A5FD0',
 
         stroke: '#E2E8F0',
         gray: '#F1F5F9',

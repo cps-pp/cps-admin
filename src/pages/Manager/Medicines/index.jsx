@@ -12,6 +12,7 @@ import { openAlert } from '@/redux/reducer/alert';
 import { useAppDispatch } from '@/redux/hook';
 import Alerts from '@/components/Alerts';
 import FilterSelect from './dropdowncate/filterselect';
+import { Empty } from 'antd';
 
 const MedicinesPage = () => {
   const [medicines, setMedicines] = useState([]);
@@ -455,7 +456,12 @@ const MedicinesPage = () => {
               ) : (
                 <tr>
                   <td colSpan={11} className="py-4 text-center text-gray-500">
-                    ບໍ່ມີຂໍ້ມູນ
+                    <div className="text-center ">
+                      <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                        <Empty description={false} />
+                      </div>
+                      <p className="text-lg">ບໍ່ພົບຂໍ້ມູນ</p>
+                    </div>
                   </td>
                 </tr>
               )}

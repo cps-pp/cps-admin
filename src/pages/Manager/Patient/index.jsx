@@ -13,6 +13,7 @@ import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import SearchBox from '../../../components/Forms/Search_New';
+import { Empty } from 'antd';
 
 const PatientPage = () => {
   const [patients, setPatients] = useState([]);
@@ -293,7 +294,12 @@ const PatientPage = () => {
               ) : (
                 <tr>
                   <td colSpan={11} className="px-4 py-6  text-gray-500">
-                    ບໍ່ມີຂໍ້ມູນ
+                     <div className="text-center ">
+                      <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                        <Empty description={false} />
+                      </div>
+                      <p className="text-lg">ບໍ່ພົບຂໍ້ມູນ</p>
+                    </div>
                   </td>
                 </tr>
               )}

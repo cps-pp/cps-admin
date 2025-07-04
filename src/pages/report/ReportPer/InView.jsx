@@ -30,12 +30,14 @@ const InspectionDetailView = ({
   // Fetch prescription data
   const fetchPrescriptionData = async (id) => {
     if (!id) return;
-    
+
     setLoading(true);
     setError('');
-    
+
     try {
-      const response = await fetch(`http://localhost:4000/src/report/prescription?id=${id}`);
+      const response = await fetch(
+        `http://localhost:4000/src/report/prescription?id=${id}`,
+      );
       const json = await response.json();
 
       if (!response.ok) {
@@ -61,7 +63,7 @@ const InspectionDetailView = ({
         (item) => item.in_id === inspectionId,
       );
       setSelectedInspection(inspection);
-      
+
       // Fetch prescription data from API
       fetchPrescriptionData(inspectionId);
     }
@@ -74,13 +76,9 @@ const InspectionDetailView = ({
     if (tab === 'all') {
       filtered = prescriptionData;
     } else if (tab === 'medicine') {
-      filtered = prescriptionData.filter(
-        (med) => med.type_name === 'ຢາ',
-      );
+      filtered = prescriptionData.filter((med) => med.type_name === 'ຢາ');
     } else if (tab === 'equipment') {
-      filtered = prescriptionData.filter(
-        (med) => med.type_name === 'ອຸປະກອນ',
-      );
+      filtered = prescriptionData.filter((med) => med.type_name === 'ອຸປະກອນ');
     }
 
     setFilteredMedicines(filtered);
@@ -145,7 +143,11 @@ const InspectionDetailView = ({
                       ວັນທີປິ່ນປົວ
                     </label>
                     <p className="text-base text-form-strokedark border border-stroke px-3 py-2 rounded">
-                     {selectedInspection.date ? new Date(selectedInspection.date).toLocaleDateString('en-GB') : '-'}
+                      {selectedInspection.date
+                        ? new Date(selectedInspection.date).toLocaleDateString(
+                            'en-GB',
+                          )
+                        : '-'}
                     </p>
                   </div>
                   <div className="space-y-1.5">
@@ -153,7 +155,7 @@ const InspectionDetailView = ({
                       ຊື່ຄົນເຈັບ
                     </label>
                     <p className="text-base text-form-strokedark border border-stroke px-3 py-2 rounded">
-                     {selectedInspection.patient_name}
+                      {selectedInspection.patient_name}
                     </p>
                   </div>
                 </div>
@@ -181,22 +183,21 @@ const InspectionDetailView = ({
                   onClick={() => handleTabChange('medicine')}
                   className={`px-4 py-2 rounded transition-colors ${
                     activeTab === 'medicine'
-                      ? 'bg-blue-500 text-white'
+                      ? 'bg-secondary2 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
                   <Pill className="w-4 h-4 inline mr-1" />
                   ຢາ (
-                  {prescriptionData?.filter(
-                    (med) => med.type_name === 'ຢາ',
-                  ).length || 0}
+                  {prescriptionData?.filter((med) => med.type_name === 'ຢາ')
+                    .length || 0}
                   )
                 </button>
                 <button
                   onClick={() => handleTabChange('equipment')}
                   className={`px-4 py-2 rounded transition-colors ${
                     activeTab === 'equipment'
-                      ? 'bg-blue-500 text-white'
+                      ? 'bg-secondary2 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -216,9 +217,21 @@ const InspectionDetailView = ({
                   <p className="mt-2 text-gray-500">ກຳລັງໂຫລດຂໍ້ມູນ...</p>
                 </div>
               ) : error ? (
-                <div className="text-center py-8 text-red-500">
-                  <Package className="w-12 h-12 mx-auto mb-2 text-red-300" />
-                  <p>{error}</p>
+                <div className="text-center text-gray-500 ">
+                  <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                    <Empty description={false} />
+                  </div>
+                  <p className="text-lg">
+                    ບໍ່ມີລາຍການ
+                    {activeTab === 'medicine'
+                      ? 'ຢາ'
+                      : activeTab === 'equipment'
+                        ? 'ອຸປະກອນ'
+                        : ''}
+                  </p>
+                  {/* <p>{error}</p> */}
+
+                  <p className="text-md ">ໃນໃບບິນນີ້</p>
                 </div>
               ) : filteredMedicines && filteredMedicines.length > 0 ? (
                 <div className="overflow-x-auto">
@@ -295,7 +308,7 @@ const InspectionDetailView = ({
                   </table>
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <div className="text-center  text-gray-500 dark:text-gray-400">
                   <div className="w-32 h-32 flex items-center justify-center mx-auto">
                     <Empty description={false} />
                   </div>
@@ -307,7 +320,7 @@ const InspectionDetailView = ({
                         ? 'ອຸປະກອນ'
                         : ''}
                   </p>
-                  <p className="text-sm mt-2">ໃນໃບບິນນີ້</p>
+                  <p className="text-md ">ໃນໃບບິນນີ້</p>
                 </div>
               )}
             </div>

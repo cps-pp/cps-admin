@@ -4,6 +4,7 @@ import { useAppDispatch } from '@/redux/hook';
 import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { openAlert } from '@/redux/reducer/alert';
 import Alerts from '@/components/Alerts';
+import { Empty } from 'antd';
 
 const ReportOrder = () => {
   const [activeTab, setActiveTab] = useState('medicine');
@@ -327,7 +328,16 @@ const ReportOrder = () => {
                     colSpan={getTableHeaders().length}
                     className="px-4 py-4 text-center text-gray-500"
                   >
-                    ບໍ່ພົບຂໍ້ມູນ
+                    <div className="text-center text-gray-500 ">
+                      <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                        <Empty description={false} />
+                      </div>
+                      <p className="text-lg">
+                        <span className="">
+                          ບໍ່ພົບຂໍ້ມູນລາຍງານການສັ່ງຊື່
+                        </span>
+                      </p>
+                    </div>
                   </td>
                 </tr>
               )}

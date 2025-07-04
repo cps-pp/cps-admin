@@ -7,6 +7,7 @@ import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { openAlert } from '@/redux/reducer/alert';
 import Alerts from '@/components/Alerts';
 import { Pay } from './colum/pay';
+import { Empty } from 'antd';
 const ReportPay = () => {
   const [payments, setPayments] = useState([]);
   const [filteredPayments, setFilteredPayments] = useState([]);
@@ -275,22 +276,15 @@ const ReportPay = () => {
               ) : (
                 <tr>
                   <td colSpan={8} className="py-8 text-center text-gray-500">
-                    <div className="flex flex-col items-center">
-                      <svg
-                        className="w-12 h-12 text-gray-400 mb-2"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                      </svg>
-                      ບໍ່ມີຂໍ້ມູນການຊຳລະເງີນ
-                    </div>
+                     <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                    <Empty description={false} />
+                  </div>
+                  <p className="text-lg">
+                    ບໍ່ພົບຂໍ້ມູນລາຍງານການຊຳລະເງີນ
+                 
+                  </p>
+                </div>
                   </td>
                 </tr>
               )}

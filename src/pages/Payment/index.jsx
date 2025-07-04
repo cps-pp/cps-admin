@@ -6,6 +6,7 @@ import Search from '@/components/Forms/Search';
 import Button from '@/components/Button';
 import ConfirmModal from '@/components/Modal';
 import { Payheader } from './header';
+import { Empty } from 'antd';
 
 const PaymentPage = () => {
   const [payments, setPayments] = useState([]);
@@ -186,7 +187,12 @@ const PaymentPage = () => {
               ) : (
                 <tr>
                   <td colSpan={8} className="text-center py-4 text-gray-500">
-                    ບໍ່ພົບຂໍ້ມູນ
+                    <div className="text-center ">
+                      <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                        <Empty description={false} />
+                      </div>
+                      <p className="text-lg">ບໍ່ພົບຂໍ້ມູນ</p>
+                    </div>
                   </td>
                 </tr>
               )}

@@ -121,7 +121,7 @@ const EditExChange = ({ id, onClose, setShow, getList }) => {
         </div>
 
         <PriceInput
-          label="ຈຳນວນເລດ"
+          label="ແກ້ໄຂຈຳນວນເລດ"
           name="ex_rate"
           register={register}
           defaultValue={getValues('ex_rate')}
@@ -130,7 +130,7 @@ const EditExChange = ({ id, onClose, setShow, getList }) => {
             min: { value: 0, message: 'ລາຄາຕ້ອງຫຼາຍກວ່າ 0' },
           }}
           errors={errors}
-          className="text-emerald-700"
+          className="text-secondary font-semibold"
         />
 
         <div className="mb-4 mt-2">
@@ -141,7 +141,7 @@ const EditExChange = ({ id, onClose, setShow, getList }) => {
             {new Date().toLocaleDateString('en-GB')}
           </div>
           <p className="mt-3 text-sm text-gray-500">
-            ລະບົບຈະໃຊ້ວັນທີປັດຈຸບັນໂດຍອັດຕະໂນມັດ
+           <span className="text-red-500">*</span> ລະບົບຈະໃຊ້ວັນທີປັດຈຸບັນໂດຍອັດຕະໂນມັດ
           </p>
         </div>
 

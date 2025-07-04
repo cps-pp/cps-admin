@@ -12,7 +12,7 @@ const CardDataStats = ({ title, total, children }) => {
 
       <div className="mt-2 flex items-end w-full">
         <div>
-          <h4 className="text-xl md:text-xl lg:text-2xl font-bold text-graydark dark:text-white whitespace-nowrap">
+          <h4 className="text-xl md:text-xl lg:text-2xl font-bold text-form-input dark:text-white whitespace-nowrap">
             {total}
           </h4>
         </div>

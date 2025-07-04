@@ -269,7 +269,7 @@ const ViewImport = ({ id, onClose, setShow }) => {
           )}
         </div>
 
-        <div className="flex justify-end mt-6  border-t border-stroke ">
+        <div className="flex justify-end  ">
           <button
             onClick={() => setShow(false)}
             className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"

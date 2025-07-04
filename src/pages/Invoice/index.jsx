@@ -10,6 +10,7 @@ import { Plus, CreditCard } from 'lucide-react';
 import ConfirmModal from '@/components/Modal';
 import BillPopup from '../Service/Treatment/BillPopup';
 import { XCircle, CheckCircle } from 'lucide-react';
+import { Empty } from 'antd';
 const InvoicePage = () => {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -313,51 +314,51 @@ const InvoicePage = () => {
 
                       <td className="px-4 py-2">{invoice.emp_id_create}</td>
                       <td className="px-4 py-2">{invoice.emp_id_updated}</td>
-                     
-                        <td className="px-4 py-2 ">
-                          <div className="flex flex-wrap gap-2">
-                            {invoice.status !== 'CANCEL' && (
-                              <button
-                                onClick={() => {
-                                  setSelectedInvoiceId(invoice.invoice_id);
-                                  setShowModal(true);
-                                }}
-                                className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded shadow-sm hover:shadow-md transition-all duration-200"
-                              >
-                                <XCircle className="w-4 h-4" />
-                                ຍົກເລີກ
-                              </button>
-                            )}
 
-                            {/* ปุ่มชำระเงิน */}
-                            {invoice.status !== 'CANCEL' &&
-                              invoice.status !== 'PAID' && (
-                                <button
-                                  onClick={() => {
-                                    setSelectedInvoiceId(invoice.invoice_id);
-                                    fetchInvoiceDetail(invoice.invoice_id);
-                                    setIsRefundMode(true);
-                                    setShowBillPopup(true);
-                                  }}
-                                  className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded shadow-sm hover:shadow-md transition-all duration-200"
-                                >
-                                  <CheckCircle className="w-4 h-4" />
-                                  ຊຳລະເງີນ
-                                </button>
-                              )}
+                      <td className="px-4 py-2 ">
+                        <div className="flex flex-wrap gap-2">
+                          {invoice.status !== 'CANCEL' && (
+                            <button
+                              onClick={() => {
+                                setSelectedInvoiceId(invoice.invoice_id);
+                                setShowModal(true);
+                              }}
+                              className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded shadow-sm hover:shadow-md transition-all duration-200"
+                            >
+                              <XCircle className="w-4 h-4" />
+                              ຍົກເລີກ
+                            </button>
+                          )}
 
-                            {invoice.status === 'CANCEL' && (
+                          {/* ปุ่มชำระเงิน */}
+                          {invoice.status !== 'CANCEL' &&
+                            invoice.status !== 'PAID' && (
                               <button
                                 onClick={() => {
                                   setSelectedInvoiceId(invoice.invoice_id);
                                   fetchInvoiceDetail(invoice.invoice_id);
+                                  setIsRefundMode(true);
+                                  setShowBillPopup(true);
                                 }}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 text-sm rounded"
+                                className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded shadow-sm hover:shadow-md transition-all duration-200"
                               >
-                                ເບິ່ງ
+                                <CheckCircle className="w-4 h-4" />
+                                ຊຳລະເງີນ
                               </button>
                             )}
-                          </div>
+
+                          {invoice.status === 'CANCEL' && (
+                            <button
+                              onClick={() => {
+                                setSelectedInvoiceId(invoice.invoice_id);
+                                fetchInvoiceDetail(invoice.invoice_id);
+                              }}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 text-sm rounded"
+                            >
+                              ເບິ່ງ
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -365,7 +366,12 @@ const InvoicePage = () => {
               ) : (
                 <tr>
                   <td colSpan="9" className="text-center py-4 text-gray-500">
-                    ບໍ່ພົບຂໍ້ມູນ
+                    <div className="text-center ">
+                      <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                        <Empty description={false} />
+                      </div>
+                      <p className="text-lg">ບໍ່ພົບຂໍ້ມູນ</p>
+                    </div>
                   </td>
                 </tr>
               )}
