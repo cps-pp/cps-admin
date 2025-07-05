@@ -388,7 +388,7 @@ const Treatment = () => {
           onTreatmentSubmit={handleTreatmentSubmit}
           loading={loading}
           isTreatmentSaved={isTreatmentSaved}
-          // refreshKey={refreshKey}
+          refreshKey={refreshKey}
            dispatch={dispatch}
         />
       ),
@@ -405,7 +405,7 @@ const Treatment = () => {
           inspectionId={inspectionId}
           isMedicineSaved={isMedicineSaved}
      
-          //  refreshKey={refreshKey}
+           refreshKey={refreshKey}
         />
       ),
     },

@@ -115,6 +115,7 @@ const InTreatmentService = ({
       setIdPatient(idPatient);
     }
   }, [checkID]);
+
   useEffect(() => {
     if (formData.date) {
       setValue('date', formData.date);

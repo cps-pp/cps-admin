@@ -294,7 +294,7 @@ const ReportImport = () => {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto shadow-md">
+        <div className="overflow-x-auto">
           <table className="w-full min-w-max table-auto">
             <thead>
               <tr className="text-left bg-gray border border-stroke">

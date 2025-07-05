@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import Logo from '../../images/logo/cps.png';
+import NewLogo from '../../images/logo/new_lg.png';
+
 import SidebarTemplate from './SidebarTemplate';
 import { FOLLOW, IMPORT, MENU, REPORTALL, SERVICE } from '../../configs/nav';
 
@@ -132,12 +134,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         </NavLink> */}
         <NavLink
           to="/dashboard"
-          className=" text-2xl font-bold text-primary  transition-colors duration-300 no-underline"
+          className="flex items-center  text-2xl font-bold text-primary transition-colors duration-300 no-underline"
         >
-          <h1 className="m-0 bg-gradient-to-r from-Third2 to-secondary2 bg-clip-text text-transparent font-en">
+          <img
+            src={NewLogo}
+            alt="Logo"
+            width={40}
+            height={40}
+            className="object-contain"
+          />
+          <h1 className="m-0 bg-secondary2 bg-clip-text text-transparent font-en">
             CPS Dental
           </h1>
         </NavLink>
+
         <button
           ref={trigger}
           onClick={() => setSidebarOpen(!sidebarOpen)}

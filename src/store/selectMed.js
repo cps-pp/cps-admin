@@ -103,6 +103,8 @@ const useStoreMed = create((set, get) => ({
           : med
       ),
     })),
+     clearMedicine: () => set({   medicines: [],
+  newMedicines: [],}),
 }))
 
 export default useStoreMed;

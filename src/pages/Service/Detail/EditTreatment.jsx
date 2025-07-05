@@ -22,6 +22,7 @@ const EditTreatment = () => {
   const { newServices, fetchInspectionById, dataInspectionBy } = useStoreServices();
   const { newMedicines, fetchInspectionMedById } = useStoreMed();
   const { newEquipment, fetchInspectionEquipmentById } = useStoreQi();
+const [invoiceData, setInvoiceData] = useState(null); 
 
   useEffect(() => {
     if (id) {
@@ -107,6 +108,36 @@ const EditTreatment = () => {
       console.error('Error updating patient:', error);
     }
   }
+const handleShowBill = async () => {
+  if (!invoiceData && dataPatien?.in_id) {
+    try {
+      const totalServiceCost = newServices.reduce((total, s) => total + s.price * s.qty, 0);
+      const totalMedicineCost = [...newMedicines, ...newEquipment].reduce((total, m) => total + m.price * m.qty, 0);
+      const grandTotal = totalServiceCost + totalMedicineCost;
+
+      const res = await fetch(`${URLBaseLocal}/src/invoice/invoice`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          total: grandTotal,
+          in_id: dataPatien.in_id,
+        }),
+      });
+
+      if (res.ok) {
+        const result = await res.json();
+        setInvoiceData(result.data);
+        setShowBillPopup(true); 
+      } else {
+        console.error('Cannot create invoice');
+      }
+    } catch (err) {
+      console.error('Error generating invoice:', err);
+    }
+  } else {
+    setShowBillPopup(true); 
+  }
+};
 
   return (
     <>
@@ -124,7 +155,7 @@ const EditTreatment = () => {
 
           <button
             type="button"
-            onClick={() => setShowBillPopup(true)}
+             onClick={handleShowBill}
             className="bg-slate-500 hover:bg-slate-600 text-white text-md px-6 py-2 rounded flex items-center gap-2 transition"
           >
             <FileText className="w-5 h-5" />
@@ -166,16 +197,17 @@ const EditTreatment = () => {
           ),
         }]} />
 
-        <BillPopup
-          isOpen={showBillPopup}
-          onClose={() => setShowBillPopup(false)}
-          patientData={{}} // mock object
-          inspectionData={{}} // mock object
-          services={[]} // mock array
-          medicines={[]} // mock array
-          invoiceData={{}} // mock object
-          onRefresh={() => { }} // mock function
-        />
+       <BillPopup
+  isOpen={showBillPopup}
+  onClose={() => setShowBillPopup(false)}
+  patientData={dataPatien}
+  inspectionData={newData}
+  services={newServices}
+  medicines={[...newMedicines, ...newEquipment]}
+  invoiceData={invoiceData} 
+  onRefresh={() => window.location.reload()}
+/>
+
 
 
 

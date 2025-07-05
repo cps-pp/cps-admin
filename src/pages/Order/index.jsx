@@ -387,7 +387,7 @@ const OrderPage = () => {
           <Button
             onClick={() => setShowAddModal(true)}
             icon={iconAdd}
-            className="bg-emerald-600 hover:bg-emerald-700"
+            className="bg-secondary2 hover:bg-secondary3"
           >
             ເພີ່ມລາຍການ
           </Button>
@@ -410,7 +410,7 @@ const OrderPage = () => {
             value={selectedSupplier}
             onChange={(e) => setSelectedSupplier(e.target.value)}
           >
-            <option value="">-- ກອງຕາມຜູ້ສະໜອງ --</option>
+            <option value="">-- ຄົ້ນຫາຕາມຜູ້ສະໜອງ --</option>
             {[...new Set(orders.map((order) => order.sup_id))].map((id) => {
               const supplier = supName.find((s) => s.sup_id === id);
               return (
@@ -426,7 +426,7 @@ const OrderPage = () => {
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
           >
-            <option value="">-- ກອງຕາມສະຖານະ --</option>
+            <option value="">-- ຄົ້ນຫາຕາມສະຖານະ --</option>
             {[...new Set(orders.map((order) => order.status))].map((status) => (
               <option key={status} value={status}>
                 {status}
@@ -439,7 +439,7 @@ const OrderPage = () => {
             value={selectedEmployee}
             onChange={(e) => setSelectedEmployee(e.target.value)}
           >
-            <option value="">-- ກອງຕາມພະນັກງານ --</option>
+            <option value="">-- ຄົ້ນຫາຕາມພະນັກງານ --</option>
             {[...new Set(orders.map((order) => order.emp_id_create))].map(
               (empId) => {
                 const employee = empName.find((emp) => emp.emp_id === empId);
@@ -456,21 +456,21 @@ const OrderPage = () => {
 
           <input
             type="month"
-            className="border border-stroke dark:border-strokedark rounded p-2"
+            className=" border-stroke rounded p-2"
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
           />
 
           <Button
             onClick={clearFilters}
-            className="bg-graydark hover:bg-graydark"
+            className="bg-slate-400 hover:bg-slate-500 text-white"
           >
-            ລ້າງຕົວກອງ
+            ລ້າງການຄົ້ນຫາ
           </Button>
         </div>
       </div>
 
-      <div className="overflow-x-auto shadow-md">
+      <div className="overflow-x-auto ">
         <table className="w-full min-w-max table-auto">
           <thead>
             <tr className="text-left bg-gray border border-stroke">
@@ -540,7 +540,7 @@ const OrderPage = () => {
                         onClick={() => handleAdd_detail(order.preorder_id)}
                        className="inline-flex items-center px-3 py-1  text-md font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded hover:bg-emerald-100 hover:text-emerald-800 transition-colors"
                       >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-4 h-4  mr-1" />
                         ເພີ່ມ
                       </button>
 
