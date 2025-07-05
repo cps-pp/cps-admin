@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { iconAdd } from '@/configs/icon';
+import Button from '@/components/Button';
 import Search from '@/components/Forms/Search';
+import { TableAction } from '@/components/Tables/TableAction';
 import Alerts from '@/components/Alerts';
 import TablePaginationDemo from '@/components/Tables/Pagination_two';
-import { Eye } from 'lucide-react';
-
+import { URLBaseLocal } from '../../../lib/MyURLAPI';
 
 const DetailPatientService = () => {
   const navigate = useNavigate();
@@ -15,16 +17,21 @@ const DetailPatientService = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+
+
+  useEffect(() => {
+    fetchInspections();
+  }, []);
+
   const fetchInspections = async () => {
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:4000/src/report/inspection');
+      const res = await fetch(`${URLBaseLocal}/src/report/inspection`);
       const data = await res.json();
-
+      // console.log(data)
       // console.log('Full API Response:', data); // Debug line
 
-     const safeData = Array.isArray(data.data) ? data.data : [];
-
+      const safeData = Array.isArray(data?.data) ? data?.data : [];
 
       setInspections(safeData);
       setFilteredInspections(safeData);
@@ -36,10 +43,6 @@ const DetailPatientService = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchInspections();
-  }, []);
 
   useEffect(() => {
     if (searchQuery.trim() === '') {
@@ -68,15 +71,15 @@ const DetailPatientService = () => {
 
   const paginatedInspections = Array.isArray(filteredInspections)
     ? filteredInspections.slice(
-        page * rowsPerPage,
-        page * rowsPerPage + rowsPerPage,
-      )
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage,
+    )
     : [];
 
   const headers = [
     'ລະຫັດການຮັກສາ',
     'ວັນທີ',
-    // 'ສະຖານະ',
+    'ສະຖານະ',
     'ຊື່ຄົນເຈັບ',
     'ອາການ',
     'ໂຣກທີ່ເປັນ',
@@ -141,7 +144,7 @@ const DetailPatientService = () => {
                         hour12: false,
                       })}
                     </td>
-                    {/* <td className="px-4 py-4">{item.status}</td> */}
+                    <td className="px-4 py-4">{item.status}</td>
                     <td className="px-4 py-4">
                       {item.patient_name} {item.patient_surname}
                     </td>
@@ -152,10 +155,9 @@ const DetailPatientService = () => {
                     <td className="px-4 py-4 ">
                       <button
                         onClick={() => handleRowClick(item)}
-                        className=" inline-flex items-center px-3 py-1  text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 hover:text-blue-700 transition-colors"
+                        className=" bg-blue-500 rounded text-white  px-4 py-2 text-xs hover:text-white hover:bg-blue-600"
                         title="View"
                       >
-                          <Eye className="w-4 h-4 mr-1" />
                         ເບີ່ງຂໍ້ມູນ
                       </button>
                     </td>

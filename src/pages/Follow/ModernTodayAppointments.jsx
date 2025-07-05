@@ -55,7 +55,7 @@ const getStatusColor = (status, dateString) => {
   }
   if (status === 'ລໍຖ້າ') {
     if (isPast(dateString)) {
-      return 'bg-red-100 text-red-700 border-red-200';
+      return 'bg-red-100 text-red-700 border-red-200 ';
     }
     if (isUpcoming(dateString)) {
       return 'bg-orange-100 text-orange-700 border-orange-200';
@@ -71,7 +71,7 @@ const getCardStyle = (dateString, status) => {
   }
   if (status === 'ລໍຖ້າ') {
     if (isPast(dateString)) {
-      return 'border-red-200  ';
+      return 'border-red-200 text-md ';
     }
     if (isUpcoming(dateString)) {
       return 'border-orange-200  ';
@@ -90,22 +90,19 @@ const ModernTodayAppointments = ({
 }) => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [isAutoRefresh, setIsAutoRefresh] = useState(true);
-  // ย้าย state declarations ขึ้นมาด้านบน
   const [patientName, setPatientName] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // อัปเดตเวลาปัจจุบัน
   useEffect(() => {
     const interval = setInterval(() => {
       if (isAutoRefresh) {
         setCurrentTime(new Date());
       }
-    }, 30000); // อัปเดตทุก 30 วินาที
+    }, 30000); 
 
     return () => clearInterval(interval);
   }, [isAutoRefresh, setCurrentTime]);
 
-  // เพิ่ม useEffect สำหรับการดึงข้อมูลคนไข้
   useEffect(() => {
     const fetchPatient = async () => {
       try {
@@ -122,7 +119,7 @@ const ModernTodayAppointments = ({
         }
 
         const data = await response.json();
-        console.log('Patient data fetched:', data.data); // เพิ่ม debug log
+        // console.log('Patient data fetched:', data.data); 
         setPatientName(data.data);
       } catch (error) {
         console.error('Error fetching patient data:', error);
@@ -134,17 +131,7 @@ const ModernTodayAppointments = ({
     fetchPatient();
   }, []);
 
-  // กรองข้อมูลตามสถานะ
-  //   const filteredAppointments = todayAppointments.filter((appointment) => {
-  //     if (filterStatus === 'all') return true;
-  //     if (filterStatus === 'waiting') return appointment.status === 'ລໍຖ້າ';
-  //     if (filterStatus === 'completed') return appointment.status === 'ກວດແລ້ວ';
-  //     if (filterStatus === 'urgent')
-  //       return (
-  //         isPast(appointment.date_addmintted) && appointment.status === 'ລໍຖ້າ'
-  //       );
-  //     return true;
-  //   });
+
 
   const filteredAppointments = todayAppointments.filter((a) => {
     if (filterStatus === 'all') return true;
@@ -203,25 +190,23 @@ const ModernTodayAppointments = ({
   };
 
   useEffect(() => {
-    console.log('appointments:', todayAppointments);
-    console.log('patientName:', patientName);
+    // console.log('appointments:', todayAppointments);
+    // console.log('patientName:', patientName);
   }, [todayAppointments, patientName]);
 
-  // ปรับปรุงฟังก์ชัน getPatientName
   const getPatientName = (patient_id) => {
     if (!patientName || patientName.length === 0) {
       return 'ກຳລັງໂຫລດ...';
     }
 
     const patient = patientName.find((pat) => pat.patient_id === patient_id);
-    console.log('Looking for patient_id:', patient_id, 'Found:', patient); // เพิ่ม debug log
+    // console.log('Looking for patient_id:', patient_id, 'Found:', patient); 
 
     return patient
       ? `${patient.patient_name} ${patient.patient_surname}`
       : 'ບໍ່ພົບຊື່';
   };
 
-  // ปรับปรุงฟังก์ชัน getPatientPhone
   const getPatientPhone = (patient_id) => {
     if (!patientName || patientName.length === 0) {
       return 'ກຳລັງໂຫລດ...';
@@ -233,7 +218,6 @@ const ModernTodayAppointments = ({
       : 'ບໍ່ພົບເບີໂທ';
   };
 
-  // แสดง loading state
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -255,7 +239,7 @@ const ModernTodayAppointments = ({
                 <Empty description={false} />
               </div>
               <p className="text-lg">ບໍ່ພົບຂໍ້ມູນການນັດໝາຍໃນມື້ີນີ້</p>
-              <p className="text-sm mt-2">ກະລຸນາກວດສອບນັດໝາຍ</p>
+              <p className="text-sm mt-2 mb-2">ກະລຸນາກວດສອບນັດໝາຍ</p>
             </div>
           </div>
         ) : (
@@ -270,12 +254,12 @@ const ModernTodayAppointments = ({
                 {/* Header with time and status */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-slate-200 rounded-lg">
+                    <div className="p-2 bg-slate-200 rounded-lg ">
                       <Users className="w-5 h-5 text-secondary2" />
                     </div>
                     <div>
                       <div className="text-lg font-bold text-form-input">
-                        {formatTime(appointment.date_addmintted)}
+                       ເວລາ {formatTime(appointment.date_addmintted)}
                       </div>
                       <div className="text-xs text-gray-500">
                         ລະຫັດ {appointment.appoint_id}
@@ -338,7 +322,7 @@ const ModernTodayAppointments = ({
                         className="flex-1 flex items-center justify-center gap-2 bg-secondary2 hover:bg-secondary2 text-white px-4 py-2 rounded text-sm font-medium transition-all"
                       >
                         <Clock className="w-4 h-4" />
-                        ເລື່ອນ
+                        ເລື່ອນນັດ
                       </button>
                     </>
                   )}

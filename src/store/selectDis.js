@@ -6,18 +6,18 @@ const useStoreDisease = create((set) => ({
   addDisease: (data) => {
     set((state) => {
       const existsID = state.dis.some(item => item.disease_id === data.disease_id);
-      
-      if (existsID) { 
-        return state 
+
+      if (existsID) {
+        return state
       }
-      
+
       const newDisease = {
         disease_id: data.disease_id,
         disease_name: data.disease_name,
         qty: 1,
         price: data.price,
       };
-      
+
       return {
         ...state,
         dis: [...state.dis, newDisease]
@@ -35,6 +35,8 @@ const useStoreDisease = create((set) => ({
     });
   },
 
+
+
   updateQty: (disease_id, qty) =>
     set((state) => ({
       dis: state.dis.map((med) =>
@@ -43,7 +45,8 @@ const useStoreDisease = create((set) => ({
           : med
       ),
     })),
-       clearDisease: () => set({ dis: [] }),
+
+
 }))
 
 export default useStoreDisease;

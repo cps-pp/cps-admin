@@ -284,7 +284,7 @@ const ImportPage = () => {
   };
 
   return (
-    <div className="rounded bg-white pt-4 dark:bg-boxdark">
+    <div className="rounded bg-white pt-4 dark:bg-boxdark border border-stroke ">
       <Alerts />
       <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark flex-wrap gap-2">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
@@ -296,7 +296,7 @@ const ImportPage = () => {
           <Button
             onClick={() => setShowAddModal(true)}
             icon={iconAdd}
-            className="bg-emerald-600 hover:bg-emerald-700"
+            className="bg-secondary2 hover:bg-secondary3"
           >
             ເພີ່ມລາຍການ
           </Button>
@@ -304,7 +304,7 @@ const ImportPage = () => {
       </div>
 
       {/* ส่วนของตัวกรอง */}
-      <div className="grid w-full gap-4 p-4">
+      <div className="grid w-full gap-4 p-4 ">
         <div className="flex flex-wrap items-center gap-2 mb-4">
           {/* Search Box */}
           <Search
@@ -322,7 +322,7 @@ const ImportPage = () => {
             value={selectedOrder}
             onChange={(e) => setSelectedOrder(e.target.value)}
           >
-            <option value="">-- ກອງຕາມລະຫັດສັ່ງຊື້ --</option>
+            <option value="">-- ຄົ້ນຫາຕາມລະຫັດສັ່ງຊື້ --</option>
             {[...new Set(Im.map((im) => im.preorder_id))].map((pre_id) => (
               <option key={pre_id} value={pre_id}>
                 {pre_id}
@@ -336,7 +336,7 @@ const ImportPage = () => {
             value={selectedEmployee}
             onChange={(e) => setSelectedEmployee(e.target.value)}
           >
-            <option value="">-- ກອງຕາມພະນັກງານ --</option>
+            <option value="">-- ຄົ້ນຫາຕາມພະນັກງານ --</option>
             {[...new Set(Im.map((im) => im.emp_id_create))].map((empId) => {
               const employee = empName.find((emp) => emp.emp_id === empId);
               return (
@@ -360,13 +360,13 @@ const ImportPage = () => {
           {/* ปุ่มล้างตัวกรอง */}
           <Button
             onClick={clearAllFilters}
-            className="bg-graydark hover:bg-graydark"
+            className="bg-slate-400 hover:bg-slate-500 text-white"
           >
-            ລ້າງຕົວກອງ
+            ລ້າງການຄົ້ນຫາ
           </Button>
         </div>
       </div>
-      <div className="overflow-x-auto  shadow-md">
+      <div className="overflow-x-auto ">
         <table className="w-full min-w-max table-auto  ">
           <thead>
             <tr className="text-left bg-gray border border-stroke ">
@@ -444,9 +444,9 @@ const ImportPage = () => {
                     <div className="flex gap-2 ">
                       <button
                         onClick={() => handleAdd_detail(im.im_id)}
-                        className="inline-flex items-center px-3 py-1  text-md font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded hover:bg-emerald-100 hover:text-emerald-800 transition-colors"
+                        className="inline-flex items-center  px-3 py-1  text-md  text-emerald-700 bg-emerald-50 border border-emerald-200 rounded hover:bg-emerald-100 hover:text-emerald-800 transition-colors"
                       >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-4 h-4  mr-1 " />
                         ເພີ່ມ
                       </button>
 

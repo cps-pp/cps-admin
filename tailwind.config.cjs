@@ -30,6 +30,7 @@ module.exports = {
         // primary: '#7C67DE',
         secondary: '#51419B',
         secondary2: '#51416B',
+        secondary3: '#3D3154',
 
         Third: '#EEEBFF',
         Third2: '#7A5FD0',

@@ -1,11 +1,11 @@
 import { Table } from 'antd';
 import { useState, useEffect } from 'react';
-import useStoreServices from '../../../../store/selectServices';
-import { URLBaseLocal } from '../../../../lib/MyURLAPI';
+import useStoreServices from '../../../store/selectServices';
+import { URLBaseLocal } from '../../../lib/MyURLAPI';
 
-export default function ListService({ selectService, tapService }) {
+export default function ListServiceUpdate({ tapService, inspection }) {
   //------Store
-  const { addService } = useStoreServices();
+  const { addServiceNews } = useStoreServices();
 
   const [dataService, setDataService] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -29,8 +29,10 @@ export default function ListService({ selectService, tapService }) {
     }
   }, [tapService]);
 
+  // console.log(inspection)
+
   const selectionService = async (record) => {
-    await addService(record);
+    await addServiceNews(record);
   };
 
   const columns = [
@@ -49,11 +51,9 @@ export default function ListService({ selectService, tapService }) {
         <button
           type="button"
           onClick={() => {
-            // console.log('Selecting:', record);
-            selectService(record);
             selectionService(record);
           }}
-          className="bg-secondary text-white px-3 py-1 rounded hover:bg-secondary2"
+          className="bg-secondary2 text-white px-3 py-1 rounded hover:bg-secondary"
         >
           ເພີ່ມ
         </button>

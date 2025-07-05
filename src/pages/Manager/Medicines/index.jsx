@@ -275,7 +275,7 @@ const MedicinesPage = () => {
 
   return (
     <>
-      <div className="rounded bg-white pt-4 dark:bg-boxdark">
+      <div className="rounded bg-white pt-4 border border-stroke">
         <Alerts />
 
         <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark flex-wrap gap-2">
@@ -287,7 +287,7 @@ const MedicinesPage = () => {
             <Button
               onClick={() => setShowAddMedicinesModal(true)}
               icon={iconAdd}
-              className="bg-emerald-600 hover:bg-emerald-700"
+              className="bg-secondary2 hover:bg-secondary3"
             >
               ເພີ່ມຂໍ້ມູນ
             </Button>
@@ -313,7 +313,7 @@ const MedicinesPage = () => {
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
             >
-              <option value="">-- ກອງຕາມປະເພດຢາ --</option>
+              <option value="">-- ຄົ້ນຫາຕາມປະເພດຢາ --</option>
               {categories.map((category) => (
                 <option key={category.medtype_id} value={category.medtype_id}>
                   {category.type_name}
@@ -327,7 +327,7 @@ const MedicinesPage = () => {
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
             >
-              <option value="">-- ກອງຕາມສະຖານະ --</option>
+              <option value="">-- ຄົ້ນຫາຕາມສະຖານະ --</option>
               <option value="ຍັງມີ">ຍັງມີ</option>
               <option value="ໝົດ">ໝົດ</option>
             </select>
@@ -335,14 +335,14 @@ const MedicinesPage = () => {
             {/* ปุ่มล้างตัวกรอง */}
             <Button
               onClick={clearAllFilters}
-              className="bg-graydark hover:bg-graydark"
+              className="bg-slate-400 hover:bg-slate-500 text-white"
             >
-              ລ້າງຕົວກອງ
+              ລ້າງການຄົ້ນຫາ
             </Button>
           </div>
         </div>
 
-        <div className="overflow-x-auto shadow-md">
+        <div className="overflow-x-auto ">
           <table className="w-full min-w-max table-auto">
             <thead>
               <tr className="text-left bg-gray border border-stroke">

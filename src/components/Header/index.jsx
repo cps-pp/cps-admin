@@ -200,7 +200,7 @@ const Header = (props) => {
 
           <div className="hidden lg:flex items-center gap-2 border border-stroke px-4 py-2 rounded bg-gray-50">
             <Clock className="w-5 h-5 text-secondary2" />
-            <span className="text-base text-form-strokedark font-semibold">
+            <span className="text-base text-secondary2 font-semibold">
               {formatDateTime(currentTime)}
             </span>
           </div>

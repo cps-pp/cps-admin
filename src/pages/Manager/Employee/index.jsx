@@ -174,7 +174,7 @@ const EmployeePage = () => {
 
   return (
         <>
-    <div className="rounded bg-white pt-4 dark:bg-boxdark">
+    <div className="rounded bg-white pt-4 border border-stroke">
       <Alerts />
 
       <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 ">
@@ -185,7 +185,7 @@ const EmployeePage = () => {
           <Button
             onClick={() => setShowAddModal(true)}
             icon={iconAdd}
-            className="bg-emerald-600 hover:bg-emerald-700"
+            className="bg-secondary2 hover:bg-secondary3"
           >
             ເພີ່ມພະນັກງານ
           </Button>
@@ -203,7 +203,7 @@ const EmployeePage = () => {
       </div>
 
     
-             <div className="overflow-x-auto  shadow-md">
+             <div className="overflow-x-auto  ">
           <table className="w-full min-w-max table-auto  ">
             <thead>
                <tr className="text-left bg-gray border border-stroke ">
@@ -247,7 +247,7 @@ const EmployeePage = () => {
                     <td className="px-4 py-4">{emp.emp_surname}</td>
                     <td className="px-4 py-4">{emp.gender}</td>
                     <td className="px-4 py-4">
-                      {new Date(emp.dob).toLocaleDateString('en-US', {
+                      {new Date(emp.dob).toLocaleDateString('en-GB', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',

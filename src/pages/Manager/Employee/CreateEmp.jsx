@@ -19,8 +19,10 @@ const CreateEmployee = ({ setShow, getList, existingIds, onCloseCallback }) => {
     reset,
     setValue,
     setFocus,
+    watch,
     formState: { isDirty, errors },
   } = useForm();
+const dob = watch('dob');
 
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
@@ -248,11 +250,12 @@ const CreateEmployee = ({ setShow, getList, existingIds, onCloseCallback }) => {
           register={register}
           errors={errors}
           value={gender}
+          
           onSelect={(e) => setGender(e.target.value)}
         />
 
         <BoxDate
-          select=""
+           select={dob}
           register={register}
           errors={errors}
           name="dob"

@@ -1,103 +1,47 @@
-import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
-import { useEffect, useMemo } from 'react';
-import { ROUTES } from './configs/routes';
-import DefaultLayout from './layout/DefaultLayout';
-import LoginForm from './components/LoginForm';
-import NotFound from './pages/NotFound';
-import PageTitle from './components/PageTitle';
-import { useAuth } from './AuthContext';
-import HomePreOrder from './pages/Manager/test/HomePreOrder';
-
-function App() {
-  const { pathname } = useLocation();
-  const navigate = useNavigate();
-  const token = localStorage.getItem('token');
-  const { user } = useAuth();
-
-  const restrictedPathsForAdmin = [
-    '/manager/employee',
-    '/manager/servicelist',
-    '/manager/packetdetail',
-  ];
-
-  const filteredRoutes = useMemo(() => {
-    if (!user) return [];
-
-    return ROUTES.filter((item) => {
-      if (item.role && !item.role.includes(user.role)) {
-        return false;
-      }
-      if (user.role === 'admin' && restrictedPathsForAdmin.includes(item.path)) {
-        return false;
-      }
-      return true;
-    });
-  }, [user]);
-useEffect(() => {
-  if (!token && pathname !== '/login') {
-    navigate('/login');
-  } else if (token && pathname === '/') {
-    navigate('/login'); 
-  }
-}, [token, pathname, navigate]);
-
-
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-
-  return (
-    <Routes>
-      {/* <Route path="/test" element={<HomePreOrder />} /> */}
-      <Route path="/login" element={<LoginForm />} />
-
-      {token && (
-        <Route path="/" element={<DefaultLayout />}>
-          {filteredRoutes.map((item, index) => (
-            <Route
-              key={index}
-              index={index === 0}
-              path={item.path}
-              element={
-                <>
-                  <PageTitle title={item.title} />
-                  {item.component}
-                </>
-              }
-            />
-          ))}
-
-          {/* ✅ Block admin access to restricted routes */}
-          {user?.role === 'admin' &&
-            restrictedPathsForAdmin.map((path) => (
-              <Route
-                key={path}
-                path={path}
-                element={<Navigate to="/dashboard" replace />}
-              />
-            ))}
-        </Route>
-      )}
-
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  );
-}
-
-export default App;
-
-
-// import React, { useEffect } from 'react';
-// import { Routes, Route, useLocation } from 'react-router-dom';
-
-// import DefaultLayout from './layout/DefaultLayout';
-// import NotFound from '@/pages/NotFound';
-// import PageTitle from './components/PageTitle';
+// import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
+// import { useEffect, useMemo } from 'react';
 // import { ROUTES } from './configs/routes';
+// import DefaultLayout from './layout/DefaultLayout';
+// import LoginForm from './components/LoginForm';
+// import NotFound from './pages/NotFound';
+// import PageTitle from './components/PageTitle';
+// import { useAuth } from './AuthContext';
+// import HomePreOrder from './pages/Manager/test/HomePreOrder';
 
-// function AppRoutes() {
+// function App() {
 //   const { pathname } = useLocation();
+//   const navigate = useNavigate();
+//   const token = localStorage.getItem('token');
+//   const { user } = useAuth();
+
+//   const restrictedPathsForAdmin = [
+//     '/manager/employee',
+//     '/manager/servicelist',
+//     '/manager/packetdetail',
+//   ];
+
+//   const filteredRoutes = useMemo(() => {
+//     if (!user) return [];
+
+//     return ROUTES.filter((item) => {
+//       if (item.role && !item.role.includes(user.role)) {
+//         return false;
+//       }
+//       if (user.role === 'admin' && restrictedPathsForAdmin.includes(item.path)) {
+//         return false;
+//       }
+//       return true;
+//     });
+//   }, [user]);
+// useEffect(() => {
+//   if (!token && pathname !== '/login') {
+//     navigate('/login');
+//   } else if (token && pathname === '/') {
+//     navigate('/login'); 
+//   }
+// }, [token, pathname, navigate]);
+
+
 
 //   useEffect(() => {
 //     window.scrollTo(0, 0);
@@ -105,32 +49,88 @@ export default App;
 
 //   return (
 //     <Routes>
-//       <Route path="/" element={<DefaultLayout />}>
-//         {ROUTES.map((item, index) => (
-//           <Route
-//             key={index}
-//             index={index === 0}
-//             path={item.path}
-//             element={
-//               <>
-//                 <PageTitle title={item.title} />
-//                 {item.component}
-//               </>
-//             }
-//           />
-//         ))}
-//       </Route>
+//       {/* <Route path="/test" element={<HomePreOrder />} /> */}
+//       <Route path="/login" element={<LoginForm />} />
+
+//       {token && (
+//         <Route path="/" element={<DefaultLayout />}>
+//           {filteredRoutes.map((item, index) => (
+//             <Route
+//               key={index}
+//               index={index === 0}
+//               path={item.path}
+//               element={
+//                 <>
+//                   <PageTitle title={item.title} />
+//                   {item.component}
+//                 </>
+//               }
+//             />
+//           ))}
+
+//           {/* ✅ Block admin access to restricted routes */}
+//           {user?.role === 'admin' &&
+//             restrictedPathsForAdmin.map((path) => (
+//               <Route
+//                 key={path}
+//                 path={path}
+//                 element={<Navigate to="/dashboard" replace />}
+//               />
+//             ))}
+//         </Route>
+//       )}
 
 //       <Route path="*" element={<NotFound />} />
 //     </Routes>
 //   );
 // }
 
-// function App() {
-//   return <AppRoutes />;
-// }
-
 // export default App;
+
+
+import React, { useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
+
+import DefaultLayout from './layout/DefaultLayout';
+import NotFound from '@/pages/NotFound';
+import PageTitle from './components/PageTitle';
+import { ROUTES } from './configs/routes';
+
+function AppRoutes() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return (
+    <Routes>
+      <Route path="/" element={<DefaultLayout />}>
+        {ROUTES.map((item, index) => (
+          <Route
+            key={index}
+            index={index === 0}
+            path={item.path}
+            element={
+              <>
+                <PageTitle title={item.title} />
+                {item.component}
+              </>
+            }
+          />
+        ))}
+      </Route>
+
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
+function App() {
+  return <AppRoutes />;
+}
+
+export default App;
 
 
 

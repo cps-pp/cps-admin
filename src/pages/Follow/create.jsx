@@ -11,6 +11,7 @@ import SelectBoxId from '../../components/Forms/SelectID';
 import ButtonBox from '../../components/Button';
 import BoxDate from '../../components/Date';
 import { usePrompt } from '@/hooks/usePrompt';
+import DateTime from '../../components/DateTime';
 
 const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
   const navigate = useNavigate();
@@ -36,18 +37,14 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
   const dispatch = useAppDispatch();
   const selectedDate = watch('date_addmintted');
 
-  // ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
   const isDirtyRef = useRef(isDirty);
   
-  // ✅ อัพเดต ref ทุกครั้งที่ isDirty เปลี่ยน
   useEffect(() => {
     isDirtyRef.current = isDirty;
   }, [isDirty]);
   
-  // ✅ เตือนเมื่อมีการพยายามออกจากหน้าด้วย navigation (Back / เปลี่ยน route)
   usePrompt('ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.', isDirty);
 
-  // ✅ เตือนเมื่อจะรีเฟรช / ปิดแท็บ
   useEffect(() => {
     const handleBeforeUnload = (event) => {
       if (!isDirtyRef.current) return;
@@ -61,7 +58,6 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
     };
   }, []);
 
-  // ✅ เตือนเมื่อคลิกปิดฟอร์ม - ใช้ current value จาก ref
   const handleCloseForm = () => {
     if (isDirtyRef.current) {
       const confirmLeave = window.confirm('ທ່ານຕ້ອງການປິດຟອມແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ປ້ອນຈະສູນເສຍ');
@@ -70,14 +66,12 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
     setShow(false);
   };
 
-  // ✅ ส่ง handleCloseForm ไปให้ parent component แค่ครั้งเดียว
   useEffect(() => {
     if (onCloseCallback) {
       onCloseCallback(() => handleCloseForm);
     }
   }, [onCloseCallback]);
 
-  // ดึงรหัสถัดไปเมื่อ component โหลด
   useEffect(() => {
     const fetchNextId = async () => {
       try {
@@ -234,16 +228,17 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
           <input type="hidden" {...register('appoint_id')} />
         </div>
 
-        <BoxDate
-          name="date_addmintted"
-          label="ວັນທີນັດໝາຍ"
-          register={register}
-          errors={errors}
-          select={selectedDate}
-          formOptions={{ required: 'ກະລຸນາເລືອກວັນທີນັດໝາຍ' }}
-          setValue={setValue}
-          withTime={true}
-        />
+     <DateTime
+  name="date_addmintted"
+  label="ວັນທີນັດໝາຍ"
+  register={register}
+  errors={errors}
+  select={selectedDate}   
+  formOptions={{ required: 'ກະລຸນາເລືອກວັນທີນັດໝາຍ' }}
+  setValue={setValue}
+  withTime={true}
+/>
+
 
 
          

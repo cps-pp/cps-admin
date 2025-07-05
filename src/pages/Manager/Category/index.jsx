@@ -188,7 +188,7 @@ const CategoryPage = () => {
 
   return (
     <>
-      <div className="rounded bg-white pt-4 dark:bg-boxdark">
+      <div className="rounded bg-white pt-4 border border-stroke">
         <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
           <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
             ຈັດການຂໍ້ມູນປະເພດຢາ
@@ -197,7 +197,7 @@ const CategoryPage = () => {
             <Button
               onClick={() => setShowAddCategoryModal(true)}
               icon={iconAdd}
-              className="bg-emerald-600 hover:bg-emerald-700"
+              className="bg-secondary2 hover:bg-secondary3"
             >
               ເພີ່ມປະເພດ
             </Button>
@@ -219,7 +219,7 @@ const CategoryPage = () => {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto shadow-md">
+        <div className="overflow-x-auto ">
           <table className="w-full min-w-max table-auto">
             <thead>
               <tr className="text-left bg-gray border border-stroke">

@@ -126,16 +126,16 @@ const ReportPay = () => {
     0,
   );
 
-  const formattedTotalAmount = `${totalAmount.toLocaleString('en-US')} Kip`;
+  const formattedTotalAmount = `${totalAmount.toLocaleString('en-US')} ກີບ`;
 
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 2xl:gap-7.5 w-full mb-6">
         <div className="rounded-sm border border-stroke bg-white p-4">
           <div className="flex items-center">
-            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-blue-100">
+            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 text-indigo-600 shadow-inner">
               <svg
-                class="w-[25px] h-[25px] text-form-strokedark"
+                class="w-[25px] h-[25px] text-primary"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -154,7 +154,7 @@ const ReportPay = () => {
             </div>
             <div className="ml-4">
               <h4 className="text-lg font-semibold  text-form-strokedark">ຈຳນວນລາຍການຊຳລະ</h4>
-              <p className="text-xl font-bold text-blue-700">
+              <p className="text-xl font-bold text-primary">
                 {totalCount} ລາຍການ
               </p>
             </div>
@@ -192,7 +192,7 @@ const ReportPay = () => {
         </div>
       </div>
 
-      <div className="rounded bg-white pt-4 dark:bg-boxdark">
+      <div className="rounded bg-white pt-4 border border-stroke">
         <Alerts />
         <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
           <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
@@ -211,7 +211,7 @@ const ReportPay = () => {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto  shadow-md">
+        <div className="overflow-x-auto  ">
           <table className="w-full min-w-max table-auto  ">
             <thead>
               <tr className="text-left bg-gray border border-stroke">
@@ -244,7 +244,7 @@ const ReportPay = () => {
                     <td className="px-4 py-4 font-medium">{payment.pay_id}</td>
                     <td className="px-4 py-4">{payment.in_id}</td>
                     <td className="px-4 py-4">
-                      {new Date(payment.date).toLocaleString('en-US', {
+                      {new Date(payment.date).toLocaleString('en-GB', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
@@ -255,13 +255,31 @@ const ReportPay = () => {
                       })}
                     </td>
                     <td className="px-4 py-4">
-                      {Number(payment.paid_amount).toLocaleString('en-US')}
+                      {Number(payment.paid_amount).toLocaleString('en-GB')}
                     </td>
-
-                    <td className="px-4 py-4">
-                      <span className="inline-flex items-center gap-1">
-                        {payment.pay_type || '-'}
-                      </span>
+    <td className="px-4 py-2">
+                      {payment.pay_type?.toUpperCase() === 'CASH' && (
+                        <span className="inline-block bg-green-100 text-green-800 text-sm  px-3 py-1 rounded-full">
+                          CASH
+                        </span>
+                      )}
+                      {payment.pay_type?.toUpperCase() === 'TRANSFER' && (
+                        <span className="inline-block bg-blue-100 text-blue-800 text-sm  px-3 py-1 rounded-full">
+                          TRANSFER
+                        </span>
+                      )}
+                      {payment.pay_type?.toUpperCase() === 'REFUND' && (
+                        <span className="inline-block bg-yellow-100 text-yellow-800 text-sm  px-3 py-1 rounded-full">
+                          Refund
+                        </span>
+                      )}
+                      {!['CASH', 'TRANSFER', 'REFUND'].includes(
+                        payment.pay_type?.toUpperCase(),
+                      ) && (
+                        <span className="inline-block bg-gray-100 text-gray-700 text-sm  px-3 py-1 rounded-full">
+                          {payment.pay_type}
+                        </span>
+                      )}
                     </td>
 
                     <td className="px-4 py-4">
@@ -276,7 +294,7 @@ const ReportPay = () => {
               ) : (
                 <tr>
                   <td colSpan={8} className="py-8 text-center text-gray-500">
-                     <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                     <div className="text-center text-gray-500 dark:text-gray-400">
                   <div className="w-32 h-32 flex items-center justify-center mx-auto">
                     <Empty description={false} />
                   </div>
