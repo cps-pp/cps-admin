@@ -534,6 +534,7 @@ const OrderPage = () => {
                   <td className="px-4 py-4">
                     {getDoctorName(order.emp_id_create)}
                   </td>
+                  <td className="px-4 py-4">{order.types}</td>
                   <td className="px-3 py-4 ">
                     <div className="flex gap-2 ">
                       <button

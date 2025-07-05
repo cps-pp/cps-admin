@@ -7,6 +7,7 @@ export const HeadersImport = [
   { id: 'ໄຟລ', name: 'ໄຟລ ', sortable: true },
 
   { id: 'ຄົນນຳເຂົ້າ', name: 'ຄົນນຳເຂົ້າ', sortable: true },
+  { id: 'ປະເພດນຳເຂົ້າ', name: 'ປະເພດນຳເຂົ້າ', sortable: true },
   { id: 'ໝາຍເຫດ', name: 'ໝາຍເຫດ', sortable: true },
 
   { id: 'ເພີ່ມແລະເບິ່ງລາຍລະອຽດໃບນຳເຂົ້າຍາ', name: 'ເພີ່ມແລະເບິ່ງລາຍລະອຽດໃບນຳເຂົ້າຍາ', sortable: true },

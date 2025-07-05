@@ -13,8 +13,8 @@ const ViewPreorder = ({ id, onClose, setShow }) => {
   const [employees, setEmployees] = useState([]);
   const [medicines, setMedicines] = useState([]);
   const dispatch = useAppDispatch();
-const [preorderDetails, setPreorderDetails] = useState([]);
 
+  // ฟังก์ชันดึงข้อมูลเริ่มต้น (suppliers, employees, medicines)
   useEffect(() => {
     async function fetchInitialData() {
       try {
@@ -271,7 +271,7 @@ const [preorderDetails, setPreorderDetails] = useState([]);
           )}
         </div>
 
-        <div className="flex justify-end   ">
+        <div className="flex justify-end mt-6  border-t border-stroke  ">
           <button
             onClick={() => setShow(false)}
             className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"

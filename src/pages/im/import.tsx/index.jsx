@@ -436,6 +436,7 @@ const ImportPage = () => {
                   <td className="px-4 py-4">
                     {getEmployeeName(im.emp_id_create)}
                   </td>
+                  <td className="px-4 py-4">{im.types}</td>
 
                   <td className="px-4 py-4">{im.node}</td>
 

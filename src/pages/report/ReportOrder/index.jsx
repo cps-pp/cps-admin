@@ -1,199 +1,292 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Button from '@/components/Button';
 import Search from '@/components/Forms/Search';
+import { OrderHead } from './column/order';
 import { useAppDispatch } from '@/redux/hook';
-import TablePaginationDemo from '@/components/Tables/Pagination_two';
-import { openAlert } from '@/redux/reducer/alert';
-import Alerts from '@/components/Alerts';
-import { Empty } from 'antd';
 
-const ReportOrder = () => {
-  const [activeTab, setActiveTab] = useState('medicine');
-  const [reportData, setReportData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
+import Alerts from '@/components/Alerts';
+
+const ReportPreorder = () => {
+  const [filterPreorder, setFilterPreorder] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const dispatch = useAppDispatch();
+  const [preorders, setPreorders] = useState([]);
+  const [empName, setEmpName] = useState([]);
+  const [supName, setSupName] = useState([]);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
 
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  // เพิ่ม state สำหรับตัวกรอง
+  const [monthFilter, setMonthFilter] = useState('');
+  const [selectedSupplier, setSelectedSupplier] = useState('');
+  const [selectedEmployee, setSelectedEmployee] = useState('');
 
+  // ✅ เพิ่ม state สำหรับการเรียงลำดับ ID
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
+
+  // ✅ เพิ่ม state สำหรับแท็บและสถิติ
+  const [activeTab, setActiveTab] = useState('all'); // all, medicine, equipment
   const [summaryStats, setSummaryStats] = useState({
-    totalMedicines: 0,
-    totalMedicineStock: 0,
-    totalEquipment: 0,
-    totalEquipmentStock: 0,
-    lowStockItems: 0,
+    totalPreorders: 0,
+    totalMedicinePreorders: 0,
+    totalEquipmentPreorders: 0,
   });
 
-  const fetchImportReport = async () => {
+  const dispatch = useAppDispatch();
+
+  // ✅ ฟังก์ชันตรวจสอบประเภทสินค้าจากคอลัมน์ types (เหมือน ReportImport)
+  const getPreorderTypeFromTypes = (types) => {
+    if (!types) return 'unknown';
+    const typesStr = types.toString();
+    
+    // ตรวจสอบว่ามีทั้งยาและอุปกรณ์หรือไม่
+    const hasMedicine = typesStr.includes('ຢາ') || typesStr.includes('ยา') || typesStr.includes('medicine');
+    const hasEquipment = typesStr.includes('ອຸປະກອນ') || typesStr.includes('อุปกรณ์') || typesStr.includes('equipment');
+    
+    if (hasMedicine && hasEquipment) {
+      return 'both'; // มีทั้งยาและอุปกรณ์
+    } else if (hasMedicine) {
+      return 'medicine';
+    } else if (hasEquipment) {
+      return 'equipment';
+    }
+    return 'unknown';
+  };
+
+  // ✅ คำนวณสถิติจากข้อมูลจริงในตาราง (ใช้คอลัมน์ types แทน)
+  const calculateStats = (preorderList) => {
+    let medicineCount = 0;
+    let equipmentCount = 0;
+    
+    preorderList.forEach(preorder => {
+      const preorderType = getPreorderTypeFromTypes(preorder.types);
+      if (preorderType === 'medicine') {
+        medicineCount++;
+      } else if (preorderType === 'equipment') {
+        equipmentCount++;
+      } else if (preorderType === 'both') {
+        // ถ้ามีทั้งยาและอุปกรณ์ ให้นับทั้งสองอย่าง
+        medicineCount++;
+        equipmentCount++;
+      }
+    });
+
+    setSummaryStats({
+      totalPreorders: preorderList.length,
+      totalMedicinePreorders: medicineCount,
+      totalEquipmentPreorders: equipmentCount,
+    });
+  };
+
+  const fetchPreorders = async () => {
     try {
       setLoading(true);
-
-      const medicineURL =
-        activeTab === 'medicine'
-          ? 'http://localhost:4000/src/manager/medicines/M1'
-          : 'http://localhost:4000/src/manager/medicines/M2';
-
-      // ดึงข้อมูลรายการยา/อุปกรณ์ตาม tab
-      const response = await fetch(medicineURL);
+      const response = await fetch(`http://localhost:4000/src/report/preorder`);
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-      const medicineData = await response.json();
 
-      const stockResponse = await fetch(
-        'http://localhost:4000/src/report/import',
-      );
-      if (!stockResponse.ok) {
-        throw new Error(`HTTP error! Status: ${stockResponse.status}`);
-      }
-      const stockData = await stockResponse.json();
-
+      const data = await response.json();
+      setPreorders(data.data);
+      setFilterPreorder(data.data);
       
-    const medicinesWithStock = (medicineData.data || []).map((item) => {
-      const stockInfo = (stockData.detail || []).find(
-        (stock) => stock.med_id === item.med_id
-      );
-      
-      return {
-        ...item, 
-        im_id: stockInfo ? stockInfo.im_id : '-',
-        im_date: stockInfo ? stockInfo.im_date : '-',
-        note: stockInfo ? (stockInfo.note || '-') : '-',
-        emp_id_create: stockInfo ? stockInfo.emp_id_create : item.emp_id_create,
-        // ✅ ใช้ qty จาก stockInfo ถ้ามี หรือจาก item
-        stock_qty: stockInfo ? stockInfo.qty : 0,
-        // เก็บ qty เดิมจากตาราง medicines ไว้ด้วย
-        medicine_qty: item.qty || 0
-      };
-    });
-
-
-      setReportData(medicinesWithStock);
-      setFilteredData(medicinesWithStock);
-
-      const totalStock = medicinesWithStock.reduce(
-        (sum, item) => sum + (item.quantity || 0),
-        0,
-      );
-      const lowStock = medicinesWithStock.filter(
-        (item) => (item.quantity || 0) < 10,
-      ).length;
-
-      if (activeTab === 'medicine') {
-        setSummaryStats((prev) => ({
-          ...prev,
-          totalMedicines: medicinesWithStock.length,
-          totalMedicineStock: totalStock,
-          lowStockItems: lowStock,
-        }));
-      } else {
-        setSummaryStats((prev) => ({
-          ...prev,
-          totalEquipment: medicinesWithStock.length,
-          totalEquipmentStock: totalStock,
-          lowStockItems: lowStock,
-        }));
-      }
+      // ✅ คำนวณสถิติ
+      calculateStats(data.data);
     } catch (error) {
-      console.error('Error fetching data:', error);
-      dispatch(
-        openAlert({
-          type: 'error',
-          title: 'ເກີດຂໍ້ຜິດພາດ',
-          message: 'ບໍ່ສາມາດດຶງຂໍ້ມູນໄດ້',
-        }),
-      );
+      console.error('Error fetching preorders:', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchImportReport();
-  }, [activeTab]);
+    fetchPreorders();
+  }, []);
 
+  // ดึงข้อมูลพนักงาน
   useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredData(reportData);
-    } else {
-      const filtered = reportData.filter((item) => {
-        const searchStr = searchQuery.toLowerCase();
-        return (
-          (item.med_name && item.med_name.toLowerCase().includes(searchStr)) ||
-          (item.med_id && item.med_id.toLowerCase().includes(searchStr)) ||
-          (item.medtype_id && item.medtype_id.toLowerCase().includes(searchStr))
-        );
-      });
-      setFilteredData(filtered);
-    }
-  }, [searchQuery, reportData]);
+    const fetchEmployee = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:4000/src/manager/emp');
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        setEmpName(data.data);
+      } catch (error) {
+        console.error('Error fetching employee data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handlePageChange = (_, newPage) => {
-    setPage(newPage);
-  };
+    fetchEmployee();
+  }, []);
 
-  const handleRowsPerPageChange = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
+  // ดึงข้อมูลผู้สะหนอง
+  useEffect(() => {
+    const fetchSupplier = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:4000/src/manager/supplier');
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        setSupName(data.data);
+      } catch (error) {
+        console.error('Error fetching supplier data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const paginatedData = filteredData.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage,
-  );
+    fetchSupplier();
+  }, []);
 
-  // Table headers
-  const getTableHeaders = () => {
-    return ['ລະຫັດນຳເຂົ້າ', 'ວັນທີ', 'ລະຫັດ','ຊື່ຢາ/ອຸປະກອນ', 'ຈຳນວນ', 'ໝາຍເຫດ'];
-  };
-
-  const renderTableRow = (item, index) => {
-    const globalIndex = page * rowsPerPage + index + 1;
-
-    return (
-      <tr
-        key={index}
-        className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
-      >
-        <td className="px-4 py-4">{item.im_id || '-'}</td>
-        <td className="px-4 py-4">
-          {item.im_date
-            ? new Date(item.im_date).toLocaleDateString('en-GB', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-              })
-            : '-'}
-        </td>
-
-        <td className="px-4 py-4">{item.med_id || '-'}</td>
-        <td className="px-4 py-4">{item.med_name || '-'}</td>
-
-        <td className="px-4 py-4">
-          <span
-            className={`font-medium ${(item.qty || 0) < 10 ? 'text-red-600' : 'text-green-600'}`}
-          >
-            {item.qty || 0}
-          </span>
-        </td>
-      </tr>
+  // ฟังก์ชันแปลง emp_id เป็นชื่อพนักงาน
+  const getEmployeeName = (emp_id) => {
+    const emp = empName.find((employee) => employee.emp_id === emp_id);
+    return emp ? (
+      <>
+        {emp.emp_name} {emp.emp_surname}
+      </>
+    ) : (
+      <span className="text-purple-600">-</span>
     );
+  };
+
+  // ฟังก์ชันแปลง sup_id เป็นชื่อผู้สะหนอง
+  const getSupplierName = (sup_id) => {
+    const sup = supName.find((supplier) => supplier.sup_id === sup_id);
+    return sup ? (
+      <>
+        {sup.company_name}
+      </>
+    ) : (
+      <span className="text-purple-600">-</span>
+    );
+  };
+
+  // ✅ Handle tab change - กรองข้อมูลตาม tab
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    // ล้างตัวกรองอื่นๆ เมื่อเปลี่ยนแท็บ
+    setSearchQuery('');
+    setMonthFilter('');
+    setSelectedSupplier('');
+    setSelectedEmployee('');
+  };
+
+  // ✅ ฟังก์ชันสำหรับเรียงลำดับ ID
+  const handleSortById = () => {
+    const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortOrder(newSortOrder);
+
+    const sortedPreorders = [...preorders].sort((a, b) => {
+      const extractNumber = (id) => {
+        const match = id.match(/\d+/);
+        return match ? parseInt(match[0]) : 0;
+      };
+
+      const numA = extractNumber(a.preorder_id);
+      const numB = extractNumber(b.preorder_id);
+
+      if (newSortOrder === 'asc') {
+        return numA - numB;
+      } else {
+        return numB - numA;
+      }
+    });
+
+    setPreorders(sortedPreorders);
+    // ถ้ามีการค้นหาหรือกรองอยู่ ให้ใช้ข้อมูลที่เรียงแล้วมากรองใหม่
+    applyFiltersWithData(sortedPreorders);
+  };
+
+  // ฟังก์ชันกรองข้อมูลแบบรวม (แก้ไขให้รับ data parameter)
+  const applyFiltersWithData = (data = preorders) => {
+    let filtered = [...data];
+
+    // ✅ กรองตามแท็บ - ตรวจสอบจากคอลัมน์ types
+    if (activeTab === 'medicine') {
+      filtered = filtered.filter(preorder => {
+        const preorderType = getPreorderTypeFromTypes(preorder.types);
+        return preorderType === 'medicine' || preorderType === 'both';
+      });
+    } else if (activeTab === 'equipment') {
+      filtered = filtered.filter(preorder => {
+        const preorderType = getPreorderTypeFromTypes(preorder.types);
+        return preorderType === 'equipment' || preorderType === 'both';
+      });
+    }
+
+    // กรองตาม search query
+    if (searchQuery.trim() !== '') {
+      filtered = filtered.filter((item) =>
+        Object.values(item)
+          .join(' ')
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()),
+      );
+    }
+
+    // กรองตามเดือน
+    if (monthFilter) {
+      filtered = filtered.filter((item) => {
+        const itemMonth = new Date(item.preorder_date).toISOString().slice(0, 7);
+        return itemMonth === monthFilter;
+      });
+    }
+
+    // กรองตามผู้สะหนอง
+    if (selectedSupplier !== '') {
+      filtered = filtered.filter((preorder) => preorder.sup_id === selectedSupplier);
+    }
+
+    // กรองตามพนักงาน
+    if (selectedEmployee !== '') {
+      filtered = filtered.filter((preorder) => preorder.emp_id_create === selectedEmployee);
+    }
+
+    setFilterPreorder(filtered);
+  };
+
+  // ฟังก์ชันกรองข้อมูลแบบรวม (เดิม)
+  const applyFilters = () => {
+    applyFiltersWithData(preorders);
+  };
+
+  // เรียกใช้ฟังก์ชันกรองเมื่อมีการเปลี่ยนแปลงใน filters หรือข้อมูล
+  useEffect(() => {
+    applyFilters();
+  }, [searchQuery, monthFilter, selectedSupplier, selectedEmployee, preorders, activeTab]);
+
+  // ฟังก์ชันล้างตัวกรองทั้งหมด
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setMonthFilter('');
+    setSelectedSupplier('');
+    setSelectedEmployee('');
+  };
+
+  const handleViewPreorder = (id) => {
+    setSelectedId(id);
+    setShowViewModal(true);
   };
 
   return (
     <>
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 2xl:gap-7.5 w-full mb-6">
-        {/* Total Items */}
+      {/* ✅ Summary Cards - กล่องแรกแสดงจำนวนทั้งหมดเสมอ */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 2xl:gap-7.5 w-full mb-6">
+        {/* Total Preorders - แสดงจำนวนสั่งซื้อทั้งหมดเสมอ */}
         <div className="rounded-sm border border-stroke bg-white p-4">
           <div className="flex items-center">
             <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-blue-100">
               <svg
-                class="w-[25px] h-[25px] text-form-strokedark"
+                className="w-[25px] h-[25px] text-form-strokedark"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -203,8 +296,8 @@ const ReportOrder = () => {
               >
                 <path
                   stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   strokeWidth="2.1"
                   d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 5h6m-6 4h6M10 3v4h4V3h-4Z"
                 />
@@ -212,25 +305,21 @@ const ReportOrder = () => {
             </div>
             <div className="ml-4">
               <h4 className="text-lg font-semibold text-strokedark">
-                {activeTab === 'medicine'
-                  ? 'ຈຳນວນຢາທັງໝົດ'
-                  : 'ຈຳນວນອຸປະກອນທັງໝົດ'}
+                ຈຳນວນສັ່ງຊື້ທັງໝົດ
               </h4>
-              <p className="text-xl font-bold text-blue-700">
-                {activeTab === 'medicine'
-                  ? summaryStats.totalMedicines
-                  : summaryStats.totalEquipment}
+              <p className="text-xl font-bold text-blue-700"> 
+                {summaryStats.totalPreorders} ຄັ້ງ
               </p>
             </div>
           </div>
         </div>
 
-        {/* Low Stock Items */}
-        <div className="rounded-sm border border-stroke bg-white p-4 ">
+        {/* Medicine Preorders - นับจากคอลัมน์ types */}
+        <div className="rounded-sm border border-stroke bg-white p-4">
           <div className="flex items-center">
-            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
+            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-green-100">
               <svg
-                className="w-6 h-6"
+                className="w-6 h-6 text-green-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -239,16 +328,45 @@ const ReportOrder = () => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
                 />
               </svg>
             </div>
             <div className="ml-4">
-              <h4 className="text-lg font-semibold text-strokedark dark:text-white">
-                {activeTab === 'medicine' ? 'ຢາໃກ້ໝົດ' : 'ອຸປະກອນໃກ້ໝົດ'}
+              <h4 className="text-lg font-semibold text-strokedark">
+                ສັ່ງຊື້ຢາ
               </h4>
-              <p className="text-xl font-bold text-red-500 dark:text-red-300">
-                {summaryStats.lowStockItems}
+              <p className="text-xl font-bold text-green-600">
+                {summaryStats.totalMedicinePreorders} ຄັ້ງ
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Equipment Preorders - นับจากคอลัมน์ types */}
+        <div className="rounded-sm border border-stroke bg-white p-4">
+          <div className="flex items-center">
+            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-purple-100">
+              <svg
+                className="w-6 h-6 text-purple-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"
+                />
+              </svg>
+            </div>
+            <div className="ml-4">
+              <h4 className="text-lg font-semibold text-strokedark">
+                ສັ່ງຊື້ອຸປະກອນ
+              </h4>
+              <p className="text-xl font-bold text-purple-600">
+                {summaryStats.totalEquipmentPreorders} ຄັ້ງ
               </p>
             </div>
           </div>
@@ -257,107 +375,231 @@ const ReportOrder = () => {
 
       <div className="rounded bg-white pt-4 dark:bg-boxdark">
         <Alerts />
-
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 ">
-            ລາຍງານການຢາແລະອຸປະກອນ
+        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark flex-wrap gap-2">
+          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+            ລາຍງານການສັ່ງຊື້
           </h1>
         </div>
 
-        <div className="flex gap-4 px-4 mt-4 ">
+        {/* ✅ Tabs */}
+        <div className="flex gap-4 px-4 mt-4">
           <button
-            onClick={() => setActiveTab('medicine')}
-            className={`px-4 py-2 ${activeTab === 'medicine' ? 'bg-blue-500 text-white rounded' : 'bg-gray-200'}`}
+            onClick={() => handleTabChange('all')}
+            className={`px-4 py-2 rounded transition-colors ${
+              activeTab === 'all' 
+                ? 'bg-slate-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            ທັງໝົດ
+          </button>
+          <button
+            onClick={() => handleTabChange('medicine')}
+            className={`px-4 py-2 rounded transition-colors ${
+              activeTab === 'medicine' 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-gray-200 hover:bg-gray-300'
+            }`}
           >
             ຢາ
           </button>
           <button
-            onClick={() => setActiveTab('equipment')}
-            className={`px-4 py-2 ${activeTab === 'equipment' ? 'bg-blue-500 text-white rounded' : 'bg-gray-200'}`}
+            onClick={() => handleTabChange('equipment')}
+            className={`px-4 py-2 rounded transition-colors ${
+              activeTab === 'equipment' 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-gray-200 hover:bg-gray-300'
+            }`}
           >
             ອຸປະກອນ
           </button>
         </div>
 
+        {/* ส่วนของตัวกรอง */}
         <div className="grid w-full gap-4 p-4">
-          <Search
-            type="text"
-            name="search"
-            placeholder="ຄົ້ນຫາ..."
-            className="rounded border border-stroke dark:border-strokedark"
-            onChange={(e) => {
-              const query = e.target.value;
-              setSearchQuery(query);
-            }}
-          />
-        </div>
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            {/* Search Box */}
+            <Search
+              type="text"
+              name="search"
+              placeholder="ຄົ້ນຫາ..."
+              className="rounded border border-stroke dark:border-strokedark"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
 
-        {/* Table */}
+            {/* ตัวกรองตามผู้สะหนอง */}
+            <select
+              className="border border-stroke dark:border-strokedark rounded p-2"
+              value={selectedSupplier}
+              onChange={(e) => setSelectedSupplier(e.target.value)}
+            >
+              <option value="">-- ກອງຕາມຜູ້ສະໜອງ --</option>
+              {[...new Set(preorders.map((preorder) => preorder.sup_id))].map((sup_id) => (
+                <option key={sup_id} value={sup_id}>
+                  {getSupplierName(sup_id)}
+                </option>
+              ))}
+            </select>
+
+            {/* ตัวกรองตามพนักงาน */}
+            <select
+              className="border border-stroke dark:border-strokedark rounded p-2"
+              value={selectedEmployee}
+              onChange={(e) => setSelectedEmployee(e.target.value)}
+            >
+              <option value="">-- ກອງຕາມພະນັກງານ --</option>
+              {[...new Set(preorders.map((preorder) => preorder.emp_id_create))].map((empId) => {
+                const employee = empName.find((emp) => emp.emp_id === empId);
+                return (
+                  <option key={empId} value={empId}>
+                    {employee
+                      ? `${employee.emp_name} ${employee.emp_surname}`
+                      : empId}
+                  </option>
+                );
+              })}
+            </select>
+
+            {/* ตัวกรองตามเดือน */}
+            <input
+              type="month"
+              className="border border-stroke dark:border-strokedark rounded p-2"
+              value={monthFilter}
+              onChange={(e) => setMonthFilter(e.target.value)}
+            />
+
+            {/* ปุ่มล้างตัวกรอง */}
+            <Button
+              onClick={clearAllFilters}
+              className="bg-graydark hover:bg-graydark"
+            >
+              ລ້າງຕົວກອງ
+            </Button>
+          </div>
+        </div>
+        
         <div className="overflow-x-auto shadow-md">
           <table className="w-full min-w-max table-auto">
             <thead>
               <tr className="text-left bg-gray border border-stroke">
-                {getTableHeaders().map((header, index) => (
+                {OrderHead.map((header, index) => (
                   <th
                     key={index}
-                    className="px-4 py-3 text-form-input font-semibold"
+                    className={`px-4 py-3 tracking-wide text-form-input font-semibold ${
+                      header.id === 'id'
+                        ? 'cursor-pointer hover:bg-gray-100 hover:text-gray-800 select-none'
+                        : ''
+                    }`}
+                    onClick={header.id === 'id' ? handleSortById : undefined}
                   >
-                    {header}
+                    <div className="flex items-center gap-2">
+                      {header.name}
+                      {header.id === 'id' && (
+                        <span
+                          className={`ml-1 inline-block text-md font-semibold transition-colors duration-200 ${
+                            sortOrder === 'asc' ? 'text-green-500' : 'text-black'
+                          }`}
+                        >
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                <tr>
-                  <td
-                    colSpan={getTableHeaders().length}
-                    className="py-8 text-center"
+              {filterPreorder.length > 0 ? (
+                filterPreorder.map((preorder, index) => (
+                  <tr
+                    key={index}
+                    className="border-b text-md border-stroke hover:bg-gray-50"
                   >
-                    <div className="flex justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                    </div>
-                  </td>
-                </tr>
-              ) : paginatedData.length > 0 ? (
-                paginatedData.map((item, index) => renderTableRow(item, index))
+                    <td className="px-4 py-4">{preorder.preorder_id}</td>
+
+                    <td className="px-4 py-4">
+                      {new Date(preorder.preorder_date).toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                      })}
+                    </td>
+
+                    <td className="px-4 py-4">
+                      {getSupplierName(preorder.sup_id)}
+                    </td>
+
+                    <td className="px-4 py-4">
+                      {getEmployeeName(preorder.emp_id_create)}
+                    </td>
+
+                    <td className="px-4 py-4">{preorder.types}</td>
+
+                    <td className="px-3 py-4">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleViewPreorder(preorder.preorder_id)}
+                          className="inline-flex items-center px-3 py-1 text-md font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 hover:text-blue-700 transition-colors"
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          ເບີ່ງລາຍລະອຽດ
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
               ) : (
                 <tr>
                   <td
                     colSpan={getTableHeaders().length}
                     className="px-4 py-4 text-center text-gray-500"
                   >
-                    <div className="text-center text-gray-500 ">
-                      <div className="w-32 h-32 flex items-center justify-center mx-auto">
-                        <Empty description={false} />
-                      </div>
-                      <p className="text-lg">
-                        <span className="">
-                          ບໍ່ພົບຂໍ້ມູນລາຍງານການສັ່ງຊື່
-                        </span>
-                      </p>
-                    </div>
+                    ບໍ່ພົບຂໍ້ມູນ
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-      </div>
 
-      {/* Pagination */}
-      {filteredData.length > 0 && (
-        <TablePaginationDemo
-          count={filteredData.length}
-          page={page}
-          onPageChange={handlePageChange}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleRowsPerPageChange}
-        />
-      )}
+        {/* Modal ดูรายละเอียด */}
+        {showViewModal && selectedId && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
+            <div className="rounded w-full max-w-lg md:max-w-2xl lg:max-w-5xl relative overflow-auto max-h-[90vh]">
+              <button
+                onClick={() => setShowViewModal(false)}
+                className="absolute top-4 right-2 text-gray-500 hover:text-gray-700 z-10"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+
+              <ViewPreorder
+                id={selectedId}
+                onClose={() => setShowViewModal(false)}
+                setShow={setShowViewModal}
+                getList={fetchPreorders}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+      
     </>
   );
 };
 
-export default ReportOrder;
+export default ReportPreorder;

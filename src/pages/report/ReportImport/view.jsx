@@ -5,29 +5,24 @@ import Loader from '@/common/Loader';
 import Alerts from '@/components/Alerts';
 import { Empty } from 'antd';
 
-const ViewPreorder = ({ id, onClose, setShow }) => {
+const ViewImport = ({ id, onClose, setShow }) => {
   const [loading, setLoading] = useState(false);
-  const [preorderData, setPreorderData] = useState(null);
-  const [preorderDetails, setPreorderDetails] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
+  const [importData, setImportData] = useState(null);
+  const [importDetails, setImportDetails] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [medicines, setMedicines] = useState([]);
+  const [preorders, setPreorders] = useState([]);
   const dispatch = useAppDispatch();
-const [preorderDetails, setPreorderDetails] = useState([]);
 
+  // ฟังก์ชันดึงข้อมูลเริ่มต้น (employees, medicines, preorders)
   useEffect(() => {
     async function fetchInitialData() {
       try {
-        const [supRes, empRes, medRes] = await Promise.all([
-          fetch('http://localhost:4000/src/manager/supplier'),
+        const [empRes, medRes, preorderRes] = await Promise.all([
           fetch('http://localhost:4000/src/manager/emp'),
           fetch('http://localhost:4000/src/manager/medicines'),
+          fetch('http://localhost:4000/src/preorder/preorder'),
         ]);
-
-        if (supRes.ok) {
-          const data = await supRes.json();
-          setSuppliers(data.data);
-        }
 
         if (empRes.ok) {
           const data = await empRes.json();
@@ -38,6 +33,11 @@ const [preorderDetails, setPreorderDetails] = useState([]);
           const data = await medRes.json();
           setMedicines(data.data);
         }
+
+        if (preorderRes.ok) {
+          const data = await preorderRes.json();
+          setPreorders(data.data);
+        }
       } catch (error) {
         console.error('Error fetching initial data:', error);
       }
@@ -45,39 +45,39 @@ const [preorderDetails, setPreorderDetails] = useState([]);
     fetchInitialData();
   }, []);
 
-  // ฟังก์ชันดึงข้อมูล preorder และ preorder_detail
+  // ฟังก์ชันดึงข้อมูล import และ import_detail
   useEffect(() => {
-    async function fetchPreorderData() {
+    async function fetchImportData() {
       if (!id) return;
 
       setLoading(true);
       try {
-        // ดึงข้อมูล preorder หลัก
-        const preorderRes = await fetch(
-          `http://localhost:4000/src/preorder/preorder/${id}`,
+        // ดึงข้อมูล import หลัก
+        const importRes = await fetch(
+          `http://localhost:4000/src/im/import/${id}`,
         );
 
-        if (preorderRes.ok) {
-          const preorderResult = await preorderRes.json();
-          setPreorderData(preorderResult.data);
+        if (importRes.ok) {
+          const importResult = await importRes.json();
+          setImportData(importResult.data);
         } else {
-          throw new Error('ไม่สามารถดึงข้อมูลสั่งซื้อได้');
+          throw new Error('ไม่สามารถดึงข้อมูลนำเข้าได้');
         }
 
-        // ดึงข้อมูล preorder_detail
+        // ดึงข้อมูล import_detail
         const detailRes = await fetch(
-          `http://localhost:4000/src/preorder_detail/preorder-detail/${id}`,
+          `http://localhost:4000/src/im_detail/import-detail/${id}`,
         );
 
         if (detailRes.ok) {
           const detailResult = await detailRes.json();
-          setPreorderDetails(detailResult.data || []);
+          setImportDetails(detailResult.data || []);
         } else {
           // ถ้าไม่มี detail ก็ไม่เป็นไร
-          setPreorderDetails([]);
+          setImportDetails([]);
         }
       } catch (error) {
-        console.error('Error fetching preorder data:', error);
+        console.error('Error fetching import data:', error);
         dispatch(
           openAlert({
             type: 'error',
@@ -90,15 +90,10 @@ const [preorderDetails, setPreorderDetails] = useState([]);
       }
     }
 
-    fetchPreorderData();
+    fetchImportData();
   }, [id, dispatch]);
 
   // Helper functions
-  const getSupplierName = (sup_id) => {
-    const supplier = suppliers.find((s) => s.sup_id === sup_id);
-    return supplier ? `${supplier.company_name} - ${supplier.address}` : '-';
-  };
-
   const getEmployeeName = (emp_id) => {
     const employee = employees.find((e) => e.emp_id === emp_id);
     return employee ? `${employee.emp_name} ${employee.emp_surname}` : '-';
@@ -111,7 +106,8 @@ const [preorderDetails, setPreorderDetails] = useState([]);
     }
     return medicine ? medicine.med_name : '-';
   };
-  const getMedicineunit = (med_id) => {
+
+  const getMedicineUnit = (med_id) => {
     const medicine = medicines.find((m) => m.med_id === med_id);
     if (!medicine) {
       console.warn('ไม่พบ med_id นี้ใน medicines:', med_id);
@@ -119,9 +115,14 @@ const [preorderDetails, setPreorderDetails] = useState([]);
     return medicine ? medicine.unit : '-';
   };
 
+  const getPreorderInfo = (preorder_id) => {
+    const preorder = preorders.find((p) => p.preorder_id === preorder_id);
+    return preorder ? preorder.preorder_id : '-';
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('en-GB', {
+    return new Date(dateString).toLocaleDateString('th-TH', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -137,74 +138,52 @@ const [preorderDetails, setPreorderDetails] = useState([]);
       <Alerts />
 
       {/* Header */}
-      <div className="flex items-center border-b border-stroke   px-4">
-        <h1 className="text-md md:text-lg lg:text-xl font-medium mb-4 text-strokedark ">
-          ລາຍລະອຽດສັ່ງຊື້ - {preorderData?.preorder_id}
+      <div className="flex items-center border-b border-stroke dark:border-strokedark pb-4 px-4">
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+          ລາຍລະອຽດນຳເຂົ້າ - {importData?.im_id}
         </h1>
       </div>
 
       <div className="p-4">
-        {preorderData && (
-          <div className=" pb-6 border-b border-stroke mt-2">
+        {importData && (
+          <div className="pb-6 border-b border-stroke mt-2">
             <h2 className="text-lg font-semibold mb-4 text-strokedark dark:text-bodydark3">
-              ຂໍ້ມູນການສັ່ງຊື້
+              ຂໍ້ມູນການນຳເຂົ້າ
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* ລະຫັດສັ່ງຊື້ */}
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-slate-600">
+                <label className="block text-sm font-medium text-slate-6002">
+                  ລະຫັດນຳເຂົ້າ
+                </label>
+                <p className="text-base font-mono text-form-strokedark  border border-stroke px-3 py-2 rounded">
+                  {importData.im_id}
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-black-2">
+                  ວັນທີນຳເຂົ້າ
+                </label>
+                <p className="text-base font-mono text-form-strokedark  border border-stroke px-3 py-2 rounded">
+                  {formatDate(importData.im_date)}
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-black-2">
                   ລະຫັດສັ່ງຊື້
                 </label>
                 <p className="text-base font-mono text-form-strokedark  border border-stroke px-3 py-2 rounded">
-                  {preorderData.preorder_id}
+                  {getPreorderInfo(importData.preorder_id)}
                 </p>
               </div>
 
-              {/* ວັນທີສັ່ງຊື້ */}
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-slate-600">
-                  ວັນທີສັ່ງຊື້
-                </label>
-                <p className="text-base text-form-strokedark  border border-stroke px-3 py-2 rounded">
-                  {formatDate(preorderData.preorder_date)}
-                </p>
-              </div>
-
-              {/* ສະຖານະ */}
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-slate-600">
-                  ສະຖານະ
-                </label>
-                <span
-                  className={`inline-block px-3 py-1 rounded-full text-sm font-medium border
-            ${
-              preorderData.status === 'ສຳເລັດ'
-                ? 'bg-green-50 text-green-700 border-green-200'
-                : preorderData.status === 'ລໍຖ້າຈັດສົ່ງ'
-                  ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                  : 'bg-slate-50 text-slate-700 border-stroke'
-            }`}
-                >
-                  {preorderData.status}
-                </span>
-              </div>
-
-              <div className="space-y-1.5 lg:col-span-2">
-                <label className="block text-sm font-medium text-slate-600">
-                  ຜູ້ສະຫນອງ
-                </label>
-                <p className="text-base text-form-strokedark  border border-stroke px-3 py-2 rounded">
-                  {getSupplierName(preorderData.sup_id)}
-                </p>
-              </div>
-
-              {/* ພະນັກງານຜູ້ສ້າງ */}
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-slate-600">
+                <label className="block text-sm font-medium text-black-2">
                   ພະນັກງານຜູ້ສ້າງ
                 </label>
-                <p className="text-base text-form-strokedark border border-stroke px-3 py-2 rounded">
-                  {getEmployeeName(preorderData.emp_id_create)}
+                <p className="text-base font-mono text-form-strokedark  border border-stroke px-3 py-2 rounded">
+                  {getEmployeeName(importData.emp_id_create)}
                 </p>
               </div>
             </div>
@@ -212,11 +191,11 @@ const [preorderDetails, setPreorderDetails] = useState([]);
         )}
 
         <div className="mt-4">
-          <h2 className="text-lg font-semibold mb-4 text-form-input">
-            ລາຍການທີ່ສັ່ງຊື້
+          <h2 className="text-lg font-semibold mb-4 text-strokedark ">
+            ລາຍການທີ່ນຳເຂົ້າ
           </h2>
 
-          {preorderDetails.length > 0 ? (
+          {importDetails.length > 0 ? (
             <>
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse border border-slate-300">
@@ -234,12 +213,15 @@ const [preorderDetails, setPreorderDetails] = useState([]);
                       <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">
                         ຫົວໜ່ວຍ
                       </th>
+                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">
+                        ວັນໝົດອາຍຸ
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {preorderDetails.map((detail, index) => (
+                    {importDetails.map((detail, index) => (
                       <tr
-                        key={detail.preorder_detail_id || index}
+                        key={detail.detail_id || index}
                         className="border-b text-md border-stroke"
                       >
                         <td className="px-4 py-2 border-r border-stroke">
@@ -251,8 +233,24 @@ const [preorderDetails, setPreorderDetails] = useState([]);
                         <td className="px-4 py-2 border-r border-stroke ">
                           {detail.qty?.toLocaleString() || 0}
                         </td>
-                        <td className="px-4 py-2 border-r border-stroke ">
-                          {getMedicineunit(detail.med_id)}
+                        <td className="px-4 py-2 border-r border-stroke">
+                          {getMedicineUnit(detail.med_id)}
+                        </td>
+                        <td className="px-4 py-3 border-r border-stroke">
+                          <span
+                            className={`px-2 py-1 rounded text-md ${
+                              new Date(detail.expired_date) < new Date()
+                                ? 'bg-red-100 text-red-800'
+                                : new Date(detail.expired_date) <
+                                    new Date(
+                                      Date.now() + 30 * 24 * 60 * 60 * 1000,
+                                    )
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-green-100 text-green-800'
+                            }`}
+                          >
+                            {formatDate(detail.expired_date)}
+                          </span>
                         </td>
                       </tr>
                     ))}
@@ -266,12 +264,12 @@ const [preorderDetails, setPreorderDetails] = useState([]);
                 <Empty description={false} />
               </div>
               <p className="text-lg">ບໍ່ມີລາຍການ</p>
-              <p className="text-sm mt-2">ກະລຸນາເພີ່ມລາຍການສັ່ງຊື້ກ່ອນ</p>
+              <p className="text-sm mt-2">ກະລຸນາເພີ່ມລາຍການນຳເຂົ້າ</p>
             </div>
           )}
         </div>
 
-        <div className="flex justify-end   ">
+        <div className="flex justify-end mt-6  border-t border-stroke ">
           <button
             onClick={() => setShow(false)}
             className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
@@ -284,4 +282,4 @@ const [preorderDetails, setPreorderDetails] = useState([]);
   );
 };
 
-export default ViewPreorder;
+export default ViewImport;
