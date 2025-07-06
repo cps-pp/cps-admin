@@ -907,12 +907,12 @@ const Dashboard = () => {
       )}
 
       {/* Exchange Rate Modal */}
-      {/* <ExchangeRateModal
+      <ExchangeRateModal
         isOpen={showExchangeModal}
         onClose={() => setShowExchangeModal(false)}
         onSubmit={handleSubmitExchangeRates}
         missingRates={missingExchangeRates}
-      /> */}
+      />
     </>
   );
 };
