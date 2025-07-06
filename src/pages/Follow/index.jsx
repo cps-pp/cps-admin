@@ -46,10 +46,9 @@ const FollowPage = () => {
     return today.toISOString().split('T')[0];
   };
 
-  // ✅ แก้ไขฟังก์ชัน isSameDate ให้รับ parameters ที่ถูกต้อง
   const isSameDate = (dateString, targetDate) => {
     if (!dateString || !targetDate) return false;
-    const localDate = new Date(dateString).toLocaleDateString('en-CA'); // en-CA format: YYYY-MM-DD
+    const localDate = new Date(dateString).toLocaleDateString('en-CA');
     return localDate === targetDate;
   };
 
@@ -431,9 +430,9 @@ const FollowPage = () => {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 2xl:gap-7.5 w-full mb-6">
         <div className="rounded-sm border border-stroke bg-white p-4 ">
           <div className="flex items-center">
-            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-Third dark:bg-secondary">
+            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 text-indigo-600 shadow-inner">
               <svg
-                className="w-6 h-6 text-primary dark:text-white"
+                className="w-6 h-6 text-primary font-bold"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -452,22 +451,24 @@ const FollowPage = () => {
             </div>
             <div className="ml-4">
               <h4 className="text-lg font-semibold text-strokedark dark:text-white">
-                ຈຳນວນທັງໝົດ
+                ຈຳນວນນັດໝາຍທັງໝົດ
               </h4>
-              <p className="text-xl font-bold text-primary">{totalCount}</p>
+              <p className="text-xl font-bold text-primary">
+                {totalCount} ລາຍການ
+              </p>
             </div>
           </div>
         </div>
         {/* Waiting Appointments */}
         <div className="rounded-sm border border-stroke bg-white p-4 dark:border-strokedark dark:bg-boxdark">
           <div className="flex items-center">
-            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900">
+            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 text-indigo-600 shadow-inner">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="1.7em"
                 height="1.7em"
                 viewBox="0 0 24 24"
-                className="text-yellow-500 dark:text-yellow-300"
+                className="text-primary font-bold"
               >
                 <g
                   fill="none"
@@ -485,7 +486,7 @@ const FollowPage = () => {
               <h4 className="text-lg font-semibold text-strokedark dark:text-white">
                 ລໍຖ້າກວດ
               </h4>
-              <p className="text-xl font-bold text-yellow-500 dark:text-yellow-300">
+              <p className="text-xl text-primary font-bold">
                 {waitingCount}
               </p>
             </div>
@@ -493,13 +494,13 @@ const FollowPage = () => {
         </div>
         <div className="rounded-sm border border-stroke bg-white p-4 dark:border-strokedark dark:bg-boxdark">
           <div className="flex items-center">
-            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
+            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 text-indigo-600 shadow-inner">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="1.7em"
                 height="1.7em"
                 viewBox="0 0 24 24"
-                className="text-green-500 dark:text-green-300"
+                className="text-primary font-bold"
               >
                 <g
                   fill="none"
@@ -516,7 +517,7 @@ const FollowPage = () => {
               <h4 className="text-lg font-semibold text-strokedark dark:text-white">
                 ກວດສຳເລັດແລ້ວ
               </h4>
-              <p className="text-xl font-bold text-green-500 dark:text-green-300">
+              <p className="text-xl text-primary font-bold">
                 {doneCount}
               </p>
             </div>
@@ -524,7 +525,10 @@ const FollowPage = () => {
         </div>
       </div>
       <div className="mb-4">
-        <h1 className='text-lg text-form-input mb-2'> ນັດໝາຍມື້ນີ້</h1>
+        <h1 className="text-md md:text-lg lg:text-xl text-form-input mb-2">
+          {' '}
+          ນັດໝາຍມື້ນີ້
+        </h1>
         <ModernTodayAppointments
           todayAppointments={todayAppointments}
           handleCompleteAppointment={handleCompleteAppointment}
@@ -533,37 +537,33 @@ const FollowPage = () => {
           setCurrentTime={setCurrentTime}
         />
       </div>
+      <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark mb-2 pt-4 ">
+        ນັດໝາຍທັງໝົດ
+      </h1>
+      <div className="rounded bg-white  border border-stroke  ">
+      <div className="grid grid-cols-[1fr_auto] gap-4 w-full p-4">
+  <Search
+    type="text"
+    name="search"
+    placeholder="ຄົ້ນຫາຂໍ້ມູນ..."
+    className="rounded border border-stroke w-full h-10 px-3 text-sm"
+    onChange={(e) => {
+      const query = e.target.value;
+      setSearchQuery(query);
+    }}
+  />
 
-      <div className="rounded bg-white pt-4 dark:bg-boxdark">
-        <div className=" border-b border-stroke px-4 pb-4 dark:border-strokedark">
-          {/* <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
-            ຈັດການນັດໝາຍ
-          </h1> */}
-          <div className="flex justify-end gap-2">
-            <Button
-              onClick={() => setShowAddModal(true)}
-              className="bg-emerald-600 hover:bg-emerald-700"
-              icon={iconAdd}
-            >
-              ເພີ່ມນັດໝາຍ
-            </Button>
-          </div>
-        </div>
+  <Button
+    onClick={() => setShowAddModal(true)}
+    icon={iconAdd}
+    className="bg-secondary2 hover:bg-secondary3 whitespace-nowrap h-10 text-sm px-4"
+  >
+    ເພີ່ມນັດໝາຍ
+  </Button>
+</div>
 
-        <div className="grid w-full gap-4 p-4">
-          <Search
-            type="text"
-            name="search"
-            placeholder="ຄົ້ນຫາຂໍ້ມູນ..."
-            className="rounded border border-stroke dark:border-strokedark"
-            onChange={(e) => {
-              const query = e.target.value;
-              setSearchQuery(query);
-            }}
-          />
-        </div>
 
-        <div className="overflow-x-auto  shadow-md">
+        <div className="overflow-x-auto ">
           <table className="w-full min-w-max table-auto  ">
             <thead>
               <tr className="text-left bg-gray border border-stroke">
@@ -598,10 +598,7 @@ const FollowPage = () => {
             <tbody>
               {paginated.length > 0 ? (
                 paginated.map((appointment, index) => (
-                  <tr
-                    key={index}
-                    className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
-                  >
+                  <tr key={index} className="border-b border-stroke ">
                     <td className="px-4 py-4">{appointment.appoint_id}</td>
                     <td className="px-4 py-4">
                       {getPatientName(appointment.patient_id)}{' '}
@@ -609,17 +606,19 @@ const FollowPage = () => {
                     <td className="px-4 py-4">
                       {getPatientPhone(appointment.patient_id)}{' '}
                     </td>
-                    <td className="px-4 py-4">
-                      {new Date(appointment.date_addmintted).toLocaleString(
-                        'en-GB',
-                        {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        },
-                      )}
+                    <td className="px-4 py-4 ">
+                      <span className="inline-block bg-secondary/10 text-secondary px-2 py-1 rounded-md ">
+                        {new Date(appointment.date_addmintted).toLocaleString(
+                          'en-GB',
+                          {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          },
+                        )}
+                      </span>
                     </td>
 
                     <td className="px-4 py-3">
@@ -754,9 +753,9 @@ const FollowPage = () => {
       {/* Postpone Modal */}
       {showPostponeModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
+          <div className="bg-white rounded p-4 w-full max-w-md">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-semibold text-form-input">
                 ເລື່ອນນັດໝາຍ
               </h3>
               <button
@@ -781,14 +780,14 @@ const FollowPage = () => {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-form-strokedark mb-2">
                 ເລືອກວັນທີ່ແລະເວລາໃໝ່:
               </label>
               <input
                 type="datetime-local"
                 value={newDate}
                 onChange={(e) => setNewDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="relative z-20 w-full mb-2 appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary  text-black dark:text-white capitalize"
                 required
               />
             </div>
@@ -796,16 +795,16 @@ const FollowPage = () => {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowPostponeModal(false)}
-                className="px-4 py-2 text-gray-600 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
+                className="px-4 py-2 text-red-500 hover:text-red-700 transition-colors"
               >
                 ຍົກເລີກ
               </button>
               <button
                 onClick={handlePostponeAppointment}
                 disabled={!newDate}
-                className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded text-white disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
-                ຢືນຢັນການເລື່ອນ
+                ຢືນຢັນ
               </button>
             </div>
           </div>

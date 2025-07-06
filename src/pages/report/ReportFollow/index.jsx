@@ -77,7 +77,7 @@ const ReportFollowAll = () => {
   };
   return (
     <>
-      <div className="rounded bg-white pt-4 dark:bg-boxdark">
+      <div className="rounded bg-white pt-4 border border-stroke">
         <Alerts />
         <div className="flex items-center justify-between border-b border-stroke px-4 pb-4">
           <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark">
@@ -94,7 +94,7 @@ const ReportFollowAll = () => {
           />
         </div>
 
-        <div className="overflow-x-auto  shadow-md">
+        <div className="overflow-x-auto ">
           <table className="w-full min-w-max table-auto  ">
             <thead>
               <tr className="text-left bg-gray border border-stroke">

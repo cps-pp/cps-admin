@@ -190,7 +190,7 @@ const ExchangePage = () => {
 
   return (
     <>
-      <div className="rounded bg-white pt-4 dark:bg-boxdark">
+      <div className="rounded bg-white pt-4 border border-stroke">
         <Alerts />
 
         <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
@@ -201,7 +201,7 @@ const ExchangePage = () => {
             <Button
               onClick={() => setShowAddModal(true)}
               icon={iconAdd}
-              className="bg-emerald-600 hover:bg-emerald-700"
+              className="bg-secondary2 hover:bg-secondary3"
             >
               ເພີ່ມອັດຕາແລກປ່ຽນ
             </Button>
@@ -221,7 +221,7 @@ const ExchangePage = () => {
           />
         </div>
 
-        <div className="overflow-x-auto shadow-md">
+        <div className="overflow-x-auto ">
           <table className="w-full min-w-max table-auto">
             <thead>
               <tr className="text-left bg-gray border border-stroke">

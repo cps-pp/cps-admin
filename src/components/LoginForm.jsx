@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Logo from '../images/logo/cps.png';
+// import Logo from '../images/logo/logo_new.png';
 import { useAuth } from '@/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -46,9 +46,9 @@ const LoginForm = () => {
       
 
         <div className="relative bg-white p-8 rounded-lg shadow-xl w-full max-w-md z-10">
-          <div className="mb-8 flex justify-center">
+          {/* <div className="mb-8 flex justify-center">
             <img src={Logo} alt="Logo" width={220} className="mx-auto" />
-          </div>
+          </div> */}
 
           <div className="text-center mb-6">
             <h1 className="text-3xl font-bold text-form-input">ຍິນດີຕ້ອນຮັບ</h1>
@@ -96,7 +96,7 @@ const LoginForm = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="bg-purple-700 hover:bg-purple-800 disabled:bg-purple-400 text-white font-medium p-4 rounded transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100 shadow-md hover:shadow-lg disabled:cursor-not-allowed flex items-center justify-center"
+              className="bg-secondary hover:bg-secondary2  text-white font-medium p-4 rounded flex items-center justify-center"
             >
               {isLoading ? (
                 <>

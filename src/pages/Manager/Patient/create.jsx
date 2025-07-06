@@ -35,8 +35,10 @@ const CreatePatient = ({
     reset,
     setValue,
     setFocus,
+    watch,
     formState: { isDirty, errors },
   } = useForm();
+const dob = watch('dob');
 
   // ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
   const isDirtyRef = useRef(isDirty);
@@ -308,7 +310,7 @@ const CreatePatient = ({
             type="text"
             value={nextPatientId}
             readOnly
-            className="w-full rounded-lg border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
+            className="w-full rounded border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
           />
           {/* Hidden input สำหรับส่งค่าไปกับฟอร์ม */}
           <input type="hidden" {...register('patient_id')} />
@@ -344,7 +346,7 @@ const CreatePatient = ({
         />
 
         <BoxDate
-          select=""
+          select={dob}
           register={register}
           errors={errors}
           name="dob"
@@ -363,7 +365,7 @@ const CreatePatient = ({
             value={phoneNumber1}
             onChange={handlePhone1Change}
             placeholder="0202xxxxxxx, 0205xxxxxxx, 0207xxxxxxx, 0209xxxxxxx"
-            className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           />
           {/* Hidden input for form validation */}
           <input

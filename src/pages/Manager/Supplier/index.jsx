@@ -186,7 +186,7 @@ const handleSortById = () => {
 
   return (
     <>
-      <div className="rounded bg-white pt-4 dark:bg-boxdark">
+      <div className="rounded bg-white pt-4 border border-stroke">
         <Alerts />
         <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
           <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
@@ -196,7 +196,7 @@ const handleSortById = () => {
             <Button
               onClick={() => setShowAddModal(true)}
               icon={iconAdd}
-              className="bg-emerald-600 hover:bg-emerald-700"
+              className="bg-secondary2 hover:bg-secondary3"
             >
               ເພີ່ມຜູ້ສະໜອງ
             </Button>
@@ -216,8 +216,8 @@ const handleSortById = () => {
           />
         </div>
 
-        <div className="overflow-x-auto rounded-lg shadow-md">
-          <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded-lg">
+        <div className="overflow-x-auto   ">
+          <table className="w-full min-w-max table-auto border-collapse overflow-hidden">
             <thead>
               <tr className="text-left bg-gray border border-stroke">
                 {SupHeaders.map((header, index) => (
@@ -253,7 +253,7 @@ const handleSortById = () => {
                 paginatedPSup.map((supplier, index) => (
                   <tr
                     key={index}
-                    className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-gray-800"
+                    className="border-b border-stroke "
                   >
                     <td className="px-4 py-4">{supplier.sup_id}</td>
                     <td className="px-4 py-4">{supplier.company_name}</td>

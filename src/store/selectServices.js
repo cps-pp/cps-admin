@@ -65,29 +65,67 @@ const useStoreServices = create((set) => ({
       }
     });
   },
+  // fetchInspectionById: async (id) => {
+  //   set({ loading: true, error: null });
+
+  //   try {
+  //     const res = await fetch(`${URLBaseLocal}/src/report/inspection/${id}`);
+  //     const data = await res.json();
+
+  //     const detailed_services = data?.data?.services
+
+  //     if (data?.resultCode === '200') {
+  //       set({
+  //         dataInspectionBy: data.data,
+  //         newServices: detailed_services,
+  //         loading: false
+  //       });
+  //     } else {
+  //       set({ error: 'Failed to fetch inspection data', loading: false });
+  //     }
+
+  //   } catch (err) {
+  //     set({ error: err.message, loading: false });
+  //   }
+  // },
   fetchInspectionById: async (id) => {
-    set({ loading: true, error: null });
+  set({ loading: true, error: null });
 
-    try {
-      const res = await fetch(`${URLBaseLocal}/src/report/inspection/${id}`);
-      const data = await res.json();
+  try {
+    const res = await fetch(`${URLBaseLocal}/src/report/inspection/${id}`);
+    const data = await res.json();
 
-      const detailed_services = data?.data?.services
+    const detailed_services = data?.data?.services || [];
 
-      if (data?.resultCode === '200') {
-        set({
+    if (data?.resultCode === '200') {
+      set((state) => {
+        const existingIDs = new Set(state.newServices.map(item => item.ser_id));
+        const uniqueNewServices = detailed_services.filter(
+          (item) => !existingIDs.has(item.ser_id)
+        );
+
+        return {
           dataInspectionBy: data.data,
-          newServices: detailed_services,
+          newServices: [...state.newServices, ...uniqueNewServices],
           loading: false
-        });
-      } else {
-        set({ error: 'Failed to fetch inspection data', loading: false });
-      }
-
-    } catch (err) {
-      set({ error: err.message, loading: false });
+        };
+      });
+    } else {
+      set({ error: 'Failed to fetch inspection data', loading: false });
     }
-  },
+
+  } catch (err) {
+    set({ error: err.message, loading: false });
+  }
+},
+clearServices: () => {
+  set({
+    services: [],
+    newServices: [],
+    dataInspectionBy: null,
+  });
+},
+
 }))
 
 export default useStoreServices;

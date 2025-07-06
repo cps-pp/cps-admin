@@ -10,11 +10,7 @@ export default function TypeService({ selectService, value ,refreshKey,inspectio
   const [selectedServices, setSelectedServices] = useState([]);
   const [selectedDis, setSelectedDis] = useState([]);
   const [allSelectedItems, setAllSelectedItems] = useState([]);
-  // useEffect(() => {
-  //   setSelectedServices([]);
-  //   setSelectedDis([]);
-  //   setAllSelectedItems([]);
-  // }, [refreshKey]);
+
   useEffect(() => {
     if (!inspectionId) {
       setSelectedServices([]);
@@ -29,7 +25,7 @@ export default function TypeService({ selectService, value ,refreshKey,inspectio
         const data = await res.json();
 
         if (data.resultCode === '200' && data.data) {
-          const servicesFromAPI = data.data.services || []; // สมมติโครงสร้าง
+          const servicesFromAPI = data.data.services || []; 
           const diseasesFromAPI = data.data.diseases || [];
 
           setSelectedServices(servicesFromAPI);

@@ -286,9 +286,9 @@ const ReportMed = () => {
         {/* Total Items */}
         <div className="rounded-sm border border-stroke bg-white p-4">
           <div className="flex items-center">
-            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-blue-100">
+            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 text-indigo-600 shadow-inner">
               <svg
-                className="w-[25px] h-[25px] text-form-strokedark"
+                className="w-[25px] h-[25px] text-primary "
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -313,7 +313,7 @@ const ReportMed = () => {
                     ? 'ຈຳນວນຢາທັງໝົດ'
                     : 'ຈຳນວນອຸປະກອນທັງໝົດ'}
               </h4>
-              <p className="text-xl font-bold text-blue-700">
+              <p className="text-xl font-bold text-primary">
                 {activeTab === 'all'
                   ? summaryStats.totalItems
                   : activeTab === 'medicine'
@@ -359,7 +359,7 @@ const ReportMed = () => {
         </div>
       </div>
 
-      <div className="rounded bg-white pt-4 dark:bg-boxdark">
+      <div className="rounded bg-white pt-4 border border-stroke">
         <Alerts />
 
         {/* Header */}
@@ -453,7 +453,7 @@ const ReportMed = () => {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto shadow-md">
+        <div className="overflow-x-auto ">
           <table className="w-full min-w-max table-auto">
             <thead>
               <tr className="text-left bg-gray border border-stroke">

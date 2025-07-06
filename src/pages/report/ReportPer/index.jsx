@@ -197,12 +197,12 @@ const ReportPer = () => {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 w-full mb-6">
         <div className="rounded-sm border border-stroke bg-white p-4">
           <div className="flex items-center">
-            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-blue-100">
-              <Package className="w-6 h-6 text-blue-600" />
+            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 text-indigo-600 shadow-inner">
+              <Package className="w-6 h-6 text-primary" />
             </div>
             <div className="ml-4">
               <h4 className="text-lg font-semibold text-strokedark">ຈຳນວນລາຍການທັງໝົດ</h4>
-              <p className="text-xl font-bold text-blue-700">
+              <p className="text-xl font-bold text-primary">
                 {groupedData.length} ຄັ້ງ
               </p>
             </div>
@@ -239,7 +239,7 @@ const ReportPer = () => {
       </div>
 
       {/* Main Table */}
-      <div className="rounded bg-white ">
+      <div className="rounded bg-white border border-stroke">
         <Alerts />
         <div className="flex items-center justify-between border-b border-stroke px-4 py-4">
            <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark ">
@@ -264,7 +264,7 @@ const ReportPer = () => {
           />
         </div>
 
-        <div className="overflow-x-auto  shadow-md">
+        <div className="overflow-x-auto ">
           <table className="w-full min-w-max table-auto  ">
             <thead>
               <tr className="text-left bg-gray border border-stroke">

@@ -12,6 +12,7 @@ import DatePickerBox from '../../components/DatePicker_New';
 // import DatePicker from '@/components/DatePicker_two';
 import moment from 'moment';
 import DateBox from '../../components/Date';
+import DateTime from '../../components/DateTime';
 
 const EditFollow = ({ setShow, getList, id }) => {
   const {
@@ -181,7 +182,7 @@ const EditFollow = ({ setShow, getList, id }) => {
           setValue={setValue}
           withTime={true}
         /> */}
-        <DateBox
+        <DateTime
           name="date_addmintted"
           label="ວັນທີນັດໝາຍ"
           register={register}

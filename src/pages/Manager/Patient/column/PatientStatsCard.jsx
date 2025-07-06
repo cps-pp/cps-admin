@@ -18,7 +18,7 @@ const PatientStatsCard = ({ patients }) => {
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 2xl:gap-7.5 w-f">
       <div className="rounded-sm border border-stroke bg-white p-4  dark:border-strokedark dark:bg-boxdark">
         <div className="flex items-center">
-          <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-Third dark:bg-secondary">
+          <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 text-indigo-600 shadow-inner">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="1.7em"
@@ -54,7 +54,7 @@ const PatientStatsCard = ({ patients }) => {
       {/* Male Patients Card */}
       <div className="rounded-sm border border-stroke bg-white p-4  dark:border-strokedark dark:bg-boxdark">
         <div className="flex items-center">
-          <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full  bg-Third dark:bg-secondary">
+          <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full  bg-gradient-to-tr from-indigo-100 to-purple-100 text-indigo-600 shadow-inner">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="1.7em"
@@ -82,7 +82,7 @@ const PatientStatsCard = ({ patients }) => {
       {/* Female Patients Card */}
       <div className="rounded-sm border border-stroke bg-white p-4  dark:border-strokedark dark:bg-boxdark">
         <div className="flex items-center">
-          <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full  bg-Third dark:bg-secondary">
+          <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full  bg-gradient-to-tr from-indigo-100 to-purple-100 text-indigo-600 shadow-inner">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="1.9em"

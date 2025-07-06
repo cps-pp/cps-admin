@@ -224,7 +224,7 @@ const ViewImport = ({ id, onClose, setShow }) => {
                         key={detail.detail_id || index}
                         className="border-b text-md border-stroke"
                       >
-                        <td className="px-4 py-2 border-r border-stroke">
+                        <td className="px-4 py-2 border border-stroke">
                           {index + 1}
                         </td>
                         <td className="px-4 py-2 border-r border-stroke">

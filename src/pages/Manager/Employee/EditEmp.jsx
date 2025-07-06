@@ -16,8 +16,10 @@ const EditEmployee = ({ setShow, getList, id }) => {
     handleSubmit,
     getValues,
     setValue,
+    watch,
     formState: { isDirty, errors },
   } = useForm();
+const dob = watch('dob');
 
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
