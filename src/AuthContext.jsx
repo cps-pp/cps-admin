@@ -1,7 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import { URLBaseLocal } from './lib/MyURLAPI';
-import { ACCESS_TOKEN_KEY } from './utils/constants';
 
 const AuthContext = createContext({
   user: null,
@@ -14,10 +13,10 @@ const AuthContext = createContext({
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  console.log(user)
+
   useEffect(() => {
     // Load user profile if token exists
-    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+    const token = localStorage.getItem('token');
     if (token) {
       // ตั้งค่า axios default header
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -29,13 +28,13 @@ export const AuthProvider = ({ children }) => {
             console.log('🔐 Loaded user:', res.data.user);
           } else {
             // Token ไม่ valid
-            localStorage.removeItem(ACCESS_TOKEN_KEY);
+            localStorage.removeItem('token');
             delete axios.defaults.headers.common['Authorization'];
           }
         })
         .catch((error) => {
           console.error('Profile load error:', error);
-          localStorage.removeItem(ACCESS_TOKEN_KEY);
+          localStorage.removeItem('token');
           delete axios.defaults.headers.common['Authorization'];
           setUser(null);
         })
@@ -55,33 +54,41 @@ export const AuthProvider = ({ children }) => {
         password
       });
 
-      const data = response.data; // ✅ แก้ตรงนี้
+      if (response.data.result === 'ok') {
+        const token = response.data.token;
+        const userData = response.data.user;
 
-      if (data.result === 'ok') {
-        const token = data.token;
-        const userData = data.user;
+        // เก็บ token
+        localStorage.setItem('token', token);
 
-        localStorage.setItem(ACCESS_TOKEN_KEY, token);
+        // ตั้งค่า axios default header
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+        // ตั้งค่า user
         setUser(userData);
 
         return { success: true, message: 'Login successful' };
       } else {
-        return { success: false, message: data.message || 'Login failed' };
+        return { success: false, message: response.data.message || 'Login failed' };
       }
     } catch (error) {
       console.error('Login failed:', error);
-      return {
-        success: false,
-        message: error?.response?.data?.message || error.message || 'Server error'
-      };
+      let errorMessage = 'Server error';
+
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      return { success: false, message: errorMessage };
     } finally {
       setLoading(false);
     }
   };
 
   const logout = () => {
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem('token');
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
   };
@@ -90,7 +97,6 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         user,
-        role: user?.role, // ✅ เพิ่มตรงนี้
         isAuthenticated: !!user,
         login,
         logout,
@@ -104,7 +110,6 @@ export const AuthProvider = ({ children }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  // console.log(context)
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
