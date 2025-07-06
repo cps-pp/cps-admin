@@ -72,7 +72,7 @@ const Dashboard = () => {
       const data = await response.json();
       // console.log('Today exchange rates check:', data);
 
-      const requiredCurrencies = ['BATH', 'Dollar', 'YUAN'];
+      const requiredCurrencies = ['THB', 'USD', 'CNY'];
       const existingCurrencies = data.data
         ? data.data.map((item) => item.ex_type)
         : [];
@@ -89,7 +89,7 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error('Error checking today exchange rates:', error);
-      setMissingExchangeRates(['BATH', 'Dollar', 'YUAN']);
+      setMissingExchangeRates(['THB', 'USD', 'CNY']);
       setShowExchangeModal(true);
     } finally {
       setExchangeCheckLoading(false);
@@ -98,9 +98,9 @@ const Dashboard = () => {
 
   const handleSubmitExchangeRates = async (rates) => {
     const mapToCode = {
-      BATH: 'BATH',
-      Dollar: 'Dollar',
-      YUAN: 'YUAN',
+      THB: 'THB',
+      USD: 'USD',
+      CNY: 'CNY',
     };
 
     const payload = {
@@ -155,13 +155,13 @@ const Dashboard = () => {
           const typeCheck = item.ex_type?.trim();
 
           switch (typeCheck) {
-            case 'BATH':
+            case 'THB':
               rates.baht = item.ex_rate || 0;
               break;
-            case 'Dollar':
+            case 'USD':
               rates.dollar = item.ex_rate || 0;
               break;
-            case 'YUAN':
+            case 'CNY':
               rates.yuan = item.ex_rate || 0;
               break;
           }
@@ -195,7 +195,7 @@ const Dashboard = () => {
       const data = await response.json();
       console.log('Database check result:', data);
 
-      const requiredCurrencies = ['BATH', 'Dollar', 'YUAN'];
+      const requiredCurrencies = ['THB', 'USD', 'CNY'];
       const existingCurrencies = data.data
         ? data.data.map((item) => item.ex_type)
         : [];
@@ -602,11 +602,11 @@ const Dashboard = () => {
   };
 
   const handleDoctorManagement = () => {
-    navigate('/manager/employee'); 
+    navigate('/manager/employee');
   };
 
   const handleExchangeManagement = () => {
-    navigate('/manager/exchange'); 
+    navigate('/manager/exchange');
   };
 
   return (
@@ -709,28 +709,28 @@ const Dashboard = () => {
           </CardDataStats>
         </div>
       </div>
-{/* -------------- */}
+      {/* -------------- */}
       <div className="grid grid-cols-1 gap-8 mt-6">
         <div className="rounded bg-white pt-1 shadow-md ">
           <div className="flex items-center justify-between px-4 py-3 ">
             <h2 className="text-md md:text-lg lg:text-xl font-medium text-strokedark ">
               ນັດໝາຍມື້ນີ້ ({getTodayDate()})
             </h2>
-              <div className="flex items-center gap-4">
-        <div className="text-md text-slate-500">
-          ລໍຖ້າກວດ: {todayPendingAppointments.length} ລາຍການ
-        </div>
+            <div className="flex items-center gap-4">
+              <div className="text-md text-slate-500">
+                ລໍຖ້າກວດ: {todayPendingAppointments.length} ລາຍການ
+              </div>
 
-        <button
-          onClick={() => navigate('/followpat')}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm rounded transition-colors duration-200 flex items-center gap-2"
-        >
-         
-          ກວດສອບນັດໝາຍ
-        </button>
-      </div>
-    </div>
-{/* -------------- */}
+              <button
+                onClick={() => navigate('/followpat')}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm rounded transition-colors duration-200 flex items-center gap-2"
+              >
+
+                ກວດສອບນັດໝາຍ
+              </button>
+            </div>
+          </div>
+          {/* -------------- */}
           <div className="overflow-x-auto  ">
             <table className="w-full min-w-max table-auto  ">
               <thead>
@@ -827,7 +827,7 @@ const Dashboard = () => {
                 onClick={() => navigate('/perorder')}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm rounded transition-colors duration-200 flex items-center gap-2"
               >
-            
+
                 ສັ່ງຊື້ຢາ ແລະ ອຸປະກອນ
               </button>
             </div>
@@ -907,12 +907,12 @@ const Dashboard = () => {
       )}
 
       {/* Exchange Rate Modal */}
-      <ExchangeRateModal
+      {/* <ExchangeRateModal
         isOpen={showExchangeModal}
         onClose={() => setShowExchangeModal(false)}
         onSubmit={handleSubmitExchangeRates}
         missingRates={missingExchangeRates}
-      />
+      /> */}
     </>
   );
 };

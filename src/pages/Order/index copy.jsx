@@ -17,11 +17,8 @@ import { Empty, Tabs } from 'antd';
 import { URLBaseLocal } from '../../lib/MyURLAPI';
 import CreatePreOrder from './CreatePreOrder';
 import HomeSupplier from './HomeSupplier';
-import { ACCESS_TOKEN_KEY } from '../../utils/constants';
 
-const token = localStorage.getItem(ACCESS_TOKEN_KEY);
-
-const OrderPage = () => {
+const OrderPage2 = () => {
   const [preorders, setPreorders] = useState([]);
 
   useEffect(() => {
@@ -49,8 +46,7 @@ const OrderPage = () => {
 
       try {
         const res = await fetch(`http://localhost:4000/src/preorder/cancel/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          method: 'PUT'
         });
 
         if (res.ok) {
@@ -76,12 +72,11 @@ const OrderPage = () => {
         <table className="min-w-full border rounded shadow mt-6">
           <thead className="bg-gray-200">
             <tr>
-              <th className="border p-2">#</th>
+              <th className="border p-2">ລະຫັດອໍເດີ້</th>
               <th className="border p-2">ວັນທີສັ່ງຊື້</th>
               <th className="border p-2">ສະຖານະ</th>
               <th className="border p-2">ຜູ້ສະໜອງ</th>
               <th className="border p-2">ລາຍລະອຽດ</th>
-              <th className="border p-2">ຜູ້ສ້າງ</th>
               <th className="border p-2">ຈັດການ</th>
             </tr>
           </thead>
@@ -114,7 +109,6 @@ const OrderPage = () => {
                     </tbody>
                   </table>
                 </td>
-                <td className="border p-2">{order.created_by ?? '-'}</td>
                 <td className="border p-2 text-center">
                   {order.status === 'WAITING' && (
                     <button
@@ -136,7 +130,7 @@ const OrderPage = () => {
   const items = [
     {
       key: '1',
-      label: 'ລາຍການສັ່ງ',
+      label: 'ລາຍການສັ່ງຊື້',
       children: <LayoutShowTable />,
     },
     {

@@ -4,6 +4,7 @@ import { User, Search, Bell, Settings, LogOut, Menu, X } from 'lucide-react';
 import Logo from '../../images/logo/cps-logo.png';
 import axios from 'axios';
 import { Clock } from 'lucide-react';
+import { ACCESS_TOKEN_KEY } from '../../utils/constants';
 
 const Header = (props) => {
   const [user, setUser] = useState(null);
@@ -18,19 +19,19 @@ const Header = (props) => {
 
 
   useEffect(() => {
-  const handleRefresh = () => {
-    fetchNotifications(); // 👉 โหลดข้อมูลแจ้งเตือนใหม่
-  };
+    const handleRefresh = () => {
+      fetchNotifications(); // 👉 โหลดข้อมูลแจ้งเตือนใหม่
+    };
 
-  window.addEventListener('refresh-notifications', handleRefresh);
-  // โหลดแจ้งเตือนครั้งแรกตอน mount
-  fetchNotifications();
-  return () => window.removeEventListener('refresh-notifications', handleRefresh);
-}, []);
+    window.addEventListener('refresh-notifications', handleRefresh);
+    // โหลดแจ้งเตือนครั้งแรกตอน mount
+    fetchNotifications();
+    return () => window.removeEventListener('refresh-notifications', handleRefresh);
+  }, []);
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem(ACCESS_TOKEN_KEY);
       if (!token) return;
 
       try {
@@ -54,9 +55,9 @@ const Header = (props) => {
     fetchProfile();
   }, []);
 
-// ฟังก์ชัน fetchNotifications ออกมาอยู่นอก useEffect เพื่อให้เรียกได้ทุกที่ใน component
+  // ฟังก์ชัน fetchNotifications ออกมาอยู่นอก useEffect เพื่อให้เรียกได้ทุกที่ใน component
   const fetchNotifications = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
     if (!token) return;
 
     try {
@@ -98,10 +99,10 @@ const Header = (props) => {
       if (Array.isArray(medicineData)) {
         medicineData.forEach((medicine) => {
           const quantity = parseInt(medicine.quantity) ||
-                           parseInt(medicine.stock) ||
-                           parseInt(medicine.amount) ||
-                           parseInt(medicine.qty) ||
-                           parseInt(medicine.remaining) || 0;
+            parseInt(medicine.stock) ||
+            parseInt(medicine.amount) ||
+            parseInt(medicine.qty) ||
+            parseInt(medicine.remaining) || 0;
 
           if (quantity === 0) {
             expiredCount++;
@@ -173,12 +174,9 @@ const Header = (props) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
     window.location.href = '/login';
   };
-
-  const totalNotifications = notifications.appointments + notifications.nearExpiry + notifications.expired;
-
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-white shadow">
@@ -205,95 +203,7 @@ const Header = (props) => {
             </span>
           </div>
         </div>
-
         <div className="flex items-center gap-4">
-          {/* <div className="relative">
-            <button
-              onClick={() => setShowNotificationMenu(!showNotificationMenu)}
-              className="relative p-2 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200/50 transition-all duration-300 hover:shadow-md group"
-            >
-              <Bell className="h-5 w-5 text-blue-600 transition-transform duration-300 group-hover:scale-110" />
-              {totalNotifications > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold animate-pulse">
-                  {totalNotifications > 99 ? '99+' : totalNotifications}
-                </span>
-              )}
-            </button>
-
-            {showNotificationMenu && (
-              <div className="absolute right-0 mt-2 w-80 bg-white backdrop-blur-md border border-stroke rounded-lg shadow-xl py-2 z-50">
-                <div className="px-4 py-3 border-b border-stroke">
-                  <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-                    <Bell className="h-4 w-4 text-blue-600" />
-                    ການແຈ້ງເຕືອນ
-                  </h3>
-                </div>
-
-                <div className="py-2 max-h-96 overflow-y-auto">
-                  {totalNotifications === 0 ? (
-                    <div className="px-4 py-6 text-center text-gray-500">
-                      <Bell className="h-8 w-8 mx-auto mb-2 text-gray-300" />
-                      <p>ບໍ່ມີການແຈ້ງເຕືອນ</p>
-                    </div>
-                  ) : (
-                    <>
-                      {notifications.appointments > 0 && (
-                        <div className="px-4 py-3 hover:bg-blue-50 border-l-4 border-blue-400 transition-colors duration-200">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                              <div>
-                                <p className="font-medium text-gray-800">ນັດໝາຍ</p>
-                                <p className="text-sm text-gray-600">ມີນັດໝາຍທີ່ຕ້ອງດຳເນີນການ</p>
-                              </div>
-                            </div>
-                            <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded-full">
-                              {notifications.appointments}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      {notifications.nearExpiry > 0 && (
-                        <div className="px-4 py-3 hover:bg-yellow-50 border-l-4 border-yellow-400 transition-colors duration-200">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                              <div>
-                                <p className="font-medium text-gray-800">ສິນຄ້າໃກ້ໝົດ</p>
-                                <p className="text-sm text-gray-600">ສິນຄ້າທີ່ເຫຼືອນ້ອຍ (≤20 ຊິ້ນ)</p>
-                              </div>
-                            </div>
-                            <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">
-                              {notifications.nearExpiry}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      {notifications.expired > 0 && (
-                        <div className="px-4 py-3 hover:bg-red-50 border-l-4 border-red-400 transition-colors duration-200">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                              <div>
-                                <p className="font-medium text-gray-800">ສິນຄ້າໝົດສະຕ໋ອກ</p>
-                                <p className="text-sm text-gray-600">ສິນຄ້າທີ່ໝົດສະຕ໋ອກ (0 ຊິ້ນ)</p>
-                              </div>
-                            </div>
-                            <span className="bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded-full">
-                              {notifications.expired}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-          </div> */}
-
           {user ? (
             <div className="relative">
               <button
@@ -307,7 +217,7 @@ const Header = (props) => {
                   <div className="text-md font-semibold text-form-input group-hover:text-secondary transition-colors duration-200">
                     {user.username} {user.role}
                   </div>
-                  
+
                 </div>
 
                 {showUserMenu ? (
