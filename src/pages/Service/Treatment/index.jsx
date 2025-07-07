@@ -1,7 +1,4 @@
-import {
-  FileText,
- 
-} from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { Tabs } from 'antd';
 import InTreatmentService from './inTreatment';
 import InMedTag from './inMedTag';
@@ -16,9 +13,7 @@ import Alerts from '@/components/Alerts';
 import { useForm } from 'react-hook-form';
 import useStoreDisease from '../../../store/selectDis';
 
-
 const Treatment = () => {
-
   const [loading, setLoading] = useState(false);
   const { services } = useStoreServices();
   const { medicines } = useStoreMed();
@@ -54,13 +49,13 @@ const Treatment = () => {
     checkup: '',
   });
   const dispatch = useAppDispatch();
-
+  const [selectEmpCreate, setSelectEmpCreate] = useState('');
+  const [createdAt, setCreatedAt] = useState('');
   const {
     register,
     setValue,
     formState: { errors },
   } = useForm();
-
 
   const generateInvoice = async () => {
     const totalServiceCost = savedServices.reduce(
@@ -91,7 +86,7 @@ const Treatment = () => {
         const invoice = resData.data;
         console.log('Invoice generated:', invoice);
         setInvoiceData(invoice);
-        setIsInvoiceGenerated(true); 
+        setIsInvoiceGenerated(true);
         return invoice;
       }
     } catch (error) {
@@ -114,6 +109,7 @@ const Treatment = () => {
       symptom: '',
       note: '',
       checkup: '',
+
     });
     clearServices();
     clearMedicine();
@@ -133,7 +129,6 @@ const Treatment = () => {
     setLoading(false);
   };
 
-
   const handleTreatmentSubmit = async () => {
     console.log('Starting treatment submit...');
     setLoading(true);
@@ -150,6 +145,8 @@ const Treatment = () => {
       note: intivalue.note || '',
       checkup: intivalue.checkup || '',
       detailed: newService,
+      emp_id_create: selectEmpCreate,
+      created_at: createdAt,
     };
 
     try {
@@ -177,6 +174,8 @@ const Treatment = () => {
         checkup: intivalue.checkup,
         diseases_now: intivalue.diseases_now,
         note: intivalue.note,
+        emp_id_create: selectEmpCreate,
+        created_at: createdAt,
       });
       setSavedPatientData(selectedPatient);
       setIsTreatmentSaved(true);
@@ -202,7 +201,7 @@ const Treatment = () => {
     }
   };
 
- const handleMedicineSubmit = async () => {
+  const handleMedicineSubmit = async () => {
     // console.log('Starting medicine submit...');
     setLoading(true);
 
@@ -218,7 +217,6 @@ const Treatment = () => {
         price: item.price,
       })),
     ];
-
 
     const sendMed = { data: medicineData };
 
@@ -389,7 +387,11 @@ const Treatment = () => {
           loading={loading}
           isTreatmentSaved={isTreatmentSaved}
           refreshKey={refreshKey}
-           dispatch={dispatch}
+          dispatch={dispatch}
+      //      selectEmpCreate={selectEmpCreate}
+      // setSelectEmpCreate={setSelectEmpCreate}
+      // createdAt={createdAt}
+      // setCreatedAt={setCreatedAt}
         />
       ),
     },
@@ -404,8 +406,7 @@ const Treatment = () => {
           loading={loading}
           inspectionId={inspectionId}
           isMedicineSaved={isMedicineSaved}
-     
-           refreshKey={refreshKey}
+          refreshKey={refreshKey}
         />
       ),
     },
@@ -438,7 +439,6 @@ const Treatment = () => {
           medicines={savedMedicines}
           invoiceData={invoiceData}
           onRefresh={handleRefresh}
-          
         />
 
         <Alerts />

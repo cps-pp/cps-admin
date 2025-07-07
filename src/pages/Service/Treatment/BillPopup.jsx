@@ -586,6 +586,7 @@ const BillPopup = ({
 
         const result = await response.json();
       }
+      onClose?.();
       onRefresh?.();
 
       setShowPaymentPopup(false);
@@ -1056,9 +1057,7 @@ const BillPopup = ({
                     </div>
                   </div>
 
-                  {/* Right Column */}
                   <div className="space-y-4">
-                    {/* Amount Input - Single Payment */}
                     {!isMixedPayment && (
                       <div>
                         <label className="block text-sm font-medium mb-2 text-form-input">
@@ -1082,7 +1081,6 @@ const BillPopup = ({
                           placeholder="0"
                         />
 
-                        {/* Exact Amount Button */}
                         <button
                           onClick={() => {
                             const exactAmount =
@@ -1255,7 +1253,6 @@ const BillPopup = ({
                   </div>
                 </div>
 
-                {/* Confirm Button - Full Width at Bottom */}
                 <div className="mt-6 pt-4 border-t border-stroke">
                   <button
                     onClick={handlePaymentConfirm}

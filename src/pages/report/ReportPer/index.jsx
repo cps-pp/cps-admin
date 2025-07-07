@@ -10,6 +10,7 @@ import Search from '@/components/Forms/Search';
 import Alerts from '@/components/Alerts';
 import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import InspectionDetailView from './InView';
+import { Empty } from 'antd';
 
 const ReportPer = () => {
   const [inspectionId, setInspectionId] = useState('');
@@ -298,10 +299,12 @@ const ReportPer = () => {
                     colSpan={getTableHeaders().length}
                     className="py-8 text-center text-gray-500"
                   >
-                    <div className="flex flex-col items-center">
-                      <Package className="w-12 h-12 text-gray-300 mb-2" />
-                      <p>ບໍ່ມີຂໍ້ມູນ</p>
-                    </div>
+                    <div className="text-center text-gray-500 dark:text-gray-400">
+                                         <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                                           <Empty description={false} />
+                                         </div>
+                                         <p className="text-lg">ບໍ່ພົບຂໍ້ມູນລາຍງານການຈ່າຍຢາແລະອຸປະກອນ</p>
+                                       </div>
                   </td>
                 </tr>
               )}

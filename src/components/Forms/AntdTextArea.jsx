@@ -5,7 +5,7 @@ const { TextArea } = Input;
 const AntdTextArea = ({ label, name, placeholder, rows = 4, maxLength, value, onChange }) => {
   return (
     <div className="mb-5.5 ">
-      <label className="mb-1 block text-sm font-medium text-black dark:text-white">
+      <label className="mb-1 block text-sm font-medium text-black ">
         {label}
       </label>
       <TextArea

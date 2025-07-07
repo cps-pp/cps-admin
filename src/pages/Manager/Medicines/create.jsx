@@ -37,7 +37,6 @@ const CreateMedicines = ({
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
   const [selectEmpCreate, setSelectEmpCreate] = useState('');
-  const [selectEmpUpdate, setSelectEmpUpdate] = useState('');
 
   const [employees, setEmployees] = useState([]);
   const [categories, setCategories] = useState([]);

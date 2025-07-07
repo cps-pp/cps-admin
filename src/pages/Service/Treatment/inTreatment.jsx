@@ -5,18 +5,17 @@ import AntdTextArea from '../../../components/Forms/AntdTextArea';
 import useStoreServices from '../../../store/selectServices';
 import useStoreMed from '../../../store/selectMed';
 import useStoreQi from '../../../store/selectQi';
-import Alerts from '@/components/Alerts';
-import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import { CheckCircle, Save } from 'lucide-react';
-
+import SelectBoxId from '../../../components/Forms/SelectID';
+import BoxDate from '../../../components/Date';
 const InTreatmentService = ({
   selectedPatient,
   setSelectedPatient,
   inspectionId,
   setInspectionId,
   formData,
-  setFormData,    
+  setFormData,
   intivalue,
   setIntivalue,
   setValue,
@@ -24,27 +23,37 @@ const InTreatmentService = ({
   dispatch,
   onTreatmentSubmit,
   loading,
-    refreshKey,
+  errors,
+  refreshKey,
+  // selectEmpCreate,
+  // setSelectEmpCreate,
+  // createdAt,
+  // setCreatedAt,
 }) => {
   const [patients, setPatients] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
-  const { services } = useStoreServices();
-  const { medicines } = useStoreMed();
-  const { equipment } = useStoreQi();
+  const [employees, setEmployees] = useState([]);
 
   const getGenderLabel = (gender) => {
     if (gender === 'male') return 'ຊາຍ';
     if (gender === 'female') return 'ຍິງ';
     return '';
   };
- const handleClick = () => {
+
+  // useEffect(() => {
+  //   const now = new Date().toISOString().split('T')[0];
+  //   setCreatedAt(now); 
+  //   setValue('created_at', now);
+  // }, [setCreatedAt, setValue]);
+
+  const handleClick = () => {
     if (!inspectionId) {
       dispatch(
         openAlert({
           type: 'warning',
           title: 'ກະລຸນາເລືອກຄົນເຈັບ',
           message: 'ກ່ອນບັນທຶກການປິ່ນປົວ ກະລຸນາເລືອກຄົນເຈັບກ່ອນ',
-        })
+        }),
       );
       return;
     }
@@ -78,10 +87,9 @@ const InTreatmentService = ({
       );
       const result = await res.json();
 
-
       if (res.ok && result?.data?.in_id) {
         const inspection = result.data;
-  setInspectionId(inspection.in_id);
+        setInspectionId(inspection.in_id);
         let formattedDate = '';
         if (inspection.date) {
           const date = new Date(inspection.date);
@@ -121,7 +129,55 @@ const InTreatmentService = ({
       setValue('date', formData.date);
     }
   }, [formData.date, setValue]);
+  useEffect(() => {
+    fetchPatients();
 
+    setSelectedPatient(null);
+    setInspectionId(null);
+    setFormData({
+      patient_id: '',
+      in_id: '',
+      date: '',
+    });
+  }, [refreshKey]);
+  useEffect(() => {
+    const fetchEmp = async () => {
+      try {
+        const response = await fetch('http://localhost:4000/src/manager/emp');
+        const data = await response.json();
+        if (response.ok) {
+          console.log('Employees loaded:', data.data);
+          setEmployees(
+            data.data.map((em) => ({
+              id: em.emp_id,
+              name: em.emp_name,
+              surname: em.emp_surname,
+              role: em.role,
+            })),
+          );
+        } else {
+          console.error('Failed to fetch employees', data);
+          dispatch(
+            openAlert({
+              type: 'error',
+              title: 'ເກີດຂໍ້ຜິດພາດ',
+              message: 'ບໍ່ສາມາດດຶງຂໍ້ມູນພະນັກງານໄດ້',
+            }),
+          );
+        }
+      } catch (error) {
+        console.error('Error fetching employees', error);
+        dispatch(
+          openAlert({
+            type: 'error',
+            title: 'ເກີດຂໍ້ຜິດພາດ',
+            message: 'ບໍ່ສາມາດເຊື່ອມຕໍ່ກັບເຊີຟເວີ',
+          }),
+        );
+      }
+    };
+    fetchEmp();
+  }, [dispatch]);
   return (
     <div className="">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -200,7 +256,7 @@ const InTreatmentService = ({
         <AntdTextArea
           label="ອາການເບື່ອງຕົ້ນ (Symptom)"
           name="symptom"
-          rows={2}
+          rows={1}
           placeholder="ປ້ອນອາການ"
           onChange={(e) =>
             setIntivalue({ ...intivalue, symptom: e.target.value })
@@ -211,7 +267,7 @@ const InTreatmentService = ({
         <AntdTextArea
           label="ບົ່ງມະຕິ (Checkup)"
           name="checkup"
-          rows={2}
+          rows={1}
           placeholder="ປ້ອນຂໍ້ມູນບບົ່ງມະຕິ"
           onChange={(e) =>
             setIntivalue({ ...intivalue, checkup: e.target.value })
@@ -222,7 +278,7 @@ const InTreatmentService = ({
         <AntdTextArea
           label="ພະຍາດ (diseases Now)"
           name="diseases_now"
-          rows={2}
+          rows={1}
           placeholder="ປ້ອນຜົນກວດ"
           onChange={(e) =>
             setIntivalue({ ...intivalue, diseases_now: e.target.value })
@@ -230,32 +286,59 @@ const InTreatmentService = ({
           value={intivalue.diseases_now}
         />
       </div>
-      <AntdTextArea
-        label="ໝາຍເຫດ"
-        name="note"
-        rows={2}
-        placeholder="ປ້ອນລາຍລະອຽດເພີ່ມເຕີມຖ້າມີ"
-        onChange={(e) => setIntivalue({ ...intivalue, note: e.target.value })}
-        value={intivalue.note}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* <SelectBoxId
+          label="ພະນັກງານ (ຜູ້ສ້າງ)"
+          name="emp_id_create"
+          value={selectEmpCreate}
+          options={employees.map((emp) => ({
+            label: `${emp.name} ${emp.surname} - ${emp.role}`,
+            value: emp.id,
+          }))}
+          register={register}
+          errors={errors}
+          onSelect={(e) => {
+            setSelectEmpCreate(e.target.value);
+          }}
+        />
+
+       <BoxDate
+        register={register}
+        errors={errors}
+        name="created_at"
+        label="ວັນທີສ້າງ"
+        formOptions={{ required: 'ກະລຸນາໃສ່ວັນທີສ້າງ' }}
+        onChange={(e) => {
+      setCreatedAt(e.target.value);
+      setValue('created_at', e.target.value);
+    }}
+      /> */}
+        <AntdTextArea
+          label="* ໝາຍເຫດ"
+          name="note"
+          rows={1}
+          placeholder="ປ້ອນລາຍລະອຽດເພີ່ມເຕີມຖ້າມີ"
+          onChange={(e) => setIntivalue({ ...intivalue, note: e.target.value })}
+          value={intivalue.note}
+        />
+      </div>
 
       <div className="overflow-x-auto  mb-4">
-       <TypeService refreshKey={refreshKey} />
+        <TypeService refreshKey={refreshKey} />
       </div>
-     <div className="flex justify-end mt-6">
-  <button
-        onClick={handleClick}
-        className={`px-6 py-2 rounded flex items-center gap-2 transition duration-200 ${
-          loading
-            ? 'bg-gray-300 text-gray-600'
-            : 'bg-blue-600 text-white hover:bg-blue-700'
-        }`}
-      >
-        <Save className="w-5 h-5" />
-        {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກການປິ່ນປົວ'}
-      </button>
-</div>
-
+      <div className="flex justify-end mt-6">
+        <button
+          onClick={handleClick}
+          className={`px-6 py-2 rounded flex items-center gap-2 transition duration-200 ${
+            loading
+              ? 'bg-gray-300 text-gray-600'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
+        >
+          <Save className="w-5 h-5" />
+          {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກການປິ່ນປົວ'}
+        </button>
+      </div>
     </div>
   );
 };

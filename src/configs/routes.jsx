@@ -32,6 +32,9 @@ import PaymentPage from '../pages/Payment';
 import ReportFollowAll from '../pages/report/ReportFollow';
 import DetailFollow from '../pages/report/ReportFollow/detail';
 import EditTreatment from '../pages/Service/Detail/EditTreatment';
+import AppointPage from '../pages/Appoint';
+import PatientDetailsPage from '../pages/Appoint/detail';
+import AppointPatientDetailsPage from '../pages/Appoint/detail';
 
 export const ROUTES = [
   {
@@ -136,7 +139,7 @@ export const ROUTES = [
   {
     path: '/list-detail',
     title: 'DetailPatientService | CPS Admin',
-    component: <DetailPatientService />,
+    component: <AppointPatientDetailsPage />,
   },
     {
     path: '/list-detail/edit-treatment/:id',
@@ -155,6 +158,16 @@ export const ROUTES = [
     component: <ImportPage />,
   },
   // -------------------------- Follow Path --------------------------------
+  {
+    path: '/appoint-patient',
+    title: 'Appoint Patient | CPS Admin',
+    component: <AppointPage />,
+  },
+  {
+    path: '/appoint-patient/detail/:id',
+    title: 'Appoint Patient | CPS Admin',
+    component: <PatientDetailsPage />,
+  },
   {
     path: '/followpat',
     title: 'Follow | CPS Admin',

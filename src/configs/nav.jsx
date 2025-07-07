@@ -263,8 +263,13 @@ export const SERVICE = [
 ];
 export const FOLLOW = [
   {
-    name: 'ຕິດຕາມການປິ່ວປົວ',
+    name: 'ນັດໝາຍ',
     path: 'followpat',
+    icon: iconCalenderWhite,
+  },
+  {
+    name: 'ຕິດຕາມການປິ່ນປົວ',
+    path: 'appoint-patient',
     icon: iconCalenderWhite,
   },
 ];
