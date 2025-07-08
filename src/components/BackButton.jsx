@@ -1,28 +1,23 @@
 import { useNavigate } from 'react-router-dom';
 
-interface BackButtonProps {
-  className?: string;
-  onClick?: () => void;
-}
-
-const BackButton: React.FC<BackButtonProps> = ({ className, onClick }) => {
+const BackButton = ({ className, onClick }) => {
   const navigate = useNavigate();
 
   const handleBack = () => {
     if (onClick) {
-      onClick(); 
+      onClick();
     } else {
-      navigate(-1); 
+      navigate(-1);
     }
   };
 
   return (
     <button
       onClick={handleBack}
-      className={`text-md inline-flex items-center justify-center rounded bg-slate-500 px-2 py-2 text-white hover:bg-opacity-90 ${className}`}
+      className={`text-md inline-flex items-center justify-center rounded bg-secondary2 px-2 py-2  text-white hover:bg-opacity-90 ${className}`}
     >
       <svg
-        className="w-5 h-5 text-gray-800 dark:text-white "
+        className="w-4 h-4 text-gray-800 "
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -37,7 +32,7 @@ const BackButton: React.FC<BackButtonProps> = ({ className, onClick }) => {
           strokeWidth="2"
           d="m15 19-7-7 7-7"
         />
-      </svg>
+      </svg> ກັບຄືນ
     </button>
   );
 };

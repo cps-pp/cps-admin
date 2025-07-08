@@ -2,59 +2,38 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { useAuth } from '../../AuthContext';
 import Logo from '../../images/logo/cps.png';
 import NewLogo from '../../images/logo/new_lg.png';
 
 import SidebarTemplate from './SidebarTemplate';
 import { FOLLOW, IMPORT, MENU, REPORTALL, SERVICE } from '../../configs/nav';
+import { useAuth } from '../../AuthContext';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
-  const { role } = useAuth();
+  const { user } = useAuth();
+  const role = user?.role;
   const { pathname } = useLocation();
   const trigger = useRef(null);
   const sidebar = useRef(null);
-
-  const filterSubs = (subs) => {
-    if (!subs) return undefined;
-    return subs.filter(
-      (item) =>
-        !(
-          role === 'admin' &&
-          (item.path === '/manager/employee' ||
-            item.path === '/manager/servicelist' ||
-            item.path === '/manager/packetdetail')
-        ),
-    );
-  };
-
-  // const filteredMENU = MENU.map((menu) => ({
-  //   ...menu,
-  //   subs: filterSubs(menu.subs),
-  // }));
-
-  const adminRestrictedPaths = [
+  // console.log("Role in Sidebar:", role);
+    const restrictedPathsForUserAdmin = [
     '/manager/employee',
     '/manager/servicelist',
-    '/manager/packetdetail',
   ];
 
   const filteredMENU = MENU.filter((menu) => {
-    // ถ้าเป็น admin และ path อยู่ใน restricted paths ให้ซ่อน
-    if (role === 'admin' && adminRestrictedPaths.includes(menu.path)) {
+    if (role === 'admin' && restrictedPathsForUserAdmin.includes(menu.path)) {
       return false;
     }
 
-    // ถ้ามี submenu ให้กรอง submenu ด้วย
     if (menu.subs) {
       menu.subs = menu.subs.filter((sub) => {
-        if (role === 'admin' && adminRestrictedPaths.includes(sub.path)) {
+        if (role === 'admin' && restrictedPathsForUserAdmin.includes(sub.path)) {
           return false;
         }
         return true;
       });
 
-      // ถ้า submenu ถูกกรองหมดแล้ว ให้ซ่อน parent menu ด้วย
       if (menu.subs.length === 0) {
         return false;
       }
@@ -63,28 +42,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     return true;
   });
 
-  const filterMenuByRole = (menuList) => {
-    return menuList
-      .map((menu) => {
-        const filteredSubs = menu.subs
-          ? filterMenuByRole(menu.subs)
-          : undefined;
-
-        if (
-          role === 'admin' &&
-          (adminRestrictedPaths.includes(menu.path) ||
-            (filteredSubs && filteredSubs.length === 0 && !menu.path))
-        ) {
-          return null;
-        }
-
-        return {
-          ...menu,
-          subs: filteredSubs,
-        };
-      })
-      .filter(Boolean);
-  };
 
   useEffect(() => {
     const clickHandler = (e) => {

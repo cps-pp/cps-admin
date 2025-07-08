@@ -1,19 +1,47 @@
-import React, { useState, useEffect } from 'react';
-import { User } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Search from '@/components/Forms/Search';
+import { Empty } from 'antd';
+import TablePaginationDemo from '@/components/Tables/Pagination_two';
+import { Eye } from 'lucide-react';
 
 const AppointPage = () => {
   const [patients, setPatients] = useState([]);
+  const [filteredPatients, setFilteredPatients] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
-const navigate = useNavigate();
-  // Fetch patients list
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    const visiblePatients = patients.filter((p) => p.patient_id !== 'PT0');
+
+    if (searchQuery.trim() === '') {
+      setFilteredPatients(visiblePatients);
+    } else {
+      const filtered = visiblePatients.filter(
+        (patient) =>
+          patient.patient_name
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          patient.patient_id.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
+      setFilteredPatients(filtered);
+    }
+  }, [searchQuery, patients]);
+
   const fetchPatients = async () => {
     setLoading(true);
     try {
       const response = await fetch('http://localhost:4000/src/report/patient');
       const data = await response.json();
-      if (data.resultCode === "200") {
-        setPatients(data.data || []);
+      if (data.resultCode === '200') {
+        const filtered = (data.data || []).filter(
+          (p) => p.patient_id !== 'PT0',
+        );
+        setPatients(filtered);
+        setFilteredPatients(filtered);
       }
     } catch (error) {
       console.error('Error fetching patients:', error);
@@ -22,128 +50,139 @@ const navigate = useNavigate();
     }
   };
 
-  // Handle view patient details
-  const handleRowClick = (patient) => {
-    navigate(`/appoint-patient/detail/${patient.patient_id}`);
-  };
-
-  // Handle back to list
-  const handleBackToList = () => {
-    setCurrentView('list');
-    setSelectedPatient(null);
-  };
-
   useEffect(() => {
     fetchPatients();
   }, []);
 
-  const Headers = [
-    'ລະຫັດຄົນເຈັບ',
-    'ຊື່',
-    'ເພດ',
-    'ວັນເດືອນປີເກີດ',
-    'ເບີໂທ 1',
-    'ເບີໂທ 2',
-    'ທີ່ຢູ່',
-    'ຈັດການ',
-  ];
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredPatients(patients);
+    } else {
+      const filtered = patients.filter(
+        (patient) =>
+          patient.patient_name
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          patient.patient_id.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
+      setFilteredPatients(filtered);
+    }
+  }, [searchQuery, patients]);
 
+  const handleRowClick = (patient) => {
+    navigate(`/follow-treatment/detail/${patient.patient_id}`, {
+      state: { patient },
+    });
+  };
 
+  const handlePageChange = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleRowsPerPageChange = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const paginatedPatients = filteredPatients.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage,
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-center space-x-3">
-            <User className="h-8 w-8 text-blue-600" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">ລາຍຊື່ຄົນເຈັບ</h1>
-              <p className="text-gray-600">Patient List</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Patients Table */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">ລາຍຊື່ຄົນເຈັບ</h2>
-          </div>
-          
-          {loading ? (
-            <div className="p-6 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-2 text-gray-600">ກຳລັງໂຫຼດຂໍ້ມູນ...</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto shadow-md">
-              <table className="w-full min-w-max table-auto">
-                <thead>
-                  <tr className="text-left bg-gray-50 border-b">
-                    {Headers.map((title, index) => (
-                      <th
-                        key={index}
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        {title}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {patients.length > 0 ? (
-                    patients.map((patient, index) => (
-                      <tr
-                        key={index}
-                        className="hover:bg-gray-50 cursor-pointer transition-colors duration-200"
-                        onClick={() => handleRowClick(patient)}
-                      >
-                        <td className="px-4 py-4 text-sm text-gray-900">{patient.patient_id}</td>
-                        <td className="px-4 py-4 text-sm text-gray-900">
-                          {patient.patient_name} {patient.patient_surname}
-                        </td>
-                        <td className="px-4 py-4 text-sm text-gray-900">{patient.gender}</td>
-                        <td className="px-4 py-4 text-sm text-gray-900">
-                          {new Date(patient.dob).toLocaleDateString('en-GB', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                          })}
-                        </td>
-                        <td className="px-4 py-4 text-sm text-gray-900">{patient.phone1}</td>
-                        <td className="px-4 py-4 text-sm text-gray-900">{patient.phone2 || '-'}</td>
-                        <td className="px-4 py-4 text-sm text-gray-900">
-                          {patient.village} {patient.district} {patient.province}
-                        </td>
-                       <td className="px-4 py-4">
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-      navigate(`/appoint-patient/detail/${patient.patient_id}`);
-    }}
-    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-xs transition-colors"
-    title="View"
-  >
-    ເບີ່ງຂໍ້ມູນ
-  </button>
-</td>
-
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={8} className="py-8 text-center text-gray-500">
-                        ບໍ່ມີຂໍ້ມູນ
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+    <>
+    <div className="rounded bg-white pt-4 border border-stroke">
+      <div className="flex items-center justify-between border-b border-stroke px-4 pb-4">
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark">
+          ລາຍຊື່ຄົນເຈັບ
+        </h1>
       </div>
+
+      <div className="grid w-full gap-4 p-4">
+        <Search
+          type="text"
+          name="search"
+          placeholder="ຄົ້ນຫາຊື່ຄົນເຈັບ..."
+          className="rounded border border-stroke"
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-max table-auto">
+          <thead>
+            <tr className="text-left bg-gray border border-stroke text-form-input">
+              <th className="px-4 py-3">ລະຫັດຄົນເຈັບ</th>
+              <th className="px-4 py-3">ຊື່</th>
+              <th className="px-4 py-3">ເພດ</th>
+              <th className="px-4 py-3">ວັນເກີດ</th>
+              <th className="px-4 py-3">ເບີໂທ 1</th>
+              <th className="px-4 py-3">ເບີໂທ 2</th>
+              <th className="px-4 py-3">ທີ່ຢູ່</th>
+              <th className="px-4 py-3">ຈັດການ</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedPatients.length > 0 ? (
+              paginatedPatients.map((patient, index) => (
+                <tr
+                  key={index}
+                  className="border-b border-stroke hover:bg-secondary2/5 cursor-pointer"
+                  onClick={() => handleRowClick(patient)}
+                >
+                  <td className="px-4 py-4">{patient.patient_id}</td>
+                  <td className="px-4 py-4">
+                    {patient.patient_name} {patient.patient_surname}
+                  </td>
+                  <td className="px-4 py-4">{patient.gender}</td>
+                  <td className="px-4 py-4">
+                    {new Date(patient.dob).toLocaleDateString('en-GB')}
+                  </td>
+                  <td className="px-4 py-4">{patient.phone1}</td>
+                  <td className="px-4 py-4">{patient.phone2 || '-'}</td>
+                  <td className="px-4 py-4">
+                    {patient.village} {patient.district} {patient.province}
+                  </td>
+                  <td className="px-4 py-4">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(
+                          `/follow-treatment/detail/${patient.patient_id}`,
+                        );
+                      }}
+                      className="inline-flex items-center gap-2 px-4 py-1 text-md font-medium rounded border border-secondary2/40 bg-secondary2/10 text-secondary2 hover:bg-secondary2/15 disabled:opacity-50 transition-colors"
+                    >
+                     <Eye className="w-4 h-4" />  ເບີ່ງຂໍ້ມູນ
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={8} className="py-4 text-center text-gray-500">
+                  <div className="text-center">
+                    <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                      <Empty description={false} />
+                    </div>
+                    <p className="text-lg">ບໍ່ພົບຂໍ້ມູນ</p>
+                  </div>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
     </div>
+      <TablePaginationDemo
+        count={filteredPatients.length}
+        page={page}
+        onPageChange={handlePageChange}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleRowsPerPageChange}
+      />
+    </>
   );
 };
 

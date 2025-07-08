@@ -156,6 +156,7 @@ function AppRoutes() {
     window.scrollTo(0, 0);
   }, [pathname]);
 
+  
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/login" />} />
@@ -172,7 +173,15 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        {ROUTES.map((item, index) => (
+        {ROUTES.filter((item) => {
+          if (
+            role === 'admin' &&
+            ['/manager/employee', '/manager/servicelist'].includes(item.path)
+          ) {
+            return false;
+          }
+          return true;
+        }).map((item, index) => (
           <Route
             key={index}
             index={index === 0}
@@ -190,6 +199,7 @@ function AppRoutes() {
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
+
 }
 
 function App() {

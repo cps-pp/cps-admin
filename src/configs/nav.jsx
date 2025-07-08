@@ -45,37 +45,19 @@ const iconBlog = (
 );
 
 const iconCareer = (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="1.5em"
-    height="1.5em"
-    viewBox="0 0 24 24"
-  >
-    <path
-      fill="currentColor"
-      d="M19 6H5a3 3 0 0 0-3 3v2.72L8.837 14h6.326L22 11.72V9a3 3 0 0 0-3-3"
-      opacity="0.5"
-    />
-    <path
-      fill="currentColor"
-      d="M10 6V5h4v1h2V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v1zm-1.163 8L2 11.72V18a3.003 3.003 0 0 0 3 3h14a3.003 3.003 0 0 0 3-3v-6.28L15.163 14z"
-    />
-  </svg>
+ <svg
+  xmlns="http://www.w3.org/2000/svg"
+  className="w-6 h-6 text-"
+  viewBox="0 0 24 24"
+  fill="currentColor"
+  aria-hidden="true"
+>
+  <path d="M16.586 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.414A2 2 0 0 0 19.414 6L16.586 3zM15 14H9v-2h6v2zm0-4H9V8h6v2z" />
+</svg>
+
 );
 
-const iconResume = (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="1.5em"
-    height="1.5em"
-    viewBox="0 0 24 24"
-  >
-    <title></title>
-    <path 
-      fill="currentColor"
-    d="M12 21.5C10.65 20.65 8.2 20 6.5 20C4.85 20 3.15 20.3 1.75 21.05C1.65 21.1 1.6 21.1 1.5 21.1C1.25 21.1 1 20.85 1 20.6V6C1.6 5.55 2.25 5.25 3 5C4.11 4.65 5.33 4.5 6.5 4.5C8.45 4.5 10.55 4.9 12 6C13.45 4.9 15.55 4.5 17.5 4.5C18.67 4.5 19.89 4.65 21 5C21.75 5.25 22.4 5.55 23 6V20.6C23 20.85 22.75 21.1 22.5 21.1C22.4 21.1 22.35 21.1 22.25 21.05C20.85 20.3 19.15 20 17.5 20C15.8 20 13.35 20.65 12 21.5M11 7.5C9.64 6.9 7.84 6.5 6.5 6.5C5.3 6.5 4.1 6.65 3 7V18.5C4.1 18.15 5.3 18 6.5 18C7.84 18 9.64 18.4 11 19V7.5M13 19C14.36 18.4 16.16 18 17.5 18C18.7 18 19.9 18.15 21 18.5V7C19.9 6.65 18.7 6.5 17.5 6.5C16.16 6.5 14.36 6.9 13 7.5V19M14 16.35C14.96 16 16.12 15.83 17.5 15.83C18.54 15.83 19.38 15.91 20 16.07V14.57C19.13 14.41 18.29 14.33 17.5 14.33C16.16 14.33 15 14.5 14 14.76V16.35M14 13.69C14.96 13.34 16.12 13.16 17.5 13.16C18.54 13.16 19.38 13.24 20 13.4V11.9C19.13 11.74 18.29 11.67 17.5 11.67C16.22 11.67 15.05 11.82 14 12.12V13.69M14 11C14.96 10.67 16.12 10.5 17.5 10.5C18.41 10.5 19.26 10.59 20 10.78V9.23C19.13 9.08 18.29 9 17.5 9C16.18 9 15 9.15 14 9.46V11Z" />
-  </svg>
-);
+
 
 const iconAccount = (
   <svg
@@ -91,38 +73,36 @@ const iconAccount = (
   </svg>
 );
 const icontImport = (
-  <svg
-    className="w-6 h-6 text-gray-800 dark:text-white"
-    aria-hidden="true"
+   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    fill="currentColor"
+    className="w-6 h-6 "
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
     viewBox="0 0 24 24"
+    aria-hidden="true"
   >
-    <path
-      fillRule="evenodd"
-      d="M9 7V2.221a2 2 0 0 0-.5.365L4.586 6.5a2 2 0 0 0-.365.5H9Zm2 0V2h7a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5h7.586l-.293.293a1 1 0 0 0 1.414 1.414l2-2a1 1 0 0 0 0-1.414l-2-2a1 1 0 0 0-1.414 1.414l.293.293H4V9h5a2 2 0 0 0 2-2Z"
-      clipRule="evenodd"
-    />
+    <path d="M12 3v12m0 0l4-4m-4 4-4-4" />
+    <rect x="3" y="17" width="18" height="4" rx="1" ry="1" />
   </svg>
 );
 
 const iconVolunteers = (
-  <svg
+ <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="1.5em"
-    height="1.5em"
+    className="w-6 h-6 "
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
     viewBox="0 0 24 24"
+    aria-hidden="true"
   >
-    <path
-      fill="none"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      d="M2 6s1.5-2 5-2s5 2 5 2v14s-1.5-1-5-1s-5 1-5 1zm10 0s1.5-2 5-2s5 2 5 2v14s-1.5-1-5-1s-5 1-5 1z"
-    />
+    <path d="M3 9.75L12 3l9 6.75V21a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 21V9.75z" />
+    <path d="M12 10.5v4.5m-2.25-2.25h4.5" />
   </svg>
 );
 
@@ -143,14 +123,34 @@ const iconCalenderWhite = (
     />
   </svg>
 );
+export const CalendarIconWhite = (
+  <svg
+  xmlns="http://www.w3.org/2000/svg"
+  fill="currentColor"
+  viewBox="0 0 24 24"
+  className="w-6 h-6  text-gray-800"
+  aria-hidden="true"
+>
+  <path d="M15 14c2.7 0 5 2.3 5 5v1H4v-1c0-2.7 2.3-5 5-5h6Zm-3-2a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm8-1h2v2h-2v2h-2v-2h-2v-2h2v-2h2v2Z" />
+</svg>
+
+);
+
 export const iconInvoice = (
   <svg
-    className="w-6 h-6 text-gray-800 dark:text-white"
     xmlns="http://www.w3.org/2000/svg"
-    fill="currentColor"
+    className="w-6 h-6 "
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
     viewBox="0 0 24 24"
+    aria-hidden="true"
   >
-    <path d="M19 2H5a2 2 0 00-2 2v18l4-2 4 2 4-2 4 2V4a2 2 0 00-2-2zm-2 14H7v-2h10v2zm0-4H7v-2h10v2zm0-4H7V6h10v2z" />
+    <rect x="3" y="4" width="18" height="16" rx="2" ry="2" />
+    <line x1="7" y1="10" x2="17" y2="10" />
+    <line x1="7" y1="14" x2="17" y2="14" />
   </svg>
 );
 
@@ -269,8 +269,8 @@ export const FOLLOW = [
   },
   {
     name: 'ຕິດຕາມການປິ່ນປົວ',
-    path: 'appoint-patient',
-    icon: iconCalenderWhite,
+    path: 'follow-treatment',
+    icon: CalendarIconWhite,
   },
 ];
 export const IMPORT = [

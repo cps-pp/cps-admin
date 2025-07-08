@@ -59,7 +59,7 @@ const SearchBox = (props) => {
           </svg>
         </span>
         <input
-          className={`w-full rounded py-4 pl-11.5 pr-10 text-black focus-visible:outline-none dark:bg-form-input dark:text-white focus:border-primary disabled:cursor-not-allowed dark:focus:border-primary border ${className}`}
+          className={`w-full rounded py-3 pl-11.5 pr-10 text-black focus-visible:outline-none dark:bg-form-input dark:text-white focus:border-primary disabled:cursor-not-allowed dark:focus:border-primary border ${className}`}
           id={name}
           type={type}
           name={name}
