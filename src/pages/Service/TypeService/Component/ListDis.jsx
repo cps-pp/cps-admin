@@ -51,7 +51,7 @@ export default function ListDis({ selectService, tapService }) {
     },
   ];
   const selectionDisease = async (record) => {
-    await addDisease(record);
+    await addDisease([record]);
   };
   return (
     <div>

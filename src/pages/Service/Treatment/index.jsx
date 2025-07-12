@@ -1,6 +1,6 @@
 import {
   FileText,
- 
+
 } from 'lucide-react';
 import { Tabs } from 'antd';
 import InTreatmentService from './inTreatment';
@@ -15,6 +15,9 @@ import { useAppDispatch } from '@/redux/hook';
 import Alerts from '@/components/Alerts';
 import { useForm } from 'react-hook-form';
 import useStoreDisease from '../../../store/selectDis';
+import { ACCESS_TOKEN_KEY } from '../../../utils/constants';
+
+const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 
 
 const Treatment = () => {
@@ -89,13 +92,13 @@ const Treatment = () => {
       if (response.ok) {
         const resData = await response.json();
         const invoice = resData.data;
-        console.log('Invoice generated:', invoice);
+        // console.log('Invoice generated:', invoice);
         setInvoiceData(invoice);
-        setIsInvoiceGenerated(true); 
+        setIsInvoiceGenerated(true);
         return invoice;
       }
     } catch (error) {
-      console.error('Failed to generate invoice:', error);
+      // console.error('Failed to generate invoice:', error);
       return null;
     }
   };
@@ -135,7 +138,7 @@ const Treatment = () => {
 
 
   const handleTreatmentSubmit = async () => {
-    console.log('Starting treatment submit...');
+    // console.log('Starting treatment submit...');
     setLoading(true);
 
     let newService = services.map((item) => ({
@@ -146,18 +149,19 @@ const Treatment = () => {
 
     const sendData = {
       diseases_now: intivalue.diseases_now || '',
+      diseases: dis.join(', ') || '',
       symptom: intivalue.symptom || '',
       note: intivalue.note || '',
       checkup: intivalue.checkup || '',
       detailed: newService,
     };
-
+    // console.log(sendData)
     try {
       const response = await fetch(
         `http://localhost:4000/src/in/inspection/${inspectionId}`,
         {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify(sendData),
         },
       );
@@ -202,7 +206,7 @@ const Treatment = () => {
     }
   };
 
- const handleMedicineSubmit = async () => {
+  const handleMedicineSubmit = async () => {
     // console.log('Starting medicine submit...');
     setLoading(true);
 
@@ -389,7 +393,7 @@ const Treatment = () => {
           loading={loading}
           isTreatmentSaved={isTreatmentSaved}
           refreshKey={refreshKey}
-           dispatch={dispatch}
+          dispatch={dispatch}
         />
       ),
     },
@@ -404,8 +408,8 @@ const Treatment = () => {
           loading={loading}
           inspectionId={inspectionId}
           isMedicineSaved={isMedicineSaved}
-     
-           refreshKey={refreshKey}
+
+          refreshKey={refreshKey}
         />
       ),
     },
@@ -419,11 +423,10 @@ const Treatment = () => {
           type="button"
           onClick={handleShowBill}
           disabled={!isTreatmentSaved && !isMedicineSaved}
-          className={`${
-            isTreatmentSaved || isMedicineSaved
-              ? 'bg-slate-500 hover:bg-slate-600'
-              : 'bg-gray-400 cursor-not-allowed'
-          } text-white text-md px-6 py-2 rounded flex items-center gap-2 transition`}
+          className={`${isTreatmentSaved || isMedicineSaved
+            ? 'bg-slate-500 hover:bg-slate-600'
+            : 'bg-gray-400 cursor-not-allowed'
+            } text-white text-md px-6 py-2 rounded flex items-center gap-2 transition`}
         >
           <FileText className="w-5 h-5" />
           ກົດເບິ່ງໃບບິນ
@@ -438,7 +441,7 @@ const Treatment = () => {
           medicines={savedMedicines}
           invoiceData={invoiceData}
           onRefresh={handleRefresh}
-          
+
         />
 
         <Alerts />

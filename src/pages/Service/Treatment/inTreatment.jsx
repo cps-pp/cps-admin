@@ -9,6 +9,9 @@ import Alerts from '@/components/Alerts';
 import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import { CheckCircle, Save } from 'lucide-react';
+import { ACCESS_TOKEN_KEY } from '../../../utils/constants';
+
+const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 
 const InTreatmentService = ({
   selectedPatient,
@@ -16,7 +19,7 @@ const InTreatmentService = ({
   inspectionId,
   setInspectionId,
   formData,
-  setFormData,    
+  setFormData,
   intivalue,
   setIntivalue,
   setValue,
@@ -24,7 +27,7 @@ const InTreatmentService = ({
   dispatch,
   onTreatmentSubmit,
   loading,
-    refreshKey,
+  refreshKey,
 }) => {
   const [patients, setPatients] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
@@ -32,12 +35,15 @@ const InTreatmentService = ({
   const { medicines } = useStoreMed();
   const { equipment } = useStoreQi();
 
+  const [idPatient, setIdPatient] = useState('');
+  const [checkID, setCheckID] = useState(false);
+
   const getGenderLabel = (gender) => {
     if (gender === 'male') return 'ຊາຍ';
     if (gender === 'female') return 'ຍິງ';
     return '';
   };
- const handleClick = () => {
+  const handleClick = () => {
     if (!inspectionId) {
       dispatch(
         openAlert({
@@ -52,6 +58,12 @@ const InTreatmentService = ({
   };
 
   useEffect(() => {
+    if (checkID) {
+      setIdPatient(idPatient);
+    }
+  }, [checkID]);
+
+  useEffect(() => {
     fetchPatients();
   }, []);
 
@@ -59,11 +71,13 @@ const InTreatmentService = ({
     try {
       const res = await fetch('http://localhost:4000/src/manager/patient');
       const data = await res.json();
-      setPatients(data.data);
+      setPatients(data?.data);
     } catch (err) {
       console.error('Error fetching patients:', err);
     }
   };
+
+  // console.log(idPatient)
 
   const handlePatientSelect = async (patientData) => {
     setSelectedPatient(patientData);
@@ -74,14 +88,19 @@ const InTreatmentService = ({
 
     try {
       const res = await fetch(
-        `http://localhost:4000/src/in/inspection/${patientData.patient_id}`,
+        `http://localhost:4000/src/in/inspection/${idPatient?.in_id}`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        }
       );
       const result = await res.json();
 
+      console.log(result)
 
       if (res.ok && result?.data?.in_id) {
         const inspection = result.data;
-  setInspectionId(inspection.in_id);
+        setInspectionId(inspection.in_id);
         let formattedDate = '';
         if (inspection.date) {
           const date = new Date(inspection.date);
@@ -107,14 +126,9 @@ const InTreatmentService = ({
     }
   };
 
-  const [idPatient, setIdPatient] = useState('');
-  const [checkID, setCheckID] = useState(false);
 
-  useEffect(() => {
-    if (checkID) {
-      setIdPatient(idPatient);
-    }
-  }, [checkID]);
+
+
 
   useEffect(() => {
     if (formData.date) {
@@ -240,21 +254,21 @@ const InTreatmentService = ({
       />
 
       <div className="overflow-x-auto  mb-4">
-       <TypeService refreshKey={refreshKey} />
+        <TypeService refreshKey={refreshKey} />
       </div>
-     <div className="flex justify-end mt-6">
-  <button
-        onClick={handleClick}
-        className={`px-6 py-2 rounded flex items-center gap-2 transition duration-200 ${
-          loading
+      <div className="flex justify-end mt-6">
+        <button
+          onClick={handleClick}
+          className={`px-6 py-2 rounded flex items-center gap-2 transition duration-200 ${loading
             ? 'bg-gray-300 text-gray-600'
             : 'bg-blue-600 text-white hover:bg-blue-700'
-        }`}
-      >
-        <Save className="w-5 h-5" />
-        {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກການປິ່ນປົວ'}
-      </button>
-</div>
+            }`}
+        >
+          <Save className="w-5 h-5" />
+          {/* {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກການປິ່ນປົວ'} */}
+          ບັນທຶກການປິ່ນປົວ
+        </button>
+      </div>
 
     </div>
   );

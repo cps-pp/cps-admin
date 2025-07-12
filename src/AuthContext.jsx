@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import { URLBaseLocal } from './lib/MyURLAPI';
+import { ACCESS_TOKEN_KEY } from './utils/constants';
 
 const AuthContext = createContext({
   user: null,
@@ -16,7 +17,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Load user profile if token exists
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
     if (token) {
       // ตั้งค่า axios default header
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -28,13 +29,13 @@ export const AuthProvider = ({ children }) => {
             console.log('🔐 Loaded user:', res.data.user);
           } else {
             // Token ไม่ valid
-            localStorage.removeItem('token');
+            localStorage.removeItem(ACCESS_TOKEN_KEY);
             delete axios.defaults.headers.common['Authorization'];
           }
         })
         .catch((error) => {
           console.error('Profile load error:', error);
-          localStorage.removeItem('token');
+          localStorage.removeItem(ACCESS_TOKEN_KEY);
           delete axios.defaults.headers.common['Authorization'];
           setUser(null);
         })
@@ -59,7 +60,7 @@ export const AuthProvider = ({ children }) => {
         const userData = response.data.user;
 
         // เก็บ token
-        localStorage.setItem('token', token);
+        localStorage.setItem(ACCESS_TOKEN_KEY, token);
 
         // ตั้งค่า axios default header
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -88,7 +89,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
   };

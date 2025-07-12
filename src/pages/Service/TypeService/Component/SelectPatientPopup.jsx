@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, User, Users, X } from 'lucide-react';
 import SearchBox from '../../../../components/Forms/Search_New';
+import { ACCESS_TOKEN_KEY } from '../../../../utils/constants';
+
+const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+
+// console.log(token)
 
 const SelectPatientPopup = ({ patients, onClose, onSelect, callback }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -46,9 +51,7 @@ const SelectPatientPopup = ({ patients, onClose, onSelect, callback }) => {
     try {
       const response = await fetch('http://localhost:4000/src/in/inspection', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
           patient_id: selectedPatient.patient_id,
         }),
@@ -65,8 +68,8 @@ const SelectPatientPopup = ({ patients, onClose, onSelect, callback }) => {
       if (onSelect) {
         onSelect({
           ...selectedPatient,
-          inspectionId: data.in_id || data.id, 
-          inspectionDate: new Date().toISOString().split('T')[0], 
+          inspectionId: data.in_id || data.id,
+          inspectionDate: new Date().toISOString().split('T')[0],
         });
       }
 
@@ -114,7 +117,7 @@ const SelectPatientPopup = ({ patients, onClose, onSelect, callback }) => {
             </div>
 
             <div className="py-4 flex items-center justify-between text-sm text-gray-500">
-              <span>ທັງໝົດ {filteredPatients.length} ຄົນ</span>
+              <span>ທັງໝົດ {filteredPatients?.length ?? 0} ຄົນ</span>
               {selectedPatient && (
                 <div className="flex items-center space-x-2 text-green-600">
                   <CheckCircle className="w-4 h-4" />
@@ -126,7 +129,7 @@ const SelectPatientPopup = ({ patients, onClose, onSelect, callback }) => {
 
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto px-2">
-            {filteredPatients.length > 0 ? (
+            {filteredPatients?.length > 0 ? (
               <div className="divide-y divide-stroke">
                 {[...filteredPatients]
                   .sort((a, b) =>
@@ -140,19 +143,17 @@ const SelectPatientPopup = ({ patients, onClose, onSelect, callback }) => {
                     <div
                       key={patient.patient_id}
                       onClick={() => setSelectedPatient(patient)}
-                      className={`p-4 cursor-pointer transition-all duration-200 hover:bg-gray-50 ${
-                        selectedPatient?.patient_id === patient.patient_id
-                          ? 'bg-purple-50 border-r-4 border-purple-800'
-                          : ''
-                      }`}
+                      className={`p-4 cursor-pointer transition-all duration-200 hover:bg-gray-50 ${selectedPatient?.patient_id === patient.patient_id
+                        ? 'bg-purple-50 border-r-4 border-purple-800'
+                        : ''
+                        }`}
                     >
                       <div className="flex items-center space-x-4">
                         <div
-                          className={`p-2 rounded-full ${
-                            selectedPatient?.patient_id === patient.patient_id
-                              ? 'bg-purple-100 text-purple-600'
-                              : 'bg-stone-00 text-stone-400'
-                          }`}
+                          className={`p-2 rounded-full ${selectedPatient?.patient_id === patient.patient_id
+                            ? 'bg-purple-100 text-purple-600'
+                            : 'bg-stone-00 text-stone-400'
+                            }`}
                         >
                           <User className="w-5 h-5" />
                         </div>
@@ -163,11 +164,10 @@ const SelectPatientPopup = ({ patients, onClose, onSelect, callback }) => {
                               ລະຫັດຄົນເຈັບ: {patient.patient_id}
                             </span>
                             <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                patient.gender === 'ຊາຍ'
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : 'bg-pink-100 text-pink-800'
-                              }`}
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${patient.gender === 'ຊາຍ'
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-pink-100 text-pink-800'
+                                }`}
                             >
                               {patient.gender}
                             </span>
@@ -211,11 +211,10 @@ const SelectPatientPopup = ({ patients, onClose, onSelect, callback }) => {
               <button
                 onClick={handleConfirm}
                 disabled={!selectedPatient || loading}
-                className={`px-4 py-2 text-white rounded shadow-sm transition-colors ${
-                  selectedPatient && !loading
-                    ? 'bg-blue-500 hover:bg-blue-600'
-                    : 'bg-blue-200 cursor-not-allowed'
-                }`}
+                className={`px-4 py-2 text-white rounded shadow-sm transition-colors ${selectedPatient && !loading
+                  ? 'bg-blue-500 hover:bg-blue-600'
+                  : 'bg-blue-200 cursor-not-allowed'
+                  }`}
               >
                 {loading ? 'ກຳລັງສົ່ງ...' : 'ຢືນຢັນ'}
               </button>
