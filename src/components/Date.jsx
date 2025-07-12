@@ -83,7 +83,7 @@ const clearDate = () => {
     <button
       type="button"
       onClick={clearDate}
-      className="flex items-center gap-1 text-xs px-2 py-4 rounded bg-red-100 text-red-600 hover:bg-red-200 transition-all shadow"
+      className="flex items-center gap-1 text-xs px-2 py-4 rounded bg-red-50 text-red-600 hover:bg-red-200 transition-all shadow"
       title="ລ້າງວັນທີ"
     >
       <svg

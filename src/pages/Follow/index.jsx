@@ -607,7 +607,7 @@ const FollowPage = () => {
                       {getPatientPhone(appointment.patient_id)}{' '}
                     </td>
                     <td className="px-4 py-4 ">
-                      <span className="inline-block bg-secondary/10 text-secondary px-2 py-1 rounded-md ">
+                      <span className="inline-block bg-secondary/10 text-secondary2 px-2 py-1 rounded-md ">
                         {new Date(appointment.date_addmintted).toLocaleString(
                           'en-GB',
                           {

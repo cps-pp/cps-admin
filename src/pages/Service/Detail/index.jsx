@@ -7,6 +7,7 @@ import { TableAction } from '@/components/Tables/TableAction';
 import Alerts from '@/components/Alerts';
 import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { URLBaseLocal } from '../../../lib/MyURLAPI';
+import { Eye } from 'lucide-react';
 
 const DetailPatientService = () => {
   const navigate = useNavigate();
@@ -79,7 +80,7 @@ const DetailPatientService = () => {
   const headers = [
     'ລະຫັດການຮັກສາ',
     'ວັນທີ',
-    'ສະຖານະ',
+    // 'ສະຖານະ',
     'ຊື່ຄົນເຈັບ',
     'ອາການ',
     'ໂຣກທີ່ເປັນ',
@@ -144,7 +145,7 @@ const DetailPatientService = () => {
                         hour12: false,
                       })}
                     </td>
-                    <td className="px-4 py-4">{item.status}</td>
+                    {/* <td className="px-4 py-4">{item.status}</td> */}
                     <td className="px-4 py-4">
                       {item.patient_name} {item.patient_surname}
                     </td>
@@ -155,10 +156,9 @@ const DetailPatientService = () => {
                     <td className="px-4 py-4 ">
                       <button
                         onClick={() => handleRowClick(item)}
-                        className=" bg-blue-500 rounded text-white  px-4 py-2 text-xs hover:text-white hover:bg-blue-600"
-                        title="View"
-                      >
-                        ເບີ່ງຂໍ້ມູນ
+                        className="inline-flex items-center gap-2 px-4 py-1 text-md font-medium rounded border border-secondary2/40 bg-secondary2/10 text-secondary2 hover:bg-secondary2/15 disabled:opacity-50 transition-colors"
+                    >
+                     <Eye className="w-4 h-4" />  ເບີ່ງຂໍ້ມູນ
                       </button>
                     </td>
                   </tr>

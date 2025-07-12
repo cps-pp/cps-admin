@@ -14,6 +14,8 @@ import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import SearchBox from '../../../components/Forms/Search_New';
 import { Empty } from 'antd';
+import { ACCESS_TOKEN_KEY } from '../../../utils/constants';
+const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 
 const PatientPage = () => {
   const [patients, setPatients] = useState([]);
@@ -40,8 +42,13 @@ const PatientPage = () => {
 
   const fetchPatients = async () => {
     try {
-      setLoading(true);
-      const response = await fetch('http://localhost:4000/src/manager/patientP');
+    setLoading(true);
+    const response = await fetch('http://localhost:4000/src/manager/patientP', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -128,7 +135,13 @@ const PatientPage = () => {
     try {
       const response = await fetch(
         `http://localhost:4000/src/manager/patient/${selectedPatientId}`,
-        { method: 'DELETE' },
+        {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      },
       );
 
       if (!response.ok) {

@@ -17,7 +17,7 @@ export default function HomeSupplier({ tab }) {
     const fetchSuppliers = async () => {
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:4000/src/supplier');
+            const res = await fetch('http://localhost:4000/src/manager/supplier');
             const json = await res.json();
             if (res.ok) {
                 setSuppliers(json.data || []);

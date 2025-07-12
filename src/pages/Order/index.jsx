@@ -1,18 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Button from '@/components/Button';
-import Search from '@/components/Forms/Search';
-import { TableAction } from '@/components/Tables/TableAction';
-import ConfirmModal from '@/components/Modal';
-import { iconAdd } from '@/configs/icon';
-import { OrderHeaders } from './column/order';
-import { openAlert } from '@/redux/reducer/alert';
-import { useAppDispatch } from '@/redux/hook';
-import { Eye, Plus } from 'lucide-react';
-import OrderCreate from './create';
-import EditPreorder from './edit';
-import ViewPreorder from './view';
-import AddDetailPreorder from './create_detail';
+
 import { Empty, Tabs } from 'antd';
 import { URLBaseLocal } from '../../lib/MyURLAPI';
 import CreatePreOrder from './CreatePreOrder';

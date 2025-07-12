@@ -25,13 +25,16 @@ import ReportPay from '../pages/report/ReportPayment';
 import ReportPer from '../pages/report/ReportPer';
 import ReportImport from '../pages/report/ReportImport';
 import ReportOrder from '../pages/report/ReportOrder';
-import DetailPatientService from '../pages/Service/Detail';
 import PackectDetail from '../pages/Manager/PackectDetail';
 import InvoicePage from '../pages/Invoice';
 import PaymentPage from '../pages/Payment';
 import ReportFollowAll from '../pages/report/ReportFollow';
 import DetailFollow from '../pages/report/ReportFollow/detail';
 import EditTreatment from '../pages/Service/Detail/EditTreatment';
+import AppointPage from '../pages/Appoint';
+import AppointPatientDetailsPage from '../pages/Appoint/detail';
+import FollowTreatmentPage from '../pages/Appoint/detail';
+import DetailPatientService from '../pages/Service/Detail';
 
 export const ROUTES = [
   {
@@ -155,6 +158,16 @@ export const ROUTES = [
     component: <ImportPage />,
   },
   // -------------------------- Follow Path --------------------------------
+  {
+    path: '/follow-treatment',
+    title: 'Appoint Patient | CPS Admin',
+    component: <AppointPage />,
+  },
+  {
+    path: '/follow-treatment/detail/:id',
+    title: 'Appoint Patient | CPS Admin',
+    component: <FollowTreatmentPage />,
+  },
   {
     path: '/followpat',
     title: 'Follow | CPS Admin',

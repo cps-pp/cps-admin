@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-// ฟังก์ชันสำหรับการจัดการวันที่และเวลา
 const formatDate = (dateString) => {
   if (!dateString) return '';
   return new Date(dateString).toLocaleDateString('lo-LA', {
@@ -178,7 +177,6 @@ const ModernTodayAppointments = ({
     }
   };
 
-  // สถิติสำหรับ header
   const stats = {
     total: todayAppointments.length,
     waiting: todayAppointments.filter((apt) => apt.status === 'ລໍຖ້າ').length,
@@ -238,7 +236,7 @@ const ModernTodayAppointments = ({
               <div className="w-32 h-32 flex items-center justify-center mx-auto ">
                 <Empty description={false} />
               </div>
-              <p className="text-lg">ບໍ່ພົບຂໍ້ມູນການນັດໝາຍໃນມື້ີນີ້</p>
+              <p className="text-lg">ບໍ່ພົບຂໍ້ມູນການນັດໝາຍໃນມື້ນີ້</p>
               <p className="text-sm mt-2 mb-2">ກະລຸນາກວດສອບນັດໝາຍ</p>
             </div>
           </div>

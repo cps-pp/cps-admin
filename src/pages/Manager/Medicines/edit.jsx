@@ -29,8 +29,9 @@ const EditMedicines = ({ id, setShow, getList }) => {
   const [employees, setEmployees] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedMedType, setSelectedMedType] = useState('');
-  const [selectEmpCreate, setSelectEmpCreate] = useState('');
-  const [createdAt, setCreatedAt] = useState('');
+const [selectEmpUpdated, setSelectEmpUpdated] = useState('');
+const [updateBy, setUpdateBy] = useState('');
+
 
   // Watch form values for debugging
   const watchedValues = watch();
@@ -92,12 +93,10 @@ const EditMedicines = ({ id, setShow, getList }) => {
         );
 
         const result = await res.json();
-        // console.log('API Response:', result);
 
         if (res.ok && result.data) {
           const med = result.data;
 
-          // console.log('Medicine data:', med);
 
           const formattedExpired = med.expired
             ? med.expired.includes('T')
@@ -110,6 +109,11 @@ const EditMedicines = ({ id, setShow, getList }) => {
               ? med.created_at.split('T')[0]
               : med.created_at
             : '';
+const formattedUpdatedBy = med.update_by
+  ? med.update_by.includes('T')
+    ? med.update_by.split('T')[0]
+    : med.update_by
+  : '';
 
           const formData = {
             med_name: med.med_name || '',
@@ -118,22 +122,23 @@ const EditMedicines = ({ id, setShow, getList }) => {
             unit: med.unit || '',
             expired: formattedExpired,
             medtype_id: med.medtype_id || '',
-            emp_id_create: med.emp_id_create || '',
-            created_at: formattedCreatedAt,
+             emp_id_updated: med.emp_id_updated || '', 
+  update_by: formattedUpdatedBy,            
             status: med.status || '',
           };
 
           // console.log('Form data to reset:', formData);
 
-          reset(formData);
-          setValue('price', med.price || '');
-          setValue('medtype_id', med.medtype_id || '');
-          setValue('emp_id_create', med.emp_id_create || '');
-          setValue('created_at', formattedCreatedAt);
-          setSelectedMedType(med.medtype_id || '');
-          setSelectEmpCreate(med.emp_id_create || '');
-          setCreatedAt(formattedCreatedAt);
-          setStatus(med.status || '');
+      reset(formData);
+setValue('price', med.price || '');
+setValue('medtype_id', med.medtype_id || '');
+setValue('emp_id_updated', med.emp_id_updated || '');
+setValue('update_by', formattedUpdatedBy);           
+setSelectedMedType(med.medtype_id || '');
+setSelectEmpUpdated(med.emp_id_updated || '');       
+setUpdateBy(formattedUpdatedBy);                      
+setStatus(med.status || '');
+
           setDataLoaded(true);
         } else {
           console.error('API Error Details:', result);
@@ -169,8 +174,8 @@ const EditMedicines = ({ id, setShow, getList }) => {
         ...formData,
 
         medtype_id: selectedMedType || formData.medtype_id,
-        emp_id_create: selectEmpCreate || formData.emp_id_create,
-        created_at: createdAt || formData.created_at,
+        emp_id_updated: selectEmpUpdated || formData.emp_id_updated,
+        update_by: updateBy || formData.update_by,
       };
 
       console.log('Payload to send:', payload);
@@ -220,10 +225,6 @@ const EditMedicines = ({ id, setShow, getList }) => {
       setValue('status', status);
     }
   }, [status, setValue]);
-  // // Show loader while fetching data
-  // if (loading && !dataLoaded) {
-  //   return <Loader />;
-  // }
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
@@ -318,37 +319,37 @@ const EditMedicines = ({ id, setShow, getList }) => {
         />
 
         <SelectBoxId
-          label="ພະນັກງານ (ຜູ້ສ້າງ)"
-          name="emp_id_create"
-          value={selectEmpCreate}
-          options={employees.map((emp) => ({
-            value: emp.id,
-            label: `${emp.name} ${emp.surname} - ${emp.role}`,
-          }))}
-          register={register}
-          errors={errors}
-          formOptions={{ required: 'ກະລຸນາເລືອກພະນັກງານ' }}
-          onSelect={(e) => {
-            const newEmp = e.target.value;
-            console.log('Employee selected:', newEmp);
-            setSelectEmpCreate(newEmp);
-            setValue('emp_id_create', newEmp);
-          }}
-        />
+  label="ພະນັກງານ (ຜູ້ແກ້ໄຂ)"
+  name="emp_id_updated"
+  value={selectEmpUpdated} // ✅ ใช้ state ใหม่
+  options={employees.map((emp) => ({
+    value: emp.id,
+    label: `${emp.name} ${emp.surname} - ${emp.role}`,
+  }))}
+  register={register}
+  errors={errors}
+  formOptions={{ required: 'ກະລຸນາເລືອກພະນັກງານ' }}
+  onSelect={(e) => {
+    const newEmp = e.target.value;
+    console.log('Employee selected:', newEmp);
+    setSelectEmpUpdated(newEmp);           // ✅ ใช้ state ใหม่
+    setValue('emp_id_updated', newEmp);    // ✅ ใช้ name ใหม่
+  }}
+/>
+<BoxDate
+  register={register}
+  errors={errors}
+  name="update_by" // ✅ เปลี่ยนชื่อ field
+  label="ວັນທີແກ້ໄຂ" // ✅ เปลี่ยน label ให้ตรงความหมาย
+  formOptions={{ required: 'ກະລຸນາເລືອກວັນທີແກ້ໄຂ' }}
+  setValue={(fieldName, value) => {
+    console.log('BoxDate setValue called:', fieldName, value);
+    setUpdateBy(value);             // ✅ ใช้ state ใหม่
+    setValue(fieldName, value);    // ✅ name ก็ถูกแล้ว
+  }}
+  select={updateBy} // ✅ ใช้ state ใหม่
+/>
 
-        <BoxDate
-          register={register}
-          errors={errors}
-          name="created_at"
-          label="ວັນທີສ້າງ"
-          formOptions={{ required: 'ກະລຸນາເລືອກວັນທີສ້າງ' }}
-          setValue={(fieldName, value) => {
-            console.log('BoxDate setValue called:', fieldName, value);
-            setCreatedAt(value);
-            setValue(fieldName, value);
-          }}
-          select={createdAt}
-        />
 
         <div className="flex justify-end space-x-4 col-span-full py-4">
           <Button variant="save" type="submit" disabled={loading}>

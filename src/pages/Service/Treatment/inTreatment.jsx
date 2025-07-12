@@ -5,14 +5,10 @@ import AntdTextArea from '../../../components/Forms/AntdTextArea';
 import useStoreServices from '../../../store/selectServices';
 import useStoreMed from '../../../store/selectMed';
 import useStoreQi from '../../../store/selectQi';
-import Alerts from '@/components/Alerts';
-import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import { CheckCircle, Save } from 'lucide-react';
-import { ACCESS_TOKEN_KEY } from '../../../utils/constants';
-
-const token = localStorage.getItem(ACCESS_TOKEN_KEY);
-
+import SelectBoxId from '../../../components/Forms/SelectID';
+import BoxDate from '../../../components/Date';
 const InTreatmentService = ({
   selectedPatient,
   setSelectedPatient,
@@ -27,22 +23,29 @@ const InTreatmentService = ({
   dispatch,
   onTreatmentSubmit,
   loading,
+  errors,
   refreshKey,
+  // selectEmpCreate,
+  // setSelectEmpCreate,
+  // createdAt,
+  // setCreatedAt,
 }) => {
   const [patients, setPatients] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
-  const { services } = useStoreServices();
-  const { medicines } = useStoreMed();
-  const { equipment } = useStoreQi();
-
-  const [idPatient, setIdPatient] = useState('');
-  const [checkID, setCheckID] = useState(false);
+  const [employees, setEmployees] = useState([]);
 
   const getGenderLabel = (gender) => {
     if (gender === 'male') return 'ຊາຍ';
     if (gender === 'female') return 'ຍິງ';
     return '';
   };
+
+  // useEffect(() => {
+  //   const now = new Date().toISOString().split('T')[0];
+  //   setCreatedAt(now); 
+  //   setValue('created_at', now);
+  // }, [setCreatedAt, setValue]);
+
   const handleClick = () => {
     if (!inspectionId) {
       dispatch(
@@ -50,18 +53,12 @@ const InTreatmentService = ({
           type: 'warning',
           title: 'ກະລຸນາເລືອກຄົນເຈັບ',
           message: 'ກ່ອນບັນທຶກການປິ່ນປົວ ກະລຸນາເລືອກຄົນເຈັບກ່ອນ',
-        })
+        }),
       );
       return;
     }
     onTreatmentSubmit();
   };
-
-  useEffect(() => {
-    if (checkID) {
-      setIdPatient(idPatient);
-    }
-  }, [checkID]);
 
   useEffect(() => {
     fetchPatients();
@@ -71,13 +68,11 @@ const InTreatmentService = ({
     try {
       const res = await fetch('http://localhost:4000/src/manager/patient');
       const data = await res.json();
-      setPatients(data?.data);
+      setPatients(data.data);
     } catch (err) {
       console.error('Error fetching patients:', err);
     }
   };
-
-  // console.log(idPatient)
 
   const handlePatientSelect = async (patientData) => {
     setSelectedPatient(patientData);
@@ -88,15 +83,9 @@ const InTreatmentService = ({
 
     try {
       const res = await fetch(
-        `http://localhost:4000/src/in/inspection/${idPatient?.in_id}`,
-        {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        }
+        `http://localhost:4000/src/in/inspection/${patientData.patient_id}`,
       );
       const result = await res.json();
-
-      console.log(result)
 
       if (res.ok && result?.data?.in_id) {
         const inspection = result.data;
@@ -126,16 +115,69 @@ const InTreatmentService = ({
     }
   };
 
+  const [idPatient, setIdPatient] = useState('');
+  const [checkID, setCheckID] = useState(false);
 
-
-
+  useEffect(() => {
+    if (checkID) {
+      setIdPatient(idPatient);
+    }
+  }, [checkID]);
 
   useEffect(() => {
     if (formData.date) {
       setValue('date', formData.date);
     }
   }, [formData.date, setValue]);
+  useEffect(() => {
+    fetchPatients();
 
+    setSelectedPatient(null);
+    setInspectionId(null);
+    setFormData({
+      patient_id: '',
+      in_id: '',
+      date: '',
+    });
+  }, [refreshKey]);
+  useEffect(() => {
+    const fetchEmp = async () => {
+      try {
+        const response = await fetch('http://localhost:4000/src/manager/emp');
+        const data = await response.json();
+        if (response.ok) {
+          console.log('Employees loaded:', data.data);
+          setEmployees(
+            data.data.map((em) => ({
+              id: em.emp_id,
+              name: em.emp_name,
+              surname: em.emp_surname,
+              role: em.role,
+            })),
+          );
+        } else {
+          console.error('Failed to fetch employees', data);
+          dispatch(
+            openAlert({
+              type: 'error',
+              title: 'ເກີດຂໍ້ຜິດພາດ',
+              message: 'ບໍ່ສາມາດດຶງຂໍ້ມູນພະນັກງານໄດ້',
+            }),
+          );
+        }
+      } catch (error) {
+        console.error('Error fetching employees', error);
+        dispatch(
+          openAlert({
+            type: 'error',
+            title: 'ເກີດຂໍ້ຜິດພາດ',
+            message: 'ບໍ່ສາມາດເຊື່ອມຕໍ່ກັບເຊີຟເວີ',
+          }),
+        );
+      }
+    };
+    fetchEmp();
+  }, [dispatch]);
   return (
     <div className="">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -214,7 +256,7 @@ const InTreatmentService = ({
         <AntdTextArea
           label="ອາການເບື່ອງຕົ້ນ (Symptom)"
           name="symptom"
-          rows={2}
+          rows={1}
           placeholder="ປ້ອນອາການ"
           onChange={(e) =>
             setIntivalue({ ...intivalue, symptom: e.target.value })
@@ -225,7 +267,7 @@ const InTreatmentService = ({
         <AntdTextArea
           label="ບົ່ງມະຕິ (Checkup)"
           name="checkup"
-          rows={2}
+          rows={1}
           placeholder="ປ້ອນຂໍ້ມູນບບົ່ງມະຕິ"
           onChange={(e) =>
             setIntivalue({ ...intivalue, checkup: e.target.value })
@@ -236,7 +278,7 @@ const InTreatmentService = ({
         <AntdTextArea
           label="ພະຍາດ (diseases Now)"
           name="diseases_now"
-          rows={2}
+          rows={1}
           placeholder="ປ້ອນຜົນກວດ"
           onChange={(e) =>
             setIntivalue({ ...intivalue, diseases_now: e.target.value })
@@ -244,14 +286,42 @@ const InTreatmentService = ({
           value={intivalue.diseases_now}
         />
       </div>
-      <AntdTextArea
-        label="ໝາຍເຫດ"
-        name="note"
-        rows={2}
-        placeholder="ປ້ອນລາຍລະອຽດເພີ່ມເຕີມຖ້າມີ"
-        onChange={(e) => setIntivalue({ ...intivalue, note: e.target.value })}
-        value={intivalue.note}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* <SelectBoxId
+          label="ພະນັກງານ (ຜູ້ສ້າງ)"
+          name="emp_id_create"
+          value={selectEmpCreate}
+          options={employees.map((emp) => ({
+            label: `${emp.name} ${emp.surname} - ${emp.role}`,
+            value: emp.id,
+          }))}
+          register={register}
+          errors={errors}
+          onSelect={(e) => {
+            setSelectEmpCreate(e.target.value);
+          }}
+        />
+
+       <BoxDate
+        register={register}
+        errors={errors}
+        name="created_at"
+        label="ວັນທີສ້າງ"
+        formOptions={{ required: 'ກະລຸນາໃສ່ວັນທີສ້າງ' }}
+        onChange={(e) => {
+      setCreatedAt(e.target.value);
+      setValue('created_at', e.target.value);
+    }}
+      /> */}
+        <AntdTextArea
+          label="* ໝາຍເຫດ"
+          name="note"
+          rows={1}
+          placeholder="ປ້ອນລາຍລະອຽດເພີ່ມເຕີມຖ້າມີ"
+          onChange={(e) => setIntivalue({ ...intivalue, note: e.target.value })}
+          value={intivalue.note}
+        />
+      </div>
 
       <div className="overflow-x-auto  mb-4">
         <TypeService refreshKey={refreshKey} />
@@ -259,17 +329,16 @@ const InTreatmentService = ({
       <div className="flex justify-end mt-6">
         <button
           onClick={handleClick}
-          className={`px-6 py-2 rounded flex items-center gap-2 transition duration-200 ${loading
-            ? 'bg-gray-300 text-gray-600'
-            : 'bg-blue-600 text-white hover:bg-blue-700'
-            }`}
+          className={`px-6 py-2 rounded flex items-center gap-2 transition duration-200 ${
+            loading
+              ? 'bg-gray-300 text-gray-600'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
         >
           <Save className="w-5 h-5" />
-          {/* {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກການປິ່ນປົວ'} */}
-          ບັນທຶກການປິ່ນປົວ
+          {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກການປິ່ນປົວ'}
         </button>
       </div>
-
     </div>
   );
 };

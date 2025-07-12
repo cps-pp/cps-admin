@@ -5,10 +5,11 @@ import Logo from '../../images/logo/cps-logo.png';
 import axios from 'axios';
 import { Clock } from 'lucide-react';
 import { ACCESS_TOKEN_KEY } from '../../utils/constants';
+import { useAuth } from '../../AuthContext';
 
 const Header = (props) => {
-  const [user, setUser] = useState(null);
-  const [notifications, setNotifications] = useState({  // <-- เพิ่มตรงนี้
+  const [notifications, setNotifications] = useState({
+    // <-- เพิ่มตรงนี้
     appointments: 0,
     nearExpiry: 0,
     expired: 0,
@@ -16,6 +17,12 @@ const Header = (props) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotificationMenu, setShowNotificationMenu] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const { user, logout } = useAuth();
+ //
+  const handleLogout = () => {
+    logout(); 
+    window.location.href = '/login';
+  };
 
 
   useEffect(() => {
@@ -26,7 +33,8 @@ const Header = (props) => {
     window.addEventListener('refresh-notifications', handleRefresh);
     // โหลดแจ้งเตือนครั้งแรกตอน mount
     fetchNotifications();
-    return () => window.removeEventListener('refresh-notifications', handleRefresh);
+    return () =>
+      window.removeEventListener('refresh-notifications', handleRefresh);
   }, []);
 
   useEffect(() => {
@@ -79,18 +87,36 @@ const Header = (props) => {
 
       // ตรวจสอบโครงสร้างข้อมูล appointment
       let appointmentData = appointmentRes.data;
-      if (appointmentData && typeof appointmentData === 'object' && !Array.isArray(appointmentData)) {
-        appointmentData = appointmentData.appointments || appointmentData.data || appointmentData.result || Object.values(appointmentData)[0];
+      if (
+        appointmentData &&
+        typeof appointmentData === 'object' &&
+        !Array.isArray(appointmentData)
+      ) {
+        appointmentData =
+          appointmentData.appointments ||
+          appointmentData.data ||
+          appointmentData.result ||
+          Object.values(appointmentData)[0];
       }
 
       // ตรวจสอบโครงสร้างข้อมูล medicine
       let medicineData = medicineRes.data;
-      if (medicineData && typeof medicineData === 'object' && !Array.isArray(medicineData)) {
-        medicineData = medicineData.medicines || medicineData.data || medicineData.result || Object.values(medicineData)[0];
+      if (
+        medicineData &&
+        typeof medicineData === 'object' &&
+        !Array.isArray(medicineData)
+      ) {
+        medicineData =
+          medicineData.medicines ||
+          medicineData.data ||
+          medicineData.result ||
+          Object.values(medicineData)[0];
       }
 
       // นับจำนวนนัดหมาย
-      const appointmentCount = Array.isArray(appointmentData) ? appointmentData.length : 0;
+      const appointmentCount = Array.isArray(appointmentData)
+        ? appointmentData.length
+        : 0;
 
       // นับจำนวนยาใกล้หมดและหมด
       let nearExpiryCount = 0;
@@ -98,11 +124,13 @@ const Header = (props) => {
 
       if (Array.isArray(medicineData)) {
         medicineData.forEach((medicine) => {
-          const quantity = parseInt(medicine.quantity) ||
+          const quantity =
+            parseInt(medicine.quantity) ||
             parseInt(medicine.stock) ||
             parseInt(medicine.amount) ||
             parseInt(medicine.qty) ||
-            parseInt(medicine.remaining) || 0;
+            parseInt(medicine.remaining) ||
+            0;
 
           if (quantity === 0) {
             expiredCount++;
@@ -173,10 +201,10 @@ const Header = (props) => {
     return `${weekday} ${day}/${month}/${year} ${time}`;
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    window.location.href = '/login';
-  };
+  // const handleLogout = () => {
+  //   localStorage.removeItem(ACCESS_TOKEN_KEY);
+  //   window.location.href = '/login';
+  // };
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-white shadow">
@@ -217,7 +245,6 @@ const Header = (props) => {
                   <div className="text-md font-semibold text-form-input group-hover:text-secondary transition-colors duration-200">
                     {user.username} {user.role}
                   </div>
-
                 </div>
 
                 {showUserMenu ? (
@@ -276,7 +303,6 @@ const Header = (props) => {
                   </div>
 
                   <div className="py-2">
-
                     <button
                       onClick={handleLogout}
                       className="w-full flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-200"
@@ -314,4 +340,3 @@ const Header = (props) => {
 };
 
 export default Header;
-

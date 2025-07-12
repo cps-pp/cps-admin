@@ -153,7 +153,9 @@ const ReportPay = () => {
               </svg>
             </div>
             <div className="ml-4">
-              <h4 className="text-lg font-semibold  text-form-strokedark">ຈຳນວນລາຍການຊຳລະ</h4>
+              <h4 className="text-lg font-semibold  text-form-strokedark">
+                ຈຳນວນລາຍການຊຳລະ
+              </h4>
               <p className="text-xl font-bold text-primary">
                 {totalCount} ລາຍການ
               </p>
@@ -183,7 +185,9 @@ const ReportPay = () => {
               </svg>
             </div>
             <div className="ml-4">
-              <h4 className="text-lg font-semibold text-form-strokedark">ຍອດຊຳລະທັງໝົດ</h4>
+              <h4 className="text-lg font-semibold text-form-strokedark">
+                ຍອດຊຳລະທັງໝົດ
+              </h4>
               <p className="text-xl font-bold text-primary">
                 <p>{formattedTotalAmount}</p>
               </p>
@@ -257,7 +261,7 @@ const ReportPay = () => {
                     <td className="px-4 py-4">
                       {Number(payment.paid_amount).toLocaleString('en-GB')}
                     </td>
-    <td className="px-4 py-2">
+                    <td className="px-4 py-2">
                       {payment.pay_type?.toUpperCase() === 'CASH' && (
                         <span className="inline-block bg-green-100 text-green-800 text-sm  px-3 py-1 rounded-full">
                           CASH
@@ -294,15 +298,12 @@ const ReportPay = () => {
               ) : (
                 <tr>
                   <td colSpan={8} className="py-8 text-center text-gray-500">
-                     <div className="text-center text-gray-500 dark:text-gray-400">
-                  <div className="w-32 h-32 flex items-center justify-center mx-auto">
-                    <Empty description={false} />
-                  </div>
-                  <p className="text-lg">
-                    ບໍ່ພົບຂໍ້ມູນລາຍງານການຊຳລະເງີນ
-                 
-                  </p>
-                </div>
+                    <div className="text-center text-gray-500 dark:text-gray-400">
+                      <div className="w-32 h-32 flex items-center justify-center mx-auto">
+                        <Empty description={false} />
+                      </div>
+                      <p className="text-lg">ບໍ່ພົບຂໍ້ມູນລາຍງານການຊຳລະເງີນ</p>
+                    </div>
                   </td>
                 </tr>
               )}

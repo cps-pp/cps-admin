@@ -9,6 +9,7 @@ export const OrderHeaders = [
   { id: 'ລະຫັດຜູ້ສະໜອງ', name: 'ລະຫັດຜູ້ສະໜອງ', sortable: true },
 
   { id: 'ຄົນນຳເຂົ້າ', name: 'ຄົນນຳເຂົ້າ ', sortable: true },
+  { id: 'ປະເພດສັ່ງຊື້', name: 'ປະເພດສັ່ງຊື້ ', sortable: true },
 
   
 

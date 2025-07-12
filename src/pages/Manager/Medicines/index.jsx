@@ -444,6 +444,24 @@ const MedicinesPage = () => {
                         <span className="text-purple-600">-</span>
                       )}
                     </td>
+                    <td className="px-4 py-4">
+                      {getDoctorName(medicine.emp_id_updated)}{' '}
+                    </td>
+                    <td className="px-4 py-4">
+                      {medicine?.update_by &&
+                      !isNaN(new Date(medicine.update_by).getTime()) ? (
+                        new Date(medicine.update_by).toLocaleDateString(
+                          'en-GB',
+                          {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                          },
+                        )
+                      ) : (
+                        <span className="text-purple-600">-</span>
+                      )}
+                    </td>
 
                     <td className="px-3 py-4 text-center">
                       <TableAction

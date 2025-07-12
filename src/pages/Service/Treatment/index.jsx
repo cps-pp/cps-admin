@@ -1,7 +1,4 @@
-import {
-  FileText,
-
-} from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { Tabs } from 'antd';
 import InTreatmentService from './inTreatment';
 import InMedTag from './inMedTag';
@@ -15,13 +12,8 @@ import { useAppDispatch } from '@/redux/hook';
 import Alerts from '@/components/Alerts';
 import { useForm } from 'react-hook-form';
 import useStoreDisease from '../../../store/selectDis';
-import { ACCESS_TOKEN_KEY } from '../../../utils/constants';
-
-const token = localStorage.getItem(ACCESS_TOKEN_KEY);
-
 
 const Treatment = () => {
-
   const [loading, setLoading] = useState(false);
   const { services } = useStoreServices();
   const { medicines } = useStoreMed();
@@ -57,13 +49,13 @@ const Treatment = () => {
     checkup: '',
   });
   const dispatch = useAppDispatch();
-
+  const [selectEmpCreate, setSelectEmpCreate] = useState('');
+  const [createdAt, setCreatedAt] = useState('');
   const {
     register,
     setValue,
     formState: { errors },
   } = useForm();
-
 
   const generateInvoice = async () => {
     const totalServiceCost = savedServices.reduce(
@@ -92,13 +84,13 @@ const Treatment = () => {
       if (response.ok) {
         const resData = await response.json();
         const invoice = resData.data;
-        // console.log('Invoice generated:', invoice);
+        console.log('Invoice generated:', invoice);
         setInvoiceData(invoice);
         setIsInvoiceGenerated(true);
         return invoice;
       }
     } catch (error) {
-      // console.error('Failed to generate invoice:', error);
+      console.error('Failed to generate invoice:', error);
       return null;
     }
   };
@@ -117,6 +109,7 @@ const Treatment = () => {
       symptom: '',
       note: '',
       checkup: '',
+
     });
     clearServices();
     clearMedicine();
@@ -136,9 +129,8 @@ const Treatment = () => {
     setLoading(false);
   };
 
-
   const handleTreatmentSubmit = async () => {
-    // console.log('Starting treatment submit...');
+    console.log('Starting treatment submit...');
     setLoading(true);
 
     let newService = services.map((item) => ({
@@ -149,19 +141,20 @@ const Treatment = () => {
 
     const sendData = {
       diseases_now: intivalue.diseases_now || '',
-      diseases: dis.join(', ') || '',
       symptom: intivalue.symptom || '',
       note: intivalue.note || '',
       checkup: intivalue.checkup || '',
       detailed: newService,
+      emp_id_create: selectEmpCreate,
+      created_at: createdAt,
     };
-    // console.log(sendData)
+
     try {
       const response = await fetch(
         `http://localhost:4000/src/in/inspection/${inspectionId}`,
         {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(sendData),
         },
       );
@@ -181,6 +174,8 @@ const Treatment = () => {
         checkup: intivalue.checkup,
         diseases_now: intivalue.diseases_now,
         note: intivalue.note,
+        emp_id_create: selectEmpCreate,
+        created_at: createdAt,
       });
       setSavedPatientData(selectedPatient);
       setIsTreatmentSaved(true);
@@ -222,7 +217,6 @@ const Treatment = () => {
         price: item.price,
       })),
     ];
-
 
     const sendMed = { data: medicineData };
 
@@ -394,6 +388,10 @@ const Treatment = () => {
           isTreatmentSaved={isTreatmentSaved}
           refreshKey={refreshKey}
           dispatch={dispatch}
+      //      selectEmpCreate={selectEmpCreate}
+      // setSelectEmpCreate={setSelectEmpCreate}
+      // createdAt={createdAt}
+      // setCreatedAt={setCreatedAt}
         />
       ),
     },
@@ -408,7 +406,6 @@ const Treatment = () => {
           loading={loading}
           inspectionId={inspectionId}
           isMedicineSaved={isMedicineSaved}
-
           refreshKey={refreshKey}
         />
       ),
@@ -423,10 +420,11 @@ const Treatment = () => {
           type="button"
           onClick={handleShowBill}
           disabled={!isTreatmentSaved && !isMedicineSaved}
-          className={`${isTreatmentSaved || isMedicineSaved
-            ? 'bg-slate-500 hover:bg-slate-600'
-            : 'bg-gray-400 cursor-not-allowed'
-            } text-white text-md px-6 py-2 rounded flex items-center gap-2 transition`}
+          className={`${
+            isTreatmentSaved || isMedicineSaved
+              ? 'bg-slate-500 hover:bg-slate-600'
+              : 'bg-gray-400 cursor-not-allowed'
+          } text-white text-md px-6 py-2 rounded flex items-center gap-2 transition`}
         >
           <FileText className="w-5 h-5" />
           ກົດເບິ່ງໃບບິນ
@@ -441,7 +439,6 @@ const Treatment = () => {
           medicines={savedMedicines}
           invoiceData={invoiceData}
           onRefresh={handleRefresh}
-
         />
 
         <Alerts />
