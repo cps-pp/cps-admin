@@ -5,12 +5,13 @@ import BoxDate from '../../../components/Date';
 import useStoreServices from '../../../store/selectServices';
 import ListServiceUpdate from './ListServiceUpdate';
 import ListDisUpdate from './ListDisUpdate';
-import { Table, Tabs } from 'antd';
+import { Divider, Table, Tabs } from 'antd';
 import { iconTrash } from '@/configs/icon';
+import useStoreDisease from '../../../store/selectDis';
 
 const InServiceUpdate = ({ dataPatient, callValue }) => {
 
-  const [intivalue, setIntivalue] = useState();
+  const [intivalue, setIntivalue] = useState({});
 
   useEffect(() => {
     if (dataPatient?.in_id) {
@@ -109,12 +110,16 @@ const InServiceUpdate = ({ dataPatient, callValue }) => {
 const TypeServiceUpdate = ({ value }) => {
 
   const [listDataServices, setlistDataServices] = useState([]);
+  const [listDisease, setListDisease] = useState([]);
 
   const { newServices, removeServiceNews } = useStoreServices();
+  const { disUpdate, removeDiseaseUpdate } = useStoreDisease();
 
   useEffect(() => {
     setlistDataServices(newServices ?? []);
-  }, [newServices]);
+    setListDisease(disUpdate ?? []);
+  }, [newServices, disUpdate]);
+
 
   const columnsService = [
     {
@@ -188,7 +193,7 @@ const TypeServiceUpdate = ({ value }) => {
         ສະຫຼຸບການລາຍການທັງໝົດ
       </h1>
       <div className="p-2  rounded bg-white border border-stroke ">
-        <h5>ສະຫຼຸບການຮັກສາ</h5>
+        <h5 className='mb-2 font-bold'>ສະຫຼຸບການຮັກສາ</h5>
         <Table
           columns={columnsService}
           dataSource={listDataServices}
@@ -199,12 +204,25 @@ const TypeServiceUpdate = ({ value }) => {
       </div>
 
       <div className="p-2 mt-10 rounded bg-white border border-stroke ">
-        <h5>ສະຫຼຸບພະຍາດ</h5>
-        {/* <SumDiseases
-          selectedServices={selectedDis}
-          removeService={handleRemoveDis}
-          tapService={8}
-        /> */}
+        <h5 className='mb-2 font-bold'>ສະຫຼຸບພະຍາດ</h5>
+        <div>
+          <ul>
+            {listDisease?.map((name, index) => (
+              <div key={index}>
+                <li className="flex justify-between">
+                  <span>{name}</span>
+                  <button
+                    onClick={() => removeDiseaseUpdate(index)}
+                    className="text-red-500 hover:text-red-600 p-1 rounded"
+                  >
+                    {iconTrash}
+                  </button>
+                </li>
+                {index !== listDisease?.length - 1 && <Divider className="my-2" />}
+              </div>
+            ))}
+          </ul>
+        </div>
       </div>
     </>
   );

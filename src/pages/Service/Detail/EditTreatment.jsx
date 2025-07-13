@@ -10,6 +10,10 @@ import InServiceUpdate from './InServiceUpdate';
 import useStoreServices from '../../../store/selectServices';
 import useStoreMed from '../../../store/selectMed';
 import useStoreQi from '../../../store/selectQi';
+import { ACCESS_TOKEN_KEY } from '../../../utils/constants';
+import useStoreDisease from '../../../store/selectDis';
+
+const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 
 
 const EditTreatment = () => {
@@ -22,13 +26,15 @@ const EditTreatment = () => {
   const { newServices, fetchInspectionById, dataInspectionBy } = useStoreServices();
   const { newMedicines, fetchInspectionMedById } = useStoreMed();
   const { newEquipment, fetchInspectionEquipmentById } = useStoreQi();
-const [invoiceData, setInvoiceData] = useState(null); 
+  const { getDiseasesForUpdate, disUpdate } = useStoreDisease();
+  const [invoiceData, setInvoiceData] = useState(null);
 
   useEffect(() => {
     if (id) {
       fetchInspectionById(id);
       fetchInspectionMedById(id);
       fetchInspectionEquipmentById(id);
+      getDiseasesForUpdate();
     }
   }, [id]);
 
@@ -41,6 +47,7 @@ const [invoiceData, setInvoiceData] = useState(null);
     try {
       const newPatient = {
         diseases_now: newData?.diseases_now,
+        diseases: disUpdate.join(',') ? disUpdate.join(',') : '',
         symptom: newData?.symptom,
         checkup: newData?.checkup,
         note: newData?.note,
@@ -49,7 +56,7 @@ const [invoiceData, setInvoiceData] = useState(null);
 
       const resP = await fetch(`${URLBaseLocal}/src/in/inspection/${dataPatien?.in_id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(newPatient),
       });
 
@@ -65,20 +72,6 @@ const [invoiceData, setInvoiceData] = useState(null);
 
   const submitMedicine = async () => {
     try {
-
-      //   const medicineData = [
-      //   ...medicines.map((med) => ({
-      //     med_id: med.med_id,
-      //     qty: med.qty,
-      //     price: med.price,
-      //   })),
-      //   ...equipment.map((item) => ({
-      //     med_id: item.med_id,
-      //     qty: item.qty,
-      //     price: item.price,
-      //   })),
-      // ];
-
       const payloadMed = {
         data: [
           ...newMedicines.map((med) => ({
@@ -108,36 +101,36 @@ const [invoiceData, setInvoiceData] = useState(null);
       console.error('Error updating patient:', error);
     }
   }
-const handleShowBill = async () => {
-  if (!invoiceData && dataPatien?.in_id) {
-    try {
-      const totalServiceCost = newServices.reduce((total, s) => total + s.price * s.qty, 0);
-      const totalMedicineCost = [...newMedicines, ...newEquipment].reduce((total, m) => total + m.price * m.qty, 0);
-      const grandTotal = totalServiceCost + totalMedicineCost;
+  const handleShowBill = async () => {
+    if (!invoiceData && dataPatien?.in_id) {
+      try {
+        const totalServiceCost = newServices.reduce((total, s) => total + s.price * s.qty, 0);
+        const totalMedicineCost = [...newMedicines, ...newEquipment].reduce((total, m) => total + m.price * m.qty, 0);
+        const grandTotal = totalServiceCost + totalMedicineCost;
 
-      const res = await fetch(`${URLBaseLocal}/src/invoice/invoice`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          total: grandTotal,
-          in_id: dataPatien.in_id,
-        }),
-      });
+        const res = await fetch(`${URLBaseLocal}/src/invoice/invoice`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            total: grandTotal,
+            in_id: dataPatien.in_id,
+          }),
+        });
 
-      if (res.ok) {
-        const result = await res.json();
-        setInvoiceData(result.data);
-        setShowBillPopup(true); 
-      } else {
-        console.error('Cannot create invoice');
+        if (res.ok) {
+          const result = await res.json();
+          setInvoiceData(result.data);
+          setShowBillPopup(true);
+        } else {
+          console.error('Cannot create invoice');
+        }
+      } catch (err) {
+        console.error('Error generating invoice:', err);
       }
-    } catch (err) {
-      console.error('Error generating invoice:', err);
+    } else {
+      setShowBillPopup(true);
     }
-  } else {
-    setShowBillPopup(true); 
-  }
-};
+  };
 
   return (
     <>
@@ -155,7 +148,7 @@ const handleShowBill = async () => {
 
           <button
             type="button"
-             onClick={handleShowBill}
+            onClick={handleShowBill}
             className="bg-slate-500 hover:bg-slate-600 text-white text-md px-6 py-2 rounded flex items-center gap-2 transition"
           >
             <FileText className="w-5 h-5" />
@@ -197,16 +190,16 @@ const handleShowBill = async () => {
           ),
         }]} />
 
-       <BillPopup
-  isOpen={showBillPopup}
-  onClose={() => setShowBillPopup(false)}
-  patientData={dataPatien}
-  inspectionData={newData}
-  services={newServices}
-  medicines={[...newMedicines, ...newEquipment]}
-  invoiceData={invoiceData} 
-  onRefresh={() => window.location.reload()}
-/>
+        <BillPopup
+          isOpen={showBillPopup}
+          onClose={() => setShowBillPopup(false)}
+          patientData={dataPatien}
+          inspectionData={newData}
+          services={newServices}
+          medicines={[...newMedicines, ...newEquipment]}
+          invoiceData={invoiceData}
+          onRefresh={() => window.location.reload()}
+        />
 
 
 

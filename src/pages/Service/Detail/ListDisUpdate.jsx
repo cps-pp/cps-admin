@@ -3,14 +3,14 @@ import { Space, Table } from 'antd';
 import useStoreDisease from '../../../store/selectDis';
 
 export default function ListDisUpdate({ selectService, tapService }) {
-  const [dataMed, setDataMed] = useState([]);
-  const { addDisease, dis } = useStoreDisease();
+  const [dataDis, setDataDis] = useState([]);
+  const { addDiseaseUpdate } = useStoreDisease();
 
   const fetchDisList = async () => {
     try {
       const res = await fetch('http://localhost:4000/src/manager/disease');
       const data = await res.json();
-      setDataMed(data.data);
+      setDataDis(data.data);
     } catch (err) {
       console.error('Error fetching disease list:', err);
     }
@@ -40,8 +40,7 @@ export default function ListDisUpdate({ selectService, tapService }) {
         <button
           type="button"
           onClick={() => {
-            selectService(record);
-            selectionDisease(record);
+            addDiseaseUpdate([record]);
           }}
           className="bg-secondary2 text-white px-3 py-1 rounded hover:bg-secondary"
         >
@@ -50,14 +49,12 @@ export default function ListDisUpdate({ selectService, tapService }) {
       ),
     },
   ];
-  const selectionDisease = async (record) => {
-    await addDisease(record);
-  };
+
   return (
     <div>
       <Table
         columns={columns}
-        dataSource={dataMed}
+        dataSource={dataDis}
         pagination={{ pageSize: 3, size: 'middle' }}
         locale={{ emptyText: 'ບໍ່ມີຂໍ້ມູນ' }}
         size="small"
