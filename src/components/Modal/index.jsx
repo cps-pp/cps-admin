@@ -1,47 +1,48 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 const ConfirmModal = ({ show, setShow, message, handleConfirm }) => {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    let timeout;
+    if (show) {
+      timeout = setTimeout(() => setVisible(true), 10);
+    } else {
+      setVisible(false);
+    }
+    return () => clearTimeout(timeout);
+  }, [show]);
+
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Background overlay */}
       <div
-        className="absolute inset-0 bg-black bg-opacity-50"
+        className={`absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out ${visible ? 'opacity-100' : 'opacity-0'}`}
         onClick={() => setShow(false)}
       />
 
-      {/* Modal */}
-      <div className="relative w-full max-w-md bg-white rounded-lg shadow-lg">
-        {/* Close Button */}
+      {/* Modal content */}
+      <div
+        className={`relative w-full max-w-md bg-white rounded-lg shadow-lg transform transition-all duration-300 ease-in-out ${
+          visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+        }`}
+      >
+        {/* Close button */}
         <button
           onClick={() => setShow(false)}
           className="absolute top-3 right-3 w-6 h-6 text-gray-500 hover:text-gray-700"
         >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
 
         {/* Content */}
         <div className="p-6 text-center">
           <div className="w-14 h-14 mx-auto mb-1 bg-red-100 rounded-full flex items-center justify-center">
-            <svg
-              className="w-8 h-8 text-red-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -51,20 +52,17 @@ const ConfirmModal = ({ show, setShow, message, handleConfirm }) => {
             </svg>
           </div>
 
-          <h3 className="text-lg font-medium text-gray-900 mb-2 font-en">
-            Delete
-          </h3>
-          <p className="text-gray-600 mb-6">{message}</p>
+          <h3 className="text-lg font-medium text-form-input mb-2 font-en">Delete</h3>
+          <p className="text-form-strokedark mb-6">{message}</p>
 
-          {/* Action Buttons */}
+          {/* Buttons */}
           <div className="flex gap-3">
             <button
               onClick={() => setShow(false)}
-              className="flex-1 px-4 py-2 text-slate-500 bg-slate-100 rounded  hover:bg-slate-200"
+              className="flex-1 px-4 py-2 text-slate-500 bg-slate-100 rounded hover:bg-slate-200"
             >
               ຍົກເລິກ
             </button>
-
             <button
               onClick={handleConfirm}
               className="flex-1 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
@@ -79,6 +77,7 @@ const ConfirmModal = ({ show, setShow, message, handleConfirm }) => {
 };
 
 export default ConfirmModal;
+
 
 // import React from 'react';
 

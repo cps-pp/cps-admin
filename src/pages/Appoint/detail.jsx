@@ -21,6 +21,7 @@ import {
   Calendar,
   Filter,
   X,
+  Package,
 } from 'lucide-react';
 import { useParams, useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -57,36 +58,36 @@ const FollowTreatmentPage = ({ onBack }) => {
   }, [id, patient]);
 
   const filterInspections = () => {
-  setIsSearching(true);
-  let filtered = [...inspectionDetails];
+    setIsSearching(true);
+    let filtered = [...inspectionDetails];
 
-  if (searchDate) {
-    filtered = filtered.filter((inspection) => {
-      const inspectionDate = new Date(inspection.date).toISOString().split('T')[0];
-      const selectedDate = new Date(searchDate).toISOString().split('T')[0];
+    if (searchDate) {
+      filtered = filtered.filter((inspection) => {
+        const inspectionDate = new Date(inspection.date)
+          .toISOString()
+          .split('T')[0];
+        const selectedDate = new Date(searchDate).toISOString().split('T')[0];
 
-      // console.log('Comparing:', inspectionDate, 'vs', selectedDate);
-      return inspectionDate === selectedDate;
-    });
-  }
+        // console.log('Comparing:', inspectionDate, 'vs', selectedDate);
+        return inspectionDate === selectedDate;
+      });
+    }
 
-  if (searchInId) {
-    filtered = filtered.filter((inspection) =>
-      inspection.in_id
-        .toString()
-        .toLowerCase()
-        .includes(searchInId.toLowerCase())
-    );
-  }
+    if (searchInId) {
+      filtered = filtered.filter((inspection) =>
+        inspection.in_id
+          .toString()
+          .toLowerCase()
+          .includes(searchInId.toLowerCase()),
+      );
+    }
 
-  setFilteredInspections(filtered);
+    setFilteredInspections(filtered);
 
-  setTimeout(() => {
-    setIsSearching(false);
-  }, 300);
-};
-
-
+    setTimeout(() => {
+      setIsSearching(false);
+    }, 300);
+  };
 
   useEffect(() => {
     filterInspections();
@@ -211,18 +212,18 @@ const FollowTreatmentPage = ({ onBack }) => {
     setFilteredInspections([]);
   };
 
-const handleReload = async () => {
-  setSearchDate('');
-  setSearchInId('');
-  
-  setFilteredInspections([]);
-  
-  if (patient) {
-    await fetchInspectionsByPatient(patient.patient_id);
-  } else {
-    await fetchPatientById();
-  }
-};
+  const handleReload = async () => {
+    setSearchDate('');
+    setSearchInId('');
+
+    setFilteredInspections([]);
+
+    if (patient) {
+      await fetchInspectionsByPatient(patient.patient_id);
+    } else {
+      await fetchPatientById();
+    }
+  };
 
   const toggleInspectionExpansion = async (inspectionId) => {
     const isExpanded = expandedInspections[inspectionId];
@@ -261,12 +262,39 @@ const handleReload = async () => {
     return age;
   };
 
-  const renderDetailItem = (label, value) => (
-    <div className="flex flex-col space-y-1">
-      <span className="text-sm font-medium text-gray-500">{label}</span>
-      <span className="text-base text-gray-900">{value || '-'}</span>
-    </div>
+  const latestInspectionId = inspectionDetails
+    .slice()
+    .sort((a, b) => new Date(b.date) - new Date(a.date))[0]?.in_id;
+
+  const detailedData = latestInspectionId
+    ? detailedInspections[latestInspectionId]
+    : null;
+// เพิ่ม function เพื่อดึง SPK services จาก inspection ล่าสุด
+const getLatestSPKServices = () => {
+  const latestInspectionId = inspectionDetails
+    .slice()
+    .sort((a, b) => new Date(b.date) - new Date(a.date))[0]?.in_id;
+  
+  const latestDetailedData = latestInspectionId
+    ? detailedInspections[latestInspectionId]
+    : null;
+  
+  if (!latestDetailedData?.services) return [];
+  
+  // กรองเฉพาะ services ที่มีรหัสขึ้นต้นด้วย "SPK"
+  return latestDetailedData.services.filter(service => 
+    service.ser_id && service.ser_id.startsWith('SPK')
   );
+};
+
+// เพิ่ม function เพื่อรวมชื่อ services ทั้งหมด
+const getSPKServiceNames = () => {
+  const spkServices = getLatestSPKServices();
+  if (spkServices.length === 0) return '-';
+  
+  return spkServices.map(service => service.ser_name).join(', ');
+};
+
 
   const renderInspectionCard = (inspection) => {
     const isExpanded = expandedInspections[inspection.in_id];
@@ -633,6 +661,7 @@ const handleReload = async () => {
                       {formatDate(patient.dob)}
                     </span>
                   </div>
+                 
                 </div>
               </div>
 
@@ -681,6 +710,32 @@ const handleReload = async () => {
                 </div>
               </div>
             </div>
+
+
+<div className="bg-white rounded shadow-sm border border-slate-200 p-6">
+  <div className="flex items-center justify-between">
+    <div className="flex items-center gap-3">
+      <div className="w-10 h-10 bg-secondary2 rounded-full flex items-center justify-center">
+        <Package className="w-5 h-5 text-white" />
+      </div>
+      <div>
+        <h3 className="font-semibold text-form-input">ແພັກແກັດ</h3>
+      </div>
+
+      <div className="h-10  border-l border-slate-400 mx-7" />
+    </div>
+
+    <div className="text-right">
+      <div className="text-2xl font-bold text-secondary2">
+        {getLatestSPKServices().length}{' '}
+        <span className="text-secondary2">ລາຍການ</span>
+      </div>
+      <div className="text-sm text-slate-500 mt-1">
+        ແພັກແກັກ{getSPKServiceNames()}
+      </div>
+    </div>
+  </div>
+</div>
             {/*  */}
             <div className="mt-6 bg-white rounded shadow-sm border border-slate-200 p-6">
               <div className="flex items-center gap-3 mb-4">
@@ -756,12 +811,12 @@ const handleReload = async () => {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                     <div className="w-32 h-32 flex items-center justify-center mx-auto ">
-                <Empty description={false} />
-              </div>
-              <p className="text-lg">ບໍ່ພົບປະຫວັດການກວດ</p>
-              <p className="text-sm mt-2">ກະລຸນາກວດສອບຂໍ້ມູນ</p>
-            </div>
+                    <div className="w-32 h-32 flex items-center justify-center mx-auto ">
+                      <Empty description={false} />
+                    </div>
+                    <p className="text-lg">ບໍ່ພົບປະຫວັດການກວດ</p>
+                    <p className="text-sm mt-2">ກະລຸນາກວດສອບຂໍ້ມູນ</p>
+                  </div>
                 )}
               </div>
             </div>

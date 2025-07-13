@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { FollowHeader } from './Follow/column/follow';
 import ExchangeRateModal from '../components/exchange_chack/ExchangeRateModal'; // เพิ่ม import
 import { Calendar, Badge, List, Typography, Card } from 'antd';
+import { ArrowRight } from 'lucide-react';
 const { Text, Title } = Typography;
 const Dashboard = () => {
   const onPanelChange = (value, mode) => {
@@ -719,10 +720,11 @@ const Dashboard = () => {
 
               <button
                 onClick={() => navigate('/followpat')}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm rounded transition-colors duration-200 flex items-center gap-2"
+                className="bg-secondary2 hover:bg-secondary3 text-white px-4 py-2 text-sm rounded transition-colors duration-200 flex items-center gap-2"
               >
 
                 ກວດສອບນັດໝາຍ
+                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -821,10 +823,11 @@ const Dashboard = () => {
               </div>
               <button
                 onClick={() => navigate('/perorder')}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm rounded transition-colors duration-200 flex items-center gap-2"
+                className="bg-secondary2 hover:bg-secondary3 text-white px-4 py-2 text-sm rounded transition-colors duration-200 flex items-center gap-2"
               >
 
                 ສັ່ງຊື້ຢາ ແລະ ອຸປະກອນ
+                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>

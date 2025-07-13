@@ -15,6 +15,7 @@ import { openAlert } from '@/redux/reducer/alert';
 import SearchBox from '../../../components/Forms/Search_New';
 import { Empty } from 'antd';
 import { ACCESS_TOKEN_KEY } from '../../../utils/constants';
+import SmoothModal from '../../../components/Modal/SmoothModal';
 const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 
 const PatientPage = () => {
@@ -36,26 +37,28 @@ const PatientPage = () => {
   const [existingPhones2, setExistingPhones2] = useState([]);
   // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
   const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
-  
+
   // ✅ เพิ่ม state สำหรับการเรียงลำดับ ID (คัดลอกจาก CategoryPage)
   const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
 
   const fetchPatients = async () => {
     try {
-    setLoading(true);
-    const response = await fetch('http://localhost:4000/src/manager/patientP', {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
+      setLoading(true);
+      const response = await fetch(
+        'http://localhost:4000/src/manager/patientP',
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
       setPatients(data.data);
       setFilteredPatients(data.data);
-      // ✅ เก็บรหัสทั้งหมดไว้
       const ids = data.data.map((patient) => patient.patient_id);
       const phones1 = data.data.map((patient) => patient.phone1); // เพิ่มตรงนี้
       const phones2 = data.data.map((patient) => patient.phone2); // เพิ่มตรงนี้
@@ -72,15 +75,22 @@ const PatientPage = () => {
   useEffect(() => {
     fetchPatients();
   }, []);
-  
+
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setFilteredPatients(patients);
     } else {
-      const filtered = patients.filter((patient) => 
-        patient.patient_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        patient.patient_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        patient.patient_surname.toLowerCase().includes(searchQuery.toLowerCase())
+      const filtered = patients.filter(
+        (patient) =>
+          patient.patient_id
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          patient.patient_name
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          patient.patient_surname
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()),
       );
       setFilteredPatients(filtered);
     }
@@ -90,25 +100,25 @@ const PatientPage = () => {
   const handleSortById = () => {
     const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
     setSortOrder(newSortOrder);
-    
+
     const sortedPatients = [...patients].sort((a, b) => {
       const extractNumber = (id) => {
         const match = id.match(/\d+/);
         return match ? parseInt(match[0]) : 0;
       };
-      
+
       const numA = extractNumber(a.patient_id);
       const numB = extractNumber(b.patient_id);
-      
+
       if (newSortOrder === 'asc') {
-        return numA - numB; 
+        return numA - numB;
       } else {
-        return numB - numA; 
+        return numB - numA;
       }
     });
-    
+
     setPatients(sortedPatients);
-    
+
     if (searchQuery.trim() !== '') {
       const filtered = sortedPatients.filter((patient) => {
         const patientDataString = Object.values(patient)
@@ -136,12 +146,12 @@ const PatientPage = () => {
       const response = await fetch(
         `http://localhost:4000/src/manager/patient/${selectedPatientId}`,
         {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
         },
-      },
       );
 
       if (!response.ok) {
@@ -188,14 +198,11 @@ const PatientPage = () => {
     setPage(0);
   };
 
-  // ✅ Handler สำหรับปุ่ม X ที่จะใช้ฟังก์ชันจาก CreateCategory
   const handleCloseAddModal = () => {
     if (createFormCloseHandler) {
-      // เรียกใช้ฟังก์ชันที่ได้รับมาจาก CreateCategory
       createFormCloseHandler();
     } else {
-      // fallback ถ้าไม่มี handler
-      setShowAddModal(false); // ✅ แก้ไขชื่อตัวแปรให้ถูกต้อง
+      setShowAddModal(false);
     }
   };
 
@@ -307,7 +314,7 @@ const PatientPage = () => {
               ) : (
                 <tr>
                   <td colSpan={11} className="px-4 py-6  text-gray-500">
-                     <div className="text-center ">
+                    <div className="text-center ">
                       <div className="w-32 h-32 flex items-center justify-center mx-auto">
                         <Empty description={false} />
                       </div>
@@ -332,7 +339,6 @@ const PatientPage = () => {
         overflow-auto
         max-h-[90vh]"
             >
-              {/* ✅ ปุ่ม X ที่ใช้ฟังก์ชันป้องกันจาก CreateCategory */}
               <button
                 onClick={handleCloseAddModal}
                 className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700 z-10"
@@ -353,14 +359,16 @@ const PatientPage = () => {
                 </svg>
               </button>
 
-              <CreatePatient
-                setShow={setShowAddModal}
-                getList={fetchPatients}
-                existingIds={existingIds} // ✅ เพิ่มบรรทัดน
-                existingPhones1={existingPhones1}
-                existingPhones2={existingPhones2}
-                onCloseCallback={setCreateFormCloseHandler} // ✅ ส่ง callback function
-              />
+              <SmoothModal onClose={() => setShowAddModal(false)}>
+                <CreatePatient
+                  setShow={setShowAddModal}
+                  getList={fetchPatients}
+                  existingIds={[]} 
+                  existingPhones1={[]}
+                  existingPhones2={[]}
+                  onCloseCallback={() => {}}
+                />
+              </SmoothModal>
             </div>
           </div>
         )}
@@ -396,14 +404,14 @@ const PatientPage = () => {
                   />
                 </svg>
               </button>
-
-              <EditPatient
-                id={selectedId}
-                onClose={() => setShowEditModal(false)}
-                setShow={setShowEditModal}
-                getList={fetchPatients}
-                
-              />
+              <SmoothModal onClose={() => setShowEditModal(false)}>
+                <EditPatient
+                  id={selectedId}
+                  onClose={() => setShowEditModal(false)}
+                  setShow={setShowEditModal}
+                  getList={fetchPatients}
+                />
+              </SmoothModal>
             </div>
           </div>
         )}
@@ -426,4 +434,3 @@ const PatientPage = () => {
 };
 
 export default PatientPage;
-

@@ -38,7 +38,7 @@ const CreatePatient = ({
     watch,
     formState: { isDirty, errors },
   } = useForm();
-const dob = watch('dob');
+  const dob = watch('dob');
 
   // ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
   const isDirtyRef = useRef(isDirty);
@@ -208,7 +208,6 @@ const dob = watch('dob');
       );
       setLoading(false); // 🛑 เพิ่มตรงนี้ เพื่อให้โหลดหยุดและฟอร์มยังคงอยู่
       return; // หยุดการดำเนินการ
-
     } else if (existingPhones1.includes(data.phone1)) {
       setFocus('phone1'); // โฟกัสที่ช่องรหัสคนเจ็บ
       dispatch(
@@ -220,7 +219,6 @@ const dob = watch('dob');
       );
       setLoading(false); // 🛑 เพิ่มตรงนี้ เพื่อให้โหลดหยุดและฟอร์มยังคงอยู่
       return; // หยุดการดำเนินการ
-
     } else if (existingPhones2.includes(data.phone2)) {
       setFocus('phone2'); // โฟกัสที่ช่องรหัสคนเจ็บ
       dispatch(
@@ -232,7 +230,6 @@ const dob = watch('dob');
       );
       setLoading(false); // 🛑 เพิ่มตรงนี้ เพื่อให้โหลดหยุดและฟอร์มยังคงอยู่
       return; // หยุดการดำเนินการ
-
     } else if (data.phone1 === data.phone2) {
       setFocus('phone2'); // โฟกัสที่ช่องรหัสคนเจ็บ
       dispatch(
@@ -301,9 +298,8 @@ const dob = watch('dob');
         onSubmit={handleSubmit(handleSave)}
         className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 px-4"
       >
-        {/* แสดงรหัสที่สร้างอัตโนมัติ (แบบ read-only) */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2 text-black dark:text-white">
+        <div className="">
+          <label className="block text-sm font-medium mb-1 text-black dark:text-white">
             ລະຫັດຄົນເຈັບ
           </label>
           <input
@@ -355,8 +351,7 @@ const dob = watch('dob');
           setValue={setValue}
         />
 
-        {/* ✅ Custom Phone Input 1 with 020 prefix - แก้ไขแล้ว */}
-        <div className="mb-4">
+        <div className="">
           <label className="block text-sm font-medium mb-2 text-black dark:text-white">
             ເບີຕິດຕໍ່ 1
           </label>
@@ -367,7 +362,6 @@ const dob = watch('dob');
             placeholder="0202xxxxxxx, 0205xxxxxxx, 0207xxxxxxx, 0209xxxxxxx"
             className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           />
-          {/* Hidden input for form validation */}
           <input
             type="hidden"
             {...register('phone1', {
@@ -402,9 +396,8 @@ const dob = watch('dob');
           )}
         </div>
 
-        {/* ✅ Custom Phone Input 2 with 020 prefix - แก้ไขแล้ว */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2 text-black dark:text-white">
+        <div className="">
+          <label className="block text-sm font-medium mb-2 text-black">
             ເບີຕິດຕໍ່ 2
           </label>
           <input
@@ -412,7 +405,7 @@ const dob = watch('dob');
             value={phoneNumber2}
             onChange={handlePhone2Change}
             placeholder="0202xxxxxxx, 0205xxxxxxx, 0207xxxxxxx, 0209xxxxxxx"
-            className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           />
           {/* Hidden input for form validation */}
           <input
@@ -477,8 +470,7 @@ const dob = watch('dob');
           errors={errors}
         />
 
-        <div className="mt-4 flex justify-end space-x-4 col-span-full py-4">
-
+        <div className=" flex justify-end space-x-4 col-span-full py-4">
           <ButtonBox variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </ButtonBox>
