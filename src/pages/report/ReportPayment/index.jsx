@@ -263,7 +263,7 @@ const ReportPay = () => {
                     </td>
                     <td className="px-4 py-2">
                       {payment.pay_type?.toUpperCase() === 'CASH' && (
-                        <span className="inline-block bg-green-100 text-green-800 text-sm  px-3 py-1 rounded-full">
+                        <span className="inline-block bg-secondary2/10 text-secondary text-sm  px-3 py-1 rounded-full">
                           CASH
                         </span>
                       )}

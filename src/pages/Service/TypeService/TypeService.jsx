@@ -6,7 +6,14 @@ import ListDis from './Component/ListDis';
 import SumService from './Component/SumService';
 import SumDiseases from './Component/SumDis';
 import { CopyPlus, Activity } from 'lucide-react';
-export default function TypeService({ selectService, value ,refreshKey,inspectionId  }) {
+import useStoreServices from '../../../store/selectServices';
+export default function TypeService({
+  selectService,
+  value,
+  refreshKey,
+  inspectionId,
+}) {
+  const { services, addService, removeService, updateQty } = useStoreServices();
   const [selectedServices, setSelectedServices] = useState([]);
   const [selectedDis, setSelectedDis] = useState([]);
   const [allSelectedItems, setAllSelectedItems] = useState([]);
@@ -21,20 +28,34 @@ export default function TypeService({ selectService, value ,refreshKey,inspectio
 
     async function loadExistingData() {
       try {
-        const res = await fetch(`http://localhost:4000/src/report/inspection/${inspectionId}`);
+        const res = await fetch(
+          `http://localhost:4000/src/report/inspection/${inspectionId}`,
+        );
         const data = await res.json();
 
         if (data.resultCode === '200' && data.data) {
-          const servicesFromAPI = data.data.services || []; 
+          const servicesFromAPI = data.data.services || [];
           const diseasesFromAPI = data.data.diseases || [];
 
           setSelectedServices(servicesFromAPI);
           setSelectedDis(diseasesFromAPI);
 
           setAllSelectedItems([
-            ...servicesFromAPI.map(s => ({ ...s, itemType: 'service' })),
-            ...diseasesFromAPI.map(d => ({ ...d, itemType: 'disease' })),
+            ...servicesFromAPI.map((s) => ({ ...s, itemType: 'service' })),
+            ...diseasesFromAPI.map((d) => ({ ...d, itemType: 'disease' })),
           ]);
+
+          // อัพเดต global store เมื่อโหลดข้อมูลจาก API
+          servicesFromAPI.forEach((service) => {
+            const existingService = services.find(
+              (s) => s.ser_id === service.ser_id,
+            );
+            if (!existingService) {
+              addService(service);
+            } else if (existingService.qty !== service.qty) {
+              updateQty(service.ser_id, service.qty);
+            }
+          });
         } else {
           setSelectedServices([]);
           setSelectedDis([]);
@@ -51,17 +72,6 @@ export default function TypeService({ selectService, value ,refreshKey,inspectio
     loadExistingData();
   }, [inspectionId, refreshKey]);
 
-
-  
-  const handleSelectService = (service) => {
-    if (!selectedServices.find((item) => item.ser_id === service.ser_id)) {
-      const serviceWithType = { ...service, itemType: 'service' };
-      setSelectedServices((prev) => [...prev, service]);
-      setAllSelectedItems((prev) => [...prev, serviceWithType]);
-    }
-    selectService?.(service);
-  };
-
   const handleRemoveService = (service) => {
     setSelectedServices((prev) =>
       prev.filter((item) => item.ser_id !== service.ser_id),
@@ -72,6 +82,9 @@ export default function TypeService({ selectService, value ,refreshKey,inspectio
           !(item.ser_id === service.ser_id && item.itemType === 'service'),
       ),
     );
+
+    // ลบจาก global store ด้วย
+    removeService(service);
   };
 
   const handleSelectDis = (service) => {
@@ -109,6 +122,49 @@ export default function TypeService({ selectService, value ,refreshKey,inspectio
     );
   };
 
+  // แก้ไข handleUpdateQty ให้อัพเดตทั้ง local state และ global store
+  const handleUpdateQty = (ser_id, qty) => {
+    console.log('Updating qty:', ser_id, qty); // เพิ่ม debug log
+
+    // อัพเดต local state
+    setSelectedServices((prev) =>
+      prev.map((item) =>
+        item.ser_id === ser_id
+          ? { ...item, qty, total: qty * item.price }
+          : item,
+      ),
+    );
+
+    setAllSelectedItems((prev) =>
+      prev.map((item) =>
+        item.ser_id === ser_id && item.itemType === 'service'
+          ? { ...item, qty, total: qty * item.price }
+          : item,
+      ),
+    );
+
+    // อัพเดต global store - นี่คือส่วนที่ขาดหายไป!
+    updateQty(ser_id, qty);
+    console.log('Global store updated for:', ser_id, qty); // เพิ่ม debug log
+  };
+
+  const handleSelectService = (service) => {
+    if (!selectedServices.find((item) => item.ser_id === service.ser_id)) {
+      const serviceWithType = {
+        ...service,
+        itemType: 'service',
+        qty: 1,
+        total: service.price ?? 0,
+      };
+      setSelectedServices((prev) => [...prev, serviceWithType]);
+      setAllSelectedItems((prev) => [...prev, serviceWithType]);
+
+      // เพิ่มใน global store
+      addService(serviceWithType);
+    }
+    selectService?.(service);
+  };
+
   const upperTabs = [
     {
       key: '1',
@@ -142,6 +198,7 @@ export default function TypeService({ selectService, value ,refreshKey,inspectio
         <SumService
           selectedServices={allSelectedItems}
           removeService={handleRemoveService}
+          updateQty={handleUpdateQty}
           tapDetail={5}
         />
       ),

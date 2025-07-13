@@ -36,7 +36,7 @@ const Treatment = () => {
   const { clearServices } = useStoreServices();
   const { clearEquipment } = useStoreQi();
   const { clearMedicine } = useStoreMed();
-  const { clearDisease } = useStoreDisease();
+  const { clearDis } = useStoreDisease();
   const [formData, setFormData] = useState({
     patient_id: '',
     in_id: '',
@@ -114,7 +114,7 @@ const Treatment = () => {
     clearServices();
     clearMedicine();
     clearEquipment();
-    clearDisease();
+    clearDis();
 
     setSelectedPatient(null);
     setInspectionId(null);
@@ -130,7 +130,9 @@ const Treatment = () => {
   };
 
   const handleTreatmentSubmit = async () => {
-    console.log('Starting treatment submit...');
+    // console.log('Starting treatment submit...');
+  // console.log('Services length:', services.length);
+  
     setLoading(true);
 
     let newService = services.map((item) => ({

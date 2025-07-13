@@ -1,5 +1,4 @@
-
-import { create } from 'zustand'
+import { create } from 'zustand';
 import { URLBaseLocal } from '../lib/MyURLAPI';
 
 const useStoreServices = create((set) => ({
@@ -8,7 +7,6 @@ const useStoreServices = create((set) => ({
   dataInspectionBy: null,
 
   addService: (data) => {
-
     set((state) => {
       {
         const addData = Array.from(new Set([...state.services, data]));
@@ -18,11 +16,15 @@ const useStoreServices = create((set) => ({
             ser_name: item.ser_name,
             qty: 1,
             price: item.price,
-          }
-        })
+          };
+        });
         // Check same id
-        const existsID = state.services.some(item => item.ser_id === data.ser_id);
-        if (existsID) { return state }
+        const existsID = state.services.some(
+          (item) => item.ser_id === data.ser_id,
+        );
+        if (existsID) {
+          return state;
+        }
 
         // if (exists) {
         //   return {
@@ -32,23 +34,25 @@ const useStoreServices = create((set) => ({
         // }
         return {
           ...state,
-          services: customData
-        }
+          services: customData,
+        };
       }
     });
   },
   removeService: (data) => {
     set((state) => {
-      const filteredData = state.services.filter((item) => item.ser_id !== data.ser_id);
+      const filteredData = state.services.filter(
+        (item) => item.ser_id !== data.ser_id,
+      );
       return {
         ...state,
-        services: filteredData
-      }
+        services: filteredData,
+      };
     });
   },
   addServiceNews: (data) => {
     set((state) => {
-      const exists = state.newServices.some(s => s.ser_id === data.ser_id);
+      const exists = state.newServices.some((s) => s.ser_id === data.ser_id);
       const updated = exists
         ? state.newServices
         : [...state.newServices, { ...data, qty: 1 }];
@@ -58,11 +62,13 @@ const useStoreServices = create((set) => ({
   },
   removeServiceNews: (data) => {
     set((state) => {
-      const filteredData = state.newServices.filter((item) => item.ser_id !== data.ser_id);
+      const filteredData = state.newServices.filter(
+        (item) => item.ser_id !== data.ser_id,
+      );
       return {
         ...state,
-        newServices: filteredData
-      }
+        newServices: filteredData,
+      };
     });
   },
   // fetchInspectionById: async (id) => {
@@ -89,43 +95,56 @@ const useStoreServices = create((set) => ({
   //   }
   // },
   fetchInspectionById: async (id) => {
-  set({ loading: true, error: null });
+    set({ loading: true, error: null });
 
-  try {
-    const res = await fetch(`${URLBaseLocal}/src/report/inspection/${id}`);
-    const data = await res.json();
+    try {
+      const res = await fetch(`${URLBaseLocal}/src/report/inspection/${id}`);
+      const data = await res.json();
 
-    const detailed_services = data?.data?.services || [];
+      const detailed_services = data?.data?.services || [];
 
-    if (data?.resultCode === '200') {
-      set((state) => {
-        const existingIDs = new Set(state.newServices.map(item => item.ser_id));
-        const uniqueNewServices = detailed_services.filter(
-          (item) => !existingIDs.has(item.ser_id)
-        );
+      if (data?.resultCode === '200') {
+        set((state) => {
+          const existingIDs = new Set(
+            state.newServices.map((item) => item.ser_id),
+          );
+          const uniqueNewServices = detailed_services.filter(
+            (item) => !existingIDs.has(item.ser_id),
+          );
 
-        return {
-          dataInspectionBy: data.data,
-          newServices: [...state.newServices, ...uniqueNewServices],
-          loading: false
-        };
-      });
-    } else {
-      set({ error: 'Failed to fetch inspection data', loading: false });
+          return {
+            dataInspectionBy: data.data,
+            newServices: [...state.newServices, ...uniqueNewServices],
+            loading: false,
+          };
+        });
+      } else {
+        set({ error: 'Failed to fetch inspection data', loading: false });
+      }
+    } catch (err) {
+      set({ error: err.message, loading: false });
     }
+  },
 
-  } catch (err) {
-    set({ error: err.message, loading: false });
-  }
-},
-clearServices: () => {
-  set({
-    services: [],
-    newServices: [],
-    dataInspectionBy: null,
-  });
-},
-
-}))
+  updateQtyServicesNews: (ser_id, qty) =>
+    set((state) => ({
+      newServices: state.newServices.map((ser) =>
+        ser.ser_id === ser_id ? { ...ser, qty, total: qty * ser.price } : ser,
+      ),
+    })),
+  updateQty: (ser_id, qty) =>
+    set((state) => ({
+      services: state.services.map((ser) =>
+        ser.ser_id === ser_id ? { ...ser, qty, total: qty * ser.price } : ser,
+      ),
+    })),
+  clearServices: () => {
+    set({
+      services: [],
+      newServices: [],
+      dataInspectionBy: null,
+    });
+  },
+}));
 
 export default useStoreServices;

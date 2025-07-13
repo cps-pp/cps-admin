@@ -148,19 +148,11 @@ const PaymentPage = () => {
                     <td className="px-4 py-2">
                       {Number(pay.paid_amount).toLocaleString()} ກີບ
                     </td>
-                    <td
-                      className={`inline-block rounded-full px-3 mt-3 py-1 text-center text-sm font-medium ${
-                        pay.status === 'SUCCESS'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-500'
-                      }`}
-                    >
-                      {pay.status}
-                    </td>
+                  
 
                     <td className="px-4 py-2">
                       {pay.pay_type?.toUpperCase() === 'CASH' && (
-                        <span className="inline-block bg-green-100 text-green-800 text-sm  px-3 py-1 rounded-full">
+                        <span className="inline-block bg-secondary2/10 text-secondary text-sm  px-3 py-1 rounded-full">
                           CASH
                         </span>
                       )}
@@ -171,7 +163,7 @@ const PaymentPage = () => {
                       )}
                       {pay.pay_type?.toUpperCase() === 'REFUND' && (
                         <span className="inline-block bg-yellow-100 text-yellow-800 text-sm  px-3 py-1 rounded-full">
-                          Refund
+                          Refund 
                         </span>
                       )}
                       {!['CASH', 'TRANSFER', 'REFUND'].includes(
@@ -181,6 +173,16 @@ const PaymentPage = () => {
                           {pay.pay_type}
                         </span>
                       )}
+                    </td>
+                    
+                      <td
+                      className={`inline-block rounded-full px-3 mt-3 py-1 text-center text-sm font-medium ${
+                        pay.status === 'SUCCESS'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-500'
+                      }`}
+                    >
+                      {pay.status}
                     </td>
                   </tr>
                 ))

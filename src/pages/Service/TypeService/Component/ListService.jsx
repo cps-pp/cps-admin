@@ -5,10 +5,20 @@ import { URLBaseLocal } from '../../../../lib/MyURLAPI';
 
 export default function ListService({ selectService, tapService }) {
   //------Store
-  const { addService } = useStoreServices();
-
+  const { addService,services } = useStoreServices();
   const [dataService, setDataService] = useState([]);
   const [loading, setLoading] = useState(false);
+  const isAdded = (ser_id) => services.some((ser) => ser.ser_id === ser_id);
+const handleAdd = async (record) => {
+  if (isAdded(record.med_id)) return;
+
+  const success = await deductOneStock(record);
+  if (!success) {
+    return;
+  }
+
+  addService({ ...record, qty: 1 });
+};
 
   const fetchServiceList = async () => {
     setLoading(true);

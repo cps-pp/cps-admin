@@ -1,8 +1,11 @@
-import { Table } from 'antd';
+import {  InputNumber, Table } from 'antd';
 import React from 'react';
 import { iconTrash } from '@/configs/icon';
 
-export default function SumService({ selectedServices, removeService }) {
+export default function SumService({ selectedServices, removeService,updateQty }) {
+  const handleQtyChange = (ser_id, newQty) => {
+    updateQty(ser_id, newQty);
+  };
   const columns = [
     {
       title: 'ລະຫັດ',
@@ -15,15 +18,29 @@ export default function SumService({ selectedServices, removeService }) {
       dataIndex: 'ser_name',
     },
     {
-      title: 'ຈໍານວນ',
+      title: 'ຈຳນວນ',
       dataIndex: 'qty',
       key: 'qty',
+      render: (_, record) => (
+        <InputNumber
+          min={1}
+          value={record.qty}
+          onChange={(value) => handleQtyChange(record.ser_id, value)}
+        />
+      ),
     },
+
     {
       title: 'ລາຄາ',
       dataIndex: 'price',
       key: 'price',
-      render: (price) => <span>{price?.toLocaleString() || '-'}</span>,
+      render: (price) => <a>{price?.toLocaleString()}</a>,
+    },
+    {
+      title: 'ລວມ',
+      dataIndex: 'total',
+      key: 'total',
+      render: (total) => <span>{total?.toLocaleString() ?? 0}</span>,
     },
     {
       title: 'ຈັດການ',

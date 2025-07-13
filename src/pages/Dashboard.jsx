@@ -431,7 +431,6 @@ const Dashboard = () => {
     }
   };
 
-  // ปรับปรุงฟังก์ชัน getExchangeRateDisplay ให้แสดงผลแบบกระชับขึ้น
   const getExchangeRateDisplay = () => {
     const rates = [];
 
@@ -455,7 +454,6 @@ const Dashboard = () => {
     return rates.join('|');
   };
 
-  // ✅ ปรับปรุงฟังก์ชัน getTodayPendingAppointments ให้เรียงลำดับตามเวลา
   const getTodayPendingAppointments = () => {
     if (!appointments || appointments.length === 0) return [];
 
@@ -483,11 +481,10 @@ const Dashboard = () => {
       );
     });
 
-    // ✅ เรียงลำดับตามเวลา (จากเวลาน้อยไปมาก)
     const sortedTodayAppts = todayAppts.sort((a, b) => {
       const timeA = new Date(a.date_addmintted).getTime();
       const timeB = new Date(b.date_addmintted).getTime();
-      return timeA - timeB; // เรียงจากเวลาน้อยไปมาก
+      return timeA - timeB;
     });
 
     return sortedTodayAppts;
@@ -656,7 +653,6 @@ const Dashboard = () => {
           </CardDataStats>
         </div>
 
-        {/* 2. Card คนเจ็บ */}
         <div onClick={handlePatientManagement} className="cursor-pointer">
           <CardDataStats
             title="ຄົນເຈັບທັງໝົດ"
