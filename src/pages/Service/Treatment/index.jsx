@@ -12,6 +12,7 @@ import { useAppDispatch } from '@/redux/hook';
 import Alerts from '@/components/Alerts';
 import { useForm } from 'react-hook-form';
 import useStoreDisease from '../../../store/selectDis';
+import { URLBaseLocal } from '../../../lib/MyURLAPI';
 
 const Treatment = () => {
   const [loading, setLoading] = useState(false);
@@ -70,7 +71,7 @@ const Treatment = () => {
 
     try {
       const response = await fetch(
-        'http://localhost:4000/src/invoice/invoice',
+        `${URLBaseLocal}/src/invoice/invoice`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -131,8 +132,8 @@ const Treatment = () => {
 
   const handleTreatmentSubmit = async () => {
     // console.log('Starting treatment submit...');
-  // console.log('Services length:', services.length);
-  
+    // console.log('Services length:', services.length);
+
     setLoading(true);
 
     let newService = services.map((item) => ({
@@ -143,6 +144,7 @@ const Treatment = () => {
 
     const sendData = {
       diseases_now: intivalue.diseases_now || '',
+      diseases: dis.join(', ') || '',
       symptom: intivalue.symptom || '',
       note: intivalue.note || '',
       checkup: intivalue.checkup || '',
@@ -153,7 +155,7 @@ const Treatment = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:4000/src/in/inspection/${inspectionId}`,
+        `${URLBaseLocal}/src/in/inspection/${inspectionId}`,
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -166,7 +168,7 @@ const Treatment = () => {
       }
 
       const result = await response.json();
-      console.log('Treatment response:', result);
+      // console.log('Treatment response:', result);
 
       setSavedServices([...services]);
       setSavedInspectionData({
@@ -190,7 +192,7 @@ const Treatment = () => {
         }),
       );
     } catch (error) {
-      console.error('Error submitting treatment:', error);
+      // console.error('Error submitting treatment:', error);
       dispatch(
         openAlert({
           type: 'error',
@@ -224,7 +226,7 @@ const Treatment = () => {
 
     try {
       const stockCheckResponse = await fetch(
-        'http://localhost:4000/src/stock/checkstock',
+        `${URLBaseLocal}/src/stock/checkstock`,
         {
           method: 'POST',
           headers: {
@@ -272,7 +274,7 @@ const Treatment = () => {
       }
 
       const deductResponse = await fetch(
-        `http://localhost:4000/src/stock/prescription/${inspectionId}`,
+        `${URLBaseLocal}/src/stock/prescription/${inspectionId}`,
         {
           method: 'POST',
           headers: {
@@ -293,7 +295,7 @@ const Treatment = () => {
       }
 
       const deductResult = await deductResponse.json();
-      console.log('Stock deduction response:', deductResult);
+      // console.log('Stock deduction response:', deductResult);
 
       setSavedMedicines([
         ...medicines.map((med) => ({
@@ -315,7 +317,7 @@ const Treatment = () => {
         }),
       );
     } catch (error) {
-      console.error('Error submitting medicine:', error);
+      // console.error('Error submitting medicine:', error);
       dispatch(
         openAlert({
           type: 'error',
@@ -390,10 +392,10 @@ const Treatment = () => {
           isTreatmentSaved={isTreatmentSaved}
           refreshKey={refreshKey}
           dispatch={dispatch}
-           selectEmpCreate={selectEmpCreate}
-      setSelectEmpCreate={setSelectEmpCreate}
-      createdAt={createdAt}
-      setCreatedAt={setCreatedAt}
+          selectEmpCreate={selectEmpCreate}
+          setSelectEmpCreate={setSelectEmpCreate}
+          createdAt={createdAt}
+          setCreatedAt={setCreatedAt}
         />
       ),
     },
@@ -422,11 +424,10 @@ const Treatment = () => {
           type="button"
           onClick={handleShowBill}
           disabled={!isTreatmentSaved && !isMedicineSaved}
-          className={`${
-            isTreatmentSaved || isMedicineSaved
-              ? 'bg-slate-500 hover:bg-slate-600'
-              : 'bg-gray-400 cursor-not-allowed'
-          } text-white text-md px-6 py-2 rounded flex items-center gap-2 transition`}
+          className={`${isTreatmentSaved || isMedicineSaved
+            ? 'bg-slate-500 hover:bg-slate-600'
+            : 'bg-gray-400 cursor-not-allowed'
+            } text-white text-md px-6 py-2 rounded flex items-center gap-2 transition`}
         >
           <FileText className="w-5 h-5" />
           ກົດເບິ່ງໃບບິນ

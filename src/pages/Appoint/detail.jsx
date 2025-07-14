@@ -30,6 +30,7 @@ import { useNavigate } from 'react-router-dom';
 import BackButton from '../../components/BackButton';
 import SearchBox from '../../components/Forms/Search_New';
 import { Empty } from 'antd';
+import { URLBaseLocal } from '../../lib/MyURLAPI';
 
 const FollowTreatmentPage = ({ onBack }) => {
   const [patientDetails, setPatientDetails] = useState(null);
@@ -99,7 +100,7 @@ const FollowTreatmentPage = ({ onBack }) => {
     try {
       setLoading(true);
       const response = await fetch(
-        `http://localhost:4000/src/report/patient/${id}`,
+        `${URLBaseLocal}/src/report/patient/${id}`,
       );
       if (!response.ok)
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -118,7 +119,7 @@ const FollowTreatmentPage = ({ onBack }) => {
   const fetchInspectionsByPatient = async (patientId) => {
     try {
       const response = await fetch(
-        `http://localhost:4000/src/report/patient/${patientId}`,
+        `${URLBaseLocal}/src/report/patient/${patientId}`,
       );
       if (!response.ok)
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -135,7 +136,7 @@ const FollowTreatmentPage = ({ onBack }) => {
       console.log('Fetching inspection details for ID:', inspectionId);
 
       const response = await fetch(
-        `http://localhost:4000/src/report/inspection/${inspectionId}`,
+        `${URLBaseLocal}/src/report/inspection/${inspectionId}`,
       );
 
       if (!response.ok) {
@@ -175,7 +176,7 @@ const FollowTreatmentPage = ({ onBack }) => {
     try {
       console.log('Fetching prescription details for ID:', inspectionId);
       const response = await fetch(
-        `http://localhost:4000/src/report/prescription?id=${inspectionId}`,
+        `${URLBaseLocal}/src/report/prescription?id=${inspectionId}`,
       );
 
       if (!response.ok) {
@@ -271,31 +272,31 @@ const FollowTreatmentPage = ({ onBack }) => {
   const detailedData = latestInspectionId
     ? detailedInspections[latestInspectionId]
     : null;
-// เพิ่ม function เพื่อดึง SPK services จาก inspection ล่าสุด
-const getLatestSPKServices = () => {
-  const latestInspectionId = inspectionDetails
-    .slice()
-    .sort((a, b) => new Date(b.date) - new Date(a.date))[0]?.in_id;
-  
-  const latestDetailedData = latestInspectionId
-    ? detailedInspections[latestInspectionId]
-    : null;
-  
-  if (!latestDetailedData?.services) return [];
-  
-  // กรองเฉพาะ services ที่มีรหัสขึ้นต้นด้วย "SPK"
-  return latestDetailedData.services.filter(service => 
-    service.ser_id && service.ser_id.startsWith('SPK')
-  );
-};
+  // เพิ่ม function เพื่อดึง SPK services จาก inspection ล่าสุด
+  const getLatestSPKServices = () => {
+    const latestInspectionId = inspectionDetails
+      .slice()
+      .sort((a, b) => new Date(b.date) - new Date(a.date))[0]?.in_id;
 
-// เพิ่ม function เพื่อรวมชื่อ services ทั้งหมด
-const getSPKServiceNames = () => {
-  const spkServices = getLatestSPKServices();
-  if (spkServices.length === 0) return '-';
-  
-  return spkServices.map(service => service.ser_name).join(', ');
-};
+    const latestDetailedData = latestInspectionId
+      ? detailedInspections[latestInspectionId]
+      : null;
+
+    if (!latestDetailedData?.services) return [];
+
+    // กรองเฉพาะ services ที่มีรหัสขึ้นต้นด้วย "SPK"
+    return latestDetailedData.services.filter(service =>
+      service.ser_id && service.ser_id.startsWith('SPK')
+    );
+  };
+
+  // เพิ่ม function เพื่อรวมชื่อ services ทั้งหมด
+  const getSPKServiceNames = () => {
+    const spkServices = getLatestSPKServices();
+    if (spkServices.length === 0) return '-';
+
+    return spkServices.map(service => service.ser_name).join(', ');
+  };
 
 
   const renderInspectionCard = (inspection) => {
@@ -483,11 +484,10 @@ const getSPKServiceNames = () => {
                               </td>
                               <td className="px-4 py-2 border border-stroke">
                                 <span
-                                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                    prescription.type_name === 'ຢາ'
-                                      ? 'bg-green-100 text-green-800'
-                                      : 'bg-purple-100 text-secondary2'
-                                  }`}
+                                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${prescription.type_name === 'ຢາ'
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-purple-100 text-secondary2'
+                                    }`}
                                 >
                                   {prescription.type_name}
                                 </span>
@@ -573,66 +573,64 @@ const getSPKServiceNames = () => {
     <>
       <div className="">
         {/* Header Section */}
-     <div className="bg-white rounded border border-stroke p-4 mb-4">
-  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-    <div className="flex items-center gap-4">
-      <BackButton />
-      <button
-        onClick={handleReload}
-        disabled={loading}
-        className="inline-flex items-center gap-2 px-4 py-2 text-md font-medium rounded border border-secondary2/40 bg-secondary2/10 text-secondary2 hover:bg-secondary2/15 disabled:opacity-50 transition-colors"
-      >
-        <RotateCcw
-          className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}
-        />
-        ໂຫຼດໃໝ່
-      </button>
-    </div>
+        <div className="bg-white rounded border border-stroke p-4 mb-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <BackButton />
+              <button
+                onClick={handleReload}
+                disabled={loading}
+                className="inline-flex items-center gap-2 px-4 py-2 text-md font-medium rounded border border-secondary2/40 bg-secondary2/10 text-secondary2 hover:bg-secondary2/15 disabled:opacity-50 transition-colors"
+              >
+                <RotateCcw
+                  className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}
+                />
+                ໂຫຼດໃໝ່
+              </button>
+            </div>
 
-    <div className="flex items-center gap-2">
-  
+            <div className="flex items-center gap-2">
 
-      <button
-        onClick={() => setShowFilters(!showFilters)}
-        className={`inline-flex items-center gap-2 px-3 py-2 text-md font-semibold rounded border transition-all duration-200 shadow-sm ${
-          showFilters
-            ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
-            : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
-        }`}
-      >
-        <FilterIcon
-          className={`w-4 h-4 transition-transform duration-200 ${
-            showFilters ? 'rotate-90' : ''
-          }`}
-        />
-        {showFilters ? 'ປິດ' : 'ເປີດການຄົ້ນຫາ'}
-      </button>
-    </div>
-  </div>
 
- {showFilters && (
-  <div className="mt-4">
-    <div className="flex flex-col lg:flex-row gap-4 items-end">
-      {/* ค้นหาตามวันที่ */}
-      <div className="flex-1">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          ຄົ້ນຫາຕາມວັນທີ່
-        </label>
-        <div className="relative">
-          <input
-            type="date"
-            value={searchDate}
-            onChange={(e) => setSearchDate(e.target.value)}
-            className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary text-black dark:text-white capitalize"
-          />
-        </div>
-      </div>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`inline-flex items-center gap-2 px-3 py-2 text-md font-semibold rounded border transition-all duration-200 shadow-sm ${showFilters
+                  ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                  : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                  }`}
+              >
+                <FilterIcon
+                  className={`w-4 h-4 transition-transform duration-200 ${showFilters ? 'rotate-90' : ''
+                    }`}
+                />
+                {showFilters ? 'ປິດ' : 'ເປີດການຄົ້ນຫາ'}
+              </button>
+            </div>
+          </div>
 
-      <div className="flex-1">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          ຄົ້ນຫາຕາມລະຫັດໃບບິນ
-        </label>
-        <div className="relative">
+          {showFilters && (
+            <div className="mt-4">
+              <div className="flex flex-col lg:flex-row gap-4 items-end">
+                {/* ค้นหาตามวันที่ */}
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    ຄົ້ນຫາຕາມວັນທີ່
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      value={searchDate}
+                      onChange={(e) => setSearchDate(e.target.value)}
+                      className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary text-black dark:text-white capitalize"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    ຄົ້ນຫາຕາມລະຫັດໃບບິນ
+                  </label>
+                  <div className="relative">
                     <input
                       type="text"
                       name="search"
@@ -642,25 +640,25 @@ const getSPKServiceNames = () => {
                       onChange={(e) => setSearchInId(e.target.value)}
                     />
                   </div>
-      </div>
+                </div>
 
-      <div className="lg:w-auto">
-        <button
-          onClick={() => {
-            setSearchDate('');
-            setSearchInId('');
-          }}
-          className="inline-flex items-center gap-2 px-4 py-3 mt-2 lg:mt-6 text-md font-semibold rounded border border-rose-500 text-rose-500 bg-white hover:bg-rose-50 transition"
-        >
-          <XCircle className="w-4 h-4" />
-          ລ້າງການຄົ້ນຫາ
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+                <div className="lg:w-auto">
+                  <button
+                    onClick={() => {
+                      setSearchDate('');
+                      setSearchInId('');
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-3 mt-2 lg:mt-6 text-md font-semibold rounded border border-rose-500 text-rose-500 bg-white hover:bg-rose-50 transition"
+                  >
+                    <XCircle className="w-4 h-4" />
+                    ລ້າງການຄົ້ນຫາ
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
-</div>
+        </div>
 
 
         <div className="grid grid-cols-1 lg:grid-cols-[350px,1fr] gap-6 ">
@@ -700,7 +698,7 @@ const getSPKServiceNames = () => {
                       {formatDate(patient.dob)}
                     </span>
                   </div>
-                 
+
                 </div>
               </div>
 
@@ -751,30 +749,30 @@ const getSPKServiceNames = () => {
             </div>
 
 
-<div className="bg-white rounded shadow-sm border border-slate-200 p-6">
-  <div className="flex items-center justify-between">
-    <div className="flex items-center gap-3">
-      <div className="w-10 h-10 bg-secondary2 rounded-full flex items-center justify-center">
-        <Package className="w-5 h-5 text-white" />
-      </div>
-      <div>
-        <h3 className="font-semibold text-form-input">ແພັກແກັດ</h3>
-      </div>
+            <div className="bg-white rounded shadow-sm border border-slate-200 p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-secondary2 rounded-full flex items-center justify-center">
+                    <Package className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-form-input">ແພັກແກັດ</h3>
+                  </div>
 
-      <div className="h-10  border-l border-slate-400 mx-7" />
-    </div>
+                  <div className="h-10  border-l border-slate-400 mx-7" />
+                </div>
 
-    <div className="text-right">
-      <div className="text-2xl font-bold text-secondary2">
-        {getLatestSPKServices().length}{' '}
-        <span className="text-secondary2">ລາຍການ</span>
-      </div>
-      <div className="text-sm text-slate-500 mt-1">
-        ແພັກແກັກ{getSPKServiceNames()}
-      </div>
-    </div>
-  </div>
-</div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-secondary2">
+                    {getLatestSPKServices().length}{' '}
+                    <span className="text-secondary2">ລາຍການ</span>
+                  </div>
+                  <div className="text-sm text-slate-500 mt-1">
+                    ແພັກແກັກ{getSPKServiceNames()}
+                  </div>
+                </div>
+              </div>
+            </div>
             {/*  */}
             <div className="mt-6 bg-white rounded shadow-sm border border-slate-200 p-6">
               <div className="flex items-center gap-3 mb-4">

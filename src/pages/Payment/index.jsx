@@ -7,6 +7,7 @@ import Button from '@/components/Button';
 import ConfirmModal from '@/components/Modal';
 import { Payheader } from './header';
 import { Empty } from 'antd';
+import { URLBaseLocal } from '../../lib/MyURLAPI';
 
 const PaymentPage = () => {
   const [payments, setPayments] = useState([]);
@@ -22,7 +23,7 @@ const PaymentPage = () => {
   const fetchPayments = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:4000/src/payment/payment');
+      const response = await fetch(`${URLBaseLocal}/src/payment/payment`);
       const data = await response.json();
       setPayments(data.data || []);
     } catch (error) {
@@ -148,7 +149,7 @@ const PaymentPage = () => {
                     <td className="px-4 py-2">
                       {Number(pay.paid_amount).toLocaleString()} ກີບ
                     </td>
-                  
+
 
                     <td className="px-4 py-2">
                       {pay.pay_type?.toUpperCase() === 'CASH' && (
@@ -163,24 +164,23 @@ const PaymentPage = () => {
                       )}
                       {pay.pay_type?.toUpperCase() === 'REFUND' && (
                         <span className="inline-block bg-yellow-100 text-yellow-800 text-sm  px-3 py-1 rounded-full">
-                          Refund 
+                          Refund
                         </span>
                       )}
                       {!['CASH', 'TRANSFER', 'REFUND'].includes(
                         pay.pay_type?.toUpperCase(),
                       ) && (
-                        <span className="inline-block bg-gray-100 text-gray-700 text-sm  px-3 py-1 rounded-full">
-                          {pay.pay_type}
-                        </span>
-                      )}
+                          <span className="inline-block bg-gray-100 text-gray-700 text-sm  px-3 py-1 rounded-full">
+                            {pay.pay_type}
+                          </span>
+                        )}
                     </td>
-                    
-                      <td
-                      className={`inline-block rounded-full px-3 mt-3 py-1 text-center text-sm font-medium ${
-                        pay.status === 'SUCCESS'
+
+                    <td
+                      className={`inline-block rounded-full px-3 mt-3 py-1 text-center text-sm font-medium ${pay.status === 'SUCCESS'
                           ? 'bg-green-100 text-green-700'
                           : 'bg-red-100 text-red-500'
-                      }`}
+                        }`}
                     >
                       {pay.status}
                     </td>

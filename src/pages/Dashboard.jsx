@@ -16,6 +16,7 @@ import { FollowHeader } from './Follow/column/follow';
 import ExchangeRateModal from '../components/exchange_chack/ExchangeRateModal'; // เพิ่ม import
 import { Calendar, Badge, List, Typography, Card } from 'antd';
 import { ArrowRight } from 'lucide-react';
+import { URLBaseLocal } from '../lib/MyURLAPI';
 const { Text, Title } = Typography;
 const Dashboard = () => {
   const onPanelChange = (value, mode) => {
@@ -63,7 +64,7 @@ const Dashboard = () => {
       setExchangeCheckLoading(true);
       const today = new Date().toISOString().split('T')[0];
       const response = await fetch(
-        `http://localhost:4000/src/manager/today/${today}`,
+        `${URLBaseLocal}/src/manager/today/${today}`,
       );
 
       if (!response.ok) {
@@ -113,7 +114,7 @@ const Dashboard = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:4000/src/manager/update-rates`,
+        `${URLBaseLocal}/src/manager/update-rates`,
         {
           method: 'POST',
           headers: {
@@ -141,7 +142,7 @@ const Dashboard = () => {
   const fetchExchangeRates = async () => {
     try {
       const response = await fetch(
-        'http://localhost:4000/src/manager/exchange',
+        `${URLBaseLocal}/src/manager/exchange`,
       );
       if (!response.ok)
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -185,7 +186,7 @@ const Dashboard = () => {
       console.log('Checking database for today rates:', today);
 
       const response = await fetch(
-        `http://localhost:4000/src/exchange/today/${today}`,
+        `${URLBaseLocal}/src/exchange/today/${today}`,
       );
 
       if (!response.ok) {
@@ -277,7 +278,7 @@ const Dashboard = () => {
       try {
         setLoading(true);
         const response = await fetch(
-          'http://localhost:4000/src/manager/patient/dashboard',
+          `${URLBaseLocal}/src/manager/patient/dashboard`,
         );
         if (!response.ok)
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -299,7 +300,7 @@ const Dashboard = () => {
       try {
         setLoading(true);
         const response = await fetch(
-          'http://localhost:4000/src/manager/patient',
+          `${URLBaseLocal}/src/manager/patient`,
         );
         if (!response.ok)
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -318,7 +319,7 @@ const Dashboard = () => {
     const fetchPatientName = async () => {
       try {
         const response = await fetch(
-          'http://localhost:4000/src/manager/patient',
+          `${URLBaseLocal}/src/manager/patient`,
         );
         if (!response.ok)
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -337,7 +338,7 @@ const Dashboard = () => {
       try {
         setMedicineLoading(true);
         const response = await fetch(
-          'http://localhost:4000/src/manager/medicines',
+          `${URLBaseLocal}/src/manager/medicines`,
         );
         if (!response.ok)
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -388,7 +389,7 @@ const Dashboard = () => {
     const fetchMedicineTypes = async () => {
       try {
         const response = await fetch(
-          'http://localhost:4000/src/manager/category',
+          `${URLBaseLocal}/src/manager/category`,
         );
         if (!response.ok)
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -497,7 +498,7 @@ const Dashboard = () => {
     const fetchAppointments = async () => {
       try {
         const response = await fetch(
-          'http://localhost:4000/src/appoint/appointment',
+          `${URLBaseLocal}/src/appoint/appointment`,
         );
         const data = await response.json();
 
@@ -526,7 +527,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const response = await fetch('http://localhost:4000/src/manager/emp');
+        const response = await fetch(`${URLBaseLocal}/src/manager/emp`);
         const data = await response.json();
         setDoctorCount(data.data.length);
       } catch (error) {
@@ -540,7 +541,7 @@ const Dashboard = () => {
     const fetchDoctor = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:4000/src/manager/emp');
+        const response = await fetch(`${URLBaseLocal}/src/manager/emp`);
         if (!response.ok)
           throw new Error(`HTTP error! Status: ${response.status}`);
         const data = await response.json();
@@ -724,7 +725,7 @@ const Dashboard = () => {
               >
 
                 ກວດສອບນັດໝາຍ
-                 <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -827,7 +828,7 @@ const Dashboard = () => {
               >
 
                 ສັ່ງຊື້ຢາ ແລະ ອຸປະກອນ
-                 <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>

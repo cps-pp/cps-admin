@@ -8,6 +8,7 @@ import { openAlert } from '@/redux/reducer/alert';
 import Alerts from '@/components/Alerts';
 import { Pay } from './colum/pay';
 import { Empty } from 'antd';
+import { URLBaseLocal } from '../../../lib/MyURLAPI';
 const ReportPay = () => {
   const [payments, setPayments] = useState([]);
   const [filteredPayments, setFilteredPayments] = useState([]);
@@ -29,7 +30,7 @@ const ReportPay = () => {
   const fetchPayments = async () => {
     try {
       setLoading(true);
-      let url = 'http://localhost:4000/src/report/payment';
+      let url = `${URLBaseLocal}/src/report/payment`;
       const params = new URLSearchParams();
 
       if (invoiceFilter) {
@@ -280,10 +281,10 @@ const ReportPay = () => {
                       {!['CASH', 'TRANSFER', 'REFUND'].includes(
                         payment.pay_type?.toUpperCase(),
                       ) && (
-                        <span className="inline-block bg-gray-100 text-gray-700 text-sm  px-3 py-1 rounded-full">
-                          {payment.pay_type}
-                        </span>
-                      )}
+                          <span className="inline-block bg-gray-100 text-gray-700 text-sm  px-3 py-1 rounded-full">
+                            {payment.pay_type}
+                          </span>
+                        )}
                     </td>
 
                     <td className="px-4 py-4">

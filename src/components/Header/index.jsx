@@ -6,6 +6,7 @@ import axios from 'axios';
 import { Clock } from 'lucide-react';
 import { ACCESS_TOKEN_KEY } from '../../utils/constants';
 import { useAuth } from '../../AuthContext';
+import { URLBaseLocal } from '../../lib/MyURLAPI';
 
 const Header = (props) => {
   const [notifications, setNotifications] = useState({
@@ -18,9 +19,9 @@ const Header = (props) => {
   const [showNotificationMenu, setShowNotificationMenu] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const { user, logout } = useAuth();
- //
+  //
   const handleLogout = () => {
-    logout(); 
+    logout();
     window.location.href = '/login';
   };
 
@@ -44,7 +45,7 @@ const Header = (props) => {
 
       try {
         const res = await axios.get(
-          'http://localhost:4000/src/auth/authen/profile',
+          `${URLBaseLocal}/src/auth/authen/profile`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -71,7 +72,7 @@ const Header = (props) => {
     try {
       // ดึงข้อมูลนัดหมาย
       const appointmentRes = await axios.get(
-        'http://localhost:4000/src/appoint/appointmentWang',
+        `${URLBaseLocal}/src/appoint/appointmentWang`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -79,7 +80,7 @@ const Header = (props) => {
 
       // ดึงข้อมูลยา
       const medicineRes = await axios.get(
-        'http://localhost:4000/src/manager/medicines',
+        `${URLBaseLocal}/src/manager/medicines`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },

@@ -11,6 +11,7 @@ import ConfirmModal from '@/components/Modal';
 import BillPopup from '../Service/Treatment/BillPopup';
 import { XCircle, CheckCircle } from 'lucide-react';
 import { Empty } from 'antd';
+import { URLBaseLocal } from '../../lib/MyURLAPI';
 const InvoicePage = () => {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -87,7 +88,7 @@ const InvoicePage = () => {
   const fetchInvoices = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:4000/src/invoice/invoice');
+      const response = await fetch(`${URLBaseLocal}/src/invoice/invoice`);
       const data = await response.json();
       setInvoices(data.data || []);
     } catch (error) {
@@ -106,7 +107,7 @@ const InvoicePage = () => {
   const fetchInvoiceDetail = async (invoiceId) => {
     try {
       const res = await fetch(
-        `http://localhost:4000/src/invoice/invoice/${invoiceId}`,
+        `${URLBaseLocal}/src/invoice/invoice/${invoiceId}`,
       );
       const json = await res.json();
 
@@ -172,7 +173,7 @@ const InvoicePage = () => {
   const fetchInspectionDetails = async (inspectionId) => {
     try {
       const response = await fetch(
-        `http://localhost:4000/src/report/inspection`,
+        `${URLBaseLocal}/src/report/inspection`,
       );
       const data = await response.json();
 
@@ -297,11 +298,10 @@ const InvoicePage = () => {
 
                       <td className="px-4 py-2 text-left">
                         <span
-                          className={`inline-block rounded-full px-3 my-2  py-1 text-center text-sm font-medium ${
-                            invoice.status === 'UNPAID'
-                              ? 'bg-yellow-100 text-yellow-700'
-                              : 'bg-red-100 text-red-500'
-                          }`}
+                          className={`inline-block rounded-full px-3 my-2  py-1 text-center text-sm font-medium ${invoice.status === 'UNPAID'
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : 'bg-red-100 text-red-500'
+                            }`}
                         >
                           {statusInfo.text}
                         </span>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Pill, Wrench, X, Package } from 'lucide-react';
 import Alerts from '@/components/Alerts';
 import { Empty } from 'antd';
+import { URLBaseLocal } from '../../../lib/MyURLAPI';
 
 const InspectionDetailView = ({
   show,
@@ -36,7 +37,7 @@ const InspectionDetailView = ({
 
     try {
       const response = await fetch(
-        `http://localhost:4000/src/report/prescription?id=${id}`,
+        `${URLBaseLocal}/src/report/prescription?id=${id}`,
       );
       const json = await response.json();
 
@@ -145,8 +146,8 @@ const InspectionDetailView = ({
                     <p className="text-base text-form-strokedark border border-stroke px-3 py-2 rounded">
                       {selectedInspection.date
                         ? new Date(selectedInspection.date).toLocaleDateString(
-                            'en-GB',
-                          )
+                          'en-GB',
+                        )
                         : '-'}
                     </p>
                   </div>
@@ -171,21 +172,19 @@ const InspectionDetailView = ({
               <div className="flex gap-2 mb-4">
                 <button
                   onClick={() => handleTabChange('all')}
-                  className={`px-4 py-2 rounded transition-colors ${
-                    activeTab === 'all'
+                  className={`px-4 py-2 rounded transition-colors ${activeTab === 'all'
                       ? 'bg-slate-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                    }`}
                 >
                   ທັງໝົດ ({prescriptionData?.length || 0}) ລາຍການ
                 </button>
                 <button
                   onClick={() => handleTabChange('medicine')}
-                  className={`px-4 py-2 rounded transition-colors ${
-                    activeTab === 'medicine'
+                  className={`px-4 py-2 rounded transition-colors ${activeTab === 'medicine'
                       ? 'bg-secondary2 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                    }`}
                 >
                   <Pill className="w-4 h-4 inline mr-1" />
                   ຢາ (
@@ -195,11 +194,10 @@ const InspectionDetailView = ({
                 </button>
                 <button
                   onClick={() => handleTabChange('equipment')}
-                  className={`px-4 py-2 rounded transition-colors ${
-                    activeTab === 'equipment'
+                  className={`px-4 py-2 rounded transition-colors ${activeTab === 'equipment'
                       ? 'bg-secondary2 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                    }`}
                 >
                   <Wrench className="w-4 h-4 inline mr-1" />
                   ອຸປະກອນ (
