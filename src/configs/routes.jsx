@@ -28,13 +28,14 @@ import ReportOrder from '../pages/report/ReportOrder';
 import PackectDetail from '../pages/Manager/PackectDetail';
 import InvoicePage from '../pages/Invoice';
 import PaymentPage from '../pages/Payment';
-import ReportFollowAll from '../pages/report/ReportFollow';
-import DetailFollow from '../pages/report/ReportFollow/detail';
+import DetailFollow from '../pages/report/ReportFollow/detail_two';
 import EditTreatment from '../pages/Service/Detail/EditTreatment';
 import AppointPage from '../pages/Appoint';
 import AppointPatientDetailsPage from '../pages/Appoint/detail';
 import FollowTreatmentPage from '../pages/Appoint/detail';
 import DetailPatientService from '../pages/Service/Detail';
+import ReportFollowPatient from '../pages/report/ReportFollow';
+import DetailFollowPatient from '../pages/report/ReportFollow/detail';
 
 export const ROUTES = [
   {
@@ -173,6 +174,7 @@ export const ROUTES = [
     title: 'Follow | CPS Admin',
     component: <FollowPage />,
   },
+
   {
     path: '/follow/create',
     title: 'Follow Create | CPS Admin',
@@ -185,12 +187,13 @@ export const ROUTES = [
   {
     path: '/report/follow-inspection',
     title: 'Report Follow | CPS Admin',
-    component: <ReportFollowAll />,
+    component: <ReportFollowPatient />,
   },
+  
     {
     path: '/follow-inspection/detail/:id',
     title: 'Follow Detail | CPS Admin',
-    component: <DetailFollow />,
+    component: <DetailFollowPatient />,
   },
   {
     path: '/report/appointment',

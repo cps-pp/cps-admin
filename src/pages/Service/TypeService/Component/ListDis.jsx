@@ -37,17 +37,18 @@ export default function ListDis({ selectService, tapService }) {
       title: 'ຈັດການ',
       key: 'action',
       render: (_, record) => (
-        <button
-          type="button"
-          onClick={() => {
-            selectService(record);
-            selectionDisease(record);
-          }}
-          className="bg-secondary text-white px-3 py-1 rounded hover:bg-secondary2"
-        >
-          ເພີ່ມ
-        </button>
-      ),
+  <button
+    type="button"
+    onClick={() => {
+      selectService(record);
+      addDisease(record);  // <-- ส่งตรง
+    }}
+    className="bg-secondary text-white px-3 py-1 rounded hover:bg-secondary2"
+  >
+    ເພີ່ມ
+  </button>
+),
+
     },
   ];
   const selectionDisease = async (record) => {

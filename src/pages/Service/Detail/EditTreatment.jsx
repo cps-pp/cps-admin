@@ -11,13 +11,9 @@ import useStoreServices from '../../../store/selectServices';
 import useStoreMed from '../../../store/selectMed';
 import useStoreQi from '../../../store/selectQi';
 import { ACCESS_TOKEN_KEY } from '../../../utils/constants';
-<<<<<<< HEAD
-=======
 import useStoreDisease from '../../../store/selectDis';
->>>>>>> test-3
 
 const token = localStorage.getItem(ACCESS_TOKEN_KEY);
-
 
 const EditTreatment = () => {
   const { id } = useParams();
@@ -29,10 +25,7 @@ const EditTreatment = () => {
   const { newServices, fetchInspectionById, dataInspectionBy } = useStoreServices();
   const { newMedicines, fetchInspectionMedById } = useStoreMed();
   const { newEquipment, fetchInspectionEquipmentById } = useStoreQi();
-<<<<<<< HEAD
-=======
   const { getDiseasesForUpdate, disUpdate } = useStoreDisease();
->>>>>>> test-3
   const [invoiceData, setInvoiceData] = useState(null);
 
   useEffect(() => {
@@ -40,16 +33,21 @@ const EditTreatment = () => {
       fetchInspectionById(id);
       fetchInspectionMedById(id);
       fetchInspectionEquipmentById(id);
-      getDiseasesForUpdate();
     }
   }, [id]);
+
+  // Separate useEffect to call getDiseasesForUpdate after dataInspectionBy is loaded
+  useEffect(() => {
+    if (dataInspectionBy) {
+      getDiseasesForUpdate();
+    }
+  }, [dataInspectionBy]);
 
   useEffect(() => {
     setDataPatien(dataInspectionBy)
   }, [dataInspectionBy]);
 
   const submitEditPatient = async () => {
-
     try {
       const newPatient = {
         diseases_now: newData?.diseases_now,
@@ -73,15 +71,10 @@ const EditTreatment = () => {
     } catch (error) {
       console.error('Error updating patient:', error);
     }
-
   }
 
   const submitMedicine = async () => {
     try {
-<<<<<<< HEAD
-
-=======
->>>>>>> test-3
       const payloadMed = {
         data: [
           ...newMedicines.map((med) => ({
@@ -102,7 +95,7 @@ const EditTreatment = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payloadMed),
       });
-      // console.log(res)
+
       if (res.data.resultCode === '200') {
         console.log('Update Med success')
       }
@@ -111,6 +104,7 @@ const EditTreatment = () => {
       console.error('Error updating patient:', error);
     }
   }
+
   const handleShowBill = async () => {
     if (!invoiceData && dataPatien?.in_id) {
       try {
@@ -210,9 +204,6 @@ const EditTreatment = () => {
           invoiceData={invoiceData}
           onRefresh={() => window.location.reload()}
         />
-
-
-
 
         <Alerts />
       </div>

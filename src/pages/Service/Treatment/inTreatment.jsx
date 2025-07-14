@@ -25,10 +25,10 @@ const InTreatmentService = ({
   loading,
   errors,
   refreshKey,
-  // selectEmpCreate,
-  // setSelectEmpCreate,
-  // createdAt,
-  // setCreatedAt,
+  selectEmpCreate,
+  setSelectEmpCreate,
+  createdAt,
+  setCreatedAt,
 }) => {
   const [patients, setPatients] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
@@ -40,11 +40,11 @@ const InTreatmentService = ({
     return '';
   };
 
-  // useEffect(() => {
-  //   const now = new Date().toISOString().split('T')[0];
-  //   setCreatedAt(now); 
-  //   setValue('created_at', now);
-  // }, [setCreatedAt, setValue]);
+  useEffect(() => {
+    const now = new Date().toISOString().split('T')[0];
+    setCreatedAt(now); 
+    setValue('created_at', now);
+  }, [setCreatedAt, setValue]);
 
   const handleClick = () => {
     if (!inspectionId) {
@@ -287,7 +287,7 @@ const InTreatmentService = ({
         />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* <SelectBoxId
+         <SelectBoxId
           label="ພະນັກງານ (ຜູ້ສ້າງ)"
           name="emp_id_create"
           value={selectEmpCreate}
@@ -301,8 +301,8 @@ const InTreatmentService = ({
             setSelectEmpCreate(e.target.value);
           }}
         />
-
-       <BoxDate
+{/* 
+        <BoxDate
         register={register}
         errors={errors}
         name="created_at"
@@ -312,7 +312,7 @@ const InTreatmentService = ({
       setCreatedAt(e.target.value);
       setValue('created_at', e.target.value);
     }}
-      /> */}
+      />   */}
         <AntdTextArea
           label="* ໝາຍເຫດ"
           name="note"

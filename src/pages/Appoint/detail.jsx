@@ -22,6 +22,8 @@ import {
   Filter,
   X,
   Package,
+  FilterIcon,
+  XCircle,
 } from 'lucide-react';
 import { useParams, useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -42,7 +44,7 @@ const FollowTreatmentPage = ({ onBack }) => {
   const [searchInId, setSearchInId] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-
+  const [showFilters, setShowFilters] = useState(false);
   const { id } = useParams();
   const location = useLocation();
   const [patient, setPatient] = useState(location.state?.patient || null);
@@ -571,58 +573,95 @@ const getSPKServiceNames = () => {
     <>
       <div className="">
         {/* Header Section */}
-        <div className="bg-white rounded border border-stroke p-4 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <BackButton />
-              <button
-                onClick={handleReload}
-                disabled={loading}
-                className="inline-flex items-center gap-2 px-4 py-2 text-md font-medium rounded border border-secondary2/40 bg-secondary2/10 text-secondary2 hover:bg-secondary2/15 disabled:opacity-50 transition-colors"
-              >
-                <RotateCcw
-                  className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}
-                />
-                ໂຫຼດໃໝ່
-              </button>
-            </div>
-          </div>
+     <div className="bg-white rounded border border-stroke p-4 mb-4">
+  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div className="flex items-center gap-4">
+      <BackButton />
+      <button
+        onClick={handleReload}
+        disabled={loading}
+        className="inline-flex items-center gap-2 px-4 py-2 text-md font-medium rounded border border-secondary2/40 bg-secondary2/10 text-secondary2 hover:bg-secondary2/15 disabled:opacity-50 transition-colors"
+      >
+        <RotateCcw
+          className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}
+        />
+        ໂຫຼດໃໝ່
+      </button>
+    </div>
 
-          {/* Search Section */}
-          <div className="mt-4">
-            <div className="flex flex-col lg:flex-row gap-4">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  ຄົ້ນຫາຕາມວັນທີ່
-                </label>
-                <div className="relative">
-                  <input
-                    type="date"
-                    value={searchDate}
-                    onChange={(e) => setSearchDate(e.target.value)}
-                    className="relative z-20 w-full  appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary   text-black dark:text-white capitalize"
-                  />
-                </div>
-              </div>
+    <div className="flex items-center gap-2">
+  
 
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  ຄົ້ນຫາຕາມລະຫັດໃບບິນ
-                </label>
-                <div className="relative">
-                  <SearchBox
-                    type="text"
-                    name="search"
-                    placeholder="ຄົ້ນຫາ..."
-                    className="rounded border border-stroke "
-                    // value={searchInId}
-                    onChange={(e) => setSearchInId(e.target.value)} // <-- เปลี่ยนให้ setSearchInId
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+      <button
+        onClick={() => setShowFilters(!showFilters)}
+        className={`inline-flex items-center gap-2 px-3 py-2 text-md font-semibold rounded border transition-all duration-200 shadow-sm ${
+          showFilters
+            ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+            : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+        }`}
+      >
+        <FilterIcon
+          className={`w-4 h-4 transition-transform duration-200 ${
+            showFilters ? 'rotate-90' : ''
+          }`}
+        />
+        {showFilters ? 'ປິດ' : 'ເປີດການຄົ້ນຫາ'}
+      </button>
+    </div>
+  </div>
+
+ {showFilters && (
+  <div className="mt-4">
+    <div className="flex flex-col lg:flex-row gap-4 items-end">
+      {/* ค้นหาตามวันที่ */}
+      <div className="flex-1">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          ຄົ້ນຫາຕາມວັນທີ່
+        </label>
+        <div className="relative">
+          <input
+            type="date"
+            value={searchDate}
+            onChange={(e) => setSearchDate(e.target.value)}
+            className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary text-black dark:text-white capitalize"
+          />
         </div>
+      </div>
+
+      <div className="flex-1">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          ຄົ້ນຫາຕາມລະຫັດໃບບິນ
+        </label>
+        <div className="relative">
+                    <input
+                      type="text"
+                      name="search"
+                      placeholder="ຄົ້ນຫາ..."
+                      className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary text-black dark:text-white capitalize"
+                      value={searchInId}
+                      onChange={(e) => setSearchInId(e.target.value)}
+                    />
+                  </div>
+      </div>
+
+      <div className="lg:w-auto">
+        <button
+          onClick={() => {
+            setSearchDate('');
+            setSearchInId('');
+          }}
+          className="inline-flex items-center gap-2 px-4 py-3 mt-2 lg:mt-6 text-md font-semibold rounded border border-rose-500 text-rose-500 bg-white hover:bg-rose-50 transition"
+        >
+          <XCircle className="w-4 h-4" />
+          ລ້າງການຄົ້ນຫາ
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+</div>
+
 
         <div className="grid grid-cols-1 lg:grid-cols-[350px,1fr] gap-6 ">
           <div className="w-full max-w-sm space-y-4">

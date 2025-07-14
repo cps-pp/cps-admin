@@ -390,10 +390,10 @@ const Treatment = () => {
           isTreatmentSaved={isTreatmentSaved}
           refreshKey={refreshKey}
           dispatch={dispatch}
-      //      selectEmpCreate={selectEmpCreate}
-      // setSelectEmpCreate={setSelectEmpCreate}
-      // createdAt={createdAt}
-      // setCreatedAt={setCreatedAt}
+           selectEmpCreate={selectEmpCreate}
+      setSelectEmpCreate={setSelectEmpCreate}
+      createdAt={createdAt}
+      setCreatedAt={setCreatedAt}
         />
       ),
     },
