@@ -1,7 +1,7 @@
 import React from 'react';
 import { List, Pill } from 'lucide-react';
 
-const PopupDetail = ({ isOpen, onClose, inspection, detailedData, prescriptions, isLoading }) => {
+const PopupInspection = ({ isOpen, onClose, inspection, detailedData, prescriptions, isLoading }) => {
   if (!isOpen) return null;
 
   return (
@@ -117,4 +117,4 @@ const PopupDetail = ({ isOpen, onClose, inspection, detailedData, prescriptions,
   );
 };
 
-export default PopupDetail;
+export default PopupInspection;
