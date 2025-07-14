@@ -3,14 +3,22 @@ import { Space, Table } from 'antd';
 import useStoreDisease from '../../../store/selectDis';
 
 export default function ListDisUpdate({ selectService, tapService }) {
+<<<<<<< HEAD
   const [dataDis, setDis] = useState([]);
+=======
+  const [dataDis, setDataDis] = useState([]);
+>>>>>>> test-3
   const { addDiseaseUpdate } = useStoreDisease();
 
   const fetchDisList = async () => {
     try {
       const res = await fetch('http://localhost:4000/src/manager/disease');
       const data = await res.json();
+<<<<<<< HEAD
       setDis(data.data);
+=======
+      setDataDis(data.data);
+>>>>>>> test-3
     } catch (err) {
       console.error('Error fetching disease list:', err);
     }

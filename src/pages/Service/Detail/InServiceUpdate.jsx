@@ -11,7 +11,7 @@ import useStoreDisease from '../../../store/selectDis';
 
 const InServiceUpdate = ({ dataPatient, callValue }) => {
 
-  const [intivalue, setIntivalue] = useState();
+  const [intivalue, setIntivalue] = useState({});
 
   useEffect(() => {
     if (dataPatient?.in_id) {
@@ -110,13 +110,20 @@ const InServiceUpdate = ({ dataPatient, callValue }) => {
 const TypeServiceUpdate = ({ listData, value }) => {
   // console.log(listData)
   const [listDataServices, setlistDataServices] = useState([]);
+  const [listDisease, setListDisease] = useState([]);
 
   const { newServices, removeServiceNews } = useStoreServices();
+<<<<<<< HEAD
   const { removeDiseaseUpdate, disUpdate, addDiseaseUpdate } = useStoreDisease();
+=======
+  const { disUpdate, removeDiseaseUpdate } = useStoreDisease();
+>>>>>>> test-3
 
   useEffect(() => {
     setlistDataServices(newServices ?? []);
-  }, [newServices]);
+    setListDisease(disUpdate ?? []);
+  }, [newServices, disUpdate]);
+
 
   const columnsService = [
     {
@@ -190,7 +197,11 @@ const TypeServiceUpdate = ({ listData, value }) => {
         ສະຫຼຸບການລາຍການທັງໝົດ
       </h1>
       <div className="p-2  rounded bg-white border border-stroke ">
+<<<<<<< HEAD
         <h5 className='font-bold'>ສະຫຼຸບການຮັກສາ</h5>
+=======
+        <h5 className='mb-2 font-bold'>ສະຫຼຸບການຮັກສາ</h5>
+>>>>>>> test-3
         <Table
           columns={columnsService}
           dataSource={listDataServices}
@@ -201,10 +212,17 @@ const TypeServiceUpdate = ({ listData, value }) => {
       </div>
 
       <div className="p-2 mt-10 rounded bg-white border border-stroke ">
+<<<<<<< HEAD
         <h5 className='font-bold mb-3'>ສະຫຼຸບພະຍາດ</h5>
         <div>
           <ul>
             {disUpdate?.map((name, index) => (
+=======
+        <h5 className='mb-2 font-bold'>ສະຫຼຸບພະຍາດ</h5>
+        <div>
+          <ul>
+            {listDisease?.map((name, index) => (
+>>>>>>> test-3
               <div key={index}>
                 <li className="flex justify-between">
                   <span>{name}</span>
@@ -215,7 +233,11 @@ const TypeServiceUpdate = ({ listData, value }) => {
                     {iconTrash}
                   </button>
                 </li>
+<<<<<<< HEAD
                 {index !== disUpdate.length - 1 && <Divider className="my-2" />}
+=======
+                {index !== listDisease?.length - 1 && <Divider className="my-2" />}
+>>>>>>> test-3
               </div>
             ))}
           </ul>
