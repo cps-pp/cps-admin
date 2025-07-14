@@ -267,11 +267,11 @@ export const FOLLOW = [
     path: 'followpat',
     icon: iconCalenderWhite,
   },
-  // {
-  //   name: 'ຕິດຕາມການປິ່ນປົວ',
-  //   path: 'follow-treatment',
-  //   icon: CalendarIconWhite,
-  // },
+  {
+    name: 'ຕິດຕາມການປິ່ນປົວ',
+    path: 'follow-treatment',
+    icon: CalendarIconWhite,
+  },
 ];
 export const IMPORT = [
   {

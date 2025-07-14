@@ -1,27 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import {
-  ResponsiveContainer,
-  Tooltip,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Area,
-  AreaChart,
-  Legend,
+  PieChart,
   Pie,
   Cell,
+  ResponsiveContainer,
+  Legend,
+  Tooltip,
 } from 'recharts';
 import CardDataStats from '../components/CardDataStats';
-
+import MonthChart from '../components/Charts/MonthChart';
+import { getAppointments } from '@/api/getAppointments';
+import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { useNavigate } from 'react-router-dom';
 import { FollowHeader } from './Follow/column/follow';
-import ExchangeRateModal from '../components/exchange_chack/ExchangeRateModal';
+import ExchangeRateModal from '../components/exchange_chack/ExchangeRateModal'; // เพิ่ม import
 import { Calendar, Badge, List, Typography, Card } from 'antd';
-import { ArrowRight, HandCoins, PieChart } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 const { Text, Title } = Typography;
 const Dashboard = () => {
+  const onPanelChange = (value, mode) => {
+    console.log(value.format('YYYY-MM-DD'), mode);
+  };
+  const [selectedDate, setSelectedDate] = useState(null);
+
   const [patients, setPatients] = useState(null);
   const [patient, setPatient] = useState(0); // ถ้ามี
   const [filteredPatients, setFilteredPatients] = useState([]);
@@ -56,228 +57,7 @@ const Dashboard = () => {
   const [showExchangeModal, setShowExchangeModal] = useState(false);
   const [missingExchangeRates, setMissingExchangeRates] = useState([]);
   const [exchangeCheckLoading, setExchangeCheckLoading] = useState(false);
-  const [payments, setPayments] = useState([]);
-  const [paymentLoading, setPaymentLoading] = useState(true);
-  const [totalRevenue, setTotalRevenue] = useState(0);
-  const [dailyRevenue, setDailyRevenue] = useState([]);
-  const [monthlyRevenue, setMonthlyRevenue] = useState([]);
-  const [paymentStats, setPaymentStats] = useState({
-    today: 0,
-    thisMonth: 0,
-    thisYear: 0,
-  });
-  const [paymentTypeStats, setPaymentTypeStats] = useState({
-    cash: 0,
-    transfer: 0,
-  });
-
-  const fetchPayments = async () => {
-    try {
-      setPaymentLoading(true);
-      const response = await fetch('http://localhost:4000/src/report/payment');
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setPayments(data.data);
-
-      // ✅ แก้ไขตรงนี้
-      const total = data.data.reduce((sum, payment) => {
-        return sum + (parseFloat(payment.paid_amount) || 0);
-      }, 0);
-      setTotalRevenue(total);
-
-      calculateRevenueStats(data.data);
-      calculatePaymentTypeStats(data.data);
-      prepareChartData(data.data);
-
-      // คำนวณรายได้รวม
-    } catch (error) {
-      console.error('Error fetching payments:', error);
-      setPayments([]);
-      setTotalRevenue(0);
-      setPaymentStats({
-        today: 0,
-        thisMonth: 0,
-        thisYear: 0,
-      });
-    } finally {
-      setPaymentLoading(false);
-    }
-  };
-
-  // ===== อัพเดท ฟังก์ชันคำนวณสถิติรายได้ =====
-  const calculateRevenueStats = (paymentData) => {
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-    const thisMonth = today.getMonth();
-    const thisYear = today.getFullYear();
-
-    const stats = {
-      today: 0,
-      thisMonth: 0,
-      thisYear: 0,
-    };
-
-    paymentData.forEach((payment) => {
-      const amount = parseFloat(payment.paid_amount) || 0;
-      const paymentDate = new Date(payment.pay_date);
-      const paymentDateStr = paymentDate.toISOString().split('T')[0];
-
-      // รายได้วันนี้
-      if (paymentDateStr === todayStr) {
-        stats.today += amount;
-      }
-
-      // รายได้เดือนนี้
-      if (
-        paymentDate.getMonth() === thisMonth &&
-        paymentDate.getFullYear() === thisYear
-      ) {
-        stats.thisMonth += amount;
-      }
-
-      // รายได้ปีนี้
-      if (paymentDate.getFullYear() === thisYear) {
-        stats.thisYear += amount;
-      }
-    });
-
-    setPaymentStats(stats);
-  };
-
-  // ===== เพิ่ม ฟังก์ชันคำนวณสถิติประเภทการชำระ =====
-  const calculatePaymentTypeStats = (paymentData) => {
-    const typeStats = {
-      cash: 0,
-      transfer: 0,
-    };
-
-    paymentData.forEach((payment) => {
-      const amount = parseFloat(payment.paid_amount) || 0;
-      if (payment.pay_type === 'CASH') {
-        typeStats.cash += amount;
-      } else if (payment.pay_type === 'TRANSFER') {
-        typeStats.transfer += amount;
-      }
-    });
-
-    setPaymentTypeStats(typeStats);
-  };
-
-  // ===== อัพเดท ฟังก์ชันเตรียมข้อมูลสำหรับ Chart =====
-  const prepareChartData = (paymentData) => {
-    // ข้อมูลรายได้รายวัน (7 วันล่าสุด)
-    const last7Days = [];
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
-
-      const dailyTotal = paymentData
-        .filter((payment) => {
-          const paymentDate = new Date(payment.pay_date);
-          return paymentDate.toISOString().split('T')[0] === dateStr;
-        })
-        .reduce(
-          (sum, payment) => sum + (parseFloat(payment.paid_amount) || 0),
-          0,
-        );
-
-      // แยกตามประเภทการชำระ
-      const cashTotal = paymentData
-        .filter((payment) => {
-          const paymentDate = new Date(payment.pay_date);
-          return (
-            paymentDate.toISOString().split('T')[0] === dateStr &&
-            payment.pay_type === 'CASH'
-          );
-        })
-        .reduce(
-          (sum, payment) => sum + (parseFloat(payment.paid_amount) || 0),
-          0,
-        );
-
-      const transferTotal = paymentData
-        .filter((payment) => {
-          const paymentDate = new Date(payment.pay_date);
-          return (
-            paymentDate.toISOString().split('T')[0] === dateStr &&
-            payment.pay_type === 'TRANSFER'
-          );
-        })
-        .reduce(
-          (sum, payment) => sum + (parseFloat(payment.paid_amount) || 0),
-          0,
-        );
-
-      last7Days.push({
-        date: date.toLocaleDateString('th-TH', {
-          day: '2-digit',
-          month: '2-digit',
-        }),
-        revenue: dailyTotal,
-        cash: cashTotal,
-        transfer: transferTotal,
-      });
-    }
-    setDailyRevenue(last7Days);
-
-    // ข้อมูลรายได้รายเดือน (6 เดือนล่าสุด)
-    const last6Months = [];
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
-      const month = date.getMonth();
-      const year = date.getFullYear();
-
-      const monthlyTotal = paymentData
-        .filter((payment) => {
-          const paymentDate = new Date(payment.pay_date);
-          return (
-            paymentDate.getMonth() === month &&
-            paymentDate.getFullYear() === year
-          );
-        })
-        .reduce(
-          (sum, payment) => sum + (parseFloat(payment.paid_amount) || 0),
-          0,
-        );
-
-      last6Months.push({
-        month: date.toLocaleDateString('th-TH', {
-          month: 'short',
-          year: 'numeric',
-        }),
-        revenue: monthlyTotal,
-      });
-    }
-    setMonthlyRevenue(last6Months);
-  };
-
-  // ===== เพิ่ม ฟังก์ชันสำหรับข้อมูล Pie Chart =====
-  const getPaymentTypeChartData = () => {
-    const total = paymentTypeStats.cash + paymentTypeStats.transfer;
-    if (total === 0) return [];
-
-    return [
-      {
-        name: 'ເງິນສົດ',
-        value: paymentTypeStats.cash,
-        percentage: ((paymentTypeStats.cash / total) * 100).toFixed(1),
-      },
-      {
-        name: 'ໂອນເງິນ',
-        value: paymentTypeStats.transfer,
-        percentage: ((paymentTypeStats.transfer / total) * 100).toFixed(1),
-      },
-    ];
-  };
-  useEffect(() => {
-    fetchPayments();
-  }, []);
-
+  // แก้ไขฟังก์ชัน checkTodayExchangeRates
   const checkTodayExchangeRates = async () => {
     try {
       setExchangeCheckLoading(true);
@@ -826,27 +606,29 @@ const Dashboard = () => {
   const handleExchangeManagement = () => {
     navigate('/manager/exchange');
   };
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('lo-LA').format(amount);
-  };
+
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
         <CardDataStats
           title="ລາຍຮັບທັງໝົດ"
-          total={
-            <span className="text-2xl text-black-2">
-              {paymentLoading
-                ? 'ກຳລັງໂຫລດ...'
-                : `${formatCurrency(totalRevenue)} ກີບ`}
-            </span>
-          }
-          rate={`ວັນນີ້: ${formatCurrency(paymentStats.today)} ກີບ`}
-          levelUp={paymentStats.today > 0}
-          levelDown={paymentStats.today === 0}
+          total={<span className="text-2xl text-black-2">60,000,000 ກີບ</span>}
         >
-          <HandCoins className="w-6 h-6 text-primary " />
+          <svg
+            className="w-6 h-6 text-primary dark:text-white"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M10 3v4a1 1 0 0 1-1 1H5m4 10v-2m3 2v-6m3 6v-3m4-11v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7.914a1 1 0 0 1 .293-.707l3.914-3.914A1 1 0 0 1 9.914 3H18a1 1 0 0 1 1 1Z"
+            />
+          </svg>
         </CardDataStats>
+
         <div onClick={handleExchangeManagement} className="cursor-pointer">
           <CardDataStats
             title="ອັດຕາແລກປ່ຽນມື້ນີ້"
@@ -924,54 +706,6 @@ const Dashboard = () => {
           </CardDataStats>
         </div>
       </div>
-      <div className="mt-6">
-        <div className="rounded-sm border border-stroke bg-white px-6 pt-6 pb-2.5 shadow-default xl:pb-1">
-          <div className="mb-6 justify-between gap-4 sm:flex">
-            <div>
-              <h4 className="text-xl font-semibold text-form-input break-words">
-                ລາຍຮັບລາຍວັນ (7 ວັນລ່າສຸດ)
-              </h4>
-            </div>
-          </div>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={dailyRevenue}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis  width={80} tickFormatter={(value) => `${formatCurrency(value)}`} />
-                <Tooltip
-                  formatter={(value, name) => [
-                    `${formatCurrency(value)} ກີບ`,
-                    name === 'cash'
-                      ? 'ເງິນສົດ'
-                      : name === 'transfer'
-                        ? 'ໂອນເງິນ'
-                        : 'ລາຍຮັບລວມ',
-                  ]}
-                />
-                <Legend />
-                <Area
-                  type="monotone"
-                  dataKey="cash"
-                  stackId="1"
-                  stroke="#10B981"
-                  fill="#10B981"
-                  name="ເງິນສົດ"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="transfer"
-                  stackId="1"
-                  stroke="#3B82F6"
-                  fill="#3B82F6"
-                  name="ໂອນເງິນ"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-
       {/* -------------- */}
       <div className="grid grid-cols-1 gap-8 mt-6">
         <div className="rounded bg-white pt-1 shadow-md ">
@@ -988,8 +722,9 @@ const Dashboard = () => {
                 onClick={() => navigate('/followpat')}
                 className="bg-secondary2 hover:bg-secondary3 text-white px-4 py-2 text-sm rounded transition-colors duration-200 flex items-center gap-2"
               >
+
                 ກວດສອບນັດໝາຍ
-                <ArrowRight className="w-4 h-4" />
+                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -1090,8 +825,9 @@ const Dashboard = () => {
                 onClick={() => navigate('/perorder')}
                 className="bg-secondary2 hover:bg-secondary3 text-white px-4 py-2 text-sm rounded transition-colors duration-200 flex items-center gap-2"
               >
+
                 ສັ່ງຊື້ຢາ ແລະ ອຸປະກອນ
-                <ArrowRight className="w-4 h-4" />
+                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -1157,6 +893,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
       {exchangeCheckLoading && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
@@ -1167,6 +904,7 @@ const Dashboard = () => {
           </div>
         </div>
       )}
+
       {/* Exchange Rate Modal */}
       <ExchangeRateModal
         isOpen={showExchangeModal}

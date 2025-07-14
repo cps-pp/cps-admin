@@ -179,10 +179,10 @@ const ReportPer = () => {
       <td className="px-4 py-3 ">
         <button
           onClick={() => handleViewDetail(item.in_id)}
-          className="inline-flex items-center px-3 py-1 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 hover:text-blue-700 transition-colors"
+          className="inline-flex items-center px-3 py-1 text-md font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 hover:text-blue-700 transition-colors"
         >
           <Eye className="w-4 h-4 mr-1" />
-         ເບີ່ງ
+         ເບີ່ງລາຍລະອຽດ
         </button>
       </td>
     </tr>
