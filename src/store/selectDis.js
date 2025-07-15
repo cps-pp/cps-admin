@@ -6,35 +6,15 @@ const useStoreDisease = create((set) => ({
   disUpdate: [],
 
   addDisease: (data) => {
-    set((state) => {
-      const existsID = state.dis.some(item => item.disease_id === data.disease_id);
-
-      if (existsID) {
-        return state
-      }
-
-      const newDisease = {
-        disease_id: data.disease_id,
-        disease_name: data.disease_name,
-        qty: 1,
-        price: data.price,
-      };
-
-      return {
-        ...state,
-        dis: [...state.dis, newDisease]
-      };
-    });
+    set((state) => ({
+      dis: [...state.dis, ...data.map(item => item.disease_name)]
+    }));
   },
 
-  removeDisease: (data) => {
-    set((state) => {
-      const filteredData = state.dis.filter((item) => item.disease_id !== data.disease_id);
-      return {
-        ...state,
-        dis: filteredData
-      }
-    });
+  removeDisease: (indexToRemove) => {
+    set((state) => ({
+      dis: state.dis.filter((_, index) => index !== indexToRemove),
+    }));
   },
 
   addDiseaseUpdate: (data) => {
@@ -63,7 +43,7 @@ const useStoreDisease = create((set) => ({
           : med
       ),
     })),
-
+ clearDisease: () => set({ dis: [], disUpdate: [] }),
 
 }))
 

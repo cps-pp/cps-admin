@@ -198,20 +198,20 @@ const dob = watch('dob');
   if (loading || loadingNextId) return <Loader />;
 
   return (
-    <div className="rounded bg-white pt-4 dark:bg-boxdark">
+    <div className="rounded bg-white pt-4 ">
       <Alerts />
-      <div className="flex items-center border-b border-stroke dark:border-strokedark pb-4">
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
-          ເພີ່ມຂໍ້ມູນ
+      <div className="flex items-center border-b border-stroke  pb-4">
+        <h1 className="text-md md:text-lg lg:text-xl font-semibold text-strokedark  px-4">
+          ເພີ່ມຂໍ້ມູນພະນັກງານ
         </h1>
+         {/* <p className="text-Third2 text-sm">ກະລຸນາປ້ອນຂໍ້ມູນໃຫ້ຄົບຖ້ວນ</p> */}
       </div>
 
       <form
         onSubmit={handleSubmit(handleSave)}
         className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 pt-4"
       >
-        {/* แสดงรหัสที่สร้างอัตโนมัติ (แบบ read-only) */}
-        <div className="mb-4">
+        <div className="">
           <label className="block text-sm font-medium mb-2 text-black dark:text-white">
             ລະຫັດໝໍ
           </label>
@@ -219,10 +219,11 @@ const dob = watch('dob');
             type="text"
             value={nextEmpId}
             readOnly
-            className="w-full rounded-lg border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
+            className="w-full rounded border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
           />
-          {/* Hidden input สำหรับส่งค่าไปกับฟอร์ม */}
           <input type="hidden" {...register('emp_id')} />
+         <p className=" text-sm mt-2"> <span className='text-red-500'>*</span>  ລະບົບສ້າງອັດຕາໂນມັດ</p>
+
         </div>
 
         <InputBox
@@ -232,6 +233,7 @@ const dob = watch('dob');
           placeholder="ປ້ອນຊຶ່ທ່ານຫມໍ"
           register={register}
           formOptions={{ required: 'ກະລຸນາປ້ອນຊື່ທ່ານຫມໍກ່ອນ' }}
+          className='mt-1'
           errors={errors}
         />
         <InputBox
@@ -264,8 +266,7 @@ const dob = watch('dob');
           setValue={setValue}
         />
         
-        {/* ✅ Custom Phone Input with 020 prefix และตรวจสอบตัวเลขที่ 4 */}
-        <div className="mb-4">
+        <div className="">
           <label className="block text-sm font-medium mb-2 text-black dark:text-white">
             ເບີຕິດຕໍ່
           </label>
@@ -324,13 +325,13 @@ const dob = watch('dob');
         <SelectBox
           label="ຕຳແໜ່ງ"
           name="ຕຳແໜ່ງ"
-          options={['ທ່ານຫມໍ', 'ຜູ້ຊ່ວຍທ່ານຫມໍ']}
+          options={['ທ່ານໝໍ', 'ຜູ້ຊ່ວຍທ່ານໝໍ']}
           register={register}
           errors={errors}
           value={role}
           onSelect={(e) => setRole(e.target.value)}
         />
-        <div className="mt-4 flex justify-end space-x-4 col-span-full py-4">
+        <div className=" flex justify-end col-span-full py-4">
           
           <ButtonBox variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}

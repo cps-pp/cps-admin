@@ -22,7 +22,7 @@ export default function SumDiseases() {
                 {iconTrash}
               </button>
             </li>
-            {index !== dis.length - 1 && <Divider className="my-2" />}
+            {index !== dis?.length - 1 && <Divider className="my-2" />}
           </div>
         ))}
       </ul>

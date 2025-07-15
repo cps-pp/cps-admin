@@ -16,7 +16,6 @@ import EditEmployee from './EditEmp';
 import Loader from '@/common/Loader';
 import { Empty } from 'antd';
 
-
 const EmployeePage = () => {
   const [employees, setEmployees] = useState([]);
   const [filteredEmployees, setFilteredEmployees] = useState([]);
@@ -42,14 +41,14 @@ const EmployeePage = () => {
     try {
       setLoading(true);
       const response = await fetch('http://localhost:4000/src/manager/emp');
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      if (!response.ok)
+        throw new Error(`HTTP error! Status: ${response.status}`);
       const data = await response.json();
       setEmployees(data.data);
       setFilteredEmployees(data.data);
       // ✅ เก็บรหัสทั้งหมดไว้
       const ids = data.data.map((employee) => employee.emp_id);
       setExistingIds(ids);
-
     } catch (error) {
       console.error('Error fetching employees:', error);
     } finally {
@@ -65,10 +64,11 @@ const EmployeePage = () => {
     if (searchQuery.trim() === '') {
       setFilteredEmployees(employees);
     } else {
-      const filtered = employees.filter((emp) =>
-        emp.emp_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        emp.emp_surname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        emp.emp_id.toLowerCase().includes(searchQuery.toLowerCase())
+      const filtered = employees.filter(
+        (emp) =>
+          emp.emp_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          emp.emp_surname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          emp.emp_id.toLowerCase().includes(searchQuery.toLowerCase()),
       );
       setFilteredEmployees(filtered);
     }
@@ -78,30 +78,31 @@ const EmployeePage = () => {
   const handleSortById = () => {
     const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
     setSortOrder(newSortOrder);
-    
+
     const sortedEmployees = [...employees].sort((a, b) => {
       const extractNumber = (id) => {
         const match = id.match(/\d+/);
         return match ? parseInt(match[0]) : 0;
       };
-      
+
       const numA = extractNumber(a.emp_id);
       const numB = extractNumber(b.emp_id);
-      
+
       if (newSortOrder === 'asc') {
-        return numA - numB; 
+        return numA - numB;
       } else {
-        return numB - numA; 
+        return numB - numA;
       }
     });
-    
+
     setEmployees(sortedEmployees);
-    
+
     if (searchQuery.trim() !== '') {
-      const filtered = sortedEmployees.filter(emp =>
-        emp.emp_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        emp.emp_surname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        emp.emp_id.toLowerCase().includes(searchQuery.toLowerCase())
+      const filtered = sortedEmployees.filter(
+        (emp) =>
+          emp.emp_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          emp.emp_surname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          emp.emp_id.toLowerCase().includes(searchQuery.toLowerCase()),
       );
       setFilteredEmployees(filtered);
     } else {
@@ -119,24 +120,30 @@ const EmployeePage = () => {
     try {
       const response = await fetch(
         `http://localhost:4000/src/manager/emp/${selectedEmpId}`,
-        { method: 'DELETE' }
+        { method: 'DELETE' },
       );
       if (!response.ok) throw new Error('ບໍ່ສາມາດລົບທ່ານຫມໍໄດ້');
 
-      setEmployees((prev) => prev.filter((emp) => emp.emp_id !== selectedEmpId));
+      setEmployees((prev) =>
+        prev.filter((emp) => emp.emp_id !== selectedEmpId),
+      );
       setShowModal(false);
       setSelectedEmpId(null);
-      dispatch(openAlert({
-        type: 'success',
-        title: 'ລົບຂໍ້ມູນສຳເລັດ',
-        message: 'ລົບຂໍ້ມູນພະນັກງານສຳເລັດແລ້ວ',
-      }));
+      dispatch(
+        openAlert({
+          type: 'success',
+          title: 'ລົບຂໍ້ມູນສຳເລັດ',
+          message: 'ລົບຂໍ້ມູນພະນັກງານສຳເລັດແລ້ວ',
+        }),
+      );
     } catch (error) {
-      dispatch(openAlert({
-        type: 'error',
-        title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
-        message: 'ເກີດຂໍ້ຜິດພາດໃນການລົບຂໍ້ມູນ',
-      }));
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ລົບຂໍ້ມູນບໍ່ສຳເລັດ',
+          message: 'ເກີດຂໍ້ຜິດພາດໃນການລົບຂໍ້ມູນ',
+        }),
+      );
     }
   };
 
@@ -167,46 +174,45 @@ const EmployeePage = () => {
 
   const paginatedEmp = filteredEmployees.slice(
     page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+    page * rowsPerPage + rowsPerPage,
   );
 
   if (loading) return <Loader />;
 
   return (
-        <>
-    <div className="rounded bg-white pt-4 border border-stroke">
-      <Alerts />
+    <>
+      <div className="rounded bg-white pt-4 border border-stroke">
+        <Alerts />
 
-      <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 ">
-        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark ">
-          ຈັດການຂໍ້ມູນພະນັກງານ
-        </h1>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => setShowAddModal(true)}
-            icon={iconAdd}
-            className="bg-secondary2 hover:bg-secondary3"
-          >
-            ເພີ່ມພະນັກງານ
-          </Button>
+        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 ">
+          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark ">
+            ຈັດການຂໍ້ມູນພະນັກງານ
+          </h1>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => setShowAddModal(true)}
+              icon={iconAdd}
+              className="bg-Third2 hover:bg-Third3"
+            >
+              ເພີ່ມພະນັກງານ
+            </Button>
+          </div>
         </div>
-      </div>
 
-      <div className="grid w-full gap-4 p-4">
-        <Search
-          type="text"
-          name="search"
-          placeholder="ຄົ້ນຫາຊື່..."
-          className="rounded border border-stroke "
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
+        <div className="grid w-full gap-4 p-4">
+          <Search
+            type="text"
+            name="search"
+            placeholder="ຄົ້ນຫາຊື່..."
+            className="rounded border border-stroke "
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
 
-    
-             <div className="overflow-x-auto  ">
+        <div className="overflow-x-auto  ">
           <table className="w-full min-w-max table-auto  ">
             <thead>
-               <tr className="text-left bg-gray border border-stroke ">
+              <tr className="text-left bg-gray border border-stroke ">
                 {EmpHeaders.map((header, index) => (
                   <th
                     key={index}
@@ -255,7 +261,19 @@ const EmployeePage = () => {
                     </td>
                     <td className="px-4 py-4">{emp.phone}</td>
                     <td className="px-4 py-4">{emp.address}</td>
-                    <td className="px-4 py-4">{emp.role}</td>
+                    <td className="px-4 py-2">
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          emp.role === 'ທ່ານໝໍ'
+                            ? 'text-Third2 bg-Third'
+                            : emp.role === 'ຜູ້ຊ່ວຍທ່ານໝໍ'
+                              ? 'text-green-700 bg-green-100'
+                              : 'text-gray-700 bg-gray-100'
+                        }`}
+                      >
+                        {emp.role}
+                      </span>
+                    </td>
 
                     <td className="px-3 py-4 text-center">
                       <TableAction
@@ -269,7 +287,7 @@ const EmployeePage = () => {
               ) : (
                 <tr>
                   <td colSpan={5} className="py-4 text-center text-gray-500">
-                 <div className="text-center ">
+                    <div className="text-center ">
                       <div className="w-32 h-32 flex items-center justify-center mx-auto">
                         <Empty description={false} />
                       </div>
@@ -282,57 +300,61 @@ const EmployeePage = () => {
           </table>
         </div>
 
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4 ">
-          <div className="    rounded
+        {showAddModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4 ">
+            <div
+              className="    rounded
         w-full max-w-lg     
         md:max-w-2xl        
          lg:max-w-4xl 
         xl:max-w-5xl       
         relative
         overflow-auto
-        max-h-[90vh]">
-             {/* ✅ ปุ่ม X ที่ใช้ฟังก์ชันป้องกันจาก CreateCategory */}
+        max-h-[90vh]"
+            >
+              {/* ✅ ปุ่ม X ที่ใช้ฟังก์ชันป้องกันจาก CreateCategory */}
               <button
                 onClick={handleCloseAddModal}
                 className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700 z-10"
               >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
 
-            <CreateEmployee
-              setShow={setShowAddModal}
-              getList={fetchEmployees}
-              existingIds={existingIds} // ✅ เพิ่มบรรทัดน
-              onCloseCallback={setCreateFormCloseHandler} // ✅ ส่ง callback function
-            />
+              <CreateEmployee
+                setShow={setShowAddModal}
+                getList={fetchEmployees}
+                existingIds={existingIds} // ✅ เพิ่มบรรทัดน
+                onCloseCallback={setCreateFormCloseHandler} // ✅ ส่ง callback function
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {showEditModal && selectedId && (
+        {showEditModal && selectedId && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
-                <div className="    rounded
+            <div
+              className="    rounded
         w-full max-w-lg     
         md:max-w-2xl        
          lg:max-w-4xl 
         xl:max-w-5xl      
         relative
         overflow-auto
-        max-h-[90vh]">
+        max-h-[90vh]"
+            >
               <button
                 onClick={() => setShowEditModal(false)}
                 className="absolute  top-4 right-2 text-gray-500 hover:text-gray-700"
@@ -361,9 +383,8 @@ const EmployeePage = () => {
               />
             </div>
           </div>
-        )} 
-    </div>
-
+        )}
+      </div>
 
       <TablePaginationDemo
         count={filteredEmployees.length}
@@ -373,13 +394,13 @@ const EmployeePage = () => {
         onRowsPerPageChange={handleRowsPerPageChange}
       />
 
-       <ConfirmModal
+      <ConfirmModal
         show={showModal}
         setShow={setShowModal}
         message="ທ່ານຕ້ອງການລົບລາຍການນີ້ອອກຈາກລະບົບບໍ່？"
         handleConfirm={handleDeleteEmployee}
-      /> 
-  </>
+      />
+    </>
   );
 };
 

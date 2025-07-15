@@ -19,7 +19,8 @@ import { useNavigate } from 'react-router-dom';
 import { FollowHeader } from './Follow/column/follow';
 import ExchangeRateModal from '../components/exchange_chack/ExchangeRateModal';
 import { Calendar, Badge, List, Typography, Card } from 'antd';
-import { ArrowRight, HandCoins, PieChart } from 'lucide-react';
+import { ArrowRight, HandCoins } from 'lucide-react';
+import { URLBaseLocal } from '../lib/MyURLAPI';
 const { Text, Title } = Typography;
 const Dashboard = () => {
   const [patients, setPatients] = useState(null);
@@ -74,7 +75,10 @@ const Dashboard = () => {
   const fetchPayments = async () => {
     try {
       setPaymentLoading(true);
-      const response = await fetch('http://localhost:4000/src/report/payment');
+         const response = await fetch(
+        `${URLBaseLocal}/src/report/payment`,
+      );
+
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -283,7 +287,7 @@ const Dashboard = () => {
       setExchangeCheckLoading(true);
       const today = new Date().toISOString().split('T')[0];
       const response = await fetch(
-        `http://localhost:4000/src/manager/today/${today}`,
+        `${URLBaseLocal}/src/manager/today/${today}`,
       );
 
       if (!response.ok) {
@@ -333,7 +337,7 @@ const Dashboard = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:4000/src/manager/update-rates`,
+        `${URLBaseLocal}/src/manager/update-rates`,
         {
           method: 'POST',
           headers: {
@@ -361,7 +365,7 @@ const Dashboard = () => {
   const fetchExchangeRates = async () => {
     try {
       const response = await fetch(
-        'http://localhost:4000/src/manager/exchange',
+        `${URLBaseLocal}/src/manager/exchange`,
       );
       if (!response.ok)
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -405,7 +409,7 @@ const Dashboard = () => {
       console.log('Checking database for today rates:', today);
 
       const response = await fetch(
-        `http://localhost:4000/src/exchange/today/${today}`,
+        `${URLBaseLocal}/src/exchange/today/${today}`,
       );
 
       if (!response.ok) {
@@ -497,7 +501,7 @@ const Dashboard = () => {
       try {
         setLoading(true);
         const response = await fetch(
-          'http://localhost:4000/src/manager/patient/dashboard',
+          `${URLBaseLocal}/src/manager/patient/dashboard`,
         );
         if (!response.ok)
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -519,7 +523,7 @@ const Dashboard = () => {
       try {
         setLoading(true);
         const response = await fetch(
-          'http://localhost:4000/src/manager/patient',
+          `${URLBaseLocal}/src/manager/patient`,
         );
         if (!response.ok)
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -538,7 +542,7 @@ const Dashboard = () => {
     const fetchPatientName = async () => {
       try {
         const response = await fetch(
-          'http://localhost:4000/src/manager/patient',
+          `${URLBaseLocal}/src/manager/patient`,
         );
         if (!response.ok)
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -557,7 +561,7 @@ const Dashboard = () => {
       try {
         setMedicineLoading(true);
         const response = await fetch(
-          'http://localhost:4000/src/manager/medicines',
+          `${URLBaseLocal}/src/manager/medicines`,
         );
         if (!response.ok)
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -608,7 +612,7 @@ const Dashboard = () => {
     const fetchMedicineTypes = async () => {
       try {
         const response = await fetch(
-          'http://localhost:4000/src/manager/category',
+          `${URLBaseLocal}/src/manager/category`,
         );
         if (!response.ok)
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -717,7 +721,7 @@ const Dashboard = () => {
     const fetchAppointments = async () => {
       try {
         const response = await fetch(
-          'http://localhost:4000/src/appoint/appointment',
+          `${URLBaseLocal}/src/appoint/appointment`,
         );
         const data = await response.json();
 
@@ -746,7 +750,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const response = await fetch('http://localhost:4000/src/manager/emp');
+        const response = await fetch(`${URLBaseLocal}/src/manager/emp`);
         const data = await response.json();
         setDoctorCount(data.data.length);
       } catch (error) {
@@ -760,7 +764,7 @@ const Dashboard = () => {
     const fetchDoctor = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:4000/src/manager/emp');
+        const response = await fetch(`${URLBaseLocal}/src/manager/emp`);
         if (!response.ok)
           throw new Error(`HTTP error! Status: ${response.status}`);
         const data = await response.json();
@@ -962,8 +966,8 @@ const Dashboard = () => {
                   type="monotone"
                   dataKey="transfer"
                   stackId="1"
-                  stroke="#3B82F6"
-                  fill="#3B82F6"
+                  stroke="#5A3AB8"
+                  fill="#5A3AB8"
                   name="ໂອນເງິນ"
                 />
               </AreaChart>
@@ -986,7 +990,7 @@ const Dashboard = () => {
 
               <button
                 onClick={() => navigate('/followpat')}
-                className="bg-secondary2 hover:bg-secondary3 text-white px-4 py-2 text-sm rounded transition-colors duration-200 flex items-center gap-2"
+                className="bg-Third2 hover:bg-Third3 text-white px-4 py-2 text-sm rounded transition-colors duration-200 flex items-center gap-2"
               >
                 ກວດສອບນັດໝາຍ
                 <ArrowRight className="w-4 h-4" />
@@ -1088,7 +1092,7 @@ const Dashboard = () => {
               </div>
               <button
                 onClick={() => navigate('/perorder')}
-                className="bg-secondary2 hover:bg-secondary3 text-white px-4 py-2 text-sm rounded transition-colors duration-200 flex items-center gap-2"
+                className="bg-Third2 hover:bg-Third3 text-white px-4 py-2 text-sm rounded transition-colors duration-200 flex items-center gap-2"
               >
                 ສັ່ງຊື້ຢາ ແລະ ອຸປະກອນ
                 <ArrowRight className="w-4 h-4" />

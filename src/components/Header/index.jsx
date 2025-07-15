@@ -6,6 +6,7 @@ import axios from 'axios';
 import { Clock } from 'lucide-react';
 import { ACCESS_TOKEN_KEY } from '../../utils/constants';
 import { useAuth } from '../../AuthContext';
+import { URLBaseLocal } from '../../lib/MyURLAPI';
 
 const Header = (props) => {
   const [notifications, setNotifications] = useState({
@@ -18,9 +19,9 @@ const Header = (props) => {
   const [showNotificationMenu, setShowNotificationMenu] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const { user, logout } = useAuth();
- //
+  //
   const handleLogout = () => {
-    logout(); 
+    logout();
     window.location.href = '/login';
   };
 
@@ -44,7 +45,7 @@ const Header = (props) => {
 
       try {
         const res = await axios.get(
-          'http://localhost:4000/src/auth/authen/profile',
+          `${URLBaseLocal}/src/auth/authen/profile`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -71,7 +72,7 @@ const Header = (props) => {
     try {
       // ดึงข้อมูลนัดหมาย
       const appointmentRes = await axios.get(
-        'http://localhost:4000/src/appoint/appointmentWang',
+        `${URLBaseLocal}/src/appoint/appointmentWang`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -79,7 +80,7 @@ const Header = (props) => {
 
       // ดึงข้อมูลยา
       const medicineRes = await axios.get(
-        'http://localhost:4000/src/manager/medicines',
+        `${URLBaseLocal}/src/manager/medicines`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -226,7 +227,7 @@ const Header = (props) => {
 
           <div className="hidden lg:flex items-center gap-2 border border-stroke px-4 py-2 rounded bg-gray-50">
             <Clock className="w-5 h-5 text-secondary2" />
-            <span className="text-base text-secondary2 font-semibold">
+            <span className="text-base text-secondary2 font-semibold font-en ">
               {formatDateTime(currentTime)}
             </span>
           </div>
@@ -238,11 +239,11 @@ const Header = (props) => {
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center gap-3 p-2 rounded bg-slate-50 hover:bg-slate-100 border border-stroke transition-all duration-300 hover:shadow-md group"
               >
-                <div className="w-8 h-8 bg-secondary2 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-Third3 rounded-full flex items-center justify-center">
                   <User className="h-4 w-4 text-white" />
                 </div>
                 <div className="hidden md:block text-left">
-                  <div className="text-md font-semibold text-form-input group-hover:text-secondary transition-colors duration-200">
+                  <div className="text-md font-semibold bg-gradient-to-r from-Third2  to-Third3 bg-clip-text text-transparent font-en group-hover:text-secondary transition-colors duration-200">
                     {user.username} {user.role}
                   </div>
                 </div>
@@ -287,25 +288,25 @@ const Header = (props) => {
               </button>
 
               {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-75 bg-white backdrop-blur-md border border-stroke rounded shadow-xl py-2 z-50">
+                <div className="absolute right-0 mt-2 w-75 bg-white backdrop-blur-md border border-stroke rounded shadow-xl  z-50">
                   <div className="px-4 py-3 border-b border-stroke">
                     <div className="flex items-center gap-4">
-                      <div className="w-8 h-8 bg-secondary2 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-Third3 rounded-full flex items-center justify-center">
                         <User className="h-4 w-4 text-white" />
                       </div>
                       <div>
-                        <div className="font-semibold text-gray-800">
-                          {user.username}
+                        <div className="font-semibold text-gray-800 font-en">
+                          {user.username} 
                         </div>
-                        <div className="text-sm text-gray-500">{user.role}</div>
+                        <div className="text-sm text-gray-500 font-en">{user.role}</div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="py-2">
+                  <div className="">
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-200"
+                      className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-200"
                     >
                       <LogOut className="h-4 w-4" />
                       <span>ອອກຈາກລະບົບ</span>

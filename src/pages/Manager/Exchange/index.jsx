@@ -201,7 +201,7 @@ const ExchangePage = () => {
             <Button
               onClick={() => setShowAddModal(true)}
               icon={iconAdd}
-              className="bg-secondary2 hover:bg-secondary3"
+              className="bg-Third2 hover:bg-Third3"
             >
               ເພີ່ມອັດຕາແລກປ່ຽນ
             </Button>

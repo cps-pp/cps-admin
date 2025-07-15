@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import Logo from '../../images/logo/cps.png';
-import NewLogo from '../../images/logo/new_lg.png';
+import NewLogo from '../../images/logo/NewLogo_2.png';
 
 import SidebarTemplate from './SidebarTemplate';
 import { FOLLOW, IMPORT, MENU, REPORTALL, SERVICE } from '../../configs/nav';
@@ -16,7 +16,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const trigger = useRef(null);
   const sidebar = useRef(null);
   // console.log("Role in Sidebar:", role);
-    const restrictedPathsForUserAdmin = [
+  const restrictedPathsForUserAdmin = [
     '/manager/employee',
     '/manager/servicelist',
   ];
@@ -28,7 +28,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
     if (menu.subs) {
       menu.subs = menu.subs.filter((sub) => {
-        if (role === 'admin' && restrictedPathsForUserAdmin.includes(sub.path)) {
+        if (
+          role === 'admin' &&
+          restrictedPathsForUserAdmin.includes(sub.path)
+        ) {
           return false;
         }
         return true;
@@ -41,7 +44,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
     return true;
   });
-
 
   useEffect(() => {
     const clickHandler = (e) => {
@@ -100,7 +102,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             height={40}
             className="object-contain"
           />
-          <h1 className="m-0 bg-secondary2 bg-clip-text text-transparent font-en">
+          <h1 className="m-0 bg-gradient-to-r from-Third2 3 to-Third3 bg-clip-text text-transparent font-en">
             CPS Dental
           </h1>
         </NavLink>

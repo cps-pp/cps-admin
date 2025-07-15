@@ -15,6 +15,7 @@ import {
 import SelectBoxId from '../../../components/Forms/SelectID';
 import { useDispatch } from 'react-redux';
 import { openAlert } from '@/redux/reducer/alert';
+import { URLBaseLocal } from '../../../lib/MyURLAPI';
 // const BillPopup = ({
 //   isOpen,
 //   onClose,
@@ -542,7 +543,7 @@ const BillPopup = ({
           }
 
           const response = await fetch(
-            'http://localhost:4000/src/payment/payment',
+            `${URLBaseLocal}/src/payment/payment`,
             {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -563,7 +564,7 @@ const BillPopup = ({
         }
       } else {
         const response = await fetch(
-          'http://localhost:4000/src/payment/payment',
+          `${URLBaseLocal}/src/payment/payment`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -900,13 +901,12 @@ const BillPopup = ({
                       <div className="flex justify-between items-center pt-2 ">
                         <span className="text-form-strokedark ">ສະຖານະ:</span>
                         <span
-                          className={`px-3 py-2 rounded-full text-xs font-semibold  ${
-                            invoiceData.status === 'paid'
+                          className={`px-3 py-2 rounded-full text-xs font-semibold  ${invoiceData.status === 'paid'
                               ? 'bg-green-100 text-green-800 '
                               : invoiceData.status === 'partial'
                                 ? 'bg-yellow-100 text-yellow-800  '
                                 : 'bg-red-100 text-red-800  '
-                          }`}
+                            }`}
                         >
                           {invoiceData.status === 'paid'
                             ? 'ຊຳລະແລ້ວ'
@@ -972,11 +972,10 @@ const BillPopup = ({
                           ([currency, amount]) => (
                             <div
                               key={currency}
-                              className={`flex justify-between items-center p-2 rounded border ${
-                                currency === 'KIP'
+                              className={`flex justify-between items-center p-2 rounded border ${currency === 'KIP'
                                   ? ' bg-gradient-to-r from-blue-50 to-indigo-50 border-stroke text-lg'
                                   : ' border-stroke'
-                              }`}
+                                }`}
                             >
                               <span className="font-medium text-gray-700 text-sm">
                                 {currency}:
@@ -1005,11 +1004,10 @@ const BillPopup = ({
                             setDisplayCashAmount('');
                             setDisplayTransferAmount('');
                           }}
-                          className={`flex flex-col items-center p-3 rounded border-2 transition-all ${
-                            paymentType === 'cash' && !isMixedPayment
+                          className={`flex flex-col items-center p-3 rounded border-2 transition-all ${paymentType === 'cash' && !isMixedPayment
                               ? 'border-green-500 bg-green-50 text-green-700'
                               : 'border-gray-200 hover:border-gray-300'
-                          }`}
+                            }`}
                         >
                           <Banknote size={20} className="mb-1" />
                           <span className="text-xs font-medium">ເງິນສົດ</span>
@@ -1023,11 +1021,10 @@ const BillPopup = ({
                             setDisplayCashAmount('');
                             setDisplayTransferAmount('');
                           }}
-                          className={`flex flex-col items-center p-3 rounded border-2 transition-all ${
-                            paymentType === 'transfer' && !isMixedPayment
+                          className={`flex flex-col items-center p-3 rounded border-2 transition-all ${paymentType === 'transfer' && !isMixedPayment
                               ? 'border-blue-500 bg-blue-50 text-blue-700'
                               : 'border-gray-200 hover:border-gray-300'
-                          }`}
+                            }`}
                         >
                           <TransferIcon size={20} className="mb-1" />
                           <span className="text-xs font-medium">ໂອນເງິນ</span>
@@ -1038,11 +1035,10 @@ const BillPopup = ({
                             setDisplayAmount('');
                             setReceivedAmount('');
                           }}
-                          className={`flex flex-col items-center p-3 rounded border-2 transition-all ${
-                            isMixedPayment
+                          className={`flex flex-col items-center p-3 rounded border-2 transition-all ${isMixedPayment
                               ? 'border-purple-500 bg-purple-50 text-purple-700'
                               : 'border-gray-200 hover:border-gray-300'
-                          }`}
+                            }`}
                         >
                           <div className="flex mb-1">
                             <Banknote size={14} />
@@ -1257,11 +1253,10 @@ const BillPopup = ({
                   <button
                     onClick={handlePaymentConfirm}
                     disabled={isProcessing || !isAmountSufficient}
-                    className={`w-full py-3 rounded text-white font-semibold text-lg transition-all ${
-                      isProcessing || !isAmountSufficient
+                    className={`w-full py-3 rounded text-white font-semibold text-lg transition-all ${isProcessing || !isAmountSufficient
                         ? 'bg-gray-400 cursor-not-allowed'
                         : 'bg-green-600 hover:bg-green-700 shadow-lg hover:shadow-xl'
-                    }`}
+                      }`}
                   >
                     {isProcessing
                       ? 'ກຳລັງດຳເນີນການ....'

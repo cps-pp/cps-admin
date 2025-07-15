@@ -556,7 +556,7 @@ const FollowPage = () => {
   <Button
     onClick={() => setShowAddModal(true)}
     icon={iconAdd}
-    className="bg-secondary2 hover:bg-secondary3 whitespace-nowrap h-10 text-sm px-4"
+    className="bg-Third2 hover:bg-Third3 whitespace-nowrap h-10 text-sm px-4"
   >
     ເພີ່ມນັດໝາຍ
   </Button>

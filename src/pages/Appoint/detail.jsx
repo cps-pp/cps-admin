@@ -30,6 +30,7 @@ import { useNavigate } from 'react-router-dom';
 import BackButton from '../../components/BackButton';
 import SearchBox from '../../components/Forms/Search_New';
 import { Empty } from 'antd';
+import { URLBaseLocal } from '../../lib/MyURLAPI';
 
 const FollowTreatmentPage = ({ onBack }) => {
   const [patientDetails, setPatientDetails] = useState(null);
@@ -99,9 +100,7 @@ const FollowTreatmentPage = ({ onBack }) => {
   const fetchPatientById = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `http://localhost:4000/src/report/patient/${id}`,
-      );
+      const response = await fetch(`${URLBaseLocal}/src/report/patient/${id}`);
       if (!response.ok)
         throw new Error(`HTTP error! Status: ${response.status}`);
       const data = await response.json();
@@ -119,7 +118,7 @@ const FollowTreatmentPage = ({ onBack }) => {
   const fetchInspectionsByPatient = async (patientId) => {
     try {
       const response = await fetch(
-        `http://localhost:4000/src/report/patient/${patientId}`,
+        `${URLBaseLocal}/src/report/patient/${patientId}`,
       );
       if (!response.ok)
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -136,7 +135,7 @@ const FollowTreatmentPage = ({ onBack }) => {
       console.log('Fetching inspection details for ID:', inspectionId);
 
       const response = await fetch(
-        `http://localhost:4000/src/report/inspection/${inspectionId}`,
+        `${URLBaseLocal}/src/report/inspection/${inspectionId}`,
       );
 
       if (!response.ok) {
@@ -176,7 +175,7 @@ const FollowTreatmentPage = ({ onBack }) => {
     try {
       console.log('Fetching prescription details for ID:', inspectionId);
       const response = await fetch(
-        `http://localhost:4000/src/report/prescription?id=${inspectionId}`,
+        `${URLBaseLocal}/src/report/prescription?id=${inspectionId}`,
       );
 
       if (!response.ok) {
@@ -590,9 +589,8 @@ const FollowTreatmentPage = ({ onBack }) => {
     <>
       <div className="">
         {/* Header Section */}
-       
 
-<div className="bg-white rounded border border-stroke p-4 mb-4">
+        <div className="bg-white rounded border border-stroke p-4 mb-4">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex items-center gap-4">
               <BackButton />
@@ -685,11 +683,12 @@ const FollowTreatmentPage = ({ onBack }) => {
                   </button>
                 </div>
               </div>
-                 {(searchDate !== '' || searchInId !== '') && filteredInspections.length === 0 && (
-      <p className="text-sm text-rose-500 mt-3">
-        * ບໍ່ພົບຂໍ້ມູນທີ່ຄົ້ນຫາ
-      </p>
-    )}
+              {(searchDate !== '' || searchInId !== '') &&
+                filteredInspections.length === 0 && (
+                  <p className="text-sm text-rose-500 mt-3">
+                    * ບໍ່ພົບຂໍ້ມູນທີ່ຄົ້ນຫາ
+                  </p>
+                )}
             </div>
           )}
         </div>

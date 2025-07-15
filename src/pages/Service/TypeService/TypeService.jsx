@@ -7,6 +7,7 @@ import SumService from './Component/SumService';
 import SumDiseases from './Component/SumDis';
 import { CopyPlus, Activity } from 'lucide-react';
 import useStoreServices from '../../../store/selectServices';
+import { URLBaseLocal } from '../../../lib/MyURLAPI';
 export default function TypeService({
   selectService,
   value,
@@ -29,7 +30,7 @@ export default function TypeService({
     async function loadExistingData() {
       try {
         const res = await fetch(
-          `http://localhost:4000/src/report/inspection/${inspectionId}`,
+          `${URLBaseLocal}/src/report/inspection/${inspectionId}`,
         );
         const data = await res.json();
 

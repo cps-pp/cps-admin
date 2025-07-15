@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Space, Table } from 'antd';
 import useStoreDisease from '../../../store/selectDis';
+import { URLBaseLocal } from '../../../lib/MyURLAPI';
 
 export default function ListDisUpdate({ selectService, tapService }) {
   const [dataDis, setDataDis] = useState([]);
@@ -8,7 +9,7 @@ export default function ListDisUpdate({ selectService, tapService }) {
 
   const fetchDisList = async () => {
     try {
-      const res = await fetch('http://localhost:4000/src/manager/disease');
+      const res = await fetch(`${URLBaseLocal}/src/manager/disease`);
       const data = await res.json();
       setDataDis(data.data);
     } catch (err) {

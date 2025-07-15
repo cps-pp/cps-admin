@@ -20,6 +20,9 @@ import {
 import { useParams, useLocation } from 'react-router-dom';
 import { Empty } from 'antd';
 import BackButton from '../../../components/BackButton';
+import SearchBox from '../../../components/Forms/Search_New';
+import { URLBaseLocal } from '../../../lib/MyURLAPI';
+
 const DetailFollowPatient = ({ onBack }) => {
   const [showFilters, setShowFilters] = useState(false);
   const [patientDetails, setPatientDetails] = useState(null);
@@ -89,7 +92,7 @@ const DetailFollowPatient = ({ onBack }) => {
     try {
       setLoading(true);
       const response = await fetch(
-        `http://localhost:4000/src/report/patient/${id}`,
+        `${URLBaseLocal}/src/report/patient/${id}`,
       );
       if (!response.ok)
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -108,7 +111,7 @@ const DetailFollowPatient = ({ onBack }) => {
   const fetchInspectionsByPatient = async (patientId) => {
     try {
       const response = await fetch(
-        `http://localhost:4000/src/report/patient/${patientId}`,
+        `${URLBaseLocal}/src/report/patient/${patientId}`,
       );
       if (!response.ok)
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -125,7 +128,7 @@ const DetailFollowPatient = ({ onBack }) => {
       console.log('Fetching inspection details for ID:', inspectionId);
 
       const response = await fetch(
-        `http://localhost:4000/src/report/inspection/${inspectionId}`,
+        `${URLBaseLocal}/src/report/inspection/${inspectionId}`,
       );
 
       if (!response.ok) {
@@ -165,7 +168,7 @@ const DetailFollowPatient = ({ onBack }) => {
     try {
       console.log('Fetching prescription details for ID:', inspectionId);
       const response = await fetch(
-        `http://localhost:4000/src/report/prescription?id=${inspectionId}`,
+        `${URLBaseLocal}/src/report/prescription?id=${inspectionId}`,
       );
 
       if (!response.ok) {
@@ -484,11 +487,10 @@ const handleReload = async () => {
                               </td>
                               <td className="px-4 py-2 border border-stroke">
                                 <span
-                                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                    prescription.type_name === 'ຢາ'
-                                      ? 'bg-green-100 text-green-800'
-                                      : 'bg-purple-100 text-secondary2'
-                                  }`}
+                                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${prescription.type_name === 'ຢາ'
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-purple-100 text-secondary2'
+                                    }`}
                                 >
                                   {prescription.type_name}
                                 </span>
@@ -574,16 +576,14 @@ const handleReload = async () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`inline-flex items-center gap-2 px-3 py-2 text-md font-semibold rounded border transition-all duration-200 shadow-sm ${
-                  showFilters
-                    ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
-                    : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
-                }`}
+                className={`inline-flex items-center gap-2 px-3 py-2 text-md font-semibold rounded border transition-all duration-200 shadow-sm ${showFilters
+                  ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                  : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                  }`}
               >
                 <Filter
-                  className={`w-4 h-4 transition-transform duration-200 ${
-                    showFilters ? 'rotate-90' : ''
-                  }`}
+                  className={`w-4 h-4 transition-transform duration-200 ${showFilters ? 'rotate-90' : ''
+                    }`}
                 />
                 {showFilters ? 'ປິດ' : 'ເປີດການຄົ້ນຫາ'}
               </button>

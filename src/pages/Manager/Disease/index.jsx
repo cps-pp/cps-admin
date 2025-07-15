@@ -182,7 +182,7 @@ const handleSortById = () => {
             <Button
               onClick={() => setShowAddDiseaseModal(true)}
               icon={iconAdd}
-              className="bg-secondary2 hover:bg-secondary3"
+              className="bg-Third2 hover:bg-Third3"
             >
               ເພີ່ມຂໍ້ມູນພະຍາດແຂ້ວ
             </Button>

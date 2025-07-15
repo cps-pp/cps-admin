@@ -200,7 +200,7 @@ const EditPatient = ({ id, onClose, setShow, getList }) => {
 
      <div className="flex items-center  border-b border-stroke  dark:border-strokedark pb-4">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
-          ແກ້ໄຂ
+          ແກ້ໄຂຂໍ້ມູນຄົນເຈັບ
         </h1>
       </div>
 
@@ -252,8 +252,7 @@ const EditPatient = ({ id, onClose, setShow, getList }) => {
 
         />
 
-        {/* ✅ Custom Phone1 Input with 020 prefix */}
-        <div className="mb-4">
+        <div className="">
           <label className="block text-sm font-medium mb-2 text-black dark:text-white">
             ເບີຕິດຕໍ່ 1
           </label>
@@ -300,7 +299,7 @@ const EditPatient = ({ id, onClose, setShow, getList }) => {
         </div>
 
         {/* ✅ Custom Phone2 Input with 020 prefix */}
-        <div className="mb-4">
+        <div className="">
           <label className="block text-sm font-medium mb-2 text-black dark:text-white">
             ເບີຕິດຕໍ່ 2
           </label>
@@ -377,7 +376,7 @@ const EditPatient = ({ id, onClose, setShow, getList }) => {
 
         />
 
-        <div className="mt-8 flex justify-end space-x-4 col-span-full px-4 py-4">
+        <div className=" flex justify-end col-span-full  py-4">
       
           <ButtonBox variant="save" type="submit">
             ບັນທຶກ

@@ -28,6 +28,7 @@ const Input = forwardRef<HTMLInputElement, TInput>(
       errors,
       formOptions,
     },
+    ref // ✅ เพิ่ม ref ตรงนี้
   ) => {
     return (
       <div className="mb-5.5">
@@ -44,6 +45,7 @@ const Input = forwardRef<HTMLInputElement, TInput>(
             <span className="absolute left-4.5 top-4">{children}</span>
           )}
           <input
+            ref={ref} // ✅ อย่าลืมส่ง ref เข้าที่ input
             className={
               (children ? 'pl-11.5' : '') +
               ' w-full rounded border border-stroke py-3 px-4.5 text-black focus:border-primary focus-visible:outline-none  dark:disabled:bg-meta-4 dark:text-white dark:focus:border-primary'
@@ -54,16 +56,17 @@ const Input = forwardRef<HTMLInputElement, TInput>(
             name={name}
             placeholder={placeholder || value}
             defaultValue={value}
-            {...register(name, formOptions)}
+            {...(register && register(name, formOptions))}
           />
-          {errors[name] && (
-        <span className="text-red-500">{errors[name]?.message}</span>
-      )}
+          {errors?.[name] && (
+            <span className="text-red-500">{errors[name]?.message}</span>
+          )}
         </div>
       </div>
     );
-  },
+  }
 );
+
 
 Input.displayName = 'Input';
 

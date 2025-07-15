@@ -9,6 +9,7 @@ import { openAlert } from '@/redux/reducer/alert';
 import { CheckCircle, Save } from 'lucide-react';
 import SelectBoxId from '../../../components/Forms/SelectID';
 import BoxDate from '../../../components/Date';
+import { URLBaseLocal } from '../../../lib/MyURLAPI';
 const InTreatmentService = ({
   selectedPatient,
   setSelectedPatient,
@@ -42,7 +43,7 @@ const InTreatmentService = ({
 
   useEffect(() => {
     const now = new Date().toISOString().split('T')[0];
-    setCreatedAt(now); 
+    setCreatedAt(now);
     setValue('created_at', now);
   }, [setCreatedAt, setValue]);
 
@@ -66,7 +67,7 @@ const InTreatmentService = ({
 
   const fetchPatients = async () => {
     try {
-      const res = await fetch('http://localhost:4000/src/manager/patient');
+      const res = await fetch(`${URLBaseLocal}/src/manager/patient`);
       const data = await res.json();
       setPatients(data.data);
     } catch (err) {
@@ -83,7 +84,7 @@ const InTreatmentService = ({
 
     try {
       const res = await fetch(
-        `http://localhost:4000/src/in/inspection/${patientData.patient_id}`,
+        `${URLBaseLocal}/src/in/inspection/${patientData.patient_id}`,
       );
       const result = await res.json();
 
@@ -96,7 +97,7 @@ const InTreatmentService = ({
 
           if (!isNaN(date.getTime())) {
             formattedDate = date.toISOString().split('T')[0];
-            console.log('Formatted date:', formattedDate);
+            // console.log('Formatted date:', formattedDate);
           }
         }
 
@@ -129,6 +130,7 @@ const InTreatmentService = ({
       setValue('date', formData.date);
     }
   }, [formData.date, setValue]);
+
   useEffect(() => {
     fetchPatients();
 
@@ -140,13 +142,15 @@ const InTreatmentService = ({
       date: '',
     });
   }, [refreshKey]);
+
+
   useEffect(() => {
     const fetchEmp = async () => {
       try {
-        const response = await fetch('http://localhost:4000/src/manager/emp');
+        const response = await fetch(`${URLBaseLocal}/src/manager/emp`);
         const data = await response.json();
         if (response.ok) {
-          console.log('Employees loaded:', data.data);
+          // console.log('Employees loaded:', data.data);
           setEmployees(
             data.data.map((em) => ({
               id: em.emp_id,
@@ -178,6 +182,8 @@ const InTreatmentService = ({
     };
     fetchEmp();
   }, [dispatch]);
+
+
   return (
     <div className="">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -287,7 +293,7 @@ const InTreatmentService = ({
         />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-         <SelectBoxId
+        <SelectBoxId
           label="ພະນັກງານ (ຜູ້ສ້າງ)"
           name="emp_id_create"
           value={selectEmpCreate}
@@ -301,7 +307,7 @@ const InTreatmentService = ({
             setSelectEmpCreate(e.target.value);
           }}
         />
-{/* 
+        {/* 
         <BoxDate
         register={register}
         errors={errors}
@@ -329,11 +335,10 @@ const InTreatmentService = ({
       <div className="flex justify-end mt-6">
         <button
           onClick={handleClick}
-          className={`px-6 py-2 rounded flex items-center gap-2 transition duration-200 ${
-            loading
-              ? 'bg-gray-300 text-gray-600'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
-          }`}
+          className={`px-6 py-2 rounded flex items-center gap-2 transition duration-200 ${loading
+            ? 'bg-gray-300 text-gray-600'
+            : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
         >
           <Save className="w-5 h-5" />
           {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກການປິ່ນປົວ'}

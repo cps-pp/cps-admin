@@ -275,7 +275,7 @@ const dob = watch('dob');
         <SelectBox
           label="ຕຳແໜ່ງ"
           name="role"
-          options={['ທ່ານຫມໍ', 'ຜູ້ຊ່ວຍທ່ານຫມໍ']}
+          options={['ທ່ານໝໍ', 'ຜູ້ຊ່ວຍທ່ານໝໍ']}
           register={register}
           errors={errors}
           value={role}

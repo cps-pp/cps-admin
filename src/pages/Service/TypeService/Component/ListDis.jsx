@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Space, Table } from 'antd';
 import useStoreDisease from '../../../../store/selectDis';
+import { URLBaseLocal } from '../../../../lib/MyURLAPI';
 
 export default function ListDis({ selectService, tapService }) {
   const [dataMed, setDataMed] = useState([]);
-  const { addDisease, dis } = useStoreDisease();
+  const { addDisease } = useStoreDisease();
 
   const fetchDisList = async () => {
     try {
-      const res = await fetch('http://localhost:4000/src/manager/disease');
+      const res = await fetch(`${URLBaseLocal}/src/manager/disease`);
       const data = await res.json();
       setDataMed(data.data);
     } catch (err) {
@@ -37,23 +38,20 @@ export default function ListDis({ selectService, tapService }) {
       title: 'ຈັດການ',
       key: 'action',
       render: (_, record) => (
-  <button
-    type="button"
-    onClick={() => {
-      selectService(record);
-      addDisease(record);  // <-- ส่งตรง
-    }}
-    className="bg-secondary text-white px-3 py-1 rounded hover:bg-secondary2"
-  >
-    ເພີ່ມ
-  </button>
-),
+        <button
+          type="button"
+          onClick={() => {
+            addDisease([record]);  // <-- ส่งตรง
+          }}
+          className="bg-secondary text-white px-3 py-1 rounded hover:bg-secondary2"
+        >
+          ເພີ່ມ
+        </button>
+      ),
 
     },
   ];
-  const selectionDisease = async (record) => {
-    await addDisease([record]);
-  };
+
   return (
     <div>
       <Table

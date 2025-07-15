@@ -35,8 +35,6 @@ const EditTreatment = () => {
       fetchInspectionEquipmentById(id);
     }
   }, [id]);
-
-  // Separate useEffect to call getDiseasesForUpdate after dataInspectionBy is loaded
   useEffect(() => {
     if (dataInspectionBy) {
       getDiseasesForUpdate();
@@ -55,8 +53,11 @@ const EditTreatment = () => {
         symptom: newData?.symptom,
         checkup: newData?.checkup,
         note: newData?.note,
+        emp_id_updated: newData?.emp_id_updated,
+
         detailed: newServices
       }
+console.log('✅ newPatient:', newPatient);
 
       const resP = await fetch(`${URLBaseLocal}/src/in/inspection/${dataPatien?.in_id}`, {
         method: 'PUT',

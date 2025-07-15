@@ -11,6 +11,7 @@ import Alerts from '@/components/Alerts';
 import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import InspectionDetailView from './InView';
 import { Empty } from 'antd';
+import { URLBaseLocal } from '../../../lib/MyURLAPI';
 
 const ReportPer = () => {
   const [inspectionId, setInspectionId] = useState('');
@@ -32,7 +33,7 @@ const ReportPer = () => {
 
   const fetchInspection = async () => {
     try {
-      const res = await fetch('http://localhost:4000/src/report/inspection');
+      const res = await fetch(`${URLBaseLocal}/src/report/inspection`);
       const json = await res.json();
 
       console.log('API Response:', json);
