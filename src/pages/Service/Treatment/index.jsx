@@ -346,7 +346,7 @@ const Treatment = () => {
         openAlert({
           type: 'success',
           title: 'ບັນທຶກການຈ່າຍຢາສຳເລັດ',
-          message: 'ລະບົບໄດ້ບັນທຶກການຈ່າຍຢາແລະຕັດສິນຄ້າອອກຈາກສາງແລ້ວ',
+          message: 'ລະບົບໄດ້ບັນທຶກການຈ່າຍຢາຮຽບຮອຍແລ້ວ',
         }),
       );
     } catch (error) {
@@ -441,8 +441,8 @@ const Treatment = () => {
             // disabled={!isTreatmentSaved && !isMedicineSaved}
             className={`${
               isTreatmentSaved || isMedicineSaved
-                ? 'bg-Third2 hover:bg-Third3'
-                : 'bg-Third3 cursor-not-allowed opacity-60'
+                ? 'bg-emerald-500 hover:emerald-500'
+                : 'bg-emerald-500 cursor-not-allowed opacity-60'
             } text-white text-md px-6 py-2 rounded shadow flex items-center gap-2 transition duration-300`}
           >
             <FileText className="w-4 h-4" />

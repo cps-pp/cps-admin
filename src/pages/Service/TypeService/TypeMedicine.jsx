@@ -86,13 +86,13 @@ export default function TypeMedicine({ selectService, value ,refreshKey}) {
         <CopyPlus className="w-5 h-5" />
         ເພີ່ມການຈ່າຍຢາ ແລະ  ອຸປະກອນ
       </h1>
-      <div className="p-2 rounded bg-white border border-stroke">
+      <div className="p-2 rounded  border border-stroke">
         <Tabs defaultActiveKey="2" items={upperItem} />
       </div>
       <h1 className="text-lg font-semibold text-form-strokedark py-4  text-left flex items-center gap-2 ">
         ສະຫຼຸບການຈ່າຍຢາ ແລະ ອຸປະກອນ
       </h1>
-      <div className="p-2 rounded bg-white border border-stroke">
+      <div className="p-2 rounded  border border-stroke">
         <Tabs defaultActiveKey="6" items={lowerItem} />
       </div>
     </div>

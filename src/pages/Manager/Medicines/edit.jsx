@@ -88,9 +88,9 @@ const [updateBy, setUpdateBy] = useState('');
       try {
         // console.log('Fetching medicine with med_id:', id);
 
-        const res = await fetch(
-          `http://localhost:4000/src/manager/medicine-list/${id}`,
-        );
+      const res = await fetch(
+  `http://localhost:4000/src/manager/medicinesEdit/${id}`,
+);
 
         const result = await res.json();
 
@@ -180,14 +180,15 @@ setStatus(med.status || '');
 
       console.log('Payload to send:', payload);
 
-      const res = await fetch(
-        `http://localhost:4000/src/manager/medicines/${id}`,
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        },
-      );
+const res = await fetch(
+  `http://localhost:4000/src/manager/medicines/${id}`,
+  {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  },
+);
+
 
       const result = await res.json();
       console.log('Save response:', result);
@@ -225,6 +226,7 @@ setStatus(med.status || '');
       setValue('status', status);
     }
   }, [status, setValue]);
+
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
@@ -289,7 +291,7 @@ setStatus(med.status || '');
           select={getValues('expired')}
           setValue={setValue}
         />
-        <SelectBox
+        {/* <SelectBox
           label="ສະຖານະ"
           name="status"
           options={['ຍັງມີ', 'ໝົດ']}
@@ -297,7 +299,7 @@ setStatus(med.status || '');
           errors={errors}
           value={status}
           onSelect={(e) => setStatus(e.target.value)}
-        />
+        /> */}
 
         <SelectBoxId
           label="ປະເພດ"

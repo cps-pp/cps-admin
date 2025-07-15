@@ -254,11 +254,11 @@ export const SERVICE = [
     path: 'invoice',
     icon: iconInvoice,
   },
-    {
-    name: 'ລາຍການຊຳລະເງິນ',
-    path: 'list-pay',
-    icon: iconPayment,
-  },
+  //   {
+  //   name: 'ລາຍການຊຳລະເງິນ',
+  //   path: 'list-pay',
+  //   icon: iconPayment,
+  // },
   
 ];
 export const FOLLOW = [

@@ -152,9 +152,9 @@ const AppointPage = () => {
                             `/follow-treatment/detail/${patient.patient_id}`,
                           );
                         }}
-                        className="inline-flex items-center gap-2 px-4 py-1 text-md font-medium rounded border border-secondary2/40 bg-secondary2/10 text-secondary2 hover:bg-secondary2/15 disabled:opacity-50 transition-colors"
+                        className="inline-flex items-center px-3 py-1 text-md font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 hover:text-blue-700 transition-colors"
                       >
-                        <Eye className="w-4 h-4" />  ເບີ່ງຂໍ້ມູນ
+                        <Eye className="w-4 h-4 mr-1" />  ເບີ່ງ
                       </button>
                     </td>
                   </tr>

@@ -204,7 +204,6 @@ const dob = watch('dob');
         <h1 className="text-md md:text-lg lg:text-xl font-semibold text-strokedark  px-4">
           ເພີ່ມຂໍ້ມູນພະນັກງານ
         </h1>
-         {/* <p className="text-Third2 text-sm">ກະລຸນາປ້ອນຂໍ້ມູນໃຫ້ຄົບຖ້ວນ</p> */}
       </div>
 
       <form
@@ -275,7 +274,7 @@ const dob = watch('dob');
             value={phoneNumber}
             onChange={handlePhoneChange}
             placeholder="0202xxxxxxx, 0205xxxxxxx, 0207xxxxxxx, 0209xxxxxxx"
-            className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           />
           {/* Hidden input for form validation */}
           <input

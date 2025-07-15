@@ -53,7 +53,7 @@ const BillPopup = ({
     (total, service) => total + service.price * service.qty,
     0,
   );
-console.log(invoiceData);
+  console.log(invoiceData);
 
   const totalMedicineCost = medicines.reduce(
     (total, medicine) => total + medicine.price * medicine.qty,
@@ -110,8 +110,6 @@ console.log(invoiceData);
     ? Math.max(0, parseFloat(receivedAmount) - totalInSelectedCurrency)
     : 0;
 
-
-    
   useEffect(() => {
     const fetchEx = async () => {
       try {
@@ -218,14 +216,11 @@ console.log(invoiceData);
             await new Promise((resolve) => setTimeout(resolve, 100));
           }
 
-          const response = await fetch(
-            `${URLBaseLocal}/src/payment/payment`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payment),
-            },
-          );
+          const response = await fetch(`${URLBaseLocal}/src/payment/payment`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payment),
+          });
 
           if (!response.ok) {
             const errorData = await response.json();
@@ -239,20 +234,24 @@ console.log(invoiceData);
           console.log(`Payment ${i + 1} successful:`, result);
         }
       } else {
-        const response = await fetch(
-          `${URLBaseLocal}/src/payment/payment`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              invoice_id: invoiceData.invoice_id,
-              paid_amount: Number(receivedAmount),
-              pay_type: paymentType.toUpperCase(),
-              ex_id: selectedExType,
-              ex_rate: exRateValue,
-            }),
-          },
-        );
+        const response = await fetch(`${URLBaseLocal}/src/payment/payment`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            invoice_id: invoiceData.invoice_id,
+            // paid_amount: parseFloat(receivedAmount),
+             paid_amount: invoiceData?.balance >= receivedAmount
+                            ?  invoiceData?.balance - receivedAmount 
+                            : receivedAmount -
+                              (receivedAmount - invoiceData?.balance),
+                              
+            pay_type: paymentType.toUpperCase(),
+            ex_id: selectedExType,
+            ex_rate: exRateValue,
+          
+                   
+          }),
+        });
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -283,7 +282,6 @@ console.log(invoiceData);
       setIsProcessing(false);
     }
   };
-  console.log('receivedAmount', receivedAmount)
   const handlePayLater = () => {
     dispatch(
       openAlert({
@@ -304,8 +302,6 @@ console.log(invoiceData);
       <div className="bg-white rounded-lg shadow-2xl max-w-3xl w-full max-h-[95vh] overflow-y-auto">
         <div className="flex justify-between items-center p-4 border-b border-stroke print:hidden">
           <div className="flex space-x-3">
-      
-           
             <button
               onClick={handlePrint}
               className="flex items-center gap-2 px-4 py-2 rounded bg-pink-600 hover:bg-pink-600 text-white shadow-md hover:shadow-lg transition-all duration-200"
@@ -580,12 +576,13 @@ console.log(invoiceData);
                       <div className="flex justify-between items-center pt-2 ">
                         <span className="text-form-strokedark ">ສະຖານະ:</span>
                         <span
-                          className={`px-3 py-2 rounded-full text-xs font-semibold  ${invoiceData.status === 'paid'
+                          className={`px-3 py-2 rounded-full text-xs font-semibold  ${
+                            invoiceData.status === 'paid'
                               ? 'bg-green-100 text-green-800 '
                               : invoiceData.status === 'partial'
                                 ? 'bg-yellow-100 text-yellow-800  '
                                 : 'bg-red-100 text-red-800  '
-                            }`}
+                          }`}
                         >
                           {invoiceData.status === 'paid'
                             ? 'ຊຳລະແລ້ວ'
@@ -651,10 +648,11 @@ console.log(invoiceData);
                           ([currency, amount]) => (
                             <div
                               key={currency}
-                              className={`flex justify-between items-center p-2 rounded border ${currency === 'KIP'
+                              className={`flex justify-between items-center p-2 rounded border ${
+                                currency === 'KIP'
                                   ? ' bg-gradient-to-r from-blue-50 to-indigo-50 border-stroke text-lg'
                                   : ' border-stroke'
-                                }`}
+                              }`}
                             >
                               <span className="font-medium text-gray-700 text-sm">
                                 {currency}:
@@ -671,7 +669,7 @@ console.log(invoiceData);
                     <div>
                       <label className="block text-sm font-medium mb-2 text-form-input">
                         ເລືອກປະເພດການຊຳລະ
-                      </label> 
+                      </label>
                       <div className="grid grid-cols-3 gap-2">
                         <button
                           onClick={() => {
@@ -682,10 +680,11 @@ console.log(invoiceData);
                             setDisplayCashAmount('');
                             setDisplayTransferAmount('');
                           }}
-                          className={`flex flex-col items-center p-3 rounded border-2 transition-all ${paymentType === 'cash' && !isMixedPayment
+                          className={`flex flex-col items-center p-3 rounded border-2 transition-all ${
+                            paymentType === 'cash' && !isMixedPayment
                               ? 'border-green-500 bg-green-50 text-green-700'
                               : 'border-gray-200 hover:border-gray-300'
-                            }`}
+                          }`}
                         >
                           <Banknote size={20} className="mb-1" />
                           <span className="text-xs font-medium">ເງິນສົດ</span>
@@ -699,10 +698,11 @@ console.log(invoiceData);
                             setDisplayCashAmount('');
                             setDisplayTransferAmount('');
                           }}
-                          className={`flex flex-col items-center p-3 rounded border-2 transition-all ${paymentType === 'transfer' && !isMixedPayment
+                          className={`flex flex-col items-center p-3 rounded border-2 transition-all ${
+                            paymentType === 'transfer' && !isMixedPayment
                               ? 'border-blue-500 bg-blue-50 text-blue-700'
                               : 'border-gray-200 hover:border-gray-300'
-                            }`}
+                          }`}
                         >
                           <TransferIcon size={20} className="mb-1" />
                           <span className="text-xs font-medium">ໂອນເງິນ</span>
@@ -713,10 +713,11 @@ console.log(invoiceData);
                             setDisplayAmount('');
                             setReceivedAmount('');
                           }}
-                          className={`flex flex-col items-center p-3 rounded border-2 transition-all ${isMixedPayment
+                          className={`flex flex-col items-center p-3 rounded border-2 transition-all ${
+                            isMixedPayment
                               ? 'border-purple-500 bg-purple-50 text-purple-700'
                               : 'border-gray-200 hover:border-gray-300'
-                            }`}
+                          }`}
                         >
                           <div className="flex mb-1">
                             <Banknote size={14} />
@@ -769,7 +770,20 @@ console.log(invoiceData);
                           ຮັບເງິນເຕັມຈຳນວນ (
                           {formatCurrency(Math.ceil(grandTotal), 'KIP')})
                         </button>
-                       <p>{invoiceData?.balance !== invoiceData?.total ? invoiceData?.balance: null }</p>
+                        {console.log(invoiceData?.balance)}
+                        {console.log(receivedAmount)}
+                        {console.log(receivedAmount - invoiceData?.balance)}
+
+                        {console.log(
+                          receivedAmount -
+                            (receivedAmount - invoiceData?.balance),
+                        )}
+                        <p>
+                          {invoiceData?.balance >= receivedAmount
+                            ?  invoiceData?.balance - receivedAmount 
+                            : receivedAmount -
+                              (receivedAmount - invoiceData?.balance)}
+                        </p>
                       </div>
                     )}
 
@@ -850,7 +864,6 @@ console.log(invoiceData);
                           {formatCurrency(Math.ceil(grandTotal), 'KIP')})
                         </button>
 
-
                         <div className="mt-3 p-3 bg-white rounded border border-stroke">
                           <div className="flex justify-between items-center">
                             <span className="text-sm text-gray-600">
@@ -875,7 +888,7 @@ console.log(invoiceData);
                         <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded border border-green-200">
                           <div className="text-center">
                             <span className="text-xl font-bold text-green-700">
-                              {(() => {
+                              {/* {(() => {
                                 const totalReceived = isMixedPayment
                                   ? totalMixedAmount
                                   : parseFloat(receivedAmount || 0);
@@ -884,7 +897,12 @@ console.log(invoiceData);
                                   Math.max(0, Math.ceil(changeAmount)),
                                   'KIP',
                                 );
-                              })()}
+                              })()} */}
+                             {receivedAmount > invoiceData?.balance
+                            ?  1   
+                            : 2} 
+                            
+                              
                             </span>
                           </div>
                         </div>
@@ -893,6 +911,7 @@ console.log(invoiceData);
 
                     {/* Warning for insufficient amount */}
                     {!isAmountSufficient &&
+                    
                       (isMixedPayment
                         ? cashAmount || transferAmount
                         : receivedAmount) && (
@@ -924,7 +943,7 @@ console.log(invoiceData);
                       )}
                   </div>
                 </div>
-  <div className="mt-6 pt-4 border-t border-stroke">
+                <div className="mt-6 pt-4 border-t border-stroke">
                   <button
                     onClick={handlePaymentConfirm}
                     // disabled={isProcessing || !isAmountSufficient}

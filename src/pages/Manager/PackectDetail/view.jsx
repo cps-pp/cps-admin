@@ -144,7 +144,7 @@ const ViewService = ({ id, onClose, setShow }) => {
         )}
 
         <div>
-          <h2 className="text-lg font-semibold mb-4 text-strokedark dark:text-bodydark3">
+          <h2 className="text-lg font-semibold mb-4 mt-4 text-strokedark dark:text-bodydark3">
             ລາຍລະອຽດຢາ ແລະ ອຸປະກອນໃນແພັກແກັດ
           </h2>
           
@@ -191,7 +191,7 @@ const ViewService = ({ id, onClose, setShow }) => {
         </div>
 
         {/* ปุ่มปิด */}
-        <div className="flex justify-end mt-6 pt-4 border-t border-stroke dark:border-strokedark">
+        <div className="flex justify-end ">
           <button
             onClick={() => setShow(false)}
             className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"

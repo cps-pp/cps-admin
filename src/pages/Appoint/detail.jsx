@@ -565,8 +565,8 @@ const FollowTreatmentPage = ({ onBack }) => {
 
                 {statementPayment?.payments?.length > 0 && (
                   <div>
-                    <h4 className="font-semibold text-secondary2 flex items-center">
-                      <ClipboardCheck className="w-5 h-5 mr-1 text-secondary2" />
+                    <h4 className="font-semibold text-Third4 flex items-center">
+                      <ClipboardCheck className="w-5 h-5 mr-1 text-Third4" />
                       ປະຫວັດການຈ່າຍ
                     </h4>
                     <div className="overflow-x-auto p-4">

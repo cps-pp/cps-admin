@@ -216,7 +216,7 @@ const CreateSupplier = ({ setShow, getList, existingIds, onCloseCallback }) => {
             type="text"
             value={nextSupplierId}
             readOnly
-            className="w-full rounded-lg border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
+            className="w-full rounded border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
           />
           {/* Hidden input สำหรับส่งค่าไปกับฟอร์ม */}
           <input type="hidden" {...register('sup_id')} />
@@ -251,7 +251,7 @@ const CreateSupplier = ({ setShow, getList, existingIds, onCloseCallback }) => {
             value={phoneNumber}
             onChange={handlePhoneChange}
             placeholder="0202xxxxxxx, 0205xxxxxxx, 0207xxxxxxx, 0209xxxxxxx"
-            className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           />
           {/* Hidden input for form validation */}
           <input

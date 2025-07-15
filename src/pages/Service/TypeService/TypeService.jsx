@@ -223,13 +223,13 @@ export default function TypeService({
         <CopyPlus className="w-5 h-5" />
         ເພີ່ມລາຍການບໍລິການ
       </h1>
-      <div className="p-2 rounded bg-white border border-stroke ">
+      <div className="p-2 rounded  border border-stroke ">
         <Tabs defaultActiveKey="1" items={upperTabs} />
       </div>
       <h1 className="text-lg font-semibold text-form-strokedark py-4  text-left flex items-center gap-2 ">
         ສະຫຼຸບການລາຍການທັງໝົດ
       </h1>
-      <div className="p-2  rounded bg-white border border-stroke ">
+      <div className="p-2  rounded  border border-stroke ">
         <Tabs defaultActiveKey="5" items={lowerTabs} />
       </div>
     </>

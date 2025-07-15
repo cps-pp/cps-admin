@@ -225,7 +225,7 @@ const dob = watch('dob');
             value={phoneNumber}
             onChange={handlePhoneChange}
             placeholder="020xxxxxxxx (ຕົວເລກທີ 4 ຕ້ອງເປັນ 2, 5, 7, ຫຼື 9)"
-            className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           />
           {/* Hidden input for form validation */}
           <input
@@ -282,9 +282,9 @@ const dob = watch('dob');
           onSelect={(e) => setRole(e.target.value)}
         />
 
-        <div className="mt-4 flex justify-end space-x-4 col-span-full py-4">
+        <div className=" flex justify-end space-x-4 col-span-full py-4">
           <ButtonBox variant="save" type="submit" disabled={loading}>
-            {loading ? 'ກຳລັງອັບເດັດ...' : 'ອັບເດັດ'}
+            {loading ? 'ກຳລັງອັບເດັດ...' : 'ບັນທືກ'}
           </ButtonBox>
         </div>
       </form>

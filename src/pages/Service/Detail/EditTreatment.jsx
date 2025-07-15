@@ -12,7 +12,9 @@ import useStoreMed from '../../../store/selectMed';
 import useStoreQi from '../../../store/selectQi';
 import { ACCESS_TOKEN_KEY } from '../../../utils/constants';
 import useStoreDisease from '../../../store/selectDis';
+import { useAppDispatch } from '@/redux/hook';
 
+import { openAlert } from '@/redux/reducer/alert';
 const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 
 const EditTreatment = () => {
@@ -22,8 +24,9 @@ const EditTreatment = () => {
 
   const [dataPatien, setDataPatien] = useState({});
   const [newData, setNewData] = useState({});
-
-  const { newServices, fetchInspectionById, dataInspectionBy } = useStoreServices();
+  const dispatch = useAppDispatch();
+  const { newServices, fetchInspectionById, dataInspectionBy } =
+    useStoreServices();
   const { newMedicines, fetchInspectionMedById } = useStoreMed();
   const { newEquipment, fetchInspectionEquipmentById } = useStoreQi();
   const { getDiseasesForUpdate, disUpdate } = useStoreDisease();
@@ -45,7 +48,7 @@ const EditTreatment = () => {
   }, [dataInspectionBy]);
 
   useEffect(() => {
-    setDataPatien(dataInspectionBy)
+    setDataPatien(dataInspectionBy);
   }, [dataInspectionBy]);
 
   // ฟังก์ชันสำหรับรีโหลดข้อมูลเฉพาะหน้านี้
@@ -56,21 +59,21 @@ const EditTreatment = () => {
       setDataPatien({});
       setNewData({});
       setInvoiceData(null);
-      
+
       // เรียก API ใหม่
       if (id) {
         await Promise.all([
           fetchInspectionById(id),
           fetchInspectionMedById(id),
-          fetchInspectionEquipmentById(id)
+          fetchInspectionEquipmentById(id),
         ]);
       }
-      
+
       // รีโหลดข้อมูลโรคถ้าจำเป็น
       if (dataInspectionBy) {
         await getDiseasesForUpdate();
       }
-      
+
       console.log('ข้อมูลถูกรีโหลดแล้ว');
     } catch (error) {
       console.error('Error reloading data:', error);
@@ -87,23 +90,28 @@ const EditTreatment = () => {
         symptom: newData?.symptom,
         checkup: newData?.checkup,
         note: newData?.note,
-        detailed: newServices
-      }
+        detailed: newServices,
+      };
 
-      const resP = await fetch(`${URLBaseLocal}/src/in/inspection/${dataPatien?.in_id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(newPatient),
-      });
+      const resP = await fetch(
+        `${URLBaseLocal}/src/in/inspection/${dataPatien?.in_id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(newPatient),
+        },
+      );
 
       if (resP.data.resultCode === '200') {
-        console.log('Update Inspection success')
+        console.log('Update Inspection success');
       }
-
     } catch (error) {
       console.error('Error updating patient:', error);
     }
-  }
+  };
 
   const submitMedicine = async () => {
     try {
@@ -119,29 +127,43 @@ const EditTreatment = () => {
             med_qty: item.qty,
             price: item.price,
           })),
-        ]
-      }
+        ],
+      };
 
-      const res = await fetch(`${URLBaseLocal}/src/stock/prescription/${dataPatien?.in_id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payloadMed),
-      });
+      const res = await fetch(
+        `${URLBaseLocal}/src/stock/prescription/${dataPatien?.in_id}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payloadMed),
+        },
+      );
 
       if (res.data.resultCode === '200') {
-        console.log('Update Med success')
+        dispatch(
+              openAlert({
+                type: 'success',
+                title: 'ສຳເລັດ',
+                message: 'ແກ້ໄຂຂໍ້ມູນປິ່ວປົວສຳເລັດແລ້ວ',
+              }),
+            );
       }
-
     } catch (error) {
       console.error('Error updating patient:', error);
     }
-  }
+  };
 
   const handleShowBill = async () => {
     if (!invoiceData && dataPatien?.in_id) {
       try {
-        const totalServiceCost = newServices.reduce((total, s) => total + s.price * s.qty, 0);
-        const totalMedicineCost = [...newMedicines, ...newEquipment].reduce((total, m) => total + m.price * m.qty, 0);
+        const totalServiceCost = newServices.reduce(
+          (total, s) => total + s.price * s.qty,
+          0,
+        );
+        const totalMedicineCost = [...newMedicines, ...newEquipment].reduce(
+          (total, m) => total + m.price * m.qty,
+          0,
+        );
         const grandTotal = totalServiceCost + totalMedicineCost;
 
         const res = await fetch(`${URLBaseLocal}/src/invoice/invoice`, {
@@ -175,7 +197,7 @@ const EditTreatment = () => {
           ແກ້ໄຂປິ່ວປົວ ແລະ ບົ່ງມະຕິ
         </div>
 
-       <div className='flex justify-end gap-5'>
+        <div className="flex justify-end gap-5">
           <button
             onClick={reloadData}
             disabled={isReloading}
@@ -196,52 +218,54 @@ const EditTreatment = () => {
           <button
             type="button"
             onClick={handleShowBill}
-            className="bg-Third2 hover:bg-Third3 text-white text-md px-6 py-2 rounded flex items-center gap-2 transition"
+            className="bg-emerald-500 hover:emerald-500 text-white text-md px-6 py-2 rounded flex items-center gap-2 transition"
           >
             <FileText className="w-5 h-5" />
             ກົດເບິ່ງໃບບິນ
           </button>
 
           <button
-            className='h-[40px] bg-Third3 hover:bg-Third4 text-white  px-6 py-2 rounded flex items-center gap-2 transition'
-            onClick={submitMedicine}
-          >
-             <Stethoscope className="w-4 h-4" />
-            ແກ້ໄຂຂໍ້ມູນຢາໃໝ່
-          </button>
-
-          <button
             type="button"
             onClick={submitEditPatient}
-            className='bg-Third2 hover:bg-Third3 text-white px-6 py-2 rounded flex items-center gap-2 transition'
+            className="bg-Third3 hover:bg-Third4  text-white px-6 py-2 rounded flex items-center gap-2 transition"
           >
-               <Pill className="w-4 h-4" />
+            <Pill className="w-4 h-4" />
             ແກ້ໄຂຂໍ້ມູນປົວໃໝ່
           </button>
+          <button
+            className="h-[40px] bg-Third2 hover:bg-Third3  text-white  px-6 py-2 rounded flex items-center gap-2 transition"
+            onClick={submitMedicine}
+          >
+            <Stethoscope className="w-4 h-4" />
+            ແກ້ໄຂຂໍ້ມູນຢາໃໝ່
+          </button>
         </div>
-</div>
+      </div>
       <div className="rounded bg-white pt-4 p-4 shadow-md relative">
-
-       
-        <Tabs defaultActiveKey="1" items={[{
-          key: '1',
-          label: <span className="text-lg font-semibold">ການປິ່ນປົວ</span>,
-          children: (
-            <InServiceUpdate
-              dataPatient={dataPatien}
-              callValue={(x) => setNewData(x)}
-            />
-          ),
-        },
-        {
-          key: '2',
-          label: <span className="text-lg font-semibold">ການຈ່າຍຢາ ແລະ ອຸປະກອນ</span>,
-          children: (
-            <InMedicine
-              dataPatient={dataPatien}
-            />
-          ),
-        }]} />
+        <Tabs
+          defaultActiveKey="1"
+          items={[
+            {
+              key: '1',
+              label: <span className="text-lg font-semibold">ການປິ່ນປົວ</span>,
+              children: (
+                <InServiceUpdate
+                  dataPatient={dataPatien}
+                  callValue={(x) => setNewData(x)}
+                />
+              ),
+            },
+            {
+              key: '2',
+              label: (
+                <span className="text-lg font-semibold">
+                  ການຈ່າຍຢາ ແລະ ອຸປະກອນ
+                </span>
+              ),
+              children: <InMedicine dataPatient={dataPatien} />,
+            },
+          ]}
+        />
 
         <BillPopup
           isOpen={showBillPopup}

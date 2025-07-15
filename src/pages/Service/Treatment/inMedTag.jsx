@@ -54,7 +54,7 @@ const InMedTag = ({ onMedicineSubmit, loading, inspectionId, refreshKey }) => {
       <div></div>
       <Alerts />
       <TypeMedicine refreshKey={refreshKey} medicines={allMedicines} />
-        <div className="py-4 flex justify-end">
+        {/* <div className="py-4 flex justify-end">
           <button
             onClick={handleSubmit}
             disabled={
@@ -73,7 +73,7 @@ const InMedTag = ({ onMedicineSubmit, loading, inspectionId, refreshKey }) => {
             <Save className="w-5 h-5" />
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </button>
-      </div>
+      </div> */}
     </>
   );
 };

@@ -283,7 +283,7 @@ const CreateMedicines = ({
         onSubmit={handleSubmit(handleSave)}
         className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 px-4"
       >
-        <div className="mb-4">
+        <div className="">
           <label className="block text-sm font-medium mb-2 text-black dark:text-white">
             ລະຫັດຢາ ແລະ ອຸປະກອນ <span className="text-red-500">*</span>
           </label>
@@ -291,7 +291,7 @@ const CreateMedicines = ({
             type="text"
             value={nextMedicinesId}
             readOnly
-            className="w-full rounded-lg border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
+            className="w-full rounded border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
           />
           <input type="hidden" {...register('med_id')} />
         </div>
@@ -362,7 +362,7 @@ const CreateMedicines = ({
           setValue={setValue}
         />
 
-        <SelectBox
+        {/* <SelectBox
           label="ສະຖານະ"
           name="ສະຖານະ"
           options={['ຍັງມີ', 'ໝົດ']}
@@ -370,7 +370,7 @@ const CreateMedicines = ({
           errors={errors}
           value={status}
           onSelect={(e) => setStatus(e.target.value)}
-        />
+        /> */}
 
         <SelectBoxId
           label="ປະເພດຢາ"

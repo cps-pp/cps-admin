@@ -122,7 +122,7 @@ const handleSortById = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:4000/manager/supplier/${selectedSupplierId}`,
+        `http://localhost:4000/src/manager/supplier/${selectedSupplierId}`,
         { method: 'DELETE' },
       );
 
