@@ -309,11 +309,9 @@ const InvoicePage = () => {
 
                       <td className="px-4 py-2 ">{invoice.in_id}</td>
                       <td className="px-4 py-2 ">
-                        {(invoice.total * 1).toLocaleString()} ກີບ
+                        {invoice?.balance?.toLocaleString()} ກີບ
                       </td>
 
-                      <td className="px-4 py-2">{invoice.emp_id_create}</td>
-                      <td className="px-4 py-2">{invoice.emp_id_updated}</td>
 
                       <td className="px-4 py-2 ">
                         <div className="flex flex-wrap gap-2">

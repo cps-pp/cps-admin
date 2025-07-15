@@ -12,7 +12,6 @@ import ButtonBox from '../../components/Button';
 import BoxDate from '../../components/Date';
 import { usePrompt } from '@/hooks/usePrompt';
 import DateTime from '../../components/DateTime';
-import { URLBaseLocal } from '../../lib/MyURLAPI';
 
 const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
   const navigate = useNavigate();
@@ -39,11 +38,11 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
   const selectedDate = watch('date_addmintted');
 
   const isDirtyRef = useRef(isDirty);
-
+  
   useEffect(() => {
     isDirtyRef.current = isDirty;
   }, [isDirty]);
-
+  
   usePrompt('ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.', isDirty);
 
   useEffect(() => {
@@ -109,7 +108,7 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
     const fetchPatients = async () => {
       try {
         const response = await fetch(
-          `${URLBaseLocal}/src/manager/patient`,
+          'http://localhost:4000/src/manager/patient',
         );
         const data = await response.json();
         if (response.ok) {
@@ -193,7 +192,7 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
         }),
       );
       // 🟢 เพิ่มบรรทัดนี้เพื่อแจ้งให้ Header รีเฟรชข้อมูล
-      window.dispatchEvent(new Event('refresh-notifications'));
+    window.dispatchEvent(new Event('refresh-notifications'));
 
       await getList();
       reset();
@@ -213,7 +212,7 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
   };
 
   if (loading || loadingNextId) return <Loader />;
-
+  
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
       <Alerts />
@@ -241,20 +240,21 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
           <input type="hidden" {...register('appoint_id')} />
         </div>
 
-        <DateTime
-          name="date_addmintted"
-          label="ວັນທີນັດໝາຍ"
-          register={register}
-          errors={errors}
-          select={selectedDate}
-          formOptions={{ required: 'ກະລຸນາເລືອກວັນທີນັດໝາຍ' }}
-          setValue={setValue}
-          withTime={true}
-        />
+     <DateTime
+  name="date_addmintted"
+  label="ວັນທີນັດໝາຍ"
+  register={register}
+  errors={errors}
+  select={selectedDate}   
+  formOptions={{ required: 'ກະລຸນາເລືອກວັນທີນັດໝາຍ' }}
+  setValue={setValue}
+  
+  withTime={true}
+/>
 
 
 
-
+         
         <InputBox
           label="ລາຍລະອຽດ"
           name="description"

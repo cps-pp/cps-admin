@@ -1,36 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   User,
   MapPin,
   Stethoscope,
   Pill,
-  Clock,
   FileText,
   Activity,
-  Eye,
   ChevronDown,
   ChevronUp,
-  Star,
   Phone,
   FileClock,
-  List,
   FileMinus,
-  ArrowLeft,
   RotateCcw,
-  Search,
-  Calendar,
-  Filter,
-  X,
   Package,
   FilterIcon,
   XCircle,
+  ClipboardCheck,
 } from 'lucide-react';
 import { useParams, useLocation } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
 import BackButton from '../../components/BackButton';
-import SearchBox from '../../components/Forms/Search_New';
-import { Empty } from 'antd';
+import { Empty, Tag } from 'antd';
 import { URLBaseLocal } from '../../lib/MyURLAPI';
+import moment from 'moment/moment';
 
 const FollowTreatmentPage = ({ onBack }) => {
   const [patientDetails, setPatientDetails] = useState(null);
@@ -41,6 +32,8 @@ const FollowTreatmentPage = ({ onBack }) => {
   const [expandedInspections, setExpandedInspections] = useState({});
   const [loadingInspections, setLoadingInspections] = useState({});
 
+  const [statementPayment, setStatementPayment] = useState([]);
+
   const [searchDate, setSearchDate] = useState('');
   const [searchInId, setSearchInId] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -50,7 +43,6 @@ const FollowTreatmentPage = ({ onBack }) => {
   const location = useLocation();
   const [patient, setPatient] = useState(location.state?.patient || null);
   const [loading, setLoading] = useState(!location.state?.patient);
-  const [isReloading, setIsReloading] = useState(false);
 
   useEffect(() => {
     if (!patient) {
@@ -100,7 +92,9 @@ const FollowTreatmentPage = ({ onBack }) => {
   const fetchPatientById = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${URLBaseLocal}/src/report/patient/${id}`);
+      const response = await fetch(
+        `${URLBaseLocal}/src/report/patient/${id}`,
+      );
       if (!response.ok)
         throw new Error(`HTTP error! Status: ${response.status}`);
       const data = await response.json();
@@ -132,7 +126,7 @@ const FollowTreatmentPage = ({ onBack }) => {
   const fetchInspectionDetails = async (inspectionId) => {
     try {
       setLoadingInspections((prev) => ({ ...prev, [inspectionId]: true }));
-      console.log('Fetching inspection details for ID:', inspectionId);
+      // console.log('Fetching inspection details for ID:', inspectionId);
 
       const response = await fetch(
         `${URLBaseLocal}/src/report/inspection/${inspectionId}`,
@@ -143,7 +137,7 @@ const FollowTreatmentPage = ({ onBack }) => {
       }
 
       const data = await response.json();
-      console.log('Inspection API response:', data);
+      // console.log('Inspection API response:', data);
 
       if (data.resultCode === '200') {
         let inspectionData = null;
@@ -157,8 +151,10 @@ const FollowTreatmentPage = ({ onBack }) => {
           ...prev,
           [inspectionId]: inspectionData,
         }));
-
+        // console.log(inspectionData)
         await fetchPrescriptionDetails(inspectionId);
+
+
       } else {
         console.error('API returned error:', data);
       }
@@ -173,7 +169,7 @@ const FollowTreatmentPage = ({ onBack }) => {
 
   const fetchPrescriptionDetails = async (inspectionId) => {
     try {
-      console.log('Fetching prescription details for ID:', inspectionId);
+      // console.log('Fetching prescription details for ID:', inspectionId);
       const response = await fetch(
         `${URLBaseLocal}/src/report/prescription?id=${inspectionId}`,
       );
@@ -183,7 +179,7 @@ const FollowTreatmentPage = ({ onBack }) => {
       }
 
       const data = await response.json();
-      console.log('Prescription API response:', data);
+      // console.log('Prescription API response:', data);
 
       if (data.resultCode === '200') {
         let prescriptionData = [];
@@ -193,54 +189,64 @@ const FollowTreatmentPage = ({ onBack }) => {
           prescriptionData = data.data;
         }
 
-        console.log('Setting prescription data:', prescriptionData);
+        // console.log('Setting prescription data:', prescriptionData);
         setPrescriptionDetails((prev) => ({
           ...prev,
           [inspectionId]: prescriptionData,
         }));
       } else {
-        console.error('API returned error:', data);
+        // console.error('API returned error:', data);
         setPrescriptionDetails((prev) => ({ ...prev, [inspectionId]: [] }));
       }
     } catch (error) {
-      console.error('Error fetching prescription details:', error);
+      // console.error('Error fetching prescription details:', error);
       setPrescriptionDetails((prev) => ({ ...prev, [inspectionId]: [] }));
     }
   };
 
-  const handleReload = async () => {
-    console.log('Button clicked!');
-    console.log('isReloading:', isReloading);
-
-    if (isReloading) {
-      // console.log('Already reloading, returning early');
-      return;
-    }
-
-    setIsReloading(true);
+  const fetchStatements = async (inspectionId) => {
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      // console.log('Fetching prescription details for ID:', inspectionId);
+      const response = await fetch(
+        `${URLBaseLocal}/src/invoice/inspection-invoice/${inspectionId}`,
+      );
 
-      setSearchDate('');
-      setSearchInId('');
-      setFilteredInspections([]);
-
-      if (patient) {
-        // console.log('Fetching inspections for patient:', patient.patient_id);
-        await fetchInspectionsByPatient(patient.patient_id);
-      } else {
-        // console.log('Fetching patient by ID');
-        await fetchPatientById();
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      console.log('Reload completed successfully');
+      const data = await response.json();
+
+
+      if (data.resultCode === '200') {
+        setStatementPayment(data.data)
+      } else {
+        // console.error('API returned error:', data);
+        setStatementPayment([]);
+      }
     } catch (error) {
-      console.error('Error reloading:', error);
-    } finally {
-      setTimeout(() => {
-        setIsReloading(false);
-      }, 200);
+      // console.error('Error fetching prescription details:', error);
+      setStatementPayment([]);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchDate('');
+    setSearchInId('');
+    setFilteredInspections([]);
+  };
+
+  const handleReload = async () => {
+    setSearchDate('');
+    setSearchInId('');
+
+    setFilteredInspections([]);
+
+    if (patient) {
+      await fetchInspectionsByPatient(patient.patient_id);
+    } else {
+      await fetchPatientById();
     }
   };
 
@@ -250,6 +256,7 @@ const FollowTreatmentPage = ({ onBack }) => {
     if (!isExpanded && !detailedInspections[inspectionId]) {
       await fetchInspectionDetails(inspectionId);
     }
+    await fetchStatements(inspectionId)
 
     setExpandedInspections((prev) => ({
       ...prev,
@@ -301,8 +308,8 @@ const FollowTreatmentPage = ({ onBack }) => {
     if (!latestDetailedData?.services) return [];
 
     // กรองเฉพาะ services ที่มีรหัสขึ้นต้นด้วย "SPK"
-    return latestDetailedData.services.filter(
-      (service) => service.ser_id && service.ser_id.startsWith('SPK'),
+    return latestDetailedData.services.filter(service =>
+      service.ser_id && service.ser_id.startsWith('SPK')
     );
   };
 
@@ -311,8 +318,9 @@ const FollowTreatmentPage = ({ onBack }) => {
     const spkServices = getLatestSPKServices();
     if (spkServices.length === 0) return '-';
 
-    return spkServices.map((service) => service.ser_name).join(', ');
+    return spkServices.map(service => service.ser_name).join(', ');
   };
+
 
   const renderInspectionCard = (inspection) => {
     const isExpanded = expandedInspections[inspection.in_id];
@@ -333,7 +341,16 @@ const FollowTreatmentPage = ({ onBack }) => {
               </div>
               <div>
                 <h3 className="font-semibold text-secondary2 mb-1">
-                  ໃບບິນປິ່ນປົວ: {inspection.in_id}
+                  ເລກທີປິ່ນປົວ: {inspection.in_id}
+                  <Tag
+                    className='ml-2 font-normal rounded-full'
+                    style={{ fontFamily: 'Noto Sans Lao' }}
+                    color={`${inspection?.invoice?.status_paid === 'SUCCESS' ? 'green' : 'blue'}`}
+                  >
+                    {
+                      inspection?.invoice?.status_paid === 'SUCCESS' ? 'ສໍາເລັດ' : 'ບໍ່ສໍາເລັດ'
+                    }
+                  </Tag>
                 </h3>
                 <p className="text-sm text-gray-500">
                   ວັນທີ່: {formatDate(inspection.date)}
@@ -413,7 +430,7 @@ const FollowTreatmentPage = ({ onBack }) => {
                           </tr>
                         </thead>
                         <tbody>
-                          {detailedData.services.map((service, index) => (
+                          {detailedData?.services?.map((service, index) => (
                             <tr
                               key={index}
                               className="border-b text-md border-stroke"
@@ -436,14 +453,14 @@ const FollowTreatmentPage = ({ onBack }) => {
                               ລວມທັງໝົດ
                             </td>
                             <td className="px-4 py-2 border border-stroke">
-                              {detailedData.services.reduce(
+                              {detailedData?.services?.reduce(
                                 (sum, service) => sum + (service.qty || 0),
                                 0,
                               )}{' '}
                               ລາຍການ
                             </td>
                             <td className="px-4 py-2 border border-stroke text-right">
-                              {detailedData.services
+                              {detailedData?.services
                                 .reduce(
                                   (sum, service) => sum + (service.total || 0),
                                   0,
@@ -458,7 +475,7 @@ const FollowTreatmentPage = ({ onBack }) => {
                   </div>
                 )}
 
-                {prescriptions.length > 0 && (
+                {prescriptions?.length > 0 && (
                   <div>
                     <h4 className="font-semibold text-secondary2 flex items-center">
                       <Pill className="w-5 h-5 mr-1 text-secondary2" />
@@ -489,7 +506,7 @@ const FollowTreatmentPage = ({ onBack }) => {
                           </tr>
                         </thead>
                         <tbody>
-                          {prescriptions.map((prescription, index) => (
+                          {prescriptions?.map((prescription, index) => (
                             <tr
                               key={prescription.pre_id || index}
                               className="border-b text-md border-stroke"
@@ -499,11 +516,10 @@ const FollowTreatmentPage = ({ onBack }) => {
                               </td>
                               <td className="px-4 py-2 border border-stroke">
                                 <span
-                                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                    prescription.type_name === 'ຢາ'
-                                      ? 'bg-green-100 text-green-800'
-                                      : 'bg-purple-100 text-secondary2'
-                                  }`}
+                                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${prescription.type_name === 'ຢາ'
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-purple-100 text-secondary2'
+                                    }`}
                                 >
                                   {prescription.type_name}
                                 </span>
@@ -546,6 +562,88 @@ const FollowTreatmentPage = ({ onBack }) => {
                     </div>
                   </div>
                 )}
+
+                {statementPayment?.payments?.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-secondary2 flex items-center">
+                      <ClipboardCheck className="w-5 h-5 mr-1 text-secondary2" />
+                      ປະຫວັດການຈ່າຍ
+                    </h4>
+                    <div className="overflow-x-auto p-4">
+                      <table className="w-full border-collapse border border-slate-300">
+                        <thead>
+                          <tr className="text-left bg-slate-100 border border-stroke">
+                            <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-200">
+                              ລະຫັດການຈ່າຍ
+                            </th>
+                            <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-200">
+                              ເວລາ
+                            </th>
+                            <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-200">
+                              ປະເພດ
+                            </th>
+                            <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-200 text-right">
+                              ເລດ
+                            </th>
+                            <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-200 text-right">
+                              ຈຳນວນ
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {statementPayment?.payments?.map((payment, index) => (
+                            <tr
+                              key={payment.pay_id || index}
+                              className="border-b text-md border-stroke"
+                            >
+                              <td className="px-4 py-2 border border-stroke">
+                                {payment.pay_id}
+                              </td>
+                              <td className="px-4 py-2 border border-stroke">
+                                {moment(payment?.pay_date).format('DD/MM/YYYY HH:mm')}
+                              </td>
+                              <td className="px-4 py-2 border border-stroke">
+                                {payment.pay_type}
+                              </td>
+                              <td className="px-4 py-2 border border-stroke text-gray-900 text-right">
+                                {payment?.ex_rate ?? 0}
+                              </td>
+                              <td className="px-4 py-2 border border-stroke text-right">
+                                {Number(payment?.paid_amount || 0).toLocaleString()}
+                              </td>
+
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot>
+                          <tr className="font-semibold text-secondary2">
+                            <td
+                              className="px-4 py-2 border border-stroke text-right"
+                              colSpan={4}
+                            >
+                              ຍອດທັງໝົດ (ກີບ)
+                            </td>
+                            <td className="px-4 py-2 border border-stroke text-right">
+                              {statementPayment?.total_paid?.toLocaleString() ?? 0}
+                            </td>
+                          </tr>
+                          <tr className="font-semibold text-secondary2">
+                            <td
+                              className="px-4 py-2 border border-stroke text-right"
+                              colSpan={4}
+                            >
+                              ຍອດຄ້າງຈ່າຍ (ກີບ)
+                            </td>
+                            <td className="px-4 py-2 border border-stroke text-right">
+                              {((Number(statementPayment?.total) - Number(statementPayment?.total_paid)) || 0).toLocaleString()}
+                            </td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
               </div>
             )}
           </div>
@@ -589,48 +687,35 @@ const FollowTreatmentPage = ({ onBack }) => {
     <>
       <div className="">
         {/* Header Section */}
-
         <div className="bg-white rounded border border-stroke p-4 mb-4">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex items-center gap-4">
               <BackButton />
               <button
                 onClick={handleReload}
-                disabled={loading || isReloading}
-                className={`
-    inline-flex items-center gap-2 px-4 py-2 text-md font-medium rounded 
-    border border-secondary2/40 bg-secondary2/10 text-secondary2 
-    hover:bg-secondary2/15 disabled:opacity-50 
-    transition-all duration-300 ease-in-out
-    ${isReloading ? 'bg-secondary2/20 cursor-not-allowed' : 'hover:scale-105'}
-  `}
+                disabled={loading}
+                className="inline-flex items-center gap-2 px-4 py-2 text-md font-medium rounded border border-secondary2/40 bg-secondary2/10 text-secondary2 hover:bg-secondary2/15 disabled:opacity-50 transition-colors"
               >
                 <RotateCcw
-                  className={`
-      w-4 h-4 
-      ${isReloading ? 'animate-spin' : ''}
-      transition-transform duration-300
-    `}
+                  className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}
                 />
-                <span className="transition-opacity duration-300">
-                  {isReloading ? 'ກຳລັງໂຫຼດ...' : 'ໂຫຼດໃໝ່'}
-                </span>
+                ໂຫຼດໃໝ່
               </button>
             </div>
 
             <div className="flex items-center gap-2">
+
+
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`inline-flex items-center gap-2 px-3 py-2 text-md font-semibold rounded border transition-all duration-200 shadow-sm ${
-                  showFilters
-                    ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
-                    : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
-                }`}
-              >
-                <Filter
-                  className={`w-4 h-4 transition-transform duration-200 ${
-                    showFilters ? 'rotate-90' : ''
+                className={`inline-flex items-center gap-2 px-3 py-2 text-md font-semibold rounded border transition-all duration-200 shadow-sm ${showFilters
+                  ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                  : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
                   }`}
+              >
+                <FilterIcon
+                  className={`w-4 h-4 transition-transform duration-200 ${showFilters ? 'rotate-90' : ''
+                    }`}
                 />
                 {showFilters ? 'ປິດ' : 'ເປີດການຄົ້ນຫາ'}
               </button>
@@ -640,6 +725,7 @@ const FollowTreatmentPage = ({ onBack }) => {
           {showFilters && (
             <div className="mt-4">
               <div className="flex flex-col lg:flex-row gap-4 items-end">
+                {/* ค้นหาตามวันที่ */}
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     ຄົ້ນຫາຕາມວັນທີ່
@@ -683,15 +769,12 @@ const FollowTreatmentPage = ({ onBack }) => {
                   </button>
                 </div>
               </div>
-              {(searchDate !== '' || searchInId !== '') &&
-                filteredInspections.length === 0 && (
-                  <p className="text-sm text-rose-500 mt-3">
-                    * ບໍ່ພົບຂໍ້ມູນທີ່ຄົ້ນຫາ
-                  </p>
-                )}
             </div>
           )}
+
         </div>
+
+
         <div className="grid grid-cols-1 lg:grid-cols-[350px,1fr] gap-6 ">
           <div className="w-full max-w-sm space-y-4">
             <div className="bg-white rounded  border border-stroke overflow-hidden">
@@ -729,6 +812,7 @@ const FollowTreatmentPage = ({ onBack }) => {
                       {formatDate(patient.dob)}
                     </span>
                   </div>
+
                 </div>
               </div>
 
@@ -777,6 +861,7 @@ const FollowTreatmentPage = ({ onBack }) => {
                 </div>
               </div>
             </div>
+
 
             <div className="bg-white rounded shadow-sm border border-slate-200 p-6">
               <div className="flex items-center justify-between">

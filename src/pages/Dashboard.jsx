@@ -1171,7 +1171,6 @@ const Dashboard = () => {
           </div>
         </div>
       )}
-      {/* Exchange Rate Modal */}
       <ExchangeRateModal
         isOpen={showExchangeModal}
         onClose={() => setShowExchangeModal(false)}

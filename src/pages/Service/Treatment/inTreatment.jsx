@@ -47,19 +47,19 @@ const InTreatmentService = ({
     setValue('created_at', now);
   }, [setCreatedAt, setValue]);
 
-  const handleClick = () => {
-    if (!inspectionId) {
-      dispatch(
-        openAlert({
-          type: 'warning',
-          title: 'ກະລຸນາເລືອກຄົນເຈັບ',
-          message: 'ກ່ອນບັນທຶກການປິ່ນປົວ ກະລຸນາເລືອກຄົນເຈັບກ່ອນ',
-        }),
-      );
-      return;
-    }
-    onTreatmentSubmit();
-  };
+  // const handleClick = () => {
+  //   if (!inspectionId) {
+  //     dispatch(
+  //       openAlert({
+  //         type: 'warning',
+  //         title: 'ກະລຸນາເລືອກຄົນເຈັບ',
+  //         message: 'ກ່ອນບັນທຶກການປິ່ນປົວ ກະລຸນາເລືອກຄົນເຈັບກ່ອນ',
+  //       }),
+  //     );
+  //     return;
+  //   }
+  //   onTreatmentSubmit();
+  // };
 
   useEffect(() => {
     fetchPatients();
@@ -332,7 +332,7 @@ const InTreatmentService = ({
       <div className="overflow-x-auto  mb-4">
         <TypeService refreshKey={refreshKey} />
       </div>
-      <div className="flex justify-end mt-6">
+      {/* <div className="flex justify-end mt-6">
         <button
           onClick={handleClick}
           className={`px-6 py-2 rounded flex items-center gap-2 transition duration-200 ${loading
@@ -343,7 +343,7 @@ const InTreatmentService = ({
           <Save className="w-5 h-5" />
           {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກການປິ່ນປົວ'}
         </button>
-      </div>
+      </div> */}
     </div>
   );
 };

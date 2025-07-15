@@ -1,4 +1,10 @@
-import { FileText, RotateCcwIcon } from 'lucide-react';
+import {
+  FileText,
+  Pill,
+  RotateCcw,
+  RotateCcwIcon,
+  Stethoscope,
+} from 'lucide-react';
 import { Tabs } from 'antd';
 import InTreatmentService from './inTreatment';
 import InMedTag from './inMedTag';
@@ -13,6 +19,7 @@ import Alerts from '@/components/Alerts';
 import { useForm } from 'react-hook-form';
 import useStoreDisease from '../../../store/selectDis';
 import { URLBaseLocal } from '../../../lib/MyURLAPI';
+import Button from '@/components/Button';
 
 const Treatment = () => {
   const [loading, setLoading] = useState(false);
@@ -33,13 +40,13 @@ const Treatment = () => {
   const [isMedicineSaved, setIsMedicineSaved] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [invoiceData, setInvoiceData] = useState(null);
-   const [isReloading, setIsReloading] = useState(false);
-   
+  const [isReloading, setIsReloading] = useState(false);
+
   // ---Clear Store--
   const { clearServices } = useStoreServices();
   const { clearEquipment } = useStoreQi();
   const { clearMedicine } = useStoreMed();
-   const { clearDisease } = useStoreDisease();
+  const { clearDisease } = useStoreDisease();
   const [formData, setFormData] = useState({
     patient_id: '',
     in_id: '',
@@ -72,17 +79,14 @@ const Treatment = () => {
     const grandTotal = totalServiceCost + totalMedicineCost;
 
     try {
-      const response = await fetch(
-        `${URLBaseLocal}/src/invoice/invoice`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            total: grandTotal,
-            in_id: inspectionId,
-          }),
-        },
-      );
+      const response = await fetch(`${URLBaseLocal}/src/invoice/invoice`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          total: grandTotal,
+          in_id: inspectionId,
+        }),
+      });
 
       if (response.ok) {
         const resData = await response.json();
@@ -112,12 +116,11 @@ const Treatment = () => {
       symptom: '',
       note: '',
       checkup: '',
-
     });
     clearServices();
     clearMedicine();
     clearEquipment();
-  clearDisease();
+    clearDisease();
     setSelectedPatient(null);
     setInspectionId(null);
     setSavedServices([]);
@@ -132,8 +135,17 @@ const Treatment = () => {
   };
 
   const handleTreatmentSubmit = async () => {
-    // console.log('Starting treatment submit...');
-    // console.log('Services length:', services.length);
+    console.log('NO INSPECTION ID');
+    if (!inspectionId) {
+      dispatch(
+        openAlert({
+          type: 'warning',
+          title: 'ກະລຸນາເລືອກຄົນເຈັບ',
+          message: 'ກ່ອນບັນທຶກການປິ່ນປົວ ກະລຸນາເລືອກຄົນເຈັບກ່ອນ',
+        }),
+      );
+      return;
+    }
 
     setLoading(true);
 
@@ -169,7 +181,6 @@ const Treatment = () => {
       }
 
       const result = await response.json();
-      // console.log('Treatment response:', result);
 
       setSavedServices([...services]);
       setSavedInspectionData({
@@ -193,7 +204,6 @@ const Treatment = () => {
         }),
       );
     } catch (error) {
-      // console.error('Error submitting treatment:', error);
       dispatch(
         openAlert({
           type: 'error',
@@ -207,7 +217,30 @@ const Treatment = () => {
   };
 
   const handleMedicineSubmit = async () => {
-    // console.log('Starting medicine submit...');
+    // Validation สำหรับ Medicine
+    if (!inspectionId) {
+      dispatch(
+        openAlert({
+          type: 'warning',
+          title: 'ກະລຸນາເລືອກຄົນເຈັບກ່ອນ',
+          message:
+            'ທ່ານຕ້ອງເລືອກຄົນເຈັບແລະມີຂໍ້ມູນການປິ່ນປົວກ່ອນບັນທຶກການຈ່າຍຢາ',
+        }),
+      );
+      return;
+    }
+
+    if (medicines.length === 0 && equipment.length === 0) {
+      dispatch(
+        openAlert({
+          type: 'warning',
+          title: 'ບໍ່ມີລາຍການຢາ',
+          message: 'ກະລຸນາເລືອກຢາຫຼືອຸປະກອນກ່ອນບັນທຶກ',
+        }),
+      );
+      return;
+    }
+
     setLoading(true);
 
     const medicineData = [
@@ -296,7 +329,6 @@ const Treatment = () => {
       }
 
       const deductResult = await deductResponse.json();
-      // console.log('Stock deduction response:', deductResult);
 
       setSavedMedicines([
         ...medicines.map((med) => ({
@@ -318,7 +350,6 @@ const Treatment = () => {
         }),
       );
     } catch (error) {
-      // console.error('Error submitting medicine:', error);
       dispatch(
         openAlert({
           type: 'error',
@@ -330,6 +361,7 @@ const Treatment = () => {
       setLoading(false);
     }
   };
+
   const handleShowBill = async () => {
     if (!inspectionId) {
       dispatch(
@@ -371,72 +403,137 @@ const Treatment = () => {
     setShowBillPopup(true);
   };
 
-
-  const items = [
-    {
-      key: '1',
-      label: <span className="text-lg font-semibold">ການປິ່ນປົວ</span>,
-      children: (
-        <InTreatmentService
-          selectedPatient={selectedPatient}
-          setSelectedPatient={setSelectedPatient}
-          inspectionId={inspectionId}
-          setInspectionId={setInspectionId}
-          formData={formData}
-          setFormData={setFormData}
-          intivalue={intivalue}
-          setIntivalue={setIntivalue}
-          setValue={setValue}
-          register={register}
-          errors={errors}
-          onTreatmentSubmit={handleTreatmentSubmit}
-          loading={loading}
-          isTreatmentSaved={isTreatmentSaved}
-          refreshKey={refreshKey}
-          dispatch={dispatch}
-          selectEmpCreate={selectEmpCreate}
-          setSelectEmpCreate={setSelectEmpCreate}
-          createdAt={createdAt}
-          setCreatedAt={setCreatedAt}
-        />
-      ),
-    },
-    {
-      key: '2',
-      label: (
-        <span className="text-lg font-semibold">ການຈ່າຍຢາ ແລະ ອຸປະກອນ</span>
-      ),
-      children: (
-        <InMedTag
-          onMedicineSubmit={handleMedicineSubmit}
-          loading={loading}
-          inspectionId={inspectionId}
-          isMedicineSaved={isMedicineSaved}
-          refreshKey={refreshKey}
-        />
-      ),
-    },
-    
-  ];
-
   return (
     <>
-      
+      <Alerts />
+      <div className="flex justify-between items-center mb-4">
+        <div className="text-md md:text-lg lg:text-xl font-semibold text-strokedark  ">
+          ຫນ້າປິ່ວປົວ ແລະ ບົ່ງມະຕິ
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => {
+              setIsReloading(true);
+              handleRefresh();
+              setTimeout(() => {
+                setIsReloading(false);
+              }, 500);
+            }}
+            disabled={loading || isReloading}
+            className={`
+        inline-flex items-center gap-2 px-4 py-2 text-md font-medium rounded 
+        border border-Third3 bg-Third3/10 text-secondary2 
+        hover:bg-blue-Third3/20 disabled:opacity-50 
+        transition-all duration-300 ease-in-out
+        ${isReloading ? 'bg-Third3 cursor-not-allowed' : 'hover:scale-105'}
+      `}
+          >
+            <RotateCcw
+              className={`w-4 h-4 ${isReloading ? 'animate-spin' : ''}`}
+            />
+            <span>{isReloading ? 'ກຳລັງໂຫຼດ...' : 'ໂຫຼດໃໝ່'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleShowBill}
+            // disabled={!isTreatmentSaved && !isMedicineSaved}
+            className={`${
+              isTreatmentSaved || isMedicineSaved
+                ? 'bg-Third2 hover:bg-Third3'
+                : 'bg-Third3 cursor-not-allowed opacity-60'
+            } text-white text-md px-6 py-2 rounded shadow flex items-center gap-2 transition duration-300`}
+          >
+            <FileText className="w-4 h-4" />
+            ກົດເບິ່ງໃບບິນ
+          </button>
+
+          <button
+            type="button"
+            onClick={handleTreatmentSubmit}
+            // disabled={loading || !inspectionId}
+            className={`${
+              loading || !inspectionId
+                ? 'bg-Third2 hover:bg-Third3'
+                : 'bg-Third3 hover:bg-Third3 '
+            } text-white text-md px-6 py-2 rounded shadow flex items-center gap-2 transition duration-300`}
+          >
+            <Stethoscope className="w-4 h-4" />
+            {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກການປິ່ນປົວ'}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleMedicineSubmit}
+            // disabled={
+            //   loading ||
+            //   !inspectionId ||
+            //   (medicines.length === 0 && equipment.length === 0)
+            // }
+            className={`${
+              loading ||
+              !inspectionId ||
+              (medicines.length === 0 && equipment.length === 0)
+                ? 'bg-Third2 hover:bg-Third3'
+                : 'bg-Third3 hover:bg-Third4'
+            } text-white text-md px-6 py-2 rounded shadow flex items-center gap-2 transition duration-300`}
+          >
+            <Pill className="w-4 h-4" />
+            {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກການຈ່າຍຢາ'}
+          </button>
+        </div>
+      </div>
+
       <div className="rounded bg-white pt-4 p-4  shadow-md relative ">
-        <Tabs defaultActiveKey="1" items={items} />
-     
-        <button
-          type="button"
-          onClick={handleShowBill}
-          disabled={!isTreatmentSaved && !isMedicineSaved}
-          className={`${isTreatmentSaved || isMedicineSaved
-            ? 'bg-slate-500 hover:bg-slate-600'
-            : 'bg-gray-400 cursor-not-allowed'
-            } text-white text-md px-6 py-2 rounded flex items-center gap-2 transition`}
-        >
-          <FileText className="w-5 h-5" />
-          ກົດເບິ່ງໃບບິນ
-        </button>
+        <Tabs
+          defaultActiveKey="1"
+          items={[
+            {
+              key: '1',
+              label: <span className="text-lg font-semibold">ການປິ່ນປົວ</span>,
+              children: (
+                <InTreatmentService
+                  selectedPatient={selectedPatient}
+                  setSelectedPatient={setSelectedPatient}
+                  inspectionId={inspectionId}
+                  setInspectionId={setInspectionId}
+                  formData={formData}
+                  setFormData={setFormData}
+                  intivalue={intivalue}
+                  setIntivalue={setIntivalue}
+                  setValue={setValue}
+                  register={register}
+                  errors={errors}
+                  loading={loading}
+                  isTreatmentSaved={isTreatmentSaved}
+                  refreshKey={refreshKey}
+                  dispatch={dispatch}
+                  selectEmpCreate={selectEmpCreate}
+                  setSelectEmpCreate={setSelectEmpCreate}
+                  createdAt={createdAt}
+                  setCreatedAt={setCreatedAt}
+                />
+              ),
+            },
+            {
+              key: '2',
+              label: (
+                <span className="text-lg font-semibold">
+                  ການຈ່າຍຢາ ແລະ ອຸປະກອນ
+                </span>
+              ),
+              children: (
+                <InMedTag
+                  loading={loading}
+                  inspectionId={inspectionId}
+                  isMedicineSaved={isMedicineSaved}
+                  refreshKey={refreshKey}
+                />
+              ),
+            },
+          ]}
+        />
 
         <BillPopup
           isOpen={showBillPopup}

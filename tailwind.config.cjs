@@ -35,6 +35,7 @@ module.exports = {
         Third: '#EEEBFF',
         Third2: '#7A5FD0',
         Third3: '#5A3AB8',
+        Third4: '#3A1E7F',
     
         
         stroke: '#E2E8F0',

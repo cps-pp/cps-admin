@@ -16,334 +16,7 @@ import SelectBoxId from '../../../components/Forms/SelectID';
 import { useDispatch } from 'react-redux';
 import { openAlert } from '@/redux/reducer/alert';
 import { URLBaseLocal } from '../../../lib/MyURLAPI';
-// const BillPopup = ({
-//   isOpen,
-//   onClose,
-//   patientData,
-//   inspectionData,
-//   services = [],
-//   medicines = [],
-// }) => {
-//   if (!isOpen) return null;
-//   // Payment states
-//   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
-//   const [paymentType, setPaymentType] = useState('cash');
-//   const [paymentStatus, setPaymentStatus] = useState('pending');
-//   const [invoiceData, setInvoiceData] = useState(null);
-//   const [exchange, setExchange] = useState([]);
-//   const [selectedExType, setSelectedExType] = useState(null);
-//   const [receivedAmount, setReceivedAmount] = useState('');
-//   const [displayAmount, setDisplayAmount] = useState('');
-//   const [isProcessing, setIsProcessing] = useState(false);
 
-//   // Exchange rates (default values)
-//   const [exchangeRates, setExchangeRates] = useState({});
-//   const [selectedCurrency, setSelectedCurrency] = useState('KIP');
-
-//   const [isMixedPayment, setIsMixedPayment] = useState(false);
-//   const [cashAmount, setCashAmount] = useState('');
-//   const [transferAmount, setTransferAmount] = useState('');
-//   const [displayCashAmount, setDisplayCashAmount] = useState('');
-//   const [displayTransferAmount, setDisplayTransferAmount] = useState('');
-
-//   const totalServiceCost = services.reduce(
-//     (total, service) => total + service.price * service.qty,
-//     0,
-//   );
-
-//   const totalMedicineCost = medicines.reduce(
-//     (total, medicine) => total + medicine.price * medicine.qty,
-//     0,
-//   );
-
-//   const grandTotal = totalServiceCost + totalMedicineCost;
-
-//   // Helper function to round currency properly
-//   const roundCurrency = (amount, currency) => {
-//     if (currency === 'KIP') {
-//       return Math.ceil(amount); // Always round up for KIP
-//     } else if (currency === 'THB' || currency === 'USD') {
-//       // For THB and USD, round up if decimal >= 0.5
-//       const decimalPart = amount - Math.floor(amount);
-//       if (decimalPart >= 0.5) {
-//         return Math.ceil(amount);
-//       } else {
-//         return parseFloat(amount.toFixed(2)); // Keep original decimal if < 0.5
-//       }
-//     }
-//     return parseFloat(amount.toFixed(2));
-//   };
-
-//   const totalInSelectedCurrency = (() => {
-//     if (selectedCurrency === 'KIP') {
-//       return grandTotal;
-//     }
-//     const rate = exchangeRates[selectedCurrency] || 1;
-//     const convertedAmount = grandTotal / rate;
-//     return roundCurrency(convertedAmount, selectedCurrency);
-//   })();
-
-//   // Calculate amounts in all currencies for display
-//   const getAmountInAllCurrencies = () => {
-//     const kipAmount = grandTotal;
-//     const currencies = {};
-
-//     currencies['KIP'] = Math.ceil(kipAmount);
-
-//     // Add other currencies
-//     exchange.forEach((ex) => {
-//       if (ex.ex_type !== 'KIP') {
-//         const convertedAmount = kipAmount / ex.ex_rate;
-//         currencies[ex.ex_type] = roundCurrency(convertedAmount, ex.ex_type);
-//       }
-//     });
-
-//     return currencies;
-//   };
-
-//   const allCurrencyAmounts = getAmountInAllCurrencies();
-
-//   // Now we can use totalInSelectedCurrency safely
-//   const totalMixedAmount =
-//     parseFloat(cashAmount || 0) + parseFloat(transferAmount || 0);
-//   const isAmountSufficient = isMixedPayment
-//     ? totalMixedAmount >= totalInSelectedCurrency
-//     : parseFloat(receivedAmount || 0) >= totalInSelectedCurrency;
-
-//   // Calculate change amount
-//   const changeAmount = receivedAmount
-//     ? Math.max(0, parseFloat(receivedAmount) - totalInSelectedCurrency)
-//     : 0;
-
-//   // Calculate change in KIP for display
-//   const changeAmountInKIP =
-//     selectedCurrency === 'KIP'
-//       ? changeAmount
-//       : changeAmount * (exchangeRates[selectedCurrency] || 1);
-
-//   useEffect(() => {
-//     if (isOpen && !invoiceData) {
-//       generateInvoice();
-//     }
-//   }, [isOpen]);
-
-//   // Fetch exchange rates
-//   useEffect(() => {
-//     const fetchEx = async () => {
-//       try {
-//         const response = await fetch(
-//           'http://localhost:4000/src/manager/exchange',
-//         );
-//         const data = await response.json();
-//         if (response.ok) {
-//           console.log('API Response:', data.data);
-//           const exchangeData = data.data.map((cat) => ({
-//             ex_id: cat.ex_id,
-//             ex_type: cat.ex_type,
-//             ex_rate: cat.ex_rate,
-//           }));
-//           setExchange(exchangeData);
-
-//           // Update exchange rates state
-//           const rates = {};
-//           exchangeData.forEach((ex) => {
-//             rates[ex.ex_type] = ex.ex_rate;
-//           });
-//           setExchangeRates((prev) => ({ ...prev, ...rates }));
-//         } else {
-//           console.error('Failed to fetch exchange rates', data);
-//         }
-//       } catch (error) {
-//         console.error('Error fetching exchange rates', error);
-//       }
-//     };
-//     fetchEx();
-//   }, []);
-
-//   const handlePrint = () => {
-//     window.print();
-//   };
-
-//   const formatDate = (dateString) => {
-//     if (!dateString) return '';
-//     const date = new Date(dateString);
-//     return date.toLocaleDateString('lo-LA', {
-//       year: 'numeric',
-//       month: 'long',
-//       day: 'numeric',
-//     });
-//   };
-
-//   const formatCurrency = (amount, currency = 'KIP') => {
-//     if (currency === 'KIP') {
-//       return new Intl.NumberFormat('lo-LA').format(Math.ceil(amount)) + ' ກີບ';
-//     } else if (currency === 'THB') {
-//       return (
-//         new Intl.NumberFormat('en-US', {
-//           minimumFractionDigits: 2,
-//           maximumFractionDigits: 2,
-//         }).format(amount) + ' ບາດ'
-//       );
-//     } else if (currency === 'USD') {
-//       return (
-//         new Intl.NumberFormat('en-US', {
-//           minimumFractionDigits: 2,
-//           maximumFractionDigits: 2,
-//         }).format(amount) + ' ໂດລາ'
-//       );
-//     }
-//     return new Intl.NumberFormat('en-US', {
-//       minimumFractionDigits: 2,
-//       maximumFractionDigits: 2,
-//     }).format(amount);
-//   };
-
-//   const handleExchangeSelect = (e) => {
-//     const selectedExId = e.target.value;
-//     setSelectedExType(selectedExId);
-
-//     const selectedEx = exchange.find((ex) => ex.ex_id == selectedExId);
-//     if (selectedEx) {
-//       setSelectedCurrency(selectedEx.ex_type);
-//     }
-//   };
-
-//   const generateInvoice = async () => {
-//     try {
-//       const response = await fetch(
-//         'http://localhost:4000/src/invoice/invoice',
-//         {
-//           method: 'POST',
-//           headers: { 'Content-Type': 'application/json' },
-//           body: JSON.stringify({
-//             total: grandTotal,
-//             in_id: inspectionData?.in_id,
-//           }),
-//         },
-//       );
-
-//       if (response.ok) {
-//         const resData = await response.json();
-//         const invoice = resData.data;
-
-//         console.log('Invoice API:', invoice);
-//         console.log('Invoice ID:', invoice.invoice_id);
-//         setInvoiceData(invoice);
-//       }
-//     } catch (error) {
-//       console.error('Failed to generate invoice:', error);
-//     }
-//   };
-//   const handlePaymentConfirm = async () => {
-//     setIsProcessing(true);
-//     const selectedEx = exchange.find((ex) => ex.ex_id == selectedExType);
-//     const exRateValue = selectedEx ? selectedEx.ex_rate : 1;
-
-//     try {
-//       if (isMixedPayment) {
-//         // สำหรับการชำระแบบผสม - ส่ง 2 รายการ
-//         const payments = [];
-
-//         // เพิ่มการชำระด้วยเงินสดถ้ามี
-//         if (parseFloat(cashAmount || 0) > 0) {
-//           payments.push({
-//             invoice_id: invoiceData.invoice_id,
-//             paid_amount: parseFloat(cashAmount),
-//             pay_type: 'CASH',
-//             ex_id: selectedExType,
-//             ex_rate: exRateValue,
-//           });
-//         }
-
-//         // เพิ่มการชำระด้วยการโอนถ้ามี
-//         if (parseFloat(transferAmount || 0) > 0) {
-//           payments.push({
-//             invoice_id: invoiceData.invoice_id,
-//             paid_amount: parseFloat(transferAmount),
-//             pay_type: 'TRANSFER',
-//             ex_id: selectedExType,
-//             ex_rate: exRateValue,
-//           });
-//         }
-
-//         // ส่ง payment แต่ละรายการทีละรายการ (Sequential)
-//         for (let i = 0; i < payments.length; i++) {
-//           const payment = payments[i];
-
-//           // Add a small delay between requests to ensure different timestamps
-//           if (i > 0) {
-//             await new Promise((resolve) => setTimeout(resolve, 100)); // 100ms delay
-//           }
-
-//           const response = await fetch(
-//             'http://localhost:4000/src/payment/payment',
-//             {
-//               method: 'POST',
-//               headers: { 'Content-Type': 'application/json' },
-//               body: JSON.stringify(payment),
-//             },
-//           );
-
-//           if (!response.ok) {
-//             const errorData = await response.json();
-//             console.error('Payment error:', errorData);
-
-//             // Show specific error message to user
-//             alert(`ການຊຳລະລົ້ມເຫລວ: ${errorData.message || 'Unknown error'}`);
-//             return;
-//           }
-
-//           const result = await response.json();
-//           console.log(`Payment ${i + 1} successful:`, result);
-//         }
-//       } else {
-//         // การชำระแบบปกติ (แค่วิธีเดียว)
-//         const response = await fetch(
-//           'http://localhost:4000/src/payment/payment',
-//           {
-//             method: 'POST',
-//             headers: { 'Content-Type': 'application/json' },
-//             body: JSON.stringify({
-//               invoice_id: invoiceData.invoice_id,
-//               paid_amount: parseFloat(receivedAmount),
-//               pay_type: paymentType.toUpperCase(),
-//               ex_id: selectedExType,
-//               ex_rate: exRateValue,
-//             }),
-//           },
-//         );
-
-//         if (!response.ok) {
-//           const errorData = await response.json();
-//           console.error('Payment error:', errorData);
-//           // alert(`ການຊຳລະລົ້ມເຫລວ: ${errorData.message || 'Unknown error'}`);
-//           return;
-//         }
-
-//         const result = await response.json();
-//         console.log('Payment successful:', result);
-//       }
-
-//       console.log('All payments completed successfully');
-//       setShowPaymentPopup(false);
-//       onClose();
-//       setInvoiceData(null);
-
-//       setPaymentType('cash');
-//       setIsMixedPayment(false);
-//       setCashAmount('');
-//       setTransferAmount('');
-//       setDisplayAmount('');
-//       setDisplayCashAmount('');
-//       setDisplayTransferAmount('');
-//       setReceivedAmount('');
-//     } catch (error) {
-//       console.error('Payment failed:', error);
-//       // alert(`ເກີດຂໍ້ຜິດພາດ: ${error.message}`);
-//     } finally {
-//       setIsProcessing(false);
-//     }
-//   };
 const BillPopup = ({
   isOpen,
   onClose,
@@ -380,6 +53,7 @@ const BillPopup = ({
     (total, service) => total + service.price * service.qty,
     0,
   );
+console.log(invoiceData);
 
   const totalMedicineCost = medicines.reduce(
     (total, medicine) => total + medicine.price * medicine.qty,
@@ -436,6 +110,8 @@ const BillPopup = ({
     ? Math.max(0, parseFloat(receivedAmount) - totalInSelectedCurrency)
     : 0;
 
+
+    
   useEffect(() => {
     const fetchEx = async () => {
       try {
@@ -570,7 +246,7 @@ const BillPopup = ({
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               invoice_id: invoiceData.invoice_id,
-              paid_amount: parseFloat(receivedAmount),
+              paid_amount: Number(receivedAmount),
               pay_type: paymentType.toUpperCase(),
               ex_id: selectedExType,
               ex_rate: exRateValue,
@@ -607,6 +283,7 @@ const BillPopup = ({
       setIsProcessing(false);
     }
   };
+  console.log('receivedAmount', receivedAmount)
   const handlePayLater = () => {
     dispatch(
       openAlert({
@@ -627,9 +304,11 @@ const BillPopup = ({
       <div className="bg-white rounded-lg shadow-2xl max-w-3xl w-full max-h-[95vh] overflow-y-auto">
         <div className="flex justify-between items-center p-4 border-b border-stroke print:hidden">
           <div className="flex space-x-3">
+      
+           
             <button
               onClick={handlePrint}
-              className="flex items-center gap-2 px-4 py-2 rounded bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
+              className="flex items-center gap-2 px-4 py-2 rounded bg-pink-600 hover:bg-pink-600 text-white shadow-md hover:shadow-lg transition-all duration-200"
             >
               <Printer size={18} />
               <span className="text-sm font-medium">ພິມບີນ</span>
@@ -640,7 +319,7 @@ const BillPopup = ({
               title="ປິດ"
             >
               <X size={20} />
-              <span className="text-md font-medium">ອອກ</span>
+              <span className="text-md font-medium">ປິດ</span>
             </button>
           </div>
         </div>
@@ -799,7 +478,7 @@ const BillPopup = ({
             <div className="overflow-x-auto border border-stroke rounded">
               <table className="w-full min-w-max table-auto border-collapse overflow-hidden rounded print:text-sm">
                 <thead>
-                  <tr className="text-left bg-slate-300 border border-slate-300 print:bg-gray-100">
+                  <tr className="text-left bg-slate-200 border border-slate-300 print:bg-gray-100">
                     <th className="border-b border-slate-300 px-4 py-3 text-form-input font-semibold text-left print:px-2 print:py-2">
                       ລຳດັບ
                     </th>
@@ -927,7 +606,7 @@ const BillPopup = ({
               {!isRefundMode && (
                 <button
                   onClick={handlePayLater}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded flex items-center gap-2"
+                  className="bg-emerald-600 text-white px-6 py-3 rounded flex items-center gap-2"
                 >
                   <Clock className="w-5 h-5" />
                   ຊຳລະພາຍຫຼັງ
@@ -989,11 +668,10 @@ const BillPopup = ({
                       </div>
                     </div>
 
-                    {/* Payment Type Selection */}
                     <div>
                       <label className="block text-sm font-medium mb-2 text-form-input">
                         ເລືອກປະເພດການຊຳລະ
-                      </label>
+                      </label> 
                       <div className="grid grid-cols-3 gap-2">
                         <button
                           onClick={() => {
@@ -1091,6 +769,7 @@ const BillPopup = ({
                           ຮັບເງິນເຕັມຈຳນວນ (
                           {formatCurrency(Math.ceil(grandTotal), 'KIP')})
                         </button>
+                       <p>{invoiceData?.balance !== invoiceData?.total ? invoiceData?.balance: null }</p>
                       </div>
                     )}
 
@@ -1154,8 +833,6 @@ const BillPopup = ({
                             />
                           </div>
                         </div>
-
-                        {/* Exact Amount Button for Mixed Payment */}
                         <button
                           onClick={() => {
                             const exactAmount =
@@ -1173,7 +850,7 @@ const BillPopup = ({
                           {formatCurrency(Math.ceil(grandTotal), 'KIP')})
                         </button>
 
-                        {/* Mixed Payment Summary */}
+
                         <div className="mt-3 p-3 bg-white rounded border border-stroke">
                           <div className="flex justify-between items-center">
                             <span className="text-sm text-gray-600">
@@ -1190,7 +867,6 @@ const BillPopup = ({
                       </div>
                     )}
 
-                    {/* Change Amount Display */}
                     {isAmountSufficient && (
                       <div>
                         <h4 className="text-sm font-medium mb-2 text-form-input">
@@ -1248,21 +924,18 @@ const BillPopup = ({
                       )}
                   </div>
                 </div>
-
-                <div className="mt-6 pt-4 border-t border-stroke">
+  <div className="mt-6 pt-4 border-t border-stroke">
                   <button
                     onClick={handlePaymentConfirm}
-                    disabled={isProcessing || !isAmountSufficient}
-                    className={`w-full py-3 rounded text-white font-semibold text-lg transition-all ${isProcessing || !isAmountSufficient
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-green-600 hover:bg-green-700 shadow-lg hover:shadow-xl'
-                      }`}
+                    // disabled={isProcessing || !isAmountSufficient}
+                    className={`w-full py-3 rounded text-white font-semibold text-lg transition-all bg-green-600 hover:bg-green-700 shadow-lg hover:shadow-xl `}
                   >
-                    {isProcessing
+                    {/* {isProcessing
                       ? 'ກຳລັງດຳເນີນການ....'
                       : !isAmountSufficient
                         ? ' ເງິນບໍ່ຄົບຈຳນວນ'
-                        : ' ຢືນຢັນການຊຳລະ'}
+                        : ' ຢືນຢັນການຊຳລະ'} */}
+                    ຢືນຢັນການຊຳລະ
                   </button>
                 </div>
               </div>

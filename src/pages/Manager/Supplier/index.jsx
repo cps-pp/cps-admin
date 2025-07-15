@@ -189,8 +189,8 @@ const handleSortById = () => {
     <>
       <div className="rounded bg-white pt-4 border border-stroke">
         <Alerts />
-        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 ">
+          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark ">
             ຈັດການຂໍ້ມູນຜູ້ສະໜອງ
           </h1>
           <div className="flex items-center gap-2">

@@ -8,7 +8,7 @@ import { iconAdd } from '@/configs/icon';
 import { OrderHeaders } from './column/order';
 import { openAlert } from '@/redux/reducer/alert';
 import { useAppDispatch } from '@/redux/hook';
-import { Eye, Plus, Edit, Settings, Printer } from 'lucide-react';
+import { Eye, Plus, Edit, Settings, Printer, RotateCcw } from 'lucide-react';
 import OrderCreate from './create';
 import EditPreorder from './EditPreorder';
 import ViewPreorder from './view';
@@ -28,21 +28,17 @@ const OrderPage = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [loading, setLoading] = useState(true);
+  const [isReloading, setIsReloading] = useState(false);
 
-  // Modal states
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailEditModal, setShowDetailEditModal] = useState(false);
   const [selectedPreorderId, setSelectedPreorderId] = useState(null);
 
-  // ✅ เพิ่ม state สำหรับตัวกรอง
   const [monthFilter, setMonthFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [supplierFilter, setSupplierFilter] = useState('');
   const [employeeFilter, setEmployeeFilter] = useState('');
-  
-  // ✅ เพิ่ม state สำหรับการเรียงลำดับ
-  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
-
+  const [sortOrder, setSortOrder] = useState('asc');
 
   const fetchPreorders = async () => {
     try {
@@ -84,16 +80,16 @@ const OrderPage = () => {
     setFilteredPreorders(sortedPreorders);
   };
 
-
   // ✅ ฟังก์ชันกรองข้อมูลแบบรวม - แก้ไขแล้ว
   const applyFiltersWithData = (data = preorders) => {
     let filtered = [...data];
 
-
     // กรองตามเดือน
     if (monthFilter) {
       filtered = filtered.filter((item) => {
-        const itemMonth = new Date(item.preorder_date).toISOString().slice(0, 7);
+        const itemMonth = new Date(item.preorder_date)
+          .toISOString()
+          .slice(0, 7);
         return itemMonth === monthFilter;
       });
     }
@@ -105,13 +101,16 @@ const OrderPage = () => {
 
     // กรองตามผู้สะหนอง
     if (supplierFilter !== '') {
-      filtered = filtered.filter((item) => item.company_name === supplierFilter);
+      filtered = filtered.filter(
+        (item) => item.company_name === supplierFilter,
+      );
     }
 
     // กรองตามผู้สั่งซื้อ
     if (employeeFilter !== '') {
       filtered = filtered.filter((item) => {
-        const fullName = `${item.emp_name || ''} ${item.emp_surname || ''}`.trim();
+        const fullName =
+          `${item.emp_name || ''} ${item.emp_surname || ''}`.trim();
         return fullName === employeeFilter;
       });
     }
@@ -148,7 +147,6 @@ const OrderPage = () => {
     setStatusFilter('');
     setSupplierFilter('');
     setEmployeeFilter('');
-
   };
 
   useEffect(() => {
@@ -157,22 +155,31 @@ const OrderPage = () => {
 
   useEffect(() => {
     applyFilters();
-  }, [ monthFilter, statusFilter, supplierFilter, employeeFilter, preorders]);
+  }, [monthFilter, statusFilter, supplierFilter, employeeFilter, preorders]);
 
   // ✅ ฟังก์ชันสำหรับสร้างรายการ unique
   const getUniqueSuppliers = () => {
-    return [...new Set(preorders.map(item => item.company_name).filter(Boolean))];
+    return [
+      ...new Set(preorders.map((item) => item.company_name).filter(Boolean)),
+    ];
   };
 
   const getUniqueEmployees = () => {
-    return [...new Set(preorders.map(item => {
-      const fullName = `${item.emp_name || ''} ${item.emp_surname || ''}`.trim();
-      return fullName;
-    }).filter(name => name !== ''))];
+    return [
+      ...new Set(
+        preorders
+          .map((item) => {
+            const fullName =
+              `${item.emp_name || ''} ${item.emp_surname || ''}`.trim();
+            return fullName;
+          })
+          .filter((name) => name !== ''),
+      ),
+    ];
   };
 
   const getUniqueStatuses = () => {
-    return [...new Set(preorders.map(item => item.status).filter(Boolean))];
+    return [...new Set(preorders.map((item) => item.status).filter(Boolean))];
   };
   const onChange = (key) => {
     console.log(key);
@@ -225,7 +232,7 @@ const OrderPage = () => {
   // Handle print order as PDF
   const handlePrintOrder = (order) => {
     const { medicine, equipment } = separateItems(order.details || []);
-    
+
     const printContent = `
       <!DOCTYPE html>
       <html>
@@ -353,7 +360,9 @@ const OrderPage = () => {
           </div>
         </div>
 
-        ${medicine.length > 0 ? `
+        ${
+          medicine.length > 0
+            ? `
         <div class="table-container">
           <div class="section-title">ລາຍການຢາ (${medicine.length} ລາຍການ)</div>
           <table>
@@ -366,7 +375,9 @@ const OrderPage = () => {
               </tr>
             </thead>
             <tbody>
-              ${medicine.map((item, index) => `
+              ${medicine
+                .map(
+                  (item, index) => `
                 <tr>
                   <td class="text-center">${index + 1}</td>
                   <td>${item.med_name}</td>
@@ -374,13 +385,19 @@ const OrderPage = () => {
                   <td class="text-center">${item.unit || '-'}</td>
                   
                 </tr>
-              `).join('')}
+              `,
+                )
+                .join('')}
             </tbody>
           </table>
         </div>
-        ` : ''}
+        `
+            : ''
+        }
 
-        ${equipment.length > 0 ? `
+        ${
+          equipment.length > 0
+            ? `
         <div class="table-container">
           <div class="section-title">ລາຍການອຸປະກອນ (${equipment.length} ລາຍການ)</div>
           <table>
@@ -393,18 +410,24 @@ const OrderPage = () => {
               </tr>
             </thead>
             <tbody>
-              ${equipment.map((item, index) => `
+              ${equipment
+                .map(
+                  (item, index) => `
                 <tr>
                   <td class="text-center">${index + 1}</td>
                   <td>${item.med_name}</td>
                   <td class="text-center">${item.qty}</td>
                   <td class="text-center">${item.unit || '-'}</td>
                 </tr>
-              `).join('')}
+              `,
+                )
+                .join('')}
             </tbody>
           </table>
         </div>
-        ` : ''}
+        `
+            : ''
+        }
 
       </body>
       </html>
@@ -414,9 +437,9 @@ const OrderPage = () => {
     const printWindow = window.open('', '_blank');
     printWindow.document.write(printContent);
     printWindow.document.close();
-    
+
     // Use browser's print to PDF functionality
-    printWindow.onload = function() {
+    printWindow.onload = function () {
       printWindow.print();
       printWindow.close();
     };
@@ -464,32 +487,16 @@ const OrderPage = () => {
   const LayoutShowTable = () => {
     return (
       <div className="rounded bg-white pt-4 border border-stroke">
-        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
-            ຈັດການຂໍ້ມູນການສັ່ງຊື້
-          </h1>
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => fetchPreorders()}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              ໂຫລດຂໍ້ມູນໃຫມ່
-            </Button>
-          </div>
-        </div>
-
         {/* ✅ ส่วนของตัวกรอง */}
         <div className="grid w-full gap-4 p-4">
           <div className="flex flex-wrap items-center gap-2 mb-4">
-
-
             {/* ตัวกรองตามผู้สะหนอง */}
             <select
               className="border border-stroke dark:border-strokedark rounded p-2 min-w-40"
               value={supplierFilter}
               onChange={(e) => setSupplierFilter(e.target.value)}
             >
-              <option value="">-- ກອງຜູ້ສະໜອງ --</option>
+              <option value="">-- ຄົ້ນຫາຜູ້ສະໜອງ --</option>
               {getUniqueSuppliers().map((supplier) => (
                 <option key={supplier} value={supplier}>
                   {supplier}
@@ -503,7 +510,7 @@ const OrderPage = () => {
               value={employeeFilter}
               onChange={(e) => setEmployeeFilter(e.target.value)}
             >
-              <option value="">-- ກອງຜູ້ສັ່ງຊື້ --</option>
+              <option value="">-- ຄົ້ນຫາຜູ້ສັ່ງຊື້ --</option>
               {getUniqueEmployees().map((employee) => (
                 <option key={employee} value={employee}>
                   {employee}
@@ -517,7 +524,7 @@ const OrderPage = () => {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <option value="">-- ກອງສະຖານະ --</option>
+              <option value="">-- ຄົ້ນຫາສະຖານະ --</option>
               {getUniqueStatuses().map((status) => (
                 <option key={status} value={status}>
                   {status}
@@ -526,19 +533,19 @@ const OrderPage = () => {
             </select>
 
             {/* ตัวกรองตามเดือน */}
-          <input
-            type="month"
-            className="border border-stroke dark:border-strokedark rounded p-2"
-            value={monthFilter}
-            onChange={(e) => setMonthFilter(e.target.value)}
-          />
+            <input
+              type="month"
+              className="border border-stroke dark:border-strokedark rounded p-2"
+              value={monthFilter}
+              onChange={(e) => setMonthFilter(e.target.value)}
+            />
 
             {/* ปุ่มล้างตัวกรอง */}
             <Button
               onClick={clearAllFilters}
               className="bg-slate-400 hover:bg-slate-500 text-white"
             >
-              ລ້າງການກອງ
+              ລ້າງການຄົ້ນຫາ
             </Button>
           </div>
         </div>
@@ -548,7 +555,7 @@ const OrderPage = () => {
           <table className="w-full min-w-max table-auto">
             <thead>
               <tr className="text-left bg-gray border border-stroke">
-                <th 
+                <th
                   className="px-4 py-3 tracking-wide font-semibold text-form-input cursor-pointer hover:bg-gray-100 hover:text-gray-800 select-none"
                   onClick={handleSortById}
                 >
@@ -602,21 +609,20 @@ const OrderPage = () => {
                         {order.preorder_date?.split(' ')[0] ||
                           order.preorder_date}
                       </td>
-          
 
                       <td className="px-4 py-4">
                         <span
-                      className={`inline-block rounded-full px-3 mt-3 py-1 text-center text-sm font-medium ${
-                        order.status === 'WAITING'
-                              ? 'bg-yellow-200 text-yellow-800'
+                          className={`inline-block rounded-full px-3 mt-3 py-1 text-center text-sm font-medium ${
+                            order.status === 'WAITING'
+                              ? 'bg-yellow-100 text-yellow-800'
                               : order.status === 'SUCCESS'
                                 ? 'bg-green-200 text-green-800'
                                 : 'bg-red-200 text-red-800'
-                      }`}
-                    >
-                      {order.status}
-                      </span>
-                    </td>
+                          }`}
+                        >
+                          {order.status}
+                        </span>
+                      </td>
 
                       <td className="px-4 py-4">
                         {order.company_name ?? 'Unknown'}
@@ -752,7 +758,9 @@ const OrderPage = () => {
                           {/* Edit Details Icon - positioned at bottom right of details table */}
                           {order.status === 'WAITING' && (
                             <button
-                              onClick={() => handleEditDetails(order.preorder_id)}
+                              onClick={() =>
+                                handleEditDetails(order.preorder_id)
+                              }
                               className="absolute -bottom-2 -right-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full p-1.5 shadow-lg transition-colors duration-200"
                               title="ແກ້ໄຂລາຍລະອຽດສິນຄ້າ"
                             >
@@ -770,17 +778,17 @@ const OrderPage = () => {
                           {/* Print Button - Available for all orders */}
                           <button
                             onClick={() => handlePrintOrder(order)}
-                            className="bg-secondary2 hover:bg-secondary3 text-white px-3 py-1 rounded text-sm flex items-center gap-1"
+                            className="bg-Third3 hover:bg-Third4 text-white px-3 py-1 rounded text-sm flex items-center gap-1"
                             title="ພິມໃບສັ່ງຊື້"
                           >
                             <Printer className="w-3 h-3" />
                             ພິມ
                           </button>
-                          
+
                           {/* Edit and Cancel buttons - Only for WAITING orders */}
                           {order.status === 'WAITING' && (
                             <>
-                              <button
+                              {/* <button
                                 onClick={() =>
                                   handleEditPreorder(order.preorder_id)
                                 }
@@ -789,12 +797,12 @@ const OrderPage = () => {
                               >
                                 <Edit className="w-3 h-3" />
                                 ແກ້ໄຂ
-                              </button>
+                              </button> */}
                               <button
                                 onClick={() => handleCancel(order.preorder_id)}
                                 className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm"
                               >
-                                Cancel
+                                ຍົກເລິກ
                               </button>
                             </>
                           )}
@@ -819,7 +827,6 @@ const OrderPage = () => {
           </table>
         </div>
 
-        {/* Pagination */}
         <TablePaginationDemo
           count={filteredPreorders.length}
           page={page}
@@ -828,7 +835,6 @@ const OrderPage = () => {
           onRowsPerPageChange={handleRowsPerPageChange}
         />
 
-        {/* Edit Preorder Modal - ใช้ EditPreorder component */}
         {showEditModal && selectedPreorderId && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
             <div className="rounded-lg w-full max-w-2xl bg-white relative">
@@ -895,7 +901,6 @@ const OrderPage = () => {
             </div>
           </div>
         )}
-
       </div>
     );
   };
@@ -911,20 +916,46 @@ const OrderPage = () => {
       label: 'ສ້າງການສັ່ງຊື້',
       children: <CreatePreOrder tab={2} />,
     },
-    {
-      key: '3',
-      label: 'ລາຍການຜູ້ສະໜອງ',
-      children: <HomeSupplier tab={3} />,
-    },
+    // {
+    //   key: '3',
+    //   label: 'ລາຍການຜູ້ສະໜອງ',
+    //   children: <HomeSupplier tab={3} />,
+    // },
   ];
-  
 
   return (
-    <div className="flex flex-col h-screen">
-      <div className="flex-1 overflow-auto p-4 bg-white">
-        <Tabs defaultActiveKey="1" items={items} onChange={onChange} />
+    <>
+      <div className="flex items-center justify-between border-b border-stroke pb-2 ">
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+          ຈັດການຂໍ້ມູນການສັ່ງຊື້
+        </h1>
+        <button
+          onClick={async () => {
+            setIsReloading(true);
+            await fetchPreorders();
+            setIsReloading(false);
+          }}
+          disabled={isReloading}
+          className={`
+    inline-flex items-center gap-2 px-4 py-2 text-md font-medium rounded 
+    border border-Third3 bg-Third3/10 text-secondary2 
+    hover:bg-blue-Third3/20 disabled:opacity-50 
+    transition-all duration-300 ease-in-out
+    ${isReloading ? 'bg-Third3 cursor-not-allowed' : 'hover:scale-105'}
+  `}
+        >
+          <RotateCcw
+            className={`w-4 h-4 ${isReloading ? 'animate-spin' : ''}`}
+          />
+          {isReloading ? 'ກຳລັງໂຫຼດ...' : 'ໂຫຼດຂໍ້ມູນໃໝ່'}
+        </button>
       </div>
-    </div>
+      <div className="flex flex-col ">
+        <div className="flex-1 overflow-auto p-4 bg-white">
+          <Tabs defaultActiveKey="1" items={items} onChange={onChange} />
+        </div>
+      </div>
+    </>
   );
 };
 

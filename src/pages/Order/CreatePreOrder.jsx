@@ -12,7 +12,7 @@ const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 
 export default function CreatePreOrder({ tab }) {
   const dispatch = useDispatch();
-  
+
   const [supId, setSupId] = useState(null);
   const [empId, setEmpId] = useState(null);
   const [suppliers, setSuppliers] = useState([]);
@@ -81,12 +81,14 @@ export default function CreatePreOrder({ tab }) {
 
   const fetchAllItems = async () => {
     try {
-      const res = await fetch('http://localhost:4000/src/manager/medicinesPAPAG');
+      const res = await fetch(
+        'http://localhost:4000/src/manager/medicinesPAPAG',
+      );
       const json = await res.json();
       const items = json.data || [];
-      
+
       console.log('All items:', items);
-      
+
       // เก็บรายการทั้งหมดไว้ในตัวแปรเดียว
       setAllItems(items);
     } catch (err) {
@@ -105,13 +107,13 @@ export default function CreatePreOrder({ tab }) {
 
   // ฟังก์ชันตรวจสอบรายการซ้ำ - ลบช่องที่เลือกซ้ำออก
   const checkDuplicateItem = (itemId, currentIndex) => {
-    const existingIndex = itemDetails.findIndex((detail, index) => 
-      detail.med_id === itemId && index !== currentIndex
+    const existingIndex = itemDetails.findIndex(
+      (detail, index) => detail.med_id === itemId && index !== currentIndex,
     );
     if (existingIndex !== -1) {
-      const item = allItems.find(item => item.med_id === itemId);
+      const item = allItems.find((item) => item.med_id === itemId);
       const itemName = item ? item.med_name : 'Unknown';
-      
+
       // แจ้งเตือนแบบธรรมดา
       dispatch(
         openAlert({
@@ -120,7 +122,7 @@ export default function CreatePreOrder({ tab }) {
           message: `${itemName} ມີຢູ່ໃນລາຍການແລ້ວ`,
         }),
       );
-      
+
       // ลบช่องที่เลือกซ้ำออก (currentIndex)
       const updated = itemDetails.filter((_, index) => index !== currentIndex);
       // ถ้าไม่มีช่องเหลือ ให้เหลือช่องว่างอย่างน้อย 1 ช่อง
@@ -129,7 +131,7 @@ export default function CreatePreOrder({ tab }) {
       } else {
         setItemDetails(updated);
       }
-      
+
       return true;
     }
     return false;
@@ -138,43 +140,42 @@ export default function CreatePreOrder({ tab }) {
   // ฟังก์ชันตรวจสอบ validation
   const validateForm = () => {
     const newErrors = {};
-    
+
     // ตรวจสอบพนักงาน
     if (!empId) {
       newErrors.empId = 'ກະລຸນາເລືອກພະນັກງານ';
     }
-    
+
     // ตรวจสอบผู้สะหนอง
     if (!supId) {
       newErrors.supId = 'ກະລຸນາເລືອກຜູ້ສະຫນອງ';
     }
-    
+
     // ตรวจสอบว่ามีการเลือกรายการอย่างน้อย 1 อย่าง
-    const hasValidItem = itemDetails.some(detail => detail.med_id);
-    
+    const hasValidItem = itemDetails.some((detail) => detail.med_id);
+
     if (!hasValidItem) {
       newErrors.items = 'ກະລຸນາເລືອກຢາ ຫຼື ອຸປະກອນ';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleItemDetailChange = (index, field, value) => {
     if (field === 'med_id' && value) {
-      // ตรวจสอบรายการซ้ำ - ระบบจะลบช่องที่เลือกซ้ำออก
       if (checkDuplicateItem(value, index)) {
         return; // หยุดการเปลี่ยนแปลงถ้ามีรายการซ้ำ
       }
     }
-    
+
     const updated = [...itemDetails];
     updated[index][field] = value;
     setItemDetails(updated);
-    
+
     // ล้าง error เมื่อมีการเลือก
     if (field === 'med_id' && value && errors.items) {
-      setErrors(prev => ({ ...prev, items: undefined }));
+      setErrors((prev) => ({ ...prev, items: undefined }));
     }
   };
 
@@ -186,7 +187,6 @@ export default function CreatePreOrder({ tab }) {
     setItemDetails(itemDetails.filter((_, i) => i !== index));
   };
 
-  // ฟังก์ชันสำหรับแสดง ConfirmModal (ใช้เฉพาะการยืนยันการบันทึก)
   const showConfirmation = (message, callback) => {
     setConfirmModalMessage(message);
     setConfirmCallback(() => callback);
@@ -204,23 +204,23 @@ export default function CreatePreOrder({ tab }) {
   const handleSupplierChange = (value) => {
     setSupId(value);
     if (value && errors.supId) {
-      setErrors(prev => ({ ...prev, supId: undefined }));
+      setErrors((prev) => ({ ...prev, supId: undefined }));
     }
   };
 
   const handleEmployeeChange = (value) => {
     setEmpId(value);
     if (value && errors.empId) {
-      setErrors(prev => ({ ...prev, empId: undefined }));
+      setErrors((prev) => ({ ...prev, empId: undefined }));
     }
   };
 
   // ฟังก์ชันยกเลิก - รีเซ็ตทุกอย่างกลับเป็นค่าเริ่มต้น
   const handleCancel = () => {
     // ตรวจสอบว่ามีการกรอกข้อมูลหรือไม่
-    const hasData = supId || empId || 
-                   itemDetails.some(detail => detail.med_id);
-    
+    const hasData =
+      supId || empId || itemDetails.some((detail) => detail.med_id);
+
     if (hasData) {
       // แสดง ConfirmModal ก่อนยกเลิก
       showConfirmation(
@@ -230,7 +230,7 @@ export default function CreatePreOrder({ tab }) {
           setEmpId(null);
           setItemDetails([{ med_id: '', qty: 1 }]);
           setErrors({});
-        }
+        },
       );
     } else {
       // ถ้าไม่มีข้อมูลให้ยกเลิกเลย
@@ -250,10 +250,12 @@ export default function CreatePreOrder({ tab }) {
     }
 
     // รวมรายการทั้งหมด
-    const allDetails = itemDetails.filter(d => d.med_id).map(d => ({
-      med_id: d.med_id,
-      qty: parseInt(d.qty),
-    }));
+    const allDetails = itemDetails
+      .filter((d) => d.med_id)
+      .map((d) => ({
+        med_id: d.med_id,
+        qty: parseInt(d.qty),
+      }));
 
     const payload = {
       sup_id: supId,
@@ -282,7 +284,7 @@ export default function CreatePreOrder({ tab }) {
             message: 'ສ້າງໃບສັ່ງຊື້ສໍາເລັດແລ້ວ',
           }),
         );
-        
+
         // รีเซ็ตฟอร์มโดยไม่ต้องยืนยัน
         setSupId(null);
         setEmpId(null);
@@ -311,16 +313,15 @@ export default function CreatePreOrder({ tab }) {
   };
 
   return (
-    <div className="max-w-6xl mx-auto bg-white shadow p-6 rounded mt-6">
+    <div className=" ">
       <div className="flex justify-between">
-        <h2 className="text-xl font-bold mb-4">ສ້າງການສັ່ງຊື້</h2>
+        <h2 className="text-xl font-medium mb-4">ສ້າງການສັ່ງຊື້</h2>
       </div>
-      
+
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* ส่วนเลือกพนักงานและผู้ส่งมอบ */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block font-medium">ເລືອກພນັກງານ</label>
+            <label className="block font-medium">ເລືອກພະນັກງານ</label>
             <Select
               showSearch
               placeholder="Select an employee"
@@ -380,14 +381,15 @@ export default function CreatePreOrder({ tab }) {
           </div>
         </div>
 
-        {/* ส่วนรายการสินค้า */}
-        <div className="border rounded-lg p-4 bg-gray-50">
+        <div className="border rounded-md p-4 border-stroke">
           <div className="flex justify-between items-center mb-3">
-            <label className="block font-semibold text-gray-700">ຢາ ຫຼື ອຸປະກອນ</label>
+            <label className="block font-semibold text-gray-700">
+              ຢາ ຫຼື ອຸປະກອນ
+            </label>
             <button
               type="button"
               onClick={addItemDetail}
-              className="text-blue-500 hover:text-blue-700 text-sm font-medium"
+              className="text-Third4 hover:text-Third3  text-sm font-medium"
             >
               + ເພີ່ມຢາ ຫຼື ອຸປະກອນ
             </button>
@@ -395,12 +397,16 @@ export default function CreatePreOrder({ tab }) {
           {itemDetails.map((detail, index) => (
             <div key={index} className="flex gap-2 items-end mb-2">
               <div className="flex-1">
-                <p className="text-xs font-medium text-gray-600">ຢາ ຫຼື ອຸປະກອນ</p>
+                <p className="text-xs font-medium text-gray-600">
+                  ຢາ ຫຼື ອຸປະກອນ
+                </p>
                 <Select
                   showSearch
                   placeholder="Select item"
                   value={detail.med_id || undefined}
-                  onChange={(value) => handleItemDetailChange(index, 'med_id', value)}
+                  onChange={(value) =>
+                    handleItemDetailChange(index, 'med_id', value)
+                  }
                   className="w-full"
                   size="middle"
                   loading={loadingItems}
@@ -427,7 +433,9 @@ export default function CreatePreOrder({ tab }) {
                   type="number"
                   min="1"
                   value={detail.qty}
-                  onChange={(e) => handleItemDetailChange(index, 'qty', e.target.value)}
+                  onChange={(e) =>
+                    handleItemDetailChange(index, 'qty', e.target.value)
+                  }
                   className="w-full border p-1 rounded text-center text-sm"
                   required
                 />
@@ -454,12 +462,11 @@ export default function CreatePreOrder({ tab }) {
           </div>
         )}
 
-        {/* ปุ่มยกเลิกและบันทึก */}
-        <div className="flex justify-between">
+        <div className="flex justify-end space-x-2">
           <button
             type="button"
             onClick={handleCancel}
-            className="bg-red-500 text-white px-6 py-2 rounded hover:bg-gray-600"
+            className="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600"
           >
             ຍົກເລີກ
           </button>
@@ -472,7 +479,6 @@ export default function CreatePreOrder({ tab }) {
         </div>
       </form>
 
-      {/* ConfirmModal สำหรับยืนยันการบันทึกเท่านั้น */}
       <ConfirmModal
         show={showConfirmModal}
         setShow={setShowConfirmModal}
