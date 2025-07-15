@@ -5,9 +5,9 @@ import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import Alerts from '@/components/Alerts';
 import Select from '@/components/Forms/Select';
-import InputBox from '../../../components/Forms/Input_new';
-import ButtonBox from '../../../components/Button';
-import PriceInputBox from '../../../components/Forms/PriceInput';
+import InputBox from '../../components/Forms/Input_new';
+import ButtonBox from '../../components/Button';
+import PriceInputBox from '../../components/Forms/PriceInput';
 import { usePrompt } from '@/hooks/usePrompt';
 
 const CreateSupplier = ({ setShow, getList, existingIds, onCloseCallback }) => {
@@ -21,7 +21,6 @@ const CreateSupplier = ({ setShow, getList, existingIds, onCloseCallback }) => {
   } = useForm();
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
-  
   const [loadingNextId, setLoadingNextId] = useState(true);
   const [nextSupplierId, setNextSupplierId] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('020'); // ✅ เพิ่ม state สำหรับเบอร์โทร
@@ -162,7 +161,6 @@ const CreateSupplier = ({ setShow, getList, existingIds, onCloseCallback }) => {
           company_name: formData.company_name,
           address: formData.address,
           phone: formData.phone,
-
         }),
       });
 
@@ -288,8 +286,6 @@ const CreateSupplier = ({ setShow, getList, existingIds, onCloseCallback }) => {
             <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
           )}
         </div>
-
-
 
         <div className="mt-8 flex justify-end space-x-4 col-span-full py-4">
           

@@ -12,6 +12,7 @@ import { openAlert } from '@/redux/reducer/alert';
 import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { Cate } from './column/cate';
 import { Empty } from 'antd';
+import SmoothModal from '../../../components/Modal/SmoothModal';
 
 const CategoryPage = () => {
   const [categories, setCategory] = useState([]);
@@ -307,13 +308,14 @@ const CategoryPage = () => {
                   />
                 </svg>
               </button>
-
+            <SmoothModal onClose={() => setShowAddCategoryModal(false)}>
               <CreateCategory
                 setShow={setShowAddCategoryModal}
                 getListCategory={fetchCategories}
                 existingIds={existingIds}
                 onCloseCallback={setCreateFormCloseHandler}
               />
+              </SmoothModal>
             </div>
           </div>
         )}
@@ -340,13 +342,14 @@ const CategoryPage = () => {
                   />
                 </svg>
               </button>
-
+            <SmoothModal onClose={() => setShowEditModal(false)}>
               <EditCate
                 id={selectedId}
                 onClose={() => setShowEditModal(false)}
                 setShow={setShowEditModal}
                 getList={fetchCategories}
               />
+              </SmoothModal>
             </div>
           </div>
         )}

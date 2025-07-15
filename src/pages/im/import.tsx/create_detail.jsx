@@ -13,6 +13,7 @@ const AddDetailImport = ({ id, setShow, getList, onClose }) => {
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors, isDirty },
   } = useForm();
 
@@ -24,6 +25,10 @@ const AddDetailImport = ({ id, setShow, getList, onClose }) => {
   // ✅ เพิ่ม state สำหรับ ConfirmModal
   const [showModal, setShowModal] = useState(false);
   const [deleteDetailId, setDeleteDetailId] = useState(null);
+
+  // ✅ เพิ่ม state สำหรับ Edit Mode
+  const [editMode, setEditMode] = useState(false);
+  const [editingDetailId, setEditingDetailId] = useState(null);
 
   const dispatch = useAppDispatch();
 
@@ -73,7 +78,7 @@ const AddDetailImport = ({ id, setShow, getList, onClose }) => {
       try {
         setLoading(true);
         const response = await fetch(
-          'http://localhost:4000/src/manager/medicines',
+          'http://localhost:4000/src/manager/medicinesPAPAG',
         );
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -123,6 +128,16 @@ const AddDetailImport = ({ id, setShow, getList, onClose }) => {
     fetchImportDetails();
   }, [id]);
 
+  // ✅ ฟังก์ชันตรวจสอบข้อมูลซ้ำ
+  const checkDuplicateEntry = (medId, expiredDate) => {
+    return importDetails.some(
+      (detail) => 
+        detail.med_id === parseInt(medId) && 
+        detail.expired_date === expiredDate &&
+        detail.detail_id !== editingDetailId // ไม่นับตัวที่กำลังแก้ไข
+    );
+  };
+
   // ✅ ฟังก์ชันสร้าง detail_id ใหม่แบบอัตโนมัติ (ดึงจากฐานข้อมูล)
   const generateDetailId = async () => {
     try {
@@ -146,53 +161,122 @@ const AddDetailImport = ({ id, setShow, getList, onClose }) => {
     }
   };
 
-  // ฟังก์ชันหาชื่อยาจาก med_id
-  const getMedicineName = (medId) => {
-    const medicine = medicines.find((med) => med.med_id === medId);
-    return medicine ? medicine.med_name : medId;
+  // ✅ ฟังก์ชันแปลงวันที่ให้เป็นรูปแบบ YYYY-MM-DD
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
   };
 
-  // ฟังก์ชันบันทึกข้อมูล
+  // ✅ ฟังก์ชันเริ่มการแก้ไข
+  const handleEditClick = (detail) => {
+    setEditMode(true);
+    setEditingDetailId(detail.detail_id);
+    setValue('med_id', detail.med_id);
+    setValue('qty', detail.qty);
+    setValue('expired_date', formatDateForInput(detail.expired_date));
+  };
+
+  // ✅ ฟังก์ชันยกเลิกการแก้ไข
+  const handleCancelEdit = () => {
+    setEditMode(false);
+    setEditingDetailId(null);
+    reset();
+  };
+
+  // ✅ ฟังก์ชันบันทึกข้อมูล (รวมการแก้ไข) - แก้ไขแล้ว
   const handleSave = async (formData) => {
     setLoading(true);
 
     try {
-      // ✅ สร้าง detail_id อัตโนมัติจากฐานข้อมูล
-      const newDetailId = await generateDetailId();
-
-      const payload = {
-        detail_id: newDetailId,
-        im_id: id,
-        med_id: formData.med_id,
-        qty: parseInt(formData.qty),
-        expired_date: formData.expired_date,
-      };
-
-      console.log('Payload being sent:', payload);
-
-      const response = await fetch(
-        'http://localhost:4000/src/im_detail/import-detail',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        },
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        console.error('API Error:', result);
-        throw new Error(result.error || 'ບັນທຶກບໍ່ສຳເລັດ');
+      // ✅ ตรวจสอบข้อมูลซ้ำ
+      if (checkDuplicateEntry(formData.med_id, formData.expired_date)) {
+        dispatch(
+          openAlert({
+            type: 'error',
+            title: 'ຂໍ້ມູນຊ້ຳ',
+            message: 'ຢາແລະວັນທີ່ໝົດອາຍຸນີ້ມີຢູ່ແລ້ວ! ກະລຸນາເລືອກຢາຫຼືວັນທີ່ອື່ນ',
+          }),
+        );
+        setLoading(false);
+        return;
       }
 
-      dispatch(
-        openAlert({
-          type: 'success',
-          title: 'ສຳເລັດ',
-          message: `ເພີ່ມລາຍລະອຽດສິນຄ້ານຳເຂົ້າສຳເລັດແລ້ວ (ID: ${newDetailId}) ✅`,
-        }),
-      );
+      if (editMode) {
+        // ✅ โหมดแก้ไข - ใช้ editingDetailId แทน detail_id
+        const payload = {
+          qty: parseInt(formData.qty),
+          expired_date: formData.expired_date,
+        };
+
+        const response = await fetch(
+          `http://localhost:4000/src/im_detail/import-detail/${editingDetailId}`,
+          {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          },
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || 'ແກ້ໄຂບໍ່ສຳເລັດ');
+        }
+
+        dispatch(
+          openAlert({
+            type: 'success',
+            title: 'ສຳເລັດ',
+            message: `ແກ້ໄຂລາຍການ ID: ${editingDetailId} ສຳເລັດແລ້ວ ✅`,
+          }),
+        );
+
+        // ออกจากโหมดแก้ไข
+        setEditMode(false);
+        setEditingDetailId(null);
+      } else {
+        // ✅ โหมดเพิ่มใหม่
+        const newDetailId = await generateDetailId();
+
+        const payload = {
+          detail_id: newDetailId,
+          im_id: id,
+          med_id: formData.med_id,
+          qty: parseInt(formData.qty),
+          expired_date: formData.expired_date,
+        };
+
+        const response = await fetch(
+          'http://localhost:4000/src/im_detail/import-detail',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          },
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || 'ບັນທຶກບໍ່ສຳເລັດ');
+        }
+
+        dispatch(
+          openAlert({
+            type: 'success',
+            title: 'ສຳເລັດ',
+            message: `ເພີ່ມລາຍລະອຽດສິນຄ້ານຳເຂົ້າສຳເລັດແລ້ວ (ID: ${newDetailId}) ✅`,
+          }),
+        );
+      }
+
       window.dispatchEvent(new Event('refresh-notifications'));
       // รีเฟรชข้อมูล
       await getList();
@@ -315,16 +399,11 @@ const AddDetailImport = ({ id, setShow, getList, onClose }) => {
     <div className="rounded bg-white pt-4 dark:bg-strokedark">
       <div className="flex items-center justify-between border-b border-stroke  pb-4">
         <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark  px-4">
-          ເພີ່ມລາຍລະອຽດສິນຄ້ານຳເຂົ້າ - ໃບນຳເຂົ້າ: {id}
+          {editMode ? 'ແກ້ໄຂລາຍລະອຽດສິນຄ້ານຳເຂົ້າ' : 'ເພີ່ມລາຍລະອຽດສິນຄ້ານຳເຂົ້າ'} - ໃບນຳເຂົ້າ: {id}
         </h1>
       </div>
+      
 
-      {/* <div className="px-4 py-2 bg-gray-50">
-      <p className="text-md text-gray-600 d">
-        <strong className='text-form-input'>ລະຫັດໃບນຳເຂົ້າ:</strong> {id} 
-        <span className="ml-4"> <strong className='text-form-input'>ສະຖານະ:</strong> ກຳລັງເພີ່ມລາຍລະອຽດສິນຄ້ານຳເຂົ້າ</span>
-      </p>
-    </div> */}
       {importDetails.length > 0 && (
         <div className="mt-4 px-4">
           <h3 className="text-lg font-medium text-form-input mb-2">
@@ -355,28 +434,39 @@ const AddDetailImport = ({ id, setShow, getList, onClose }) => {
                 {importDetails.map((detail, index) => (
                   <tr
                     key={`${detail.detail_id}-${index}`}
-                    className="border-b text-md border-stroke"
+                    className={`border-b text-md border-stroke ${
+                      editingDetailId === detail.detail_id ? 'bg-blue-50' : ''
+                    }`}
                   >
-                    <td className=" px-4 py-2 border-r border-stroke">
+                    <td className="px-4 py-2 border-r border-stroke">
                       {detail.detail_id}
                     </td>
-                    <td className=" px-4 py-2 border-r border-stroke">
-                      {getMedicineName(detail.med_id)} ({detail.med_id})
+                    <td className="px-4 py-2 border-r border-stroke">
+                      {detail.med_name} ({detail.type_name})
                     </td>
-                    <td className=" px-4 py-2  border-r border-stroke">
+                    <td className="px-4 py-2 border-r border-stroke">
                       {detail.qty}
                     </td>
-                    <td className=" px-4 py-2">
+                    <td className="px-4 py-2 border-r border-stroke">
                       {formatDate(detail.expired_date)}
                     </td>
-                    <td className=" px-4 py-2  border-l border-stroke">
-                      <button
-                        onClick={() => handleDeleteClick(detail.detail_id)}
-                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-color   "
-                        disabled={loading}
-                      >
-                        {loading ? 'ກຳລັງລົບ...' : 'ລົບ'}
-                      </button>
+                    <td className="px-4 py-2 border-l border-stroke">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEditClick(detail)}
+                          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors"
+                          disabled={loading || editMode}
+                        >
+                          ແກ້ໄຂ
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(detail.detail_id)}
+                          className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
+                          disabled={loading || editMode}
+                        >
+                          {loading ? 'ກຳລັງລົບ...' : 'ລົບ'}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -393,12 +483,13 @@ const AddDetailImport = ({ id, setShow, getList, onClose }) => {
           </label>
           <select
             {...register('med_id', { required: 'ກະລຸນາເລືອກຢາ' })}
-            className="text-strokedark dark:text-stroke relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary  capitalize"
+            className="text-strokedark dark:text-stroke relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary capitalize"
+            disabled={editMode} // ปิดการเลือกยาในโหมดแก้ไข
           >
             <option value="">-- ເລືອກຢາ --</option>
             {medicines.map((medicine) => (
               <option key={medicine.med_id} value={medicine.med_id}>
-                {medicine.med_name} ({medicine.med_id})
+                {medicine.med_name} ({medicine.type_name})
               </option>
             ))}
           </select>
@@ -420,7 +511,7 @@ const AddDetailImport = ({ id, setShow, getList, onClose }) => {
             })}
             type="number"
             placeholder="ປ້ອນຈຳນວນ"
-            className="text-strokedark dark:text-stroke relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary  capitalize"
+            className="text-strokedark dark:text-stroke relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary capitalize"
           />
           {errors.qty && (
             <span className="text-red-500 text-sm">{errors.qty.message}</span>
@@ -436,7 +527,7 @@ const AddDetailImport = ({ id, setShow, getList, onClose }) => {
               required: 'ກະລຸນາເລືອກວັນທີ່ໝົດອາຍຸ',
             })}
             type="date"
-            className="text-strokedark dark:text-stroke relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary  capitalize"
+            className="text-strokedark dark:text-stroke relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary capitalize"
           />
           {errors.expired_date && (
             <span className="text-red-500 text-sm">
@@ -445,9 +536,22 @@ const AddDetailImport = ({ id, setShow, getList, onClose }) => {
           )}
         </div>
 
-        <div className="mt-4 flex justify-end space-x-4 py-2 pb-4 ">
+        <div className="mt-4 flex justify-end space-x-4 py-2 pb-4">
+          {editMode && (
+            <ButtonBox 
+              variant="secondary" 
+              type="button" 
+              onClick={handleCancelEdit}
+              disabled={loading}
+            >
+              ຍົກເລີກ
+            </ButtonBox>
+          )}
           <ButtonBox variant="save" type="submit" disabled={loading}>
-            {loading ? 'ກຳລັງບັນທຶກ...' : 'ເພີ່ມສິນຄ້ານຳເຂົ້າ'}
+            {loading ? 
+              (editMode ? 'ກຳລັງແກ້ໄຂ...' : 'ກຳລັງບັນທຶກ...') : 
+              (editMode ? 'ບັນທຶກການແກ້ໄຂ' : 'ເພີ່ມສິນຄ້ານຳເຂົ້າ')
+            }
           </ButtonBox>
         </div>
       </form>

@@ -13,6 +13,7 @@ import { openAlert } from '@/redux/reducer/alert';
 import { useAppDispatch } from '@/redux/hook';
 import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { Empty } from 'antd';
+import SmoothModal from '../../../components/Modal/SmoothModal';
 
 const DiseasePage = () => {
   const [diseases, setDiseases] = useState([]);
@@ -291,13 +292,14 @@ const handleSortById = () => {
                   />
                 </svg>
               </button>
-
+              <SmoothModal onClose={() => setShowAddDiseaseModal(false)}>
               <CreateDisease
                 setShow={setShowAddDiseaseModal}
                 getList={fetchDiseases}
                 existingIds={existingIds} // ✅ เพิ่มบรรทัดน
                 onCloseCallback={setCreateFormCloseHandler} // ✅ ส่ง callback function
               />
+              </SmoothModal>
             </div>
           </div>
         )}
@@ -324,13 +326,14 @@ const handleSortById = () => {
                   />
                 </svg>
               </button>
-
+              <SmoothModal onClose={() => setShowEditModal(false)}>
               <EditDisease
                 id={selectedId}
                 onClose={() => setShowEditModal(false)}
                 setShow={setShowEditModal}
                 getList={fetchDiseases}
               />
+              </SmoothModal>
             </div>
           </div>
         )}

@@ -1,379 +1,468 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Button from '@/components/Button';
 import Search from '@/components/Forms/Search';
 import { useAppDispatch } from '@/redux/hook';
-import TablePaginationDemo from '@/components/Tables/Pagination_two';
-import { openAlert } from '@/redux/reducer/alert';
+import { Package, AlertTriangle, XCircle, Printer } from 'lucide-react';
 import Alerts from '@/components/Alerts';
 
-import { Empty } from 'antd';
-
-const ReportMed = () => {
-  const [activeTab, setActiveTab] = useState('all'); // all, medicine, equipment
-  const [reportData, setReportData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
+const ReportStock = () => {
+  const [filterStock, setFilterStock] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const dispatch = useAppDispatch();
-  const [stockStatusFilter, setStockStatusFilter] = useState('all');
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-
-  // Pagination states
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-
-  // Summary stats
+  const [stock, setStock] = useState([]);
+  const [activeTab, setActiveTab] = useState('all'); // all, medicine, equipment
+  const [statusFilter, setStatusFilter] = useState(''); // สำหรับกรองตามสถานะ
+  
+  // State สำหรับสถิติ
   const [summaryStats, setSummaryStats] = useState({
-    totalMedicines: 0,
-    totalMedicineStock: 0,
-    totalEquipment: 0,
-    totalEquipmentStock: 0,
-    lowStockItems: 0,
+
     totalItems: 0,
-    totalStock: 0,
+    almostOutOfStock: 0,
+    outOfStock: 0,
   });
 
-  const fetchAllData = async () => {
+  const dispatch = useAppDispatch();
+
+  // ฟังก์ชันคำนวณสถิติ
+  const calculateStats = (stockData) => {
+    if (!stockData || !Array.isArray(stockData)) {
+      setSummaryStats({
+        totalItems: 0,
+        almostOutOfStock: 0,
+        outOfStock: 0,
+      });
+      return;
+    }
+
+    let almostOutCount = 0;
+    let outOfStockCount = 0;
+    
+    stockData.forEach(item => {
+      if (item.status === 'ກຳລັງຈະໝົດ') {
+        almostOutCount++;
+      } else if (item.status === 'ໝົດ') {
+        outOfStockCount++;
+      }
+    });
+
+    setSummaryStats({
+      totalItems: stockData.length,
+      almostOutOfStock: almostOutCount,
+      outOfStock: outOfStockCount,
+    });
+  };
+
+  // ดึงข้อมูลสต็อก
+  const fetchStock = async () => {
     try {
       setLoading(true);
-
-      // ดึงข้อมูลยา
-      const medicineResponse = await fetch(
-        'http://localhost:4000/src/manager/medicines/M1',
-      );
-      if (!medicineResponse.ok) {
-        throw new Error(`HTTP error! Status: ${medicineResponse.status}`);
+      const response = await fetch(`http://localhost:4000/src/report/stock`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
-      const medicineData = await medicineResponse.json();
 
-      // ดึงข้อมูลอุปกรณ์
-      const equipmentResponse = await fetch(
-        'http://localhost:4000/src/manager/medicines/M2',
-      );
-      if (!equipmentResponse.ok) {
-        throw new Error(`HTTP error! Status: ${equipmentResponse.status}`);
-      }
-      const equipmentData = await equipmentResponse.json();
-
-      // ดึงข้อมูล stock
-      const stockResponse = await fetch(
-        'http://localhost:4000/src/report/stock',
-      );
-      if (!stockResponse.ok) {
-        throw new Error(`HTTP error! Status: ${stockResponse.status}`);
-      }
-      const stockData = await stockResponse.json();
-
-      // รวม stock เข้ากับ medicines และ equipment
-      const medicinesWithStock = (medicineData.data || []).map((item) => {
-        const stockInfo = (stockData.data || []).find(
-          (stock) => stock.medicine_id === item.med_id,
-        );
-        return {
-          ...item,
-          quantity: stockInfo ? stockInfo.quantity : 0,
-          unit: stockInfo ? stockInfo.unit : '-',
-          category: stockInfo ? stockInfo.category : item.medtype_id,
-          type: 'medicine', // เพิ่ม type เพื่อแยกประเภท
-          displayType: 'ຢາ',
-        };
-      });
-
-      const equipmentWithStock = (equipmentData.data || []).map((item) => {
-        const stockInfo = (stockData.data || []).find(
-          (stock) => stock.medicine_id === item.med_id,
-        );
-        return {
-          ...item,
-          quantity: stockInfo ? stockInfo.quantity : 0,
-          unit: stockInfo ? stockInfo.unit : '-',
-          category: stockInfo ? stockInfo.category : item.medtype_id,
-          type: 'equipment', // เพิ่ม type เพื่อแยกประเภท
-          displayType: 'ອຸປະກອນ',
-        };
-      });
-
+      const data = await response.json();
+      const stockData = data.data || []; // ป้องกัน undefined
+      setStock(stockData);
+      setFilterStock(stockData);
+      
       // คำนวณสถิติ
-      const totalMedicineStock = medicinesWithStock.reduce(
-        (sum, item) => sum + (item.quantity || 0),
-        0,
-      );
-      const totalEquipmentStock = equipmentWithStock.reduce(
-        (sum, item) => sum + (item.quantity || 0),
-        0,
-      );
-      const lowStockMedicines = medicinesWithStock.filter(
-        (item) => (item.quantity || 0) < 10,
-      ).length;
-      const lowStockEquipment = equipmentWithStock.filter(
-        (item) => (item.quantity || 0) < 10,
-      ).length;
-
-      // อัปเดตสถิติ
-      setSummaryStats({
-        totalMedicines: medicinesWithStock.length,
-        totalMedicineStock: totalMedicineStock,
-        totalEquipment: equipmentWithStock.length,
-        totalEquipmentStock: totalEquipmentStock,
-        lowStockItems: lowStockMedicines + lowStockEquipment,
-        totalItems: medicinesWithStock.length + equipmentWithStock.length,
-        totalStock: totalMedicineStock + totalEquipmentStock,
-      });
-
-      // กำหนดข้อมูลตาม tab ที่เลือก
-      let dataToSet = [];
-      if (activeTab === 'all') {
-        dataToSet = [...medicinesWithStock, ...equipmentWithStock];
-      } else if (activeTab === 'medicine') {
-        dataToSet = medicinesWithStock;
-      } else if (activeTab === 'equipment') {
-        dataToSet = equipmentWithStock;
-      }
-
-      setReportData(dataToSet);
-      setFilteredData(dataToSet);
+      calculateStats(stockData);
     } catch (error) {
-      console.error('Error fetching data:', error);
-      dispatch(
-        openAlert({
-          type: 'error',
-          title: 'ເກີດຂໍ້ຜິດພາດ',
-          message: 'ບໍ່ສາມາດດຶງຂໍ້ມູນໄດ້',
-        }),
-      );
+      console.error('Error fetching stock:', error);
+      // ตั้งค่าเริ่มต้นเป็น array ว่างในกรณีที่เกิดข้อผิดพลาด
+      setStock([]);
+      setFilterStock([]);
+      calculateStats([]);
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchStock();
+  }, []);
+
   // Handle tab change
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    setPage(0);
-    setSearchQuery('');
-  };
-  useEffect(() => {
-    let filtered = [...reportData];
 
-    if (searchQuery.trim() !== '') {
-      const searchStr = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (item) =>
-          (item.med_name && item.med_name.toLowerCase().includes(searchStr)) ||
-          (item.med_id && item.med_id.toLowerCase().includes(searchStr)) ||
-          (item.medtype_id &&
-            item.medtype_id.toLowerCase().includes(searchStr)) ||
-          (item.displayType &&
-            item.displayType.toLowerCase().includes(searchStr)),
+    setSearchQuery('');
+    setStatusFilter('');
+  };
+
+  // ฟังก์ชันกรองข้อมูล
+  const applyFilters = () => {
+    if (!stock || !Array.isArray(stock)) {
+      setFilterStock([]);
+      return;
+    }
+
+    let filtered = [...stock];
+
+    // กรองตามแท็บ
+    if (activeTab === 'medicine') {
+      filtered = filtered.filter(item => 
+        item.type_name === 'ຢາ' || item.type_name === 'ยา'
+      );
+    } else if (activeTab === 'equipment') {
+      filtered = filtered.filter(item => 
+        item.type_name === 'ອຸປະກອນ' || item.type_name === 'อุปกรณ์'
       );
     }
 
-    // 🔽 กรองสถานะตาม dropdown
-    if (stockStatusFilter === 'low') {
-      filtered = filtered.filter((item) => item.qty < 10);
-    } else if (stockStatusFilter === 'medium') {
-      filtered = filtered.filter((item) => item.qty >= 10 && item.qty < 50);
-    } else if (stockStatusFilter === 'sufficient') {
-      filtered = filtered.filter((item) => item.qty >= 50);
+    // กรองตาม search query
+    if (searchQuery.trim() !== '') {
+      filtered = filtered.filter((item) =>
+        Object.values(item)
+          .join(' ')
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+      );
     }
 
-    setFilteredData(filtered);
-  }, [searchQuery, reportData, stockStatusFilter]);
-
-  // Search functionality
-  // useEffect(() => {
-  //   if (searchQuery.trim() === '') {
-  //     setFilteredData(reportData);
-  //   } else {
-  //     const filtered = reportData.filter((item) => {
-  //       const searchStr = searchQuery.toLowerCase();
-  //       return (
-  //         (item.med_name && item.med_name.toLowerCase().includes(searchStr)) ||
-  //         (item.med_id && item.med_id.toLowerCase().includes(searchStr)) ||
-  //         (item.medtype_id && item.medtype_id.toLowerCase().includes(searchStr)) ||
-  //         (item.displayType && item.displayType.toLowerCase().includes(searchStr))
-  //       );
-  //     });
-  //     setFilteredData(filtered);
-  //   }
-  // }, [searchQuery, reportData]);
-
-  // Load data when activeTab changes
-  useEffect(() => {
-    fetchAllData();
-  }, [activeTab]);
-
-  // Pagination handlers
-  const handlePageChange = (_, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleRowsPerPageChange = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const paginatedData = filteredData.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage,
-  );
-
-  // Table headers
-  const getTableHeaders = () => {
-    if (activeTab === 'all') {
-      return ['ປະເພດ', 'ລະຫັດ', 'ຊື່', 'ຈຳນວນຄົງເຫຼືອ', 'ສະຖານະ'];
+    // กรองตามสถานะ
+    if (statusFilter) {
+      filtered = filtered.filter(item => item.status === statusFilter);
     }
-    return ['ລະຫັດ', 'ຊື່', 'ຈຳນວນຄົງເຫຼືອ', 'ສະຖານະ'];
+
+    setFilterStock(filtered);
   };
 
-  // Render table row
-  const renderTableRow = (item, index) => {
-    const globalIndex = page * rowsPerPage + index + 1;
-
-    return (
-      <tr key={index} className="border-b border-stroke ">
-        {activeTab === 'all' && (
-          <td className="px-4 py-4">
-            <span
-              className={`inline-block rounded-full px-2 py-1 text-xs font-medium ${
-                item.type === 'medicine'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-green-100 text-green-700'
-              }`}
-            >
-              {item.displayType}
-            </span>
-          </td>
-        )}
-        <td className="px-4 py-4">{item.med_id || '-'}</td>
-        <td className="px-4 py-4">{item.med_name || '-'}</td>
-        <td className="px-4 py-4">
-          <span
-            className={`font-medium ${(item.qty || 0) < 10 ? 'text-red-600' : 'text-green-600'}`}
-          >
-            {item.qty || 0}
-          </span>
-        </td>
-        <td className="px-4 py-4 ">
-          <span
-            className={`inline-block rounded-full px-3 py-1 text-sm font-medium  ${
-              (item.qty || 0) < 10
-                ? 'bg-red-100 text-red-700'
-                : (item.qty || 0) < 50
-                  ? 'bg-yellow-100 text-yellow-700'
-                  : 'bg-green-100 text-green-700'
-            }`}
-          >
-            {(item.qty || 0) < 10
-              ? 'ກຳລັງຈະໝົດ'
-              : (item.qty || 0) < 50
-                ? 'ໃກ້ໝົດ'
-                : 'ພຽງພໍ'}
-          </span>
-        </td>
-      </tr>
-    );
-  };
-
-  // Load initial data
+  // เรียกใช้ฟังก์ชันกรองเมื่อมีการเปลี่ยนแปลง
   useEffect(() => {
-    fetchAllData();
-  }, []);
+    applyFilters();
+  }, [searchQuery, statusFilter, stock, activeTab]);
+
+  // ฟังก์ชันล้างตัวกรอง
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('');
+  };
+
+  // ฟังก์ชันกำหนดสีสถานะ
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'ພຽງພໍ':
+        return 'text-green-600 bg-green-50';
+      case 'ກຳລັງຈະໝົດ':
+        return 'text-yellow-600 bg-yellow-50';
+      case 'ໝົດ':
+        return 'text-red-600 bg-red-50';
+      default:
+        return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+  // ฟังก์ชันสำหรับพิมพ์รายงาน
+  const handlePrintReport = () => {
+    const reportData = filterStock;
+    
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>ລາຍງານສະຕ໋ອກຢາແລະອຸປະກອນ</title>
+        <style>
+          @page {
+            size: A4;
+            margin: 20mm;
+          }
+          
+          body {
+            font-family: 'phetsarath ot', serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+          }
+          
+          .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+          }
+          
+          .header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+            color: #2c5aa0;
+          }
+          
+          .report-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+          }
+          
+          .report-info div {
+            flex: 1;
+          }
+          
+          .report-info strong {
+            color: #2c5aa0;
+          }
+          
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+          }
+          
+          th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+          }
+          
+          th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #2c5aa0;
+          }
+          
+          .text-center {
+            text-align: center;
+          }
+          
+          .status-enough {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+          }
+          
+          .status-running-out {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+          }
+          
+          .status-out {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+          }
+          
+          .type-medicine {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+          }
+          
+          .type-equipment {
+            background-color: #e2e3f0;
+            color: #6f42c1;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+          }
+          
+          .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #6c757d;
+          }
+          
+          @media print {
+            body {
+              font-size: 12px;
+            }
+            
+            .header h1 {
+              font-size: 20px;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>ລາຍງານສະຕ໋ອກຢາແລະອຸປະກອນ</h1>
+          <p>Medicine and Equipment Stock Report</p>
+        </div>
+        
+        <div class="report-info">
+          <div>
+            <p><strong>ວັນທີ່ອອກລາຍງານ:</strong> ${new Date().toLocaleDateString('en-GB', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            })}</p>
+          </div>
+          <div>
+            <p><strong>ຈຳນວນລາຍການທັງໝົດ:</strong> ${reportData.length} ລາຍການ</p>
+          </div>
+          <div>
+            ${activeTab === 'medicine' ? `<p><strong>ປະເພດ:</strong> ຢາ</p>` : ''}
+            ${activeTab === 'equipment' ? `<p><strong>ປະເພດ:</strong> ອຸປະກອນ</p>` : ''}
+            ${statusFilter ? `<p><strong>ສະຖານະ:</strong> ${statusFilter}</p>` : ''}
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th class="text-center" style="width: 60px;">ລຳດັບ</th>
+              <th>ລະຫັດ</th>
+              <th>ຊື່</th>
+              <th class="text-center">ປະເພດ</th>
+              <th class="text-center">ຈຳນວນ</th>
+              <th class="text-center">ສະຖານະ</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${reportData.map((item, index) => `
+              <tr>
+                <td class="text-center">${index + 1}</td>
+                <td>${item.med_id}</td>
+                <td>${item.med_name}</td>
+                <td class="text-center">
+                  <span class="${
+                    item.type_name === 'ຢາ' || item.type_name === 'ยา' 
+                      ? 'type-medicine' 
+                      : 'type-equipment'
+                  }">
+                    ${item.type_name}
+                  </span>
+                </td>
+                <td class="text-center">${item.qty}</td>
+                <td class="text-center">
+                  <span class="${
+                    item.status === 'ພຽງພໍ' ? 'status-enough' :
+                    item.status === 'ກຳລັງຈະໝົດ' ? 'status-running-out' : 'status-out'
+                  }">
+                    ${item.status}
+                  </span>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+      </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+
+    printWindow.onload = () => {
+      printWindow.focus();
+
+      // ปิด popup หลังจากผู้ใช้ "พิมพ์หรือยกเลิก" dialog print
+      printWindow.onafterprint = () => {
+        printWindow.close();
+      };
+
+      // เรียกหน้าต่างพิมพ์
+      printWindow.print();
+
+      // fallback: ปิดหลัง 5 วินาที ถ้า onafterprint ไม่ทำงาน
+      setTimeout(() => {
+        if (!printWindow.closed) {
+          printWindow.close();
+        }
+      }, 5000);
+    };
+  };
 
   return (
     <>
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 2xl:gap-7.5 w-full mb-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 2xl:gap-7.5 w-full mb-6">
         {/* Total Items */}
         <div className="rounded-sm border border-stroke bg-white p-4">
           <div className="flex items-center">
-            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 text-indigo-600 shadow-inner">
-              <svg
-                className="w-[25px] h-[25px] text-primary "
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2.1"
-                  d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 5h6m-6 4h6M10 3v4h4V3h-4Z"
-                />
-              </svg>
+            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-blue-100">
+              <Package className="w-6 h-6 text-blue-600" />
             </div>
             <div className="ml-4">
               <h4 className="text-lg font-semibold text-strokedark">
-                {activeTab === 'all'
-                  ? 'ຈຳນວນທັງໝົດ'
-                  : activeTab === 'medicine'
-                    ? 'ຈຳນວນຢາທັງໝົດ'
-                    : 'ຈຳນວນອຸປະກອນທັງໝົດ'}
+                ລາຍການທັງໝົດ
               </h4>
-              <p className="text-xl font-bold text-primary">
-                {activeTab === 'all'
-                  ? summaryStats.totalItems
-                  : activeTab === 'medicine'
-                    ? summaryStats.totalMedicines
-                    : summaryStats.totalEquipment}{' '}
-                ລາຍການ
+              <p className="text-xl font-bold text-blue-700">
+                {summaryStats.totalItems} ລາຍການ
               </p>
             </div>
           </div>
         </div>
 
-        {/* Low Stock Items */}
-        <div className="rounded-sm border border-stroke bg-white p-4 ">
+        {/* Almost Out of Stock */}
+        <div className="rounded-sm border border-stroke bg-white p-4">
           <div className="flex items-center">
-            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"
-                />
-              </svg>
+            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-yellow-100">
+              <AlertTriangle className="w-6 h-6 text-yellow-600" />
             </div>
             <div className="ml-4">
-              <h4 className="text-lg font-semibold text-strokedark ">
-                {activeTab === 'all'
-                  ? 'ສິນຄ້າໃກ້ໝົດ'
-                  : activeTab === 'medicine'
-                    ? 'ຢາໃກ້ໝົດ'
-                    : 'ອຸປະກອນໃກ້ໝົດ'}
+              <h4 className="text-lg font-semibold text-strokedark">
+                ກຳລັງຈະໝົດ
               </h4>
-              <p className="text-xl font-bold text-red-500 dark:text-red-300">
-                {summaryStats.lowStockItems} ລາຍການ
+              <p className="text-xl font-bold text-yellow-600">
+                {summaryStats.almostOutOfStock} ລາຍການ
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Out of Stock */}
+        <div className="rounded-sm border border-stroke bg-white p-4">
+          <div className="flex items-center">
+            <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-red-100">
+              <XCircle className="w-6 h-6 text-red-600" />
+            </div>
+            <div className="ml-4">
+              <h4 className="text-lg font-semibold text-strokedark">
+                ໝົດ
+              </h4>
+              <p className="text-xl font-bold text-red-600">
+                {summaryStats.outOfStock} ລາຍການ
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="rounded bg-white pt-4 border border-stroke">
+      <div className="rounded bg-white pt-4 dark:bg-boxdark">
         <Alerts />
-
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark ">
+        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark flex-wrap gap-2">
+          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
             ລາຍງານການຢາແລະອຸປະກອນ
           </h1>
+          
+          <div className="ml-auto">
+            <Button
+              onClick={handlePrintReport}
+              className="bg-secondary2 hover:bg-secondary3"
+            >
+              <Printer className="w-4 h-4" />
+              ພິມລາຍງານ
+            </Button>
+          </div>
         </div>
 
-        <div className="flex gap-4 px-4 mt-4 ">
+        {/* Tabs */}
+        <div className="flex gap-4 px-4 mt-4">
           <button
             onClick={() => handleTabChange('all')}
             className={`px-4 py-2 rounded transition-colors ${
-              activeTab === 'all'
+              activeTab === 'all' 
                 ? 'bg-slate-600 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
@@ -383,8 +472,8 @@ const ReportMed = () => {
           <button
             onClick={() => handleTabChange('medicine')}
             className={`px-4 py-2 rounded transition-colors ${
-              activeTab === 'medicine'
-                ? 'bg-secondary2 text-white'
+              activeTab === 'medicine' 
+                ? 'bg-blue-500 text-white' 
                 : 'bg-gray-200 hover:bg-gray-300'
             }`}
           >
@@ -393,110 +482,112 @@ const ReportMed = () => {
           <button
             onClick={() => handleTabChange('equipment')}
             className={`px-4 py-2 rounded transition-colors ${
-              activeTab === 'equipment'
-                ? 'bg-secondary2 text-white'
+              activeTab === 'equipment' 
+                ? 'bg-blue-500 text-white' 
                 : 'bg-gray-200 hover:bg-gray-300'
             }`}
           >
             ອຸປະກອນ
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 py-2 my-2">
-          {/* Search */}
-          <div className="relative w-full">
+
+        {/* ส่วนของตัวกรอง */}
+        <div className="grid w-full gap-4 p-4">
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            {/* Search Box */}
             <Search
               type="text"
               name="search"
               placeholder="ຄົ້ນຫາ..."
-              className="rounded border border-stroke  "
-              onChange={(e) => setSearchQuery(e.target.value)}
+              className="rounded border border-stroke dark:border-strokedark"
               value={searchQuery}
-            />
-          </div>
+              onChange={(e) => setSearchQuery(e.target.value)}
 
-          {/* Dropdown with icon and toggle animation */}
-          <div className="relative ">
+            />
+
+
+            {/* ตัวกรองตามสถานะ */}
             <select
-              value={stockStatusFilter}
-              onChange={(e) => setStockStatusFilter(e.target.value)}
-              onFocus={() => setDropdownOpen(true)}
-              onBlur={() => setDropdownOpen(false)}
-              className="appearance-none relative z-10 w-full  rounded border border-stroke bg-white  py-4.5 px-4 pr-10 text-sm text-black dark:text-white outline-none focus:border-primary transition"
+              className="border border-stroke dark:border-strokedark rounded p-2"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <option value="all">ສະຖານະທັງໝົດ</option>
-              <option value="low">ກຳລັງຈະໝົດ</option>
-              <option value="medium">ໃກ້ໝົດ</option>
-              <option value="sufficient">ພຽງພໍ</option>
+              <option value="">-- ກອງຕາມສະຖານະ --</option>
+              <option value="ພຽງພໍ">ພຽງພໍ</option>
+              <option value="ກຳລັງຈະໝົດ">ກຳລັງຈະໝົດ</option>
+              <option value="ໝົດ">ໝົດ</option>
             </select>
 
-            {/* Dropdown arrow icon */}
-            <div
-              className={`pointer-events-none absolute right-3 top-1/2 z-20 -translate-y-1/2 text-gray-500 dark:text-gray-300 transition-transform duration-200 ${
-                dropdownOpen ? 'rotate-180' : 'rotate-0'
-              }`}
+            {/* ปุ่มล้างตัวกรอง */}
+            <Button
+              onClick={clearAllFilters}
+              className="bg-slate-600 hover:bg-slate-800 text-white"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </div>
+              ລ້າງຕົວກອງ
+            </Button>
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto ">
+        {/* ตาราง */}
+        <div className="overflow-x-auto shadow-md">
           <table className="w-full min-w-max table-auto">
             <thead>
               <tr className="text-left bg-gray border border-stroke">
-                {getTableHeaders().map((header, index) => (
-                  <th
-                    key={index}
-                    className="px-4 py-3 text-form-input font-semibold"
-                  >
-                    {header}
-                  </th>
-                ))}
+                <th className="px-4 py-3 tracking-wide text-form-input font-semibold">
+                  ລະຫັດ
+                </th>
+                <th className="px-4 py-3 tracking-wide text-form-input font-semibold">
+                  ຊື່
+                </th>
+                <th className="px-4 py-3 tracking-wide text-form-input font-semibold">
+                  ປະເພດ
+                </th>
+                <th className="px-4 py-3 tracking-wide text-form-input font-semibold">
+                  ຈຳນວນ
+                </th>
+                <th className="px-4 py-3 tracking-wide text-form-input font-semibold">
+                  ສະຖານະ
+                </th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td
-                    colSpan={getTableHeaders().length}
-                    className="py-8 text-center"
-                  >
-                    <div className="flex justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                    </div>
+                  <td colSpan={5} className="py-4 text-center text-gray-500">
+                    ກຳລັງໂຫລດ...
                   </td>
                 </tr>
-              ) : paginatedData.length > 0 ? (
-                paginatedData.map((item, index) => renderTableRow(item, index))
+              ) : filterStock.length > 0 ? (
+                filterStock.map((item, index) => (
+                  <tr
+                    key={index}
+                    className="border-b text-md border-stroke hover:bg-gray-50"
+                  >
+                    <td className="px-4 py-4 font-medium">{item.med_id}</td>
+                    <td className="px-4 py-4">{item.med_name}</td>
+                    <td className="px-4 py-4">
+                      <span className={`px-2 py-1 rounded-full text-sm font-medium ${
+                        item.type_name === 'ຢາ' || item.type_name === 'ยา' 
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-purple-100 text-purple-800'
+                      }`}>
+                        {item.type_name}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-center font-semibold">
+                      {item.qty}
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className={`px-2 py-1 rounded-full text-sm font-medium ${getStatusColor(item.status)}`}>
+                        {item.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
               ) : (
                 <tr>
-                  <td
-                    colSpan={getTableHeaders().length}
-                    className="py-4 "
-                  >
-                    <div className="text-center text-gray-500 ">
-                      <div className="w-32 h-32 flex items-center justify-center mx-auto">
-                        <Empty description={false} />
-                      </div>
-                      <p className="text-lg">
-                        <span className="">
-                          ບໍ່ພົບຂໍ້ມູນລາຍງານການຈ່າຍຢາ ແລະ ອຸປະກອນ
-                        </span>
-                      </p>
-                    </div>
+                  <td colSpan={5} className="py-4 text-center text-gray-500">
+                    ບໍ່ມີຂໍ້ມູນ
                   </td>
                 </tr>
               )}
@@ -505,18 +596,9 @@ const ReportMed = () => {
         </div>
       </div>
 
-      {/* Pagination */}
-      {filteredData.length > 0 && (
-        <TablePaginationDemo
-          count={filteredData.length}
-          page={page}
-          onPageChange={handlePageChange}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleRowsPerPageChange}
-        />
-      )}
+
     </>
   );
 };
 
-export default ReportMed;
+export default ReportStock;

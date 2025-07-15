@@ -152,6 +152,18 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
 
       setLoading(true);
 
+      // แปลงวันที่ให้เป็น local timezone string
+    const appointmentDate = new Date(data.date_addmintted);
+    const year = appointmentDate.getFullYear();
+    const month = String(appointmentDate.getMonth() + 1).padStart(2, '0');
+    const day = String(appointmentDate.getDate()).padStart(2, '0');
+    const hours = String(appointmentDate.getHours()).padStart(2, '0');
+    const minutes = String(appointmentDate.getMinutes()).padStart(2, '0');
+    const seconds = String(appointmentDate.getSeconds()).padStart(2, '0');
+
+    const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    console.log('Formatted date:', formattedDate); // ตรวจสอบ
+
       const response = await fetch(
         'http://localhost:4000/src/appoint/appointment',
         {
@@ -159,7 +171,7 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             appoint_id: data.appoint_id,
-            date_addmintted: data.date_addmintted,
+            date_addmintted: formattedDate, // ใช้ string ที่แปลงแล้ว
             status: 'ລໍຖ້າ', // ✅ ตั้งค่าสถานะเป็น "ລໍຖ້າ" โดยอัตโนมัติ
             description: data.description,
             emp_id: selectedEmp,

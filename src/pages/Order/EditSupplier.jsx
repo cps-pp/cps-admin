@@ -20,7 +20,6 @@ const EditSupplier = ({ id, onClose, setShow, getList }) => {
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false);
   const dispatch = useAppDispatch();
-  
   const [phoneNumber, setPhoneNumber] = useState('020'); // ✅ เพิ่ม state สำหรับเบอร์โทร
 
   useEffect(() => {
@@ -120,7 +119,6 @@ const EditSupplier = ({ id, onClose, setShow, getList }) => {
           company_name: formData.company_name,
           address: formData.address,
           phone: formData.phone,
-          status: formData.status,
         }),
       });
 
@@ -230,7 +228,6 @@ const EditSupplier = ({ id, onClose, setShow, getList }) => {
           )}
         </div>
 
-     
         <div className="mt-8 flex justify-end space-x-4 col-span-full py-4">
           <Button variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}

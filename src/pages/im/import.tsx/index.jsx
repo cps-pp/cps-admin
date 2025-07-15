@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '@/components/Button';
-import Search from '@/components/Forms/Search';
+
 import { TableAction } from '@/components/Tables/TableAction';
 import ConfirmModal from '@/components/Modal';
 import { iconAdd } from '@/configs/icon';
@@ -16,10 +16,11 @@ import ViewImport from './view';
 import AddDetailImport from './create_detail';
 import { Eye, Plus } from 'lucide-react';
 import { Empty } from 'antd';
+import SmoothModal from '@/components/Modal/SmoothModal';
 
 const ImportPage = () => {
   const [filterIm, setFilterIm] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
+
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -99,7 +100,7 @@ const ImportPage = () => {
     );
   };
 
-  // ✅ ฟังก์ชันสำหรับเรียงลำดับ ID (เพิ่มใหม่)
+  // ✅ ฟังก์ชันสำหรับเรียงลำดับ ID
   const handleSortById = () => {
     const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
     setSortOrder(newSortOrder);
@@ -130,15 +131,7 @@ const ImportPage = () => {
   const applyFiltersWithData = (data = Im) => {
     let filtered = [...data];
 
-    // กรองตาม search query
-    if (searchQuery.trim() !== '') {
-      filtered = filtered.filter((item) =>
-        Object.values(item)
-          .join(' ')
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()),
-      );
-    }
+
 
     // กรองตามเดือน
     if (monthFilter) {
@@ -148,10 +141,15 @@ const ImportPage = () => {
       });
     }
 
-    // กรองตามลະຫັດສັ່ງຊື້
+     // กรองตามรหัสสั่งซื้อ (แก้ไขส่วนนี้)
     if (selectedOrder !== '') {
-      filtered = filtered.filter((Im) => Im.preorder_id === selectedOrder);
-    }
+    filtered = filtered.filter((Im) => {
+      // แปลงทั้งสองค่าเป็น string เพื่อเปรียบเทียบ
+      const preorderId = Im.preorder_id ? String(Im.preorder_id) : '';
+      const selectedOrderStr = String(selectedOrder);
+      return preorderId === selectedOrderStr;
+    });
+  }
 
     // กรองตามพนักงาน
     if (selectedEmployee !== '') {
@@ -168,11 +166,11 @@ const ImportPage = () => {
   // เรียกใช้ฟังก์ชันกรองเมื่อมีการเปลี่ยนแปลงใน filters หรือข้อมูล
   useEffect(() => {
     applyFilters();
-  }, [searchQuery, monthFilter, selectedOrder, selectedEmployee, Im]);
+  }, [ monthFilter, selectedOrder, selectedEmployee, Im]);
 
   // ฟังก์ชันล้างตัวกรองทั้งหมด
   const clearAllFilters = () => {
-    setSearchQuery('');
+
     setMonthFilter('');
     setSelectedOrder('');
     setSelectedEmployee('');
@@ -223,42 +221,30 @@ const ImportPage = () => {
     setShowEditModal(true);
   };
 
-  // เพิ่มฟังก์ชันสำหรับจัดการ View
+
   const handleViewImport = (id) => {
     setSelectedId(id);
     setShowViewModal(true);
   };
 
-  // ✅ ฟังก์ชันนี้ถูกต้องแล้ว - ใช้ setSelectedId
+
   const handleAdd_detail = (id) => {
     setSelectedId(id);
     setShowAdd_detailModal(true);
   };
 
-  // ✅ Handler สำหรับปุ่ม X ที่จะใช้ฟังก์ชันจาก CreateImport
+
   const handleCloseAddModal = () => {
     if (createFormCloseHandler) {
-      // เรียกใช้ฟังก์ชันที่ได้รับมาจาก CreateImport
+
       createFormCloseHandler();
     } else {
-      // fallback ถ้าไม่มี handler
+
       setShowAddModal(false);
     }
   };
 
-  // แทนที่ฟังก์ชัน handleViewFile เดิมด้วยโค้ดนี้
-  const handleViewFile = (fileName) => {
-    if (!fileName) {
-      alert('ไม่พบไฟล์');
-      return;
-    }
 
-    // ✅ เปิดไฟล์ในหน้าใหม่โดยตรง (ไม่ต้องใช้ fetch)
-    const fileUrl = `http://localhost:4000/src/im/view/${fileName}`;
-    window.open(fileUrl, '_blank');
-  };
-
-  // ✅ หรือถ้าต้องการให้ robust มากขึ้น สามารถใช้แบบนี้
   const handleViewFileAdvanced = async (fileName) => {
     if (!fileName) {
       alert('ไม่พบไฟล์');
@@ -268,14 +254,14 @@ const ImportPage = () => {
     try {
       const fileUrl = `http://localhost:4000/src/im/view/${fileName}`;
 
-      // ✅ ตรวจสอบว่าไฟล์มีอยู่จริงก่อนเปิด
+
       const response = await fetch(fileUrl, { method: 'HEAD' });
 
       if (!response.ok) {
         throw new Error('ไม่สามารถเปิดไฟล์ได้');
       }
 
-      // ✅ เปิดไฟล์ในหน้าใหม่
+
       window.open(fileUrl, '_blank');
     } catch (error) {
       console.error('Error viewing file:', error);
@@ -292,7 +278,7 @@ const ImportPage = () => {
         </h1>
 
         <div className="ml-auto flex flex-wrap items-center gap-x-2 gap-y-2">
-          {/* ปุ่มเพิ่มรายการ */}
+
           <Button
             onClick={() => setShowAddModal(true)}
             icon={iconAdd}
@@ -303,27 +289,20 @@ const ImportPage = () => {
         </div>
       </div>
 
-      {/* ส่วนของตัวกรอง */}
-      <div className="grid w-full gap-4 p-4 ">
-        <div className="flex flex-wrap items-center gap-2 mb-4">
-          {/* Search Box */}
-          <Search
-            type="text"
-            name="search"
-            placeholder="ຄົ້ນຫາ..."
-            className="rounded border border-stroke dark:border-strokedark"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+      {/* ✅ ส่วนของการค้นหาและตัวกรอง */}
+      <div className="p-4 space-y-4">
+    
 
-          {/* ตัวกรองตามลະຫັດສັ່ງຊື້ */}
+        {/* ✅ ตัวกรองอื่นๆ ในแถวถัดไป */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* ตัวกรองตามรหัสสั่งซื้อ */}
           <select
             className="border border-stroke dark:border-strokedark rounded p-2"
             value={selectedOrder}
             onChange={(e) => setSelectedOrder(e.target.value)}
           >
-            <option value="">-- ຄົ້ນຫາຕາມລະຫັດສັ່ງຊື້ --</option>
-            {[...new Set(Im.map((im) => im.preorder_id))].map((pre_id) => (
+            <option value="">-- ກອງຕາມລະຫັດສັ່ງຊື້ --</option>
+            {[...new Set(Im.map((im) => im.preorder_id).filter(Boolean))].map((pre_id) => (
               <option key={pre_id} value={pre_id}>
                 {pre_id}
               </option>
@@ -336,7 +315,7 @@ const ImportPage = () => {
             value={selectedEmployee}
             onChange={(e) => setSelectedEmployee(e.target.value)}
           >
-            <option value="">-- ຄົ້ນຫາຕາມພະນັກງານ --</option>
+            <option value="">-- ກອງຕາມພະນັກງານ --</option>
             {[...new Set(Im.map((im) => im.emp_id_create))].map((empId) => {
               const employee = empName.find((emp) => emp.emp_id === empId);
               return (
@@ -362,10 +341,11 @@ const ImportPage = () => {
             onClick={clearAllFilters}
             className="bg-slate-400 hover:bg-slate-500 text-white"
           >
-            ລ້າງການຄົ້ນຫາ
+            ລ້າງການກອງ
           </Button>
         </div>
       </div>
+
       <div className="overflow-x-auto ">
         <table className="w-full min-w-max table-auto  ">
           <thead>
@@ -413,7 +393,7 @@ const ImportPage = () => {
                     })}
                   </td>
 
-                  {/* ລະຫັດສັ່ງຊື້ */}
+
                   <td className="px-4 py-4">
                     {im.preorder_id || (
                       <span className="text-purple-600">-</span>
@@ -438,7 +418,7 @@ const ImportPage = () => {
                   </td>
                   <td className="px-4 py-4">{im.types}</td>
 
-                  <td className="px-4 py-4">{im.node}</td>
+                  <td className="px-4 py-4">{im.note}</td>
 
                   <td className="px-3 py-4 ">
                     <div className="flex gap-2 ">
@@ -459,14 +439,7 @@ const ImportPage = () => {
                       </button>
                     </div>
                   </td>
-                  {/* <td className="px-3 py-4 text-center">
-                    <TableAction
-                      onView={() => handleViewImport(im.im_id)}
-                      onAdd={() => handleAdd_detail(im.im_id)}
-                    />
-                  </td> */}
 
-                  {/* Actions - เพิ่ม onView ให้กับ TableAction */}
                   <td className="px-3 py-4 text-center">
                     <TableAction
                       onDelete={openDeleteModal(im.im_id)}
@@ -482,7 +455,9 @@ const ImportPage = () => {
                     <div className="w-32 h-32 flex items-center justify-center mx-auto">
                       <Empty description={false} />
                     </div>
-                    <p className="text-lg">ບໍ່ພົບຂໍ້ມູນການນຳເຂົ້າ</p>
+                    <p className="text-lg">
+                      ບໍ່ພົບຂໍ້ມູນການນຳເຂົ້າ
+                    </p>
                   </div>
                 </td>
               </tr>
@@ -495,7 +470,7 @@ const ImportPage = () => {
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
           <div className="rounded w-full max-w-lg md:max-w-2xl lg:max-w-5xl relative overflow-auto max-h-[90vh]">
-            {/* ปุ่ม X */}
+
             <button
               onClick={handleCloseAddModal}
               className="absolute px-4 top-3 right-3 text-gray-500 hover:text-gray-700 z-10"
@@ -516,11 +491,13 @@ const ImportPage = () => {
               </svg>
             </button>
 
+          <SmoothModal onClose={() => setShowAddModal(false)}>
             <CreateImport
               setShow={setShowAddModal}
               getList={fetchImport}
               onCloseCallback={setCreateFormCloseHandler}
             />
+            </SmoothModal>
           </div>
         </div>
       )}
@@ -549,17 +526,19 @@ const ImportPage = () => {
               </svg>
             </button>
 
+          <SmoothModal onClose={() => setShowEditModal(false)}>
             <EditImport
               id={selectedId}
               onClose={() => setShowEditModal(false)}
               setShow={setShowEditModal}
               getList={fetchImport}
             />
+            </SmoothModal>
           </div>
         </div>
       )}
 
-      {/* Modal ดูรายละเอียด - เพิ่ม View Modal */}
+      {/* Modal ดูรายละเอียด */}
       {showViewModal && selectedId && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
           <div className="rounded w-full max-w-lg md:max-w-2xl lg:max-w-5xl relative overflow-auto max-h-[90vh]">
@@ -583,17 +562,19 @@ const ImportPage = () => {
               </svg>
             </button>
 
+            <SmoothModal onClose={() => setShowViewModal(false)}>
             <ViewImport
               id={selectedId}
               onClose={() => setShowViewModal(false)}
               setShow={setShowViewModal}
               getList={fetchImport}
             />
+            </SmoothModal>
           </div>
         </div>
       )}
 
-      {/* Modal ดูรายละเอียด - เพิ่ม View Modal */}
+      {/* Modal เพิ่มรายละเอียด */}
       {showAdd_detailModal && selectedId && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
           <div className="rounded w-full max-w-lg md:max-w-2xl lg:max-w-5xl relative overflow-auto max-h-[90vh]">
@@ -617,12 +598,14 @@ const ImportPage = () => {
               </svg>
             </button>
 
+            <SmoothModal onClose={() => setShowAdd_detailModal(false)}>
             <AddDetailImport
               id={selectedId}
               onClose={() => setShowAdd_detailModal(false)}
               setShow={setShowAdd_detailModal}
               getList={fetchImport}
             />
+            </SmoothModal>
           </div>
         </div>
       )}

@@ -18,6 +18,7 @@ import ViewService from './view.jsx';
 import AddDetailPacket from './create_detail.jsx';
 import { Eye, Plus } from 'lucide-react';
 import { Empty } from 'antd';
+import SmoothModal from '../../../components/Modal/SmoothModal';
 
 const ServicePage = () => {
   const [services, setServices] = useState([]);
@@ -354,12 +355,14 @@ const ServicePage = () => {
                 </svg>
               </button>
 
+            <SmoothModal onClose={() => setShowAddModal(false)}>
               <CreateServiceList
                 setShow={setShowAddModal}
                 getList={fetchServiceList}
                 existingIds={existingIds} // ✅ เพิ่มบรรทัดน
                 onCloseCallback={setCreateFormCloseHandler} // ✅ ส่ง callback function
               />
+              </SmoothModal>
             </div>
           </div>
         )}
@@ -387,12 +390,14 @@ const ServicePage = () => {
                 </svg>
               </button>
 
+            <SmoothModal onClose={() => setShowEditModal(false)}>
               <EditServicerList
                 id={selectedId}
                 onClose={() => setShowEditModal(false)}
                 setShow={setShowEditModal}
                 getList={fetchServiceList}
               />
+              </SmoothModal>
             </div>
           </div>
         )}
@@ -420,13 +425,15 @@ const ServicePage = () => {
                         />
                       </svg>
                     </button>
-        
+                  
+                  <SmoothModal onClose={() => setShowAdd_detailModal(false)}>
                     <AddDetailPacket
                       id={selectedId}
                       onClose={() => setShowAdd_detailModal(false)}
                       setShow={setShowAdd_detailModal}
                       getList={fetchServiceList}
                     />
+                    </SmoothModal>
                   </div>
                 </div>
               )}
@@ -455,12 +462,14 @@ const ServicePage = () => {
               </svg>
             </button>
 
+            <SmoothModal onClose={() => setShowViewModal(false)}>
             <ViewService
               id={selectedId}
               onClose={() => setShowViewModal(false)}
               setShow={setShowViewModal}
               getList={fetchServiceList}
             />
+            </SmoothModal>
           </div>
         </div>
       )}

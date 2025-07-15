@@ -15,7 +15,7 @@ import { openAlert } from '@/redux/reducer/alert';
 import SearchBox from '../../../components/Forms/Search_New';
 import { Empty } from 'antd';
 import { ACCESS_TOKEN_KEY } from '../../../utils/constants';
-import SmoothModal from '../../../components/Modal/SmoothModal';
+import SmoothModal from '@/components/Modal/SmoothModal';
 const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 
 const PatientPage = () => {

@@ -13,6 +13,7 @@ import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { openAlert } from '@/redux/reducer/alert';
 import Alerts from '@/components/Alerts';
 import { Empty } from 'antd';
+import SmoothModal from '../../../components/Modal/SmoothModal';
 
 const SupplierPage = () => {
   const [suppliers, setSuppliers] = useState([]);
@@ -259,19 +260,7 @@ const handleSortById = () => {
                     <td className="px-4 py-4">{supplier.company_name}</td>
                     <td className="px-4 py-4">{supplier.address}</td>
                     <td className="px-4 py-4">{supplier.phone}</td>
-                    <td className="">
-                      <span
-                        className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
-                          supplier.status === 'ເປີດ'
-                            ? 'bg-green-100 text-green-700'
-                            : supplier.status === 'ປິດ'
-                              ? 'bg-red-100 text-red-700'
-                              : 'bg-gray-100 text-gray-700'
-                        }`}
-                      >
-                        {supplier.status}
-                      </span>
-                    </td>
+                    
                     <td className="px-3 py-4 text-center">
                       <TableAction
                         onDelete={openDeleteModal(supplier.sup_id)}
@@ -319,12 +308,14 @@ const handleSortById = () => {
                 </svg>
               </button>
  
+              <SmoothModal onClose={() => setShowAddModal(false)}>
               <CreateSupplier
                 setShow={setShowAddModal}
                 getList={fetchSuppliers}
                 existingIds={existingIds} // ✅ เพิ่มบรรทัดน
                 onCloseCallback={setCreateFormCloseHandler} // ✅ ส่ง callback function
               />
+              </SmoothModal>
             </div>
           </div>
         )}
@@ -352,12 +343,14 @@ const handleSortById = () => {
                 </svg>
               </button>
 
+              <SmoothModal onClose={() => setShowEditModal(false)}>
               <EditSupplier
                 id={selectedId}
                 onClose={() => setShowEditModal(false)}
                 setShow={setShowEditModal}
                 getList={fetchSuppliers}
               />
+              </SmoothModal>
             </div>
           </div>
         )}

@@ -36,6 +36,7 @@ import FollowTreatmentPage from '../pages/Appoint/detail';
 import DetailPatientService from '../pages/Service/Detail';
 import ReportFollowPatient from '../pages/report/ReportFollow';
 import DetailFollowPatient from '../pages/report/ReportFollow/detail';
+import DetailEmployee from '../pages/Manager/Employee/detail';
 
 export const ROUTES = [
   {
@@ -67,6 +68,11 @@ export const ROUTES = [
     path: '/manager/employee',
     title: 'Employee| CPS Admin',
     component: <EmployeePage />,
+  },
+  {
+    path: '/employee/detail/:id',
+    title: 'Employee| CPS Admin',
+    component: <DetailEmployee />,
   },
   //  -------------------------- Category Path --------------------------------
   {

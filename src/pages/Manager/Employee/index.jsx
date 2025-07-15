@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import Button from '@/components/Button';
 import Search from '@/components/Forms/Search';
@@ -15,6 +16,7 @@ import Alerts from '@/components/Alerts';
 import EditEmployee from './EditEmp';
 import Loader from '@/common/Loader';
 import { Empty } from 'antd';
+import SmoothModal from '../../../components/Modal/SmoothModal';
 
 const EmployeePage = () => {
   const [employees, setEmployees] = useState([]);
@@ -176,6 +178,11 @@ const EmployeePage = () => {
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage,
   );
+  const navigate = useNavigate();
+
+   const handleViewEmp = (id) => {
+    navigate(`/employee/detail/${id}`);
+  };
 
   if (loading) return <Loader />;
 
@@ -280,6 +287,7 @@ const EmployeePage = () => {
                         // onView={() => handleViewExchange(exchange.ex_id)}
                         onDelete={openDeleteModal(emp.emp_id)}
                         onEdit={() => handleEdit(emp.emp_id)}
+                        onView={() => handleViewEmp(emp.emp_id)}
                       />
                     </td>
                   </tr>
@@ -333,12 +341,14 @@ const EmployeePage = () => {
                 </svg>
               </button>
 
+              <SmoothModal onClose={() => setShowAddModal(false)}>
               <CreateEmployee
                 setShow={setShowAddModal}
                 getList={fetchEmployees}
                 existingIds={existingIds} // ✅ เพิ่มบรรทัดน
                 onCloseCallback={setCreateFormCloseHandler} // ✅ ส่ง callback function
               />
+              </SmoothModal>
             </div>
           </div>
         )}
@@ -375,12 +385,14 @@ const EmployeePage = () => {
                 </svg>
               </button>
 
+              <SmoothModal onClose={() => setShowEditModal(false)}>
               <EditEmployee
                 id={selectedId}
                 onClose={() => setShowEditModal(false)}
                 setShow={setShowEditModal}
                 getList={fetchEmployees}
               />
+              </SmoothModal>
             </div>
           </div>
         )}

@@ -12,8 +12,10 @@ import { openAlert } from '@/redux/reducer/alert';
 import { useAppDispatch } from '@/redux/hook';
 import { FollowHeader } from './column/follow';
 import { iconAdd } from '@/configs/icon';
-import { Empty } from 'antd';
 import ModernTodayAppointments from './ModernTodayAppointments';
+import { Empty } from 'antd';
+import SmoothModal from '@/components/Modal/SmoothModal';
+
 const FollowPage = () => {
   const [appointments, setAppointments] = useState([]);
   const [filteredAppointments, setFilteredAppointments] = useState([]);
@@ -36,15 +38,18 @@ const FollowPage = () => {
   const [showPostponeModal, setShowPostponeModal] = useState(false);
   const [postponeAppointmentId, setPostponeAppointmentId] = useState(null);
   const [newDate, setNewDate] = useState('');
-  const dispatch = useAppDispatch();
 
   const [sortOrder, setSortOrder] = useState('asc');
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [error, setError] = useState(null);
+  
+  const dispatch = useAppDispatch();
+  const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
 
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
   };
+
 
   const isSameDate = (dateString, targetDate) => {
     if (!dateString || !targetDate) return false;
@@ -55,25 +60,44 @@ const FollowPage = () => {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
+      console.log('Fetching appointments from API...');
+      
       const response = await fetch(
         'http://localhost:4000/src/appoint/appointment',
         {
           method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
       );
+
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
       const data = await response.json();
-      setAppointments(data.data);
-      setFilteredAppointments(data.data);
+      console.log('API Response:', data);
+
+      // ตรวจสอบ data structure
+      if (!data || !data.data || !Array.isArray(data.data)) {
+        console.error('Invalid data structure:', data);
+        throw new Error('Invalid data structure from API');
+      }
 
       const allAppointments = data.data;
-      const today = getTodayDate();
+      console.log('All appointments:', allAppointments);
+      
+      setAppointments(allAppointments);
+      setFilteredAppointments(allAppointments);
 
-      // ✅ แก้ไขการใช้งาน isSameDate function
+      // Filter today's appointments
+      const today = getTodayDate();
       const todayAppts = allAppointments.filter((appointment) => {
         if (!appointment.date_addmintted) return false;
         return (
@@ -82,15 +106,16 @@ const FollowPage = () => {
         );
       });
 
-      // ✅ เรียงลำดับตามเวลา (จากเวลาน้อยไปมาก)
+      // Sort by time
       const sortedTodayAppts = todayAppts.sort((a, b) => {
         const timeA = new Date(a.date_addmintted).getTime();
         const timeB = new Date(b.date_addmintted).getTime();
-        return timeA - timeB; // เรียงจากเวลาน้อยไปมาก
+        return timeA - timeB;
       });
 
       setTodayAppointments(sortedTodayAppts);
 
+      // Update counters
       setTotalCount(allAppointments.length);
       setDoneCount(
         allAppointments.filter((item) => item.status === 'ກວດແລ້ວ').length,
@@ -98,13 +123,46 @@ const FollowPage = () => {
       setWaitingCount(
         allAppointments.filter((item) => item.status === 'ລໍຖ້າ').length,
       );
+
+      console.log('Data loaded successfully:', {
+        total: allAppointments.length,
+        today: sortedTodayAppts.length,
+        done: allAppointments.filter((item) => item.status === 'ກວດແລ້ວ').length,
+        waiting: allAppointments.filter((item) => item.status === 'ລໍຖ້າ').length,
+      });
+
     } catch (error) {
       console.error('Error fetching appointments:', error);
+      setError(error.message);
+      
+      // Show error alert
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ເກີດຂໍ້ຜິດພາດ',
+          message: `ບໍ່ສາມາດດຶງຂໍ້ມູນນັດໝາຍໄດ້: ${error.message}`,
+        }),
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  // เพิ่ม useEffect สำหรับเรียก fetchAppointments
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
+
+  // Current time update
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Search functionality
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setFilteredAppointments(appointments);
@@ -130,6 +188,89 @@ const FollowPage = () => {
       setFilteredAppointments(filtered);
     }
   }, [searchQuery, appointments, patientName, empName]);
+
+  // Fetch patient data
+  useEffect(() => {
+    const fetchPatient = async () => {
+      try {
+        console.log('Fetching patient data...');
+        const response = await fetch(
+          'http://localhost:4000/src/manager/patient',
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Patient data:', data);
+        
+        if (data && data.data && Array.isArray(data.data)) {
+          setPatientName(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching patient data:', error);
+        
+      }
+    };
+
+    fetchPatient();
+  }, []);
+
+  // Fetch doctor data
+  useEffect(() => {
+    const fetchDoctor = async () => {
+      try {
+        console.log('Fetching doctor data...');
+        const response = await fetch('http://localhost:4000/src/manager/emp', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Doctor data:', data);
+        
+        if (data && data.data && Array.isArray(data.data)) {
+          setEmpName(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching doctor data:', error);
+      }
+    };
+
+    fetchDoctor();
+  }, []);
+
+  const getDoctorName = (emp_id) => {
+    const emp = empName.find((employee) => employee.emp_id === emp_id);
+    return emp ? `${emp.emp_name} ${emp.emp_surname}` : 'ບໍ່ພົບຊື່';
+  };
+
+  const getPatientName = (patient_id) => {
+    const patient = patientName.find((pat) => pat.patient_id === patient_id);
+    return patient
+      ? `${patient.patient_name} ${patient.patient_surname}`
+      : 'ບໍ່ພົບຊື່';
+  };
+
+  const getPatientPhone = (patient_id) => {
+    const patient = patientName.find((pat) => pat.patient_id === patient_id);
+    return patient
+      ? ` ${patient.phone1 || ''}${patient.phone2 ? ' / ' + patient.phone2 : ''}`
+      : 'ບໍ່ພົບເບີໂທ';
+  };
 
   const handleSortById = () => {
     const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
@@ -178,79 +319,7 @@ const FollowPage = () => {
     }
   };
 
-  useEffect(() => {
-    fetchAppointments();
-  }, []);
 
-  useEffect(() => {
-    const fetchPatient = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(
-          'http://localhost:4000/src/manager/patient',
-          {
-            method: 'GET',
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        setPatientName(data.data);
-      } catch (error) {
-        console.error('Error fetching patient data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPatient();
-  }, []);
-
-  useEffect(() => {
-    const fetchDoctor = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('http://localhost:4000/src/manager/emp', {
-          method: 'GET',
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        setEmpName(data.data);
-      } catch (error) {
-        console.error('Error fetching patient data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDoctor();
-  }, []);
-
-  const getDoctorName = (emp_id) => {
-    const emp = empName.find((employee) => employee.emp_id === emp_id);
-    return emp ? `${emp.emp_name} ${emp.emp_surname}` : 'ບໍ່ພົບຊື່';
-  };
-
-  const getPatientName = (patient_id) => {
-    const patient = patientName.find((pat) => pat.patient_id === patient_id);
-    return patient
-      ? `${patient.patient_name} ${patient.patient_surname}`
-      : 'ບໍ່ພົບຊື່';
-  };
-
-  const getPatientPhone = (patient_id) => {
-    const patient = patientName.find((pat) => pat.patient_id === patient_id);
-    return patient
-      ? ` ${patient.phone1 || ''}${patient.phone2 ? ' / ' + patient.phone2 : ''}`
-      : 'ບໍ່ພົບເບີໂທ';
-  };
 
   const openDeleteModal = (id) => () => {
     setSelectedAppointmentId(id);
@@ -272,25 +341,11 @@ const FollowPage = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      setAppointments((prevAppointments) =>
-        prevAppointments.filter(
-          (appointment) => appointment.appoint_id !== selectedAppointmentId,
-        ),
-      );
-      setFilteredAppointments((prevAppointments) =>
-        prevAppointments.filter(
-          (appointment) => appointment.appoint_id !== selectedAppointmentId,
-        ),
-      );
 
-      // Update today's appointments as well
-      setTodayAppointments((prevAppointments) =>
-        prevAppointments.filter(
-          (appointment) => appointment.appoint_id !== selectedAppointmentId,
-        ),
-      );
+      await fetchAppointments();
 
       setShowModal(false);
+      
       dispatch(
         openAlert({
           type: 'success',
@@ -299,7 +354,6 @@ const FollowPage = () => {
         }),
       );
 
-      // 🟢 เพิ่มบรรทัดนี้เพื่อแจ้งให้ Header รีเฟรชข้อมูล
       window.dispatchEvent(new Event('refresh-notifications'));
     } catch (error) {
       dispatch(
@@ -331,8 +385,8 @@ const FollowPage = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      // Refresh the data - จะทำให้ตารางบนอัพเดทและไม่แสดงรายการที่เสร็จแล้ว
-      fetchAppointments();
+
+      await fetchAppointments();
 
       dispatch(
         openAlert({
@@ -342,7 +396,6 @@ const FollowPage = () => {
         }),
       );
 
-      // 🟢 เพิ่มบรรทัดนี้เพื่อแจ้งให้ Header รีเฟรชข้อมูล
       window.dispatchEvent(new Event('refresh-notifications'));
     } catch (error) {
       dispatch(
@@ -382,8 +435,8 @@ const FollowPage = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      // Refresh the data
-      fetchAppointments();
+
+      await fetchAppointments();
       setShowPostponeModal(false);
 
       dispatch(
@@ -425,6 +478,37 @@ const FollowPage = () => {
     setShowEditModal(true);
   };
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <span className="ml-4 text-lg">ກຳລັງໂຫຼດຂໍ້ມູນ...</span>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-center">
+          <svg className="mx-auto h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h3 className="mt-2 text-lg font-medium text-red-600">ເກີດຂໍ້ຜິດພາດ</h3>
+          <p className="mt-1 text-sm text-red-500">{error}</p>
+          <button
+            onClick={fetchAppointments}
+            className="mt-4 px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition-colors"
+          >
+            ລອງອີກຄັ້ງ
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 2xl:gap-7.5 w-full mb-6">
@@ -442,8 +526,8 @@ const FollowPage = () => {
               >
                 <path
                   stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   strokeWidth="1.5"
                   d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z"
                 />
@@ -459,7 +543,7 @@ const FollowPage = () => {
             </div>
           </div>
         </div>
-        {/* Waiting Appointments */}
+
         <div className="rounded-sm border border-stroke bg-white p-4 dark:border-strokedark dark:bg-boxdark">
           <div className="flex items-center">
             <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 text-indigo-600 shadow-inner">
@@ -492,6 +576,7 @@ const FollowPage = () => {
             </div>
           </div>
         </div>
+
         <div className="rounded-sm border border-stroke bg-white p-4 dark:border-strokedark dark:bg-boxdark">
           <div className="flex items-center">
             <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 text-indigo-600 shadow-inner">
@@ -524,11 +609,9 @@ const FollowPage = () => {
           </div>
         </div>
       </div>
+
       <div className="mb-4">
-        <h1 className="text-md md:text-lg lg:text-xl text-form-input mb-2">
-          {' '}
-          ນັດໝາຍມື້ນີ້
-        </h1>
+        <h1 className='text-lg text-form-input mb-2'> ນັດໝາຍມື້ນີ້</h1>
         <ModernTodayAppointments
           todayAppointments={todayAppointments}
           handleCompleteAppointment={handleCompleteAppointment}
@@ -537,21 +620,23 @@ const FollowPage = () => {
           setCurrentTime={setCurrentTime}
         />
       </div>
+
       <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark mb-2 pt-4 ">
         ນັດໝາຍທັງໝົດ
       </h1>
-      <div className="rounded bg-white  border border-stroke  ">
-      <div className="grid grid-cols-[1fr_auto] gap-4 w-full p-4">
-  <Search
-    type="text"
-    name="search"
-    placeholder="ຄົ້ນຫາຂໍ້ມູນ..."
-    className="rounded border border-stroke w-full h-10 px-3 text-sm"
-    onChange={(e) => {
-      const query = e.target.value;
-      setSearchQuery(query);
-    }}
-  />
+      
+      <div className="rounded bg-white border border-stroke">
+        <div className="grid grid-cols-[1fr_auto] gap-4 w-full p-4">
+          <Search
+            type="text"
+            name="search"
+            placeholder="ຄົ້ນຫາຂໍ້ມູນ..."
+            className="rounded border border-stroke w-full h-10 px-3 text-sm"
+            onChange={(e) => {
+              const query = e.target.value;
+              setSearchQuery(query);
+            }}
+          />
 
   <Button
     onClick={() => setShowAddModal(true)}
@@ -562,9 +647,8 @@ const FollowPage = () => {
   </Button>
 </div>
 
-
-        <div className="overflow-x-auto ">
-          <table className="w-full min-w-max table-auto  ">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-max table-auto">
             <thead>
               <tr className="text-left bg-gray border border-stroke">
                 {FollowHeader.map((header, index) => (
@@ -695,11 +779,12 @@ const FollowPage = () => {
                   />
                 </svg>
               </button>
-
+              <SmoothModal onClose={() => setShowAddModal(false)}>
               <CreateFollow
                 setShow={setShowAddModal}
                 getList={fetchAppointments}
               />
+              </SmoothModal>
             </div>
           </div>
         )}
@@ -726,12 +811,14 @@ const FollowPage = () => {
                 </svg>
               </button>
 
+              <SmoothModal onClose={() => setShowEditModal(false)}>
               <EditFollow
                 id={selectedId}
                 onClose={() => setShowEditModal(false)}
                 setShow={setShowEditModal}
                 getList={fetchAppointments}
               />
+              </SmoothModal>
             </div>
           </div>
         )}
