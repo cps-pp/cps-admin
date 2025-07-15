@@ -61,6 +61,28 @@ const BillPopup = ({
   );
   const grandTotal = totalServiceCost + totalMedicineCost;
 
+  // const currentBalance = invoiceData?.balance || 0;
+  // const isDebt = currentBalance > 0;
+
+  // const calculateChange = () => {
+  //   const totalReceived = isMixedPayment
+  //     ? totalMixedAmount
+  //     : parseFloat(receivedAmount || 0);
+
+  //   if (totalReceived > currentBalance) {
+  //     return totalReceived - currentBalance;
+  //   }
+  //   return 0;
+  // };
+
+  // const calculateRemainingBalance = () => {
+  //   const totalReceived = isMixedPayment
+  //     ? totalMixedAmount
+  //     : parseFloat(receivedAmount || 0);
+
+  //   return Math.max(0, currentBalance - totalReceived);
+  // };
+
   const roundCurrency = (amount, currency) => {
     if (currency === 'KIP') {
       return Math.ceil(amount);
@@ -109,6 +131,33 @@ const BillPopup = ({
   const changeAmount = receivedAmount
     ? Math.max(0, parseFloat(receivedAmount) - totalInSelectedCurrency)
     : 0;
+
+
+const currentBalance = invoiceData?.balance !== undefined ? invoiceData.balance : grandTotal;
+const isDebt = currentBalance > 0;
+const hasBalanceData = invoiceData?.balance !== undefined; // เช็คว่ามี balance data หรือไม่
+
+// ฟังก์ชันคำนวณเงินทอน
+const calculateChange = () => {
+  const totalReceived = isMixedPayment
+    ? totalMixedAmount
+    : parseFloat(receivedAmount || 0);
+  
+  if (totalReceived > currentBalance) {
+    return totalReceived - currentBalance;
+  }
+  return 0;
+};
+
+// ฟังก์ชันคำนวณยอดคงเหลือ
+const calculateRemainingBalance = () => {
+  const totalReceived = isMixedPayment
+    ? totalMixedAmount
+    : parseFloat(receivedAmount || 0);
+  
+  return Math.max(0, currentBalance - totalReceived);
+};
+
 
   useEffect(() => {
     const fetchEx = async () => {
@@ -240,16 +289,14 @@ const BillPopup = ({
           body: JSON.stringify({
             invoice_id: invoiceData.invoice_id,
             // paid_amount: parseFloat(receivedAmount),
-             paid_amount: invoiceData?.balance >= receivedAmount
-                            ?  invoiceData?.balance - receivedAmount 
-                            : receivedAmount -
-                              (receivedAmount - invoiceData?.balance),
-                              
+            paid_amount:
+              invoiceData?.balance >= receivedAmount
+                ? invoiceData?.balance - receivedAmount
+                : receivedAmount - (receivedAmount - invoiceData?.balance),
+
             pay_type: paymentType.toUpperCase(),
             ex_id: selectedExType,
             ex_rate: exRateValue,
-          
-                   
           }),
         });
 
@@ -622,7 +669,7 @@ const BillPopup = ({
 
           {showPaymentPopup && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60 print:hidden p-4">
-              <div className="bg-white p-6 rounded max-w-4xl w-full max-h-[95vh] overflow-y-auto ">
+              <div className="bg-white p-6 rounded max-w-4xl w-full max-h-[95vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-4 border-b border-stroke pb-4">
                   <h3 className="text-xl font-semibold text-form-input">
                     ຊຳລະເງິນ
@@ -638,34 +685,55 @@ const BillPopup = ({
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Left Column */}
                   <div className="space-y-4">
-                    {/* Total Amount Display - Show all currencies */}
-                    <div>
+                    {/* Balance Status Display */}
+                    <div className="p-4 bg-slate-50 rounded-lg">
                       <h4 className="text-md font-medium mb-2 text-form-input">
-                        ຍອດທີ່ຕ້ອງຊຳລະ
+                        ສະຖານະບິນ
                       </h4>
                       <div className="space-y-2">
-                        {Object.entries(allCurrencyAmounts).map(
-                          ([currency, amount]) => (
-                            <div
-                              key={currency}
-                              className={`flex justify-between items-center p-2 rounded border ${
-                                currency === 'KIP'
-                                  ? ' bg-gradient-to-r from-blue-50 to-indigo-50 border-stroke text-lg'
-                                  : ' border-stroke'
-                              }`}
-                            >
-                              <span className="font-medium text-gray-700 text-sm">
-                                {currency}:
-                              </span>
-                              <span className="font-bold text-form-strokedark">
-                                {formatCurrency(amount, currency)}
-                              </span>
-                            </div>
-                          ),
-                        )}
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">ຍອດລວມ:</span>
+                          <span className="font-semibold">
+                            {formatCurrency(grandTotal, 'KIP')}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between items-center">
+                          <span className="text-md text-red-600">
+                            ຍອດຄົງເຫຼືອ:
+                          </span>
+                          <span
+                            className={`font-bold text-lg  ${isDebt ? 'text-red-600' : 'text-green-600'}`}
+                          >
+                            {formatCurrency(currentBalance, 'KIP')}
+                          </span>
+                        </div>
+
+                        <div className="space-y-2">
+                          {Object.entries(allCurrencyAmounts).map(
+                            ([currency, amount]) => (
+                              <div
+                                key={currency}
+                                className={`flex justify-between items-center p-2 rounded border ${
+                                  currency === 'KIP'
+                                    ? ' font-bold text-form-strokedar'
+                                    : ' border-stroke'
+                                }`}
+                              >
+                                <span className="font-medium text-gray-700 text-sm">
+                                  {currency}:
+                                </span>
+                                <span className="font-bold text-form-strokedark">
+                                  {formatCurrency(amount, currency)}
+                                </span>
+                              </div>
+                            ),
+                          )}
+                        </div>
                       </div>
                     </div>
 
+                    {/* Payment Type Selection */}
                     <div>
                       <label className="block text-sm font-medium mb-2 text-form-input">
                         ເລືອກປະເພດການຊຳລະ
@@ -732,6 +800,7 @@ const BillPopup = ({
                     </div>
                   </div>
 
+                  {/* Right Column */}
                   <div className="space-y-4">
                     {!isMixedPayment && (
                       <div>
@@ -756,42 +825,85 @@ const BillPopup = ({
                           placeholder="0"
                         />
 
-                        <button
-                          onClick={() => {
-                            const exactAmount =
-                              Math.ceil(grandTotal).toString();
-                            const formattedAmount =
-                              Number(exactAmount).toLocaleString('en-US');
-                            setDisplayAmount(formattedAmount);
-                            setReceivedAmount(exactAmount);
-                          }}
-                          className="w-full mt-3 py-2 px-4 bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white font-medium rounded transition-all duration-200 shadow-md hover:shadow-lg"
-                        >
-                          ຮັບເງິນເຕັມຈຳນວນ (
-                          {formatCurrency(Math.ceil(grandTotal), 'KIP')})
-                        </button>
-                        {console.log(invoiceData?.balance)}
-                        {console.log(receivedAmount)}
-                        {console.log(receivedAmount - invoiceData?.balance)}
+                        {/* Payment Amount Buttons */}
+                        <div className="grid grid-cols-2 gap-2 mt-3">
+                          <button
+                            onClick={() => {
+                              const halfAmount = Math.ceil(
+                                currentBalance / 2,
+                              ).toString();
+                              const formattedAmount =
+                                Number(halfAmount).toLocaleString('en-US');
+                              setDisplayAmount(formattedAmount);
+                              setReceivedAmount(halfAmount);
+                            }}
+                            className="py-2 px-4 bg-slate-500 hover:bg-slate-600 text-white font-medium rounded transition-all duration-200 shadow-md hover:shadow-lg"
+                          >
+                            ຊຳລະ 50% (
+                            {formatCurrency(
+                              Math.ceil(currentBalance / 2),
+                              'KIP',
+                            )}
+                            )
+                          </button>
+                          <button
+                            onClick={() => {
+                              const fullAmount =
+                                Math.ceil(currentBalance).toString();
+                              const formattedAmount =
+                                Number(fullAmount).toLocaleString('en-US');
+                              setDisplayAmount(formattedAmount);
+                              setReceivedAmount(fullAmount);
+                            }}
+                            className="py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded transition-all duration-200 shadow-md hover:shadow-lg"
+                          >
+                            ຊຳລະເຕັມ (
+                            {formatCurrency(Math.ceil(currentBalance), 'KIP')})
+                          </button>
+                        </div>
 
-                        {console.log(
-                          receivedAmount -
-                            (receivedAmount - invoiceData?.balance),
+                        {/* Display Change or Remaining Balance */}
+                        {receivedAmount && (
+                          <div className="mt-4">
+                            {calculateChange() > 0 ? (
+                              <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded border border-green-200">
+                                <div className="text-center">
+                                  <div className="text-sm text-green-600 mb-1">
+                                    ເງິນທອນ
+                                  </div>
+                                  <span className="text-xl font-bold text-green-700">
+                                    {formatCurrency(
+                                      Math.ceil(calculateChange()),
+                                      'KIP',
+                                    )}
+                                  </span>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="p-4 bg-gradient-to-r from-red-50 to-red-50 rounded border border-red-200">
+                                <div className="text-center">
+                                  <div className="text-sm text-red-600 mb-1">
+                                    ຍອດຄົງເຫຼືອ
+                                  </div>
+                                  <span className="text-xl font-bold text-red-700">
+                                    {formatCurrency(
+                                      Math.ceil(calculateRemainingBalance()),
+                                      'KIP',
+                                    )}
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         )}
-                        <p>
-                          {invoiceData?.balance >= receivedAmount
-                            ?  invoiceData?.balance - receivedAmount 
-                            : receivedAmount -
-                              (receivedAmount - invoiceData?.balance)}
-                        </p>
                       </div>
                     )}
 
-                    {/* Mixed Payment Input */}
+                    {/* Mixed Payment Section */}
                     {isMixedPayment && (
                       <div className="p-4 bg-slate-50 rounded border border-stroke">
                         <h4 className="font-medium text-md mb-3">
-                          💳 ການຊຳລະເງິນຫຼາຍຊ່ອງທາງ
+                          * ການຊຳລະເງິນຫຼາຍຊ່ອງທາງ
                         </h4>
 
                         <div className="space-y-3">
@@ -847,25 +959,44 @@ const BillPopup = ({
                             />
                           </div>
                         </div>
-                        <button
-                          onClick={() => {
-                            const exactAmount =
-                              Math.ceil(grandTotal).toString();
-                            const formattedAmount =
-                              Number(exactAmount).toLocaleString('en-US');
-                            setDisplayCashAmount(formattedAmount);
-                            setCashAmount(exactAmount);
-                            setDisplayTransferAmount('0');
-                            setTransferAmount('0');
-                          }}
-                          className="w-full mt-3 py-2 px-4 bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white font-medium rounded transition-all duration-200 shadow-md hover:shadow-lg"
-                        >
-                          💰 ຮັບເງິນເຕັມຈຳນວນ (
-                          {formatCurrency(Math.ceil(grandTotal), 'KIP')})
-                        </button>
+
+                        {/* Mixed Payment Buttons */}
+                        <div className="grid grid-cols-2 gap-2 mt-3">
+                          <button
+                            onClick={() => {
+                              const halfAmount = Math.ceil(
+                                currentBalance / 2,
+                              ).toString();
+                              const formattedAmount =
+                                Number(halfAmount).toLocaleString('en-US');
+                              setDisplayCashAmount(formattedAmount);
+                              setCashAmount(halfAmount);
+                              setDisplayTransferAmount('0');
+                              setTransferAmount('0');
+                            }}
+                            className="py-2 px-4 bg-slate-500 hover:bg-slate-600 text-white font-medium rounded transition-all duration-200 shadow-md hover:shadow-lg"
+                          >
+                            50% ເງິນສົດ
+                          </button>
+                          <button
+                            onClick={() => {
+                              const fullAmount =
+                                Math.ceil(currentBalance).toString();
+                              const formattedAmount =
+                                Number(fullAmount).toLocaleString('en-US');
+                              setDisplayCashAmount(formattedAmount);
+                              setCashAmount(fullAmount);
+                              setDisplayTransferAmount('0');
+                              setTransferAmount('0');
+                            }}
+                            className="py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded transition-all duration-200 shadow-md hover:shadow-lg"
+                          >
+                            ຊຳລະເຕັມ
+                          </button>
+                        </div>
 
                         <div className="mt-3 p-3 bg-white rounded border border-stroke">
-                          <div className="flex justify-between items-center">
+                          <div className="flex justify-between items-center mb-2">
                             <span className="text-sm text-gray-600">
                               ລວມທີ່ຮັບ:
                             </span>
@@ -876,84 +1007,53 @@ const BillPopup = ({
                               )}
                             </span>
                           </div>
-                        </div>
-                      </div>
-                    )}
 
-                    {isAmountSufficient && (
-                      <div>
-                        <h4 className="text-sm font-medium mb-2 text-form-input">
-                          ເງິນທອນ
-                        </h4>
-                        <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded border border-green-200">
-                          <div className="text-center">
-                            <span className="text-xl font-bold text-green-700">
-                              {/* {(() => {
-                                const totalReceived = isMixedPayment
-                                  ? totalMixedAmount
-                                  : parseFloat(receivedAmount || 0);
-                                const changeAmount = totalReceived - grandTotal; // Always calculate change in KIP
-                                return formatCurrency(
-                                  Math.max(0, Math.ceil(changeAmount)),
-                                  'KIP',
-                                );
-                              })()} */}
-                             {receivedAmount > invoiceData?.balance
-                            ?  1   
-                            : 2} 
-                            
-                              
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Warning for insufficient amount */}
-                    {!isAmountSufficient &&
-                    
-                      (isMixedPayment
-                        ? cashAmount || transferAmount
-                        : receivedAmount) && (
-                        <div>
-                          <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded border border-red-200">
-                            <div className="flex items-center gap-3 text-red-700">
-                              <span className="text-xl">⚠️</span>
-                              <div>
-                                <div className="font-semibold">
-                                  ເງິນຍັງບໍ່ຄົບຈຳນວນ!
-                                </div>
-                                <div className="text-sm mt-1">
-                                  ຂາດອີກ:{' '}
-                                  {(() => {
-                                    const totalReceived = isMixedPayment
-                                      ? totalMixedAmount
-                                      : parseFloat(receivedAmount || 0);
-                                    const shortage = grandTotal - totalReceived; // Calculate shortage in KIP
-                                    return formatCurrency(
-                                      Math.ceil(shortage),
+                          {/* Show change or remaining balance for mixed payment */}
+                          {totalMixedAmount > 0 && (
+                            <div className="flex justify-between items-center">
+                              {totalMixedAmount > currentBalance ? (
+                                <>
+                                  <span className="text-sm text-green-600">
+                                    ເງິນທອນ:
+                                  </span>
+                                  <span className="font-semibold text-green-600">
+                                    {formatCurrency(
+                                      Math.ceil(
+                                        totalMixedAmount - currentBalance,
+                                      ),
                                       'KIP',
-                                    );
-                                  })()}
-                                </div>
-                              </div>
+                                    )}
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="text-sm text-red-600">
+                                    ຍອດຄົງເຫຼືອ:
+                                  </span>
+                                  <span className="font-semibold text-red-600">
+                                    {formatCurrency(
+                                      Math.ceil(
+                                        currentBalance - totalMixedAmount,
+                                      ),
+                                      'KIP',
+                                    )}
+                                  </span>
+                                </>
+                              )}
                             </div>
-                          </div>
+                          )}
                         </div>
-                      )}
+                      </div>
+                    )}
                   </div>
                 </div>
+
+                {/* Confirm Button */}
                 <div className="mt-6 pt-4 border-t border-stroke">
                   <button
                     onClick={handlePaymentConfirm}
-                    // disabled={isProcessing || !isAmountSufficient}
-                    className={`w-full py-3 rounded text-white font-semibold text-lg transition-all bg-green-600 hover:bg-green-700 shadow-lg hover:shadow-xl `}
+                    className="w-full py-3 rounded text-white font-semibold text-lg transition-all bg-green-600 hover:bg-green-700 shadow-lg hover:shadow-xl"
                   >
-                    {/* {isProcessing
-                      ? 'ກຳລັງດຳເນີນການ....'
-                      : !isAmountSufficient
-                        ? ' ເງິນບໍ່ຄົບຈຳນວນ'
-                        : ' ຢືນຢັນການຊຳລະ'} */}
                     ຢືນຢັນການຊຳລະ
                   </button>
                 </div>

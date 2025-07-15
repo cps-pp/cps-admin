@@ -6,7 +6,7 @@ import { openAlert } from '@/redux/reducer/alert';
 import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { Inheader } from './invocieheader';
 import Search from '@/components/Forms/Search';
-import { Plus, CreditCard } from 'lucide-react';
+import { Plus, CreditCard, RotateCcw } from 'lucide-react';
 import ConfirmModal from '@/components/Modal';
 import BillPopup from '../Service/Treatment/BillPopup';
 import { XCircle, CheckCircle } from 'lucide-react';
@@ -26,6 +26,8 @@ const InvoicePage = () => {
   const [billData, setBillData] = useState(null);
   const [inspectionDetails, setInspectionDetails] = useState(null);
   const [isRefundMode, setIsRefundMode] = useState(false);
+  const [isReloading, setIsReloading] = useState(false);
+
   // const fetchInvoices = async () => {
   //   try {
   //     setLoading(true);
@@ -172,9 +174,7 @@ const InvoicePage = () => {
   // };
   const fetchInspectionDetails = async (inspectionId) => {
     try {
-      const response = await fetch(
-        `${URLBaseLocal}/src/report/inspection`,
-      );
+      const response = await fetch(`${URLBaseLocal}/src/report/inspection`);
       const data = await response.json();
 
       if (response.ok) {
@@ -203,9 +203,13 @@ const InvoicePage = () => {
   };
 
   const filteredInvoices = useMemo(() => {
-    return invoices.filter((invoice) =>
-      invoice.invoice_id?.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
+    return invoices.filter((invoice) => {
+      const search = searchQuery.toLowerCase();
+      return (
+        invoice.invoice_id?.toLowerCase().includes(search) ||
+        invoice.in_id?.toLowerCase().includes(search)
+      );
+    });
   }, [invoices, searchQuery]);
 
   const paginatedInvoices = filteredInvoices.slice(
@@ -237,6 +241,14 @@ const InvoicePage = () => {
         };
     }
   };
+  const reloadData = async () => {
+    setIsReloading(true);
+    try {
+      await fetchInvoices();
+    } finally {
+      setIsReloading(false);
+    }
+  };
 
   return (
     <>
@@ -246,6 +258,22 @@ const InvoicePage = () => {
           <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
             ຈັດການໃບບິນທັງໝົດ
           </h1>
+              <button
+            onClick={reloadData}
+            disabled={isReloading}
+            className={`
+              inline-flex items-center gap-2 px-6 py-2 text-md font-medium rounded 
+              border border-Third3 bg-Third3/10 text-secondary2 
+              hover:bg-blue-Third3/20 disabled:opacity-50 
+              transition-all duration-300 ease-in-out
+              ${isReloading ? 'bg-Third3 cursor-not-allowed' : 'hover:scale-105'}
+            `}
+          >
+            <RotateCcw
+              className={`w-4 h-4 ${isReloading ? 'animate-spin' : ''}`}
+            />
+            <span>{isReloading ? 'ກຳລັງໂຫຼດ...' : 'ໂຫຼດໃໝ່'}</span>
+          </button>
         </div>
 
         {/* Search */}
@@ -253,10 +281,12 @@ const InvoicePage = () => {
           <Search
             type="text"
             name="search"
-            placeholder="ຄົ້ນຫາລະຫັດໃບບິນ..."
+            placeholder="ຄົ້ນຫາລະຫັດໃບບິນ ຫຼື ລະຫັດໃບບິນປິ່ນປົວ..."
             className="rounded border border-stroke dark:border-strokedark"
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+
+      
         </div>
 
         {/* Table */}
@@ -298,10 +328,11 @@ const InvoicePage = () => {
 
                       <td className="px-4 py-2 text-left">
                         <span
-                          className={`inline-block rounded-full px-3 my-2  py-1 text-center text-sm font-medium ${invoice.status === 'UNPAID'
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-red-100 text-red-500'
-                            }`}
+                          className={`inline-block rounded-full px-3 my-2  py-1 text-center text-sm font-medium ${
+                            invoice.status === 'UNPAID'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-red-100 text-red-500'
+                          }`}
                         >
                           {statusInfo.text}
                         </span>
@@ -311,7 +342,6 @@ const InvoicePage = () => {
                       <td className="px-4 py-2 ">
                         {invoice?.balance?.toLocaleString()} ກີບ
                       </td>
-
 
                       <td className="px-4 py-2 ">
                         <div className="flex flex-wrap gap-2">

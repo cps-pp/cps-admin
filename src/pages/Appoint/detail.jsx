@@ -92,9 +92,7 @@ const FollowTreatmentPage = ({ onBack }) => {
   const fetchPatientById = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `${URLBaseLocal}/src/report/patient/${id}`,
-      );
+      const response = await fetch(`${URLBaseLocal}/src/report/patient/${id}`);
       if (!response.ok)
         throw new Error(`HTTP error! Status: ${response.status}`);
       const data = await response.json();
@@ -153,8 +151,6 @@ const FollowTreatmentPage = ({ onBack }) => {
         }));
         // console.log(inspectionData)
         await fetchPrescriptionDetails(inspectionId);
-
-
       } else {
         console.error('API returned error:', data);
       }
@@ -205,7 +201,6 @@ const FollowTreatmentPage = ({ onBack }) => {
   };
 
   const fetchStatements = async (inspectionId) => {
-
     try {
       // console.log('Fetching prescription details for ID:', inspectionId);
       const response = await fetch(
@@ -218,9 +213,8 @@ const FollowTreatmentPage = ({ onBack }) => {
 
       const data = await response.json();
 
-
       if (data.resultCode === '200') {
-        setStatementPayment(data.data)
+        setStatementPayment(data.data);
       } else {
         // console.error('API returned error:', data);
         setStatementPayment([]);
@@ -256,7 +250,7 @@ const FollowTreatmentPage = ({ onBack }) => {
     if (!isExpanded && !detailedInspections[inspectionId]) {
       await fetchInspectionDetails(inspectionId);
     }
-    await fetchStatements(inspectionId)
+    await fetchStatements(inspectionId);
 
     setExpandedInspections((prev) => ({
       ...prev,
@@ -308,8 +302,8 @@ const FollowTreatmentPage = ({ onBack }) => {
     if (!latestDetailedData?.services) return [];
 
     // กรองเฉพาะ services ที่มีรหัสขึ้นต้นด้วย "SPK"
-    return latestDetailedData.services.filter(service =>
-      service.ser_id && service.ser_id.startsWith('SPK')
+    return latestDetailedData.services.filter(
+      (service) => service.ser_id && service.ser_id.startsWith('SPK'),
     );
   };
 
@@ -318,9 +312,8 @@ const FollowTreatmentPage = ({ onBack }) => {
     const spkServices = getLatestSPKServices();
     if (spkServices.length === 0) return '-';
 
-    return spkServices.map(service => service.ser_name).join(', ');
+    return spkServices.map((service) => service.ser_name).join(', ');
   };
-
 
   const renderInspectionCard = (inspection) => {
     const isExpanded = expandedInspections[inspection.in_id];
@@ -343,13 +336,13 @@ const FollowTreatmentPage = ({ onBack }) => {
                 <h3 className="font-semibold text-secondary2 mb-1">
                   ເລກທີປິ່ນປົວ: {inspection.in_id}
                   <Tag
-                    className='ml-2 font-normal rounded-full'
+                    className="ml-2 font-normal rounded-full"
                     style={{ fontFamily: 'Noto Sans Lao' }}
                     color={`${inspection?.invoice?.status_paid === 'SUCCESS' ? 'green' : 'blue'}`}
                   >
-                    {
-                      inspection?.invoice?.status_paid === 'SUCCESS' ? 'ສໍາເລັດ' : 'ບໍ່ສໍາເລັດ'
-                    }
+                    {inspection?.invoice?.status_paid === 'SUCCESS'
+                      ? 'ສໍາເລັດ'
+                      : 'ບໍ່ສໍາເລັດ'}
                   </Tag>
                 </h3>
                 <p className="text-sm text-gray-500">
@@ -397,7 +390,6 @@ const FollowTreatmentPage = ({ onBack }) => {
           </div>
         </div>
 
-        {/* Expanded Details */}
         {isExpanded && (
           <div className="">
             {isLoading ? (
@@ -516,10 +508,11 @@ const FollowTreatmentPage = ({ onBack }) => {
                               </td>
                               <td className="px-4 py-2 border border-stroke">
                                 <span
-                                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${prescription.type_name === 'ຢາ'
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-purple-100 text-secondary2'
-                                    }`}
+                                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                    prescription.type_name === 'ຢາ'
+                                      ? 'bg-green-100 text-green-800'
+                                      : 'bg-purple-100 text-secondary2'
+                                  }`}
                                 >
                                   {prescription.type_name}
                                 </span>
@@ -600,18 +593,40 @@ const FollowTreatmentPage = ({ onBack }) => {
                                 {payment.pay_id}
                               </td>
                               <td className="px-4 py-2 border border-stroke">
-                                {moment(payment?.pay_date).format('DD/MM/YYYY HH:mm')}
+                                {moment(payment?.pay_date).format(
+                                  'DD/MM/YYYY HH:mm',
+                                )}
                               </td>
                               <td className="px-4 py-2 border border-stroke">
-                                {payment.pay_type}
+                                {payment.pay_type?.toUpperCase() === 'CASH' && (
+                                  <span className="inline-block bg-secondary2/10 text-secondary text-sm  px-3 py-1 rounded-full">
+                                    CASH
+                                  </span>
+                                )}
+                                {payment.pay_type?.toUpperCase() === 'TRANSFER' && (
+                                  <span className="inline-block bg-blue-100 text-blue-800 text-sm  px-3 py-1 rounded-full">
+                                    TRANSFER
+                                  </span>
+                                )}
+                             
+                                {!['CASH', 'TRANSFER'].includes(
+                                  payment.pay_type?.toUpperCase(),
+                                ) && (
+                                  <span className="inline-block bg-gray-100 text-gray-700 text-sm  px-3 py-1 rounded-full">
+                                    {payment.pay_type}
+                                  </span>
+                                )}
+
                               </td>
+
                               <td className="px-4 py-2 border border-stroke text-gray-900 text-right">
                                 {payment?.ex_rate ?? 0}
                               </td>
                               <td className="px-4 py-2 border border-stroke text-right">
-                                {Number(payment?.paid_amount || 0).toLocaleString()}
+                                {Number(
+                                  payment?.paid_amount || 0,
+                                ).toLocaleString()}
                               </td>
-
                             </tr>
                           ))}
                         </tbody>
@@ -624,18 +639,22 @@ const FollowTreatmentPage = ({ onBack }) => {
                               ຍອດທັງໝົດ (ກີບ)
                             </td>
                             <td className="px-4 py-2 border border-stroke text-right">
-                              {statementPayment?.total_paid?.toLocaleString() ?? 0}
+                              {statementPayment?.total_paid?.toLocaleString() ??
+                                0}
                             </td>
                           </tr>
-                          <tr className="font-semibold text-secondary2">
+                          <tr className="font-semibold text-red-500">
                             <td
                               className="px-4 py-2 border border-stroke text-right"
                               colSpan={4}
                             >
                               ຍອດຄ້າງຈ່າຍ (ກີບ)
                             </td>
-                            <td className="px-4 py-2 border border-stroke text-right">
-                              {((Number(statementPayment?.total) - Number(statementPayment?.total_paid)) || 0).toLocaleString()}
+                            <td className="px-4 py-2 border text-red-500 border-stroke text-right">
+                              {(
+                                Number(statementPayment?.total) -
+                                  Number(statementPayment?.total_paid) || 0
+                              ).toLocaleString()}
                             </td>
                           </tr>
                         </tfoot>
@@ -643,7 +662,6 @@ const FollowTreatmentPage = ({ onBack }) => {
                     </div>
                   </div>
                 )}
-
               </div>
             )}
           </div>
@@ -704,18 +722,18 @@ const FollowTreatmentPage = ({ onBack }) => {
             </div>
 
             <div className="flex items-center gap-2">
-
-
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`inline-flex items-center gap-2 px-3 py-2 text-md font-semibold rounded border transition-all duration-200 shadow-sm ${showFilters
-                  ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
-                  : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
-                  }`}
+                className={`inline-flex items-center gap-2 px-3 py-2 text-md font-semibold rounded border transition-all duration-200 shadow-sm ${
+                  showFilters
+                    ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                    : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                }`}
               >
                 <FilterIcon
-                  className={`w-4 h-4 transition-transform duration-200 ${showFilters ? 'rotate-90' : ''
-                    }`}
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    showFilters ? 'rotate-90' : ''
+                  }`}
                 />
                 {showFilters ? 'ປິດ' : 'ເປີດການຄົ້ນຫາ'}
               </button>
@@ -771,9 +789,7 @@ const FollowTreatmentPage = ({ onBack }) => {
               </div>
             </div>
           )}
-
         </div>
-
 
         <div className="grid grid-cols-1 lg:grid-cols-[350px,1fr] gap-6 ">
           <div className="w-full max-w-sm space-y-4">
@@ -812,7 +828,6 @@ const FollowTreatmentPage = ({ onBack }) => {
                       {formatDate(patient.dob)}
                     </span>
                   </div>
-
                 </div>
               </div>
 
@@ -861,7 +876,6 @@ const FollowTreatmentPage = ({ onBack }) => {
                 </div>
               </div>
             </div>
-
 
             <div className="bg-white rounded shadow-sm border border-slate-200 p-6">
               <div className="flex items-center justify-between">
