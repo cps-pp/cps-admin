@@ -5,15 +5,21 @@ import {
 
   Wrench,
   Eye,
+  Printer,
 } from 'lucide-react';
 import Search from '@/components/Forms/Search';
 import Alerts from '@/components/Alerts';
 import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import InspectionDetailView from './InView';
+import Button from '@/components/Button';
 import { Empty } from 'antd';
 import { URLBaseLocal } from '../../../lib/MyURLAPI';
+import { useAppDispatch } from '@/redux/hook';
+
+
 
 const ReportPer = () => {
+  const dispatch = useAppDispatch();
   const [inspectionId, setInspectionId] = useState('');
   const [allData, setAllData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -55,7 +61,7 @@ const ReportPer = () => {
         );
       });
 
-      console.log('Exxxxxxxxxxxxtracted medicines:', allMedicines);
+
 
       setAllData(allMedicines);
       setFilteredData(allMedicines);
@@ -142,10 +148,354 @@ const ReportPer = () => {
     setShowDetailView(true);
   };
 
-  const paginatedData = groupedData.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage,
+  // ฟังก์ชันสำหรับพิมพ์รายงานการจ่าย พร้อมรายละเอียด
+const handlePrintReport = async () => {
+  const reportData = groupedData.filter(item => 
+    item.in_id?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // 🔄 โหลดข้อมูลรายละเอียดการจ่ายทั้งหมด
+  const detailMap = {}; // key: in_id => value: array of detail rows
+  try {
+    for (const inspection of reportData) {
+      // ดึงข้อมูลรายละเอียดของแต่ละการตวจ
+      const inspectionDetail = inspectionInfo.find(item => item.in_id === inspection.in_id);
+      detailMap[inspection.in_id] = inspectionDetail?.medicines || [];
+    }
+  } catch (error) {
+    console.error('โหลดข้อมูลรายละเอียดไม่สำเร็จ:', error);
+    dispatch(
+      openAlert({
+        type: 'error',
+        title: 'ຜິດພາດ',
+        message: 'ເກີດຂໍ້ຜິດພາດໃນການດຶງຂໍ້ມູນລາຍລະອຽດ',
+      })
+    );
+    return;
+  }
+
+  // 🔵 เริ่มสร้าง HTML รายงาน
+  const printContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>ລາຍງານການຈ່າຍຢາ ແລະ ອຸປະກອນ</title>
+      <style>
+        @page {
+          size: A4;
+          margin: 20mm;
+        }
+
+        body {
+          font-family: 'phetsarath ot', serif;
+          font-size: 14px;
+          line-height: 1.6;
+          color: #333;
+          margin: 0;
+          padding: 0;
+        }
+
+        .header {
+          text-align: center;
+          margin-bottom: 30px;
+          border-bottom: 2px solid #333;
+          padding-bottom: 20px;
+        }
+
+        .header h1 {
+          font-size: 24px;
+          font-weight: bold;
+          margin: 0;
+          color: #2c5aa0;
+        }
+
+        .report-info {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 30px;
+          background-color: #f8f9fa;
+          padding: 15px;
+          border-radius: 5px;
+        }
+
+        .report-info div {
+          flex: 1;
+        }
+
+        .report-info strong {
+          color: #2c5aa0;
+        }
+
+        .summary-cards {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 20px;
+          margin-bottom: 30px;
+        }
+
+        .summary-card {
+          background-color: #f8f9fa;
+          padding: 15px;
+          border-radius: 8px;
+          border: 1px solid #ddd;
+          text-align: center;
+        }
+
+        .summary-card h3 {
+          margin: 0 0 10px 0;
+          color: #2c5aa0;
+          font-size: 16px;
+        }
+
+        .summary-card p {
+          margin: 0;
+          font-size: 24px;
+          font-weight: bold;
+          color: #333;
+        }
+
+        .section {
+          margin-bottom: 40px;
+          page-break-inside: avoid;
+        }
+
+        .section-title {
+          font-weight: bold;
+          color: #2c5aa0;
+          font-size: 16px;
+          margin-bottom: 10px;
+        }
+
+        .section-id {
+          color: #333;
+          font-weight: normal;
+          font-size: 14px;
+        }
+
+        .inline-info {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 20px;
+          margin-bottom: 15px;
+          background-color: #f8f9fa;
+          padding: 10px;
+          border-radius: 5px;
+        }
+
+        .inline-info p {
+          margin: 0;
+          font-size: 13px;
+          color: #333;
+        }
+
+        .inline-info strong {
+          color: #2c5aa0;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 20px;
+        }
+
+        th, td {
+          border: 1px solid #ddd;
+          padding: 12px;
+          text-align: left;
+        }
+
+        th {
+          background-color: #f8f9fa;
+          font-weight: bold;
+          color: #2c5aa0;
+        }
+
+        .sub-table {
+          margin-left: 20px;
+          width: calc(100% - 40px);
+          border: 1px solid #ddd;
+        }
+
+        .sub-table th,
+        .sub-table td {
+          border: 1px solid #eee;
+          font-size: 12px;
+          padding: 8px;
+        }
+
+        .text-center {
+          text-align: center;
+        }
+
+        .text-right {
+          text-align: right;
+        }
+
+        .badge {
+          padding: 4px 8px;
+          border-radius: 12px;
+          font-size: 12px;
+          font-weight: bold;
+          display: inline-block;
+        }
+
+        .badge-medicine {
+          background-color: #dbeafe;
+          color: #1e40af;
+        }
+
+        .badge-equipment {
+          background-color: #dcfce7;
+          color: #166534;
+        }
+
+        .footer {
+          margin-top: 30px;
+          text-align: center;
+          font-size: 12px;
+          color: #6c757d;
+        }
+
+        @media print {
+          body {
+            font-size: 12px;
+          }
+
+          .header h1 {
+            font-size: 20px;
+          }
+
+          .inline-info p {
+            font-size: 12px;
+          }
+
+          th, td {
+            padding: 8px;
+          }
+
+          .section-title {
+            font-size: 14px;
+          }
+
+          .summary-cards {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>ລາຍງານການຈ່າຍຢາ ແລະ ອຸປະກອນ</h1>
+        <p>Medicine and Equipment Distribution Report</p>
+      </div>
+      
+      <div class="report-info">
+        <div>
+          <p><strong>ວັນທີ່ອອກລາຍງານ:</strong> ${new Date().toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          })}</p>
+        </div>
+        <div>
+          <p><strong>ຈຳນວນການຕວດທັງໝົດ:</strong> ${reportData.length} ຄັ້ງ</p>
+        </div>
+       
+      </div>
+
+
+      ${reportData.map((item, index) => {
+        const details = detailMap[item.in_id] || [];
+        const medicines = details.filter(d => d.type_name === 'ຢາ');
+        const equipments = details.filter(d => d.type_name === 'ອຸປະກອນ');
+        
+        return `
+        <div class="section">
+          <p class="section-title">ການຕວດລຳດັບ ${index + 1} <span class="section-id">(ລະຫັດ: ${item.in_id})</span></p>
+          <div class="inline-info">
+            <p><strong>ວັນທີ່ປຶ່ນປົວ:</strong> ${new Date(item.date).toLocaleString('en-GB', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+              
+                })}</p>
+            <p><strong>ຊື່ຄົນເຈັບ:</strong> ${item.patient_name} ລາຍການ</p>
+            <p><strong>ລວມທັງໝົດ:</strong> ${item.totalValue != null ? item.totalValue.toLocaleString('en-GB') + ' ກີບ' : '-'}</p>
+          </div>
+
+          ${details.length > 0 ? `
+          <table class="sub-table">
+            <thead>
+              <tr>
+                <th class="text-center" style="width: 60px;">ລຳດັບ</th>
+                <th>ລະຫັດ</th>
+                <th>ຊື່</th>
+                <th class="text-center">ປະເພດ</th>
+                <th class="text-center">ຈຳນວນ</th>
+                <th class="text-center">ຫົວໜ່ວຍ</th>
+                <th class="text-center">ລາຄາຕໍ່ຫນ່ວຍ</th>
+                <th class="text-right">ລວມ</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${details.map((d, i) => `
+                <tr>
+                  <td class="text-center">${i + 1}</td>
+                  <td>${d.med_id || '-'}</td>
+                  <td>${d.med_name || '-'}</td>
+                  <td class="text-center">
+                    <span class="badge ${d.type_name === 'ຢາ' ? 'badge-medicine' : 'badge-equipment'}">
+                      ${d.type_name}
+                    </span>
+                  </td>
+                  <td class="text-center">${d.qty || '-'}</td>
+                  <td class="text-center">${d.unit || '-'}</td>
+                  <td class="text-center">${d.price || '-'}</td>
+                  <td class="text-right">${d.total != null ? d.total.toLocaleString('en-GB') + ' ກີບ' : '-'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          ` : '<p style="text-align: center; color: #666; font-style: italic;">ບໍ່ມີລາຍລະອຽດ</p>'}
+        </div>
+        `;
+      }).join('')}
+
+    </body>
+    </html>
+  `;
+
+  // ✅ เปิดหน้าต่างสำหรับพิมพ์
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(printContent);
+  printWindow.document.close();
+
+  printWindow.onload = () => {
+    printWindow.focus();
+    
+    // ✅ ปิด popup หลังจากผู้ใช้ "พิมพ์หรือยกเลิก" dialog print
+    printWindow.onafterprint = () => {
+      printWindow.close();
+    };
+
+    // เรียกหน้าต่างพิมพ์
+    printWindow.print();
+
+    // ✅ fallback: ปิดหลัง 5 วินาที ถ้า onafterprint ไม่ทำงาน
+    setTimeout(() => {
+      if (!printWindow.closed) {
+        printWindow.close();
+      }
+    }, 5000);
+  };
+};
+
+  const paginatedData = groupedData
+    .filter(item => 
+      item.in_id?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   const getTableHeaders = () => [
     'ລະຫັດປິ່ນປົວ',
@@ -180,10 +530,10 @@ const ReportPer = () => {
       <td className="px-4 py-3 ">
         <button
           onClick={() => handleViewDetail(item.in_id)}
-          className="inline-flex items-center px-3 py-1 text-md font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 hover:text-blue-700 transition-colors"
+          className="inline-flex items-center px-3 py-1 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 hover:text-blue-700 transition-colors"
         >
           <Eye className="w-4 h-4 mr-1" />
-         ເບີ່ງລາຍລະອຽດ
+         ເບີ່ງ
         </button>
       </td>
     </tr>
@@ -247,6 +597,16 @@ const ReportPer = () => {
            <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark ">
             ລາຍງານການຈ່າຍຢາ ແລະ ອຸປະກອນ
           </h1>
+          
+          <div className="ml-auto">
+            <Button
+              onClick={handlePrintReport}
+              className="bg-secondary2 hover:bg-secondary3"
+            >
+              <Printer className="w-4 h-4" />
+              ພິມລາຍງານ
+            </Button>
+          </div>
         </div>
 
         <div className="flex gap-4 items-end p-4">
@@ -255,12 +615,11 @@ const ReportPer = () => {
             name="search"
             placeholder="ຄົ້ນຫາລະຫັດການຕວດ..."
             className="rounded border border-stroke dark:border-strokedark"
+            value={searchQuery}
             onChange={(e) => {
               const query = e.target.value;
               setSearchQuery(query);
-              const filtered = groupedData.filter(item => 
-                item.in_id?.toLowerCase().includes(query.toLowerCase())
-              );
+
               setPage(0);
             }}
           />
@@ -327,9 +686,13 @@ const ReportPer = () => {
         />
       )}
     </div>
-      {groupedData.length > 0 && (
+      {groupedData.filter(item => 
+        item.in_id?.toLowerCase().includes(searchQuery.toLowerCase())
+      ).length > 0 && (
           <TablePaginationDemo
-            count={groupedData.length}
+            count={groupedData.filter(item => 
+              item.in_id?.toLowerCase().includes(searchQuery.toLowerCase())
+            ).length}
             page={page}
             onPageChange={handlePageChange}
             rowsPerPage={rowsPerPage}

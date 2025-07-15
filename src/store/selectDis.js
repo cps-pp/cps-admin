@@ -4,7 +4,6 @@ import useStoreServices from './selectServices';
 const useStoreDisease = create((set) => ({
   dis: [],
   disUpdate: [],
-
   addDisease: (data) => {
     set((state) => ({
       dis: [...state.dis, ...data.map(item => item.disease_name)]
@@ -43,7 +42,7 @@ const useStoreDisease = create((set) => ({
           : med
       ),
     })),
-
+ clearDisease: () => set({ dis: [], disUpdate: [] }),
 
 }))
 

@@ -4,6 +4,7 @@ import Button from '@/components/Button';
 import Search from '@/components/Forms/Search';
 import { imHeaders } from './column/im';
 import { useAppDispatch } from '@/redux/hook';
+import { Printer } from 'lucide-react';
 
 import Alerts from '@/components/Alerts';
 import ViewImport from './view';
@@ -128,17 +129,12 @@ const ReportImport = () => {
     fetchEmployee();
   }, []);
 
-  // ฟังก์ชันแปลง emp_id เป็นชื่อพนักงาน
-  const getEmployeeName = (emp_id) => {
-    const emp = empName.find((employee) => employee.emp_id === emp_id);
-    return emp ? (
-      <>
-        {emp.emp_name} {emp.emp_surname}
-      </>
-    ) : (
-      <span className="text-purple-600">-</span>
-    );
-  };
+  // ✅ ฟังก์ชันแปลง emp_id เป็นชื่อพนักงาน (แบบ string)
+const getEmployeeName = (emp_id) => {
+  const emp = empName.find((employee) => employee.emp_id === emp_id);
+  return emp ? `${emp.emp_name} ${emp.emp_surname}` : '-';
+};
+
 
   // ✅ Handle tab change - กรองข้อมูลตาม tab
   const handleTabChange = (tab) => {
@@ -238,6 +234,272 @@ const ReportImport = () => {
     setSelectedId(id);
     setShowViewModal(true);
   };
+
+// ฟังก์ชันสำหรับพิมพ์รายงานการนำเข้า พร้อมลายละเอียดเชื่อมต่อ
+const handlePrintReport = async () => {
+  const reportData = filterIm; // ใช้ข้อมูลที่กรองแล้ว
+
+  // 🔄 โหลดข้อมูลรายละเอียดการนำเข้าทั้งหมด
+  const detailMap = {}; // key: im_id => value: array of detail rows
+  try {
+    for (const im of reportData) {
+      const res = await fetch(`http://localhost:4000/src/report/import-detail/${im.im_id}`);
+      const json = await res.json();
+      detailMap[im.im_id] = json.data || [];
+    }
+  } catch (error) {
+    console.error('โหลดข้อมูลลายละเอียดไม่สำเร็จ:', error);
+    alert('ເກີດຂໍ້ຜິດພາດໃນການດຶງຂໍ້ມູນລາຍລະອຽດ');
+    return;
+  }
+
+  // 🔵 เริ่มสร้าง HTML รายงาน
+  const printContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>ລາຍງານການນຳເຂົ້າ</title>
+      <style>
+        @page {
+          size: A4;
+          margin: 20mm;
+        }
+
+        body {
+          font-family: 'phetsarath ot', serif;
+          font-size: 14px;
+          line-height: 1.6;
+          color: #333;
+          margin: 0;
+          padding: 0;
+        }
+
+        .header {
+          text-align: center;
+          margin-bottom: 30px;
+          border-bottom: 2px solid #333;
+          padding-bottom: 20px;
+        }
+
+        .header h1 {
+          font-size: 24px;
+          font-weight: bold;
+          margin: 0;
+          color: #2c5aa0;
+        }
+
+        .report-info {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 30px;
+          background-color: #f8f9fa;
+          padding: 15px;
+          border-radius: 5px;
+        }
+
+        .report-info div {
+          flex: 1;
+        }
+
+        .report-info strong {
+          color: #2c5aa0;
+        }
+
+        .section {
+          margin-bottom: 40px;
+        }
+
+        .section-title {
+          font-weight: bold;
+          color: #2c5aa0;
+          font-size: 16px;
+          margin-bottom: 10px;
+        }
+
+        .section-id {
+          color: #333;
+          font-weight: normal;
+          font-size: 14px;
+        }
+
+        .inline-info {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 20px;
+          margin-bottom: 15px;
+          background-color: #f8f9fa;
+          padding: 10px;
+          border-radius: 5px;
+        }
+
+        .inline-info p {
+          margin: 0;
+          font-size: 13px;
+          color: #333;
+        }
+
+        .inline-info strong {
+          color: #2c5aa0;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 20px;
+        }
+
+        th, td {
+          border: 1px solid #ddd;
+          padding: 12px;
+          text-align: left;
+        }
+
+        th {
+          background-color: #f8f9fa;
+          font-weight: bold;
+          color: #2c5aa0;
+        }
+
+        .sub-table {
+          margin-left: 20px;
+          width: calc(100% - 40px);
+          border: 1px solid #ddd;
+        }
+
+        .sub-table th,
+        .sub-table td {
+          border: 1px solid #eee;
+          font-size: 12px;
+          padding: 8px;
+        }
+
+        .text-center {
+          text-align: center;
+        }
+
+        .footer {
+          margin-top: 30px;
+          text-align: center;
+          font-size: 12px;
+          color: #6c757d;
+        }
+
+        @media print {
+          body {
+            font-size: 12px;
+          }
+
+          .header h1 {
+            font-size: 20px;
+          }
+
+          .inline-info p {
+            font-size: 12px;
+          }
+
+          th, td {
+            padding: 8px;
+          }
+
+          .section-title {
+            font-size: 14px;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>ລາຍງານການນຳເຂົ້າ</h1>
+        <p>Import Report</p>
+      </div>
+      
+      <div class="report-info">
+        <div>
+          <p><strong>ວັນທີ່ອອກລາຍງານ:</strong> ${new Date().toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          })}</p>
+        </div>
+        <div>
+          <p><strong>ຈຳນວນການນຳເຂົ້າທັງໝົດ:</strong> ${reportData.length} ລາຍການ</p>
+        </div>
+        <div>
+          ${monthFilter ? `<p><strong>ເດືອນ:</strong> ${monthFilter}</p>` : ''}
+        </div>
+      </div>
+
+      ${reportData.map((item, index) => {
+        const details = detailMap[item.im_id] || [];
+        return `
+        <div class="section">
+          <p class="section-title">ນຳເຂົ້າລຳດັບ ${index + 1} <span class="section-id">(ລະຫັດ: ${item.im_id})</span></p>
+          <div class="inline-info">
+            <p><strong>ວັນທີ:</strong> ${new Date(item.im_date).toLocaleDateString('en-GB')}</p>
+            <p><strong>ພະນັກງານ:</strong> ${getEmployeeName(item.emp_id_create)}</p>
+            <p><strong>ປະເພດ:</strong> ${item.types}</p>
+            <p><strong>ລະຫັດສັ່ງຊື້:</strong> ${item.preorder_id || '-'}</p>
+          </div>
+
+          <table class="sub-table">
+            <thead>
+              <tr>
+                <th class="text-center" style="width: 60px;">ລຳດັບ</th>
+                <th>ລະຫັດຢາ/ອຸປະກອນ</th>
+                <th>ຊື່</th>
+                <th class="text-center">ຈຳນວນ</th>
+                <th class="text-center">ຫົວໜ່ວຍ</th>
+                <th class="text-center">ວັນໝົດອາຍຸ</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${details.map((d, i) => `
+                <tr>
+                  <td class="text-center">${i + 1}</td>
+                  <td>${d.med_id}</td>
+                  <td>${d.med_name}</td>
+                  <td class="text-center">${d.qty}</td>
+                  <td class="text-center">${d.unit}</td>
+                  <td class="text-center">${new Date(d.expired).toLocaleDateString('en-GB')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        `;
+      }).join('')}
+
+      
+    </body>
+    </html>
+  `;
+
+  // ✅ เปิดหน้าต่างสำหรับพิมพ์
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(printContent);
+  printWindow.document.close();
+
+  printWindow.onload = () => {
+    printWindow.focus();
+    
+    // ✅ ปิด popup หลังจากผู้ใช้ "พิมพ์หรือยกเลิก" dialog print
+    printWindow.onafterprint = () => {
+      printWindow.close();
+    };
+
+    // เรียกหน้าต่างพิมพ์
+    printWindow.print();
+
+    // ✅ fallback: ปิดหลัง 5 วินาที ถ้า onafterprint ไม่ทำงาน
+    setTimeout(() => {
+      if (!printWindow.closed) {
+        printWindow.close();
+      }
+    }, 5000);
+  };
+};
+
 
   return (
     <>
@@ -341,6 +603,16 @@ const ReportImport = () => {
           <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
             ລາຍງານການນຳເຂົ້າ
           </h1>
+
+          <div className="ml-auto">
+            <Button
+              onClick={handlePrintReport}
+              className="bg-secondary2 hover:bg-secondary3"
+            >
+              <Printer className="w-4 h-4" />
+              ພິມລາຍງານ
+            </Button>
+          </div>
         </div>
 
         {/* ✅ Tabs */}
@@ -419,7 +691,7 @@ const ReportImport = () => {
             {/* ปุ่มล้างตัวกรอง */}
             <Button
               onClick={clearAllFilters}
-              className="bg-graydark hover:bg-graydark"
+              className="bg-slate-600 hover:bg-slate-800 text-white"
             >
               ລ້າງຕົວກອງ
             </Button>

@@ -15,7 +15,7 @@ import { openAlert } from '@/redux/reducer/alert';
 import SearchBox from '../../../components/Forms/Search_New';
 import { Empty } from 'antd';
 import { ACCESS_TOKEN_KEY } from '../../../utils/constants';
-import SmoothModal from '../../../components/Modal/SmoothModal';
+import SmoothModal from '@/components/Modal/SmoothModal';
 const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 
 const PatientPage = () => {
@@ -35,11 +35,9 @@ const PatientPage = () => {
   const [existingIds, setExistingIds] = useState([]);
   const [existingPhones1, setExistingPhones1] = useState([]);
   const [existingPhones2, setExistingPhones2] = useState([]);
-  // ✅ เก็บ reference ของ handleCloseForm จาก CreateCategory
   const [createFormCloseHandler, setCreateFormCloseHandler] = useState(null);
 
-  // ✅ เพิ่ม state สำหรับการเรียงลำดับ ID (คัดลอกจาก CategoryPage)
-  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
+  const [sortOrder, setSortOrder] = useState('asc');
 
   const fetchPatients = async () => {
     try {
@@ -231,7 +229,7 @@ const PatientPage = () => {
             <Button
               onClick={() => setShowAddModal(true)}
               icon={iconAdd}
-              className="bg-secondary2 hover:bg-secondary3"
+              className="bg-Third2 hover:bg-Third3"
             >
               ເພີ່ມຂໍ້ມູນຜູ່ປ່ວຍ
             </Button>

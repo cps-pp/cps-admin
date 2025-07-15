@@ -15,7 +15,7 @@ import {
   Package,
   FilterIcon,
   XCircle,
-  ListCheck
+  ClipboardCheck,
 } from 'lucide-react';
 import { useParams, useLocation } from 'react-router-dom';
 import BackButton from '../../components/BackButton';
@@ -566,7 +566,7 @@ const FollowTreatmentPage = ({ onBack }) => {
                 {statementPayment?.payments?.length > 0 && (
                   <div>
                     <h4 className="font-semibold text-secondary2 flex items-center">
-                      <ListCheck className="w-5 h-5 mr-1 text-secondary2" />
+                      <ClipboardCheck className="w-5 h-5 mr-1 text-secondary2" />
                       ປະຫວັດການຈ່າຍ
                     </h4>
                     <div className="overflow-x-auto p-4">

@@ -1,4 +1,4 @@
-import { FileText } from 'lucide-react';
+import { FileText, Pill, RotateCcw, Stethoscope } from 'lucide-react';
 import { Button, Tabs } from 'antd';
 import { useEffect, useState } from 'react';
 import Alerts from '@/components/Alerts';
@@ -18,6 +18,7 @@ const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 const EditTreatment = () => {
   const { id } = useParams();
   const [showBillPopup, setShowBillPopup] = useState(false);
+  const [isReloading, setIsReloading] = useState(false);
 
   const [dataPatien, setDataPatien] = useState({});
   const [newData, setNewData] = useState({});
@@ -46,6 +47,37 @@ const EditTreatment = () => {
   useEffect(() => {
     setDataPatien(dataInspectionBy)
   }, [dataInspectionBy]);
+
+  // ฟังก์ชันสำหรับรีโหลดข้อมูลเฉพาะหน้านี้
+  const reloadData = async () => {
+    setIsReloading(true);
+    try {
+      // รีเซ็ตข้อมูลก่อน
+      setDataPatien({});
+      setNewData({});
+      setInvoiceData(null);
+      
+      // เรียก API ใหม่
+      if (id) {
+        await Promise.all([
+          fetchInspectionById(id),
+          fetchInspectionMedById(id),
+          fetchInspectionEquipmentById(id)
+        ]);
+      }
+      
+      // รีโหลดข้อมูลโรคถ้าจำเป็น
+      if (dataInspectionBy) {
+        await getDiseasesForUpdate();
+      }
+      
+      console.log('ข้อมูลถูกรีโหลดแล้ว');
+    } catch (error) {
+      console.error('Error reloading data:', error);
+    } finally {
+      setIsReloading(false);
+    }
+  };
 
   const submitEditPatient = async () => {
     try {
@@ -138,42 +170,59 @@ const EditTreatment = () => {
 
   return (
     <>
-      <div className='text-lg font-semibold text-form-strokedark mb-4'>
-        ແກ້ໄຂລາຍການບໍລິການ
-      </div>
-      <div className="rounded bg-white pt-4 p-4 shadow-md relative">
+      <div className="flex justify-between items-center mb-4">
+        <div className="text-md md:text-lg lg:text-xl font-semibold text-strokedark  ">
+          ແກ້ໄຂປິ່ວປົວ ແລະ ບົ່ງມະຕິ
+        </div>
 
-        <div className='flex justify-end gap-5'>
-          <Button
-            className='h-[40px]'
-            onClick={() => window.location.reload()}>
-            ໂຫລດຂໍ້ມູນໃຫມ່
-          </Button>
+       <div className='flex justify-end gap-5'>
+          <button
+            onClick={reloadData}
+            disabled={isReloading}
+            className={`
+              inline-flex items-center gap-2 px-4 py-2 text-md font-medium rounded 
+              border border-Third3 bg-Third3/10 text-secondary2 
+              hover:bg-blue-Third3/20 disabled:opacity-50 
+              transition-all duration-300 ease-in-out
+              ${isReloading ? 'bg-Third3 cursor-not-allowed' : 'hover:scale-105'}
+            `}
+          >
+            <RotateCcw
+              className={`w-4 h-4 ${isReloading ? 'animate-spin' : ''}`}
+            />
+            <span>{isReloading ? 'ກຳລັງໂຫຼດ...' : 'ໂຫຼດໃໝ່'}</span>
+          </button>
 
           <button
             type="button"
             onClick={handleShowBill}
-            className="bg-slate-500 hover:bg-slate-600 text-white text-md px-6 py-2 rounded flex items-center gap-2 transition"
+            className="bg-Third2 hover:bg-Third3 text-white text-md px-6 py-2 rounded flex items-center gap-2 transition"
           >
             <FileText className="w-5 h-5" />
             ກົດເບິ່ງໃບບິນ
           </button>
 
-          <Button
-            className='h-[40px]'
-            onClick={submitMedicine}>
+          <button
+            className='h-[40px] bg-Third3 hover:bg-Third4 text-white  px-6 py-2 rounded flex items-center gap-2 transition'
+            onClick={submitMedicine}
+          >
+             <Stethoscope className="w-4 h-4" />
             ແກ້ໄຂຂໍ້ມູນຢາໃໝ່
-          </Button>
+          </button>
 
           <button
             type="button"
             onClick={submitEditPatient}
-            className="bg-indigo-500 hover:bg-indigo-600 text-white text-md px-6 py-2 rounded flex items-center gap-2 transition"
+            className='bg-Third2 hover:bg-Third3 text-white px-6 py-2 rounded flex items-center gap-2 transition'
           >
+               <Pill className="w-4 h-4" />
             ແກ້ໄຂຂໍ້ມູນປົວໃໝ່
           </button>
         </div>
+</div>
+      <div className="rounded bg-white pt-4 p-4 shadow-md relative">
 
+       
         <Tabs defaultActiveKey="1" items={[{
           key: '1',
           label: <span className="text-lg font-semibold">ການປິ່ນປົວ</span>,
@@ -202,7 +251,7 @@ const EditTreatment = () => {
           services={newServices}
           medicines={[...newMedicines, ...newEquipment]}
           invoiceData={invoiceData}
-          onRefresh={() => window.location.reload()}
+          onRefresh={reloadData}
         />
 
         <Alerts />

@@ -6,7 +6,7 @@ import Alerts from '@/components/Alerts';
 import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import FileUploadInput from '@/components/Forms/FileUploadInput';
-import BoxDate from '../../../components/Date';
+// import BoxDate from '../../../components/Date'; // ✅ ลบการใช้งาน BoxDate
 import InputBox from '../../../components/Forms/Input_new';
 import SelectBoxId from '../../../components/Forms/SelectID';
 import { usePrompt } from '@/hooks/usePrompt';
@@ -26,26 +26,34 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
 
   const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
-  const [loadingNextId, setLoadingNextId] = useState(true); // ✅ เพิ่ม state สำหรับโหลดรหัส
-  const [nextImportId, setNextImportId] = useState(''); // ✅ เพิ่ม state สำหรับเก็บรหัสถัดไป
+  const [loadingNextId, setLoadingNextId] = useState(true);
+  const [nextImportId, setNextImportId] = useState('');
   const [selectedEmp, setSelectedEmp] = useState('');
   const [selectedPreorder, setSelectedPreorder] = useState('');
   const [employees, setEmployees] = useState([]);
   const [preorders, setPreorders] = useState([]);
   const [usedPreorders, setUsedPreorders] = useState([]);
 
-  // ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
+  // ✅ ฟังก์ชันสำหรับแปลงวันที่เป็นรูปแบบ YYYY-MM-DD
+  const getCurrentDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const isDirtyRef = useRef(isDirty);
 
-  // ✅ อัพเดต ref ทุกครั้งที่ isDirty เปลี่ยน
+
   useEffect(() => {
     isDirtyRef.current = isDirty;
   }, [isDirty]);
 
-  // ✅ เตือนเมื่อมีการพยายามออกจากหน้าด้วย navigation (Back / เปลี่ยน route)
+
   usePrompt('ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.', isDirty);
 
-  // ✅ เตือนเมื่อจะรีเฟรช / ปิดแท็บ
+
   useEffect(() => {
     const handleBeforeUnload = (event) => {
       if (!isDirtyRef.current) return;
@@ -59,7 +67,7 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
     };
   }, []);
 
-  // ✅ เตือนเมื่อคลิกปิดฟอร์ม - ใช้ current value จาก ref
+
   const handleCloseForm = () => {
     if (isDirtyRef.current) {
       const confirmLeave = window.confirm('ທ່ານຕ້ອງການປິດຟອມແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ປ້ອນຈະສູນເສຍ');
@@ -68,14 +76,14 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
     setShow(false);
   };
 
-  // ✅ ส่ง handleCloseForm ไปให้ parent component แค่ครั้งเดียว
+
   useEffect(() => {
     if (onCloseCallback) {
       onCloseCallback(() => handleCloseForm);
     }
   }, [onCloseCallback]);
 
-  // ✅ ดึงรหัส Import ถัดไปเมื่อ component โหลด
+  // ✅ ดึงรหัส Import ถัดไป และตั้งวันที่อัตโนมัติ
   useEffect(() => {
     const fetchNextId = async () => {
       try {
@@ -88,7 +96,12 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
 
         const data = await response.json();
         setNextImportId(data.nextId);
-        setValue('im_id', data.nextId); // ✅ ตั้งค่ารหัสในฟอร์ม
+        setValue('im_id', data.nextId);
+        
+        // ✅ ตั้งวันที่ปัจจุบันอัตโนมัติ
+        const currentDate = getCurrentDate();
+        setValue('im_date', currentDate);
+        
       } catch (error) {
         console.error('Error fetching next Import ID:', error);
         dispatch(
@@ -106,7 +119,7 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
     fetchNextId();
   }, [dispatch, setValue]);
 
-  // ✅ ฟังก์ชันดึงข้อมูล Import ที่มีอยู่แล้วเพื่อเช็ค preorder ที่ใช้แล้ว
+
   const fetchUsedPreorders = async () => {
     try {
       const response = await fetch('http://localhost:4000/src/im/import');
@@ -122,7 +135,7 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
     }
   };
 
-  // ✅ useEffect สำหรับเซ็ต preorder_id อัตโนมัติเมื่อได้รับ props
+
   useEffect(() => {
     if (preorderId) {
       console.log('Setting preorder_id from props:', preorderId);
@@ -131,7 +144,7 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
     }
   }, [preorderId, setValue]);
 
-  // ✅ ดึงข้อมูล Employees, Preorders และ Used Preorders
+
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
@@ -178,7 +191,7 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
     fetchUsedPreorders();
   }, [dispatch]);
 
-  // ✅ ฟังก์ชันตรวจสอบก่อนบันทึก
+
   const validatePreorderUsage = (preorderId) => {
     if (usedPreorders.includes(preorderId)) {
       dispatch(openAlert({
@@ -192,7 +205,7 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
   };
 
   const handleSave = async (data) => {
-    // ✅ ตรวจสอบก่อนว่า preorder นี้ถูกใช้แล้วหรือไม่
+
     if (!validatePreorderUsage(selectedPreorder)) {
       return;
     }
@@ -201,12 +214,15 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
     try {
       const formData = new FormData();
       formData.append('im_id', data.im_id);
-      formData.append('im_date', data.im_date);
+      
+      // ✅ ใช้วันที่ปัจจุบันแทนข้อมูลจากฟอร์ม
+      formData.append('im_date', getCurrentDate());
+      
       formData.append('preorder_id', selectedPreorder);
       formData.append('emp_id', selectedEmp);
       formData.append('note', data.note || '');
 
-      // ✅ เพิ่มไฟล์ถ้ามี
+
       if (data.file && data.file.length > 0) {
         formData.append('file', data.file[0]);
       }
@@ -255,7 +271,7 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
     !usedPreorders.includes(preorder.preorder_id)
   );
 
-  if (loading || loadingNextId) return <Loader />; 
+  if (loading || loadingNextId) return <Loader />;
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
@@ -283,17 +299,22 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
           <input type="hidden" {...register('im_id')} />
         </div>
 
-        <BoxDate
-          name="im_date"
-          label="ວັນທີ່ Import"
-          select=""
-          register={register}
-          setValue={setValue}
-          errors={errors}
-          formOptions={{ required: 'ກະລຸນາເລືອກວັນທີ່' }}
-        />
+        {/* ✅ แสดงวันที่ปัจจุบันแบบ read-only */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2 text-black dark:text-white">
+            ວັນທີ່ Import
+          </label>
+          <input
+            type="text"
+            value={getCurrentDate()}
+            readOnly
+            className="w-full rounded-lg border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
+          />
+          <input type="hidden" {...register('im_date')} />
+        </div>
+
         <SelectBoxId
-          label=" Preorder (ທີ່ຍັງບໍ່ໄດ້ນຳເຂົ້າ)"
+          label="Preorder (ທີ່ຍັງບໍ່ໄດ້ນຳເຂົ້າ)"
           name="preorder"
           value={selectedPreorder}
           options={availablePreorders.map((preorder) => ({
@@ -308,7 +329,7 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
           }}
         />
 
-        {/* ✅ เลือก Employee */}
+
         <SelectBoxId
           label="ເລືອກພະນັກງານ"
           name="employee"
@@ -325,7 +346,7 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
           }}
         />
 
-        {/* ✅ อัพโลดไฟล์ */}
+
         <div className="md:col-span-2">
           <FileUploadInput
             label="ໄຟລເອກະສານ"
@@ -336,7 +357,7 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
             formOptions={{ required: false }}
           />
 
-          {/* ✅ note */}
+
           <InputBox
             label="ໝາຍເຫດ ບໍ່ບັງຄັບ"
             name="note"
@@ -346,7 +367,7 @@ const CreateImport = ({ setShow, getList, onCloseCallback, preorderId }) => {
           />
         </div>
 
-        {/* ✅ ปุ่มบันทึก */}
+
         <div className="md:col-span-2 mt-4 flex justify-end space-x-4 py-4">
 
 

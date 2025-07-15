@@ -12,7 +12,6 @@ import ButtonBox from '../../components/Button';
 import BoxDate from '../../components/Date';
 import { usePrompt } from '@/hooks/usePrompt';
 import DateTime from '../../components/DateTime';
-import { URLBaseLocal } from '../../lib/MyURLAPI';
 
 const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
   const navigate = useNavigate();
@@ -39,11 +38,11 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
   const selectedDate = watch('date_addmintted');
 
   const isDirtyRef = useRef(isDirty);
-
+  
   useEffect(() => {
     isDirtyRef.current = isDirty;
   }, [isDirty]);
-
+  
   usePrompt('ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.', isDirty);
 
   useEffect(() => {
@@ -109,7 +108,7 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
     const fetchPatients = async () => {
       try {
         const response = await fetch(
-          `${URLBaseLocal}/src/manager/patient`,
+          'http://localhost:4000/src/manager/patient',
         );
         const data = await response.json();
         if (response.ok) {
@@ -152,6 +151,18 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
 
       setLoading(true);
 
+      // แปลงวันที่ให้เป็น local timezone string
+    const appointmentDate = new Date(data.date_addmintted);
+    const year = appointmentDate.getFullYear();
+    const month = String(appointmentDate.getMonth() + 1).padStart(2, '0');
+    const day = String(appointmentDate.getDate()).padStart(2, '0');
+    const hours = String(appointmentDate.getHours()).padStart(2, '0');
+    const minutes = String(appointmentDate.getMinutes()).padStart(2, '0');
+    const seconds = String(appointmentDate.getSeconds()).padStart(2, '0');
+
+    const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    console.log('Formatted date:', formattedDate); // ตรวจสอบ
+
       const response = await fetch(
         'http://localhost:4000/src/appoint/appointment',
         {
@@ -159,7 +170,7 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             appoint_id: data.appoint_id,
-            date_addmintted: data.date_addmintted,
+            date_addmintted: formattedDate, // ใช้ string ที่แปลงแล้ว
             status: 'ລໍຖ້າ', // ✅ ตั้งค่าสถานะเป็น "ລໍຖ້າ" โดยอัตโนมัติ
             description: data.description,
             emp_id: selectedEmp,
@@ -181,7 +192,7 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
         }),
       );
       // 🟢 เพิ่มบรรทัดนี้เพื่อแจ้งให้ Header รีเฟรชข้อมูล
-      window.dispatchEvent(new Event('refresh-notifications'));
+    window.dispatchEvent(new Event('refresh-notifications'));
 
       await getList();
       reset();
@@ -201,7 +212,7 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
   };
 
   if (loading || loadingNextId) return <Loader />;
-
+  
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
       <Alerts />
@@ -229,20 +240,21 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
           <input type="hidden" {...register('appoint_id')} />
         </div>
 
-        <DateTime
-          name="date_addmintted"
-          label="ວັນທີນັດໝາຍ"
-          register={register}
-          errors={errors}
-          select={selectedDate}
-          formOptions={{ required: 'ກະລຸນາເລືອກວັນທີນັດໝາຍ' }}
-          setValue={setValue}
-          withTime={true}
-        />
+     <DateTime
+  name="date_addmintted"
+  label="ວັນທີນັດໝາຍ"
+  register={register}
+  errors={errors}
+  select={selectedDate}   
+  formOptions={{ required: 'ກະລຸນາເລືອກວັນທີນັດໝາຍ' }}
+  setValue={setValue}
+  
+  withTime={true}
+/>
 
 
 
-
+         
         <InputBox
           label="ລາຍລະອຽດ"
           name="description"

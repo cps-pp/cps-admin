@@ -20,10 +20,10 @@ const SidebarTemplate = ({
             <>
               <NavLink
                 to="#"
-                className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-form-strokedark duration-300 ease-in-out hover:bg-secondary2 hover:text-white ${
+                className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-form-strokedark duration-300 ease-in-out hover:bg-Third3 hover:text-white ${
                   (pathname === `/${menu.path}` ||
                     pathname.includes(menu.path)) &&
-                    'bg-secondary2 text-white'
+                    'bg-Third3 text-white'
                 }`}
                 onClick={(e) => {
                   e.preventDefault();
@@ -83,8 +83,8 @@ const SidebarTemplate = ({
     <li>
       <NavLink
         to={`/${menu.path}`}
-        className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-form-strokedark duration-300 ease-in-out hover:bg-secondary2 hover:text-white ${
-          pathname.includes(menu.path) && 'bg-secondary2 text-white'
+        className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-form-strokedark duration-300 ease-in-out hover:bg-Third3 hover:text-white ${
+          pathname.includes(menu.path) && 'bg-Third3 text-white'
         }`}
       >
         {menu.icon}

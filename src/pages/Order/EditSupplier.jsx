@@ -1,31 +1,25 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { useEffect, useState } from 'react';
-import { useAppDispatch } from '@/redux/hook';
-import Loader from '@/common/Loader';
+import Button from '@/components/Button';
+import Input from '@/components/Forms/Input';
 import Alerts from '@/components/Alerts';
+import Loader from '@/common/Loader';
+import Select from '@/components/Forms/Select';
+import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
-import DatePicker from '@/components/DatePicker_two';
-import InputBox from '../../../components/Forms/Input_new';
-import SelectBox from '../../../components/Forms/Select';
-import ButtonBox from '../../../components/Button';
-import BoxDate from '../../../components/Date';
 
-const EditEmployee = ({ setShow, getList, id }) => {
+const EditSupplier = ({ id, onClose, setShow, getList }) => {
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
-    getValues,
+    formState: { errors, isDirty },
     setValue,
-    watch,
-    formState: { isDirty, errors },
   } = useForm();
-const dob = watch('dob');
-
-  const [loading, setLoading] = useState(false);
-  const [fetchLoading, setFetchLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [fetching, setFetching] = useState(false);
   const dispatch = useAppDispatch();
-  const [gender, setGender] = useState('');
-  const [role, setRole] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('020'); // ✅ เพิ่ม state สำหรับเบอร์โทร
 
   useEffect(() => {
@@ -75,40 +69,30 @@ const dob = watch('dob');
   };
 
   useEffect(() => {
-    const fetchEmployeeData = async () => {
-      setFetchLoading(true);
+    const fetchSupplierData = async () => {
+      
       try {
-        const response = await fetch(
-          `http://localhost:4000/src/manager/emp/${id}`,
-          {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-          },
-        );
+        const response = await fetch(`http://localhost:4000/src/manager/supplier/${id}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
 
-        const result = await response.json();
-        if (!response.ok)
-          throw new Error(result.error || 'ບໍ່ສາມາດດຶງຂໍ້ມູນໄດ້');
+        setValue('company_name', data.data.company_name);
+        setValue('address', data.data.address);
 
-        const employee = result.data;
-        setValue('emp_id', employee.emp_id);
-        setValue('emp_name', employee.emp_name);
-        setValue('emp_surname', employee.emp_surname);
-        
-        setValue('address', employee.address);
-        setValue('dob', employee.dob);
-        setRole(employee.role || '');
-        setGender(employee.gender || '');
-        
+
         // ✅ จัดการเบอร์โทรพิเศษ - ถ้าไม่ขึ้นต้นด้วย 020 ให้เติม 020 ให้
-        let phoneValue = employee.phone || '020';
+        let phoneValue = data.data.phone || '020';
         if (!phoneValue.startsWith('020')) {
           phoneValue = '020' + phoneValue;
         }
         setPhoneNumber(phoneValue);
         setValue('phone', phoneValue);
-        
+
+        setLoading(false);
       } catch (error) {
+        console.error('Error fetching supplier data:', error);
         dispatch(
           openAlert({
             type: 'error',
@@ -116,32 +100,38 @@ const dob = watch('dob');
             message: error.message || 'ມີຂໍ້ຜິດພາດໃນການດຶງຂໍ້ມູນ',
           }),
         );
-      } finally {
-        setFetchLoading(false);
+        setLoading(false);
       }
     };
 
-    fetchEmployeeData();
-  }, [id, dispatch, setValue]);
+    fetchSupplierData();
+  }, [id, setValue, fetching, navigate, dispatch]);
 
-  const handleSave = async (data) => {
+  const handleSave = async (formData) => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:4000/src/manager/emp/${id}`, {
+      const response = await fetch(`http://localhost:4000/src/manager/supplier/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, role, gender }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          company_name: formData.company_name,
+          address: formData.address,
+          phone: formData.phone,
+        }),
       });
 
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || `Status ${res.status}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
 
       dispatch(
         openAlert({
           type: 'success',
           title: 'ແກ້ໄຂສຳເລັດ',
-          message: 'ແກ້ໄຂຂໍ້ມູນພະນັກງານສຳເລັດແລ້ວ',
-        }),
+          message: 'ແກ້ໄຂຂໍ້ມູນຜູ້ສະໜອງສຳເລັດແລ້ວ',
+        })
       );
 
       if (getList) getList();
@@ -152,17 +142,15 @@ const dob = watch('dob');
         openAlert({
           type: 'error',
           title: 'ແກ້ໄຂຂໍ້ມູນບໍ່ສຳເລັດ',
-          message: 'ເກີດຂໍ້ຜຶດພາດໃນການບັນທືກຂໍ້ມູນ',
-        }),
+          message: 'ເກີດຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
+        })
       );
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading || fetchLoading) {
-    return <Loader />;
-  }
+  if (loading) return <Loader />;
 
   return (
     <div className="rounded bg-white pt-4 dark:bg-boxdark">
@@ -172,49 +160,26 @@ const dob = watch('dob');
           ແກ້ໄຂຂໍ້ມູນ
         </h1>
       </div>
-
-      <form
-        onSubmit={handleSubmit(handleSave)}
-        className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 pt-4"
-      >
-        <InputBox
-          label="ຊື່ທ່ານຫມໍ"
-          name="emp_name"
+      <form onSubmit={handleSubmit(handleSave)} className="mt-4 px-4">
+        <Input
+          label="ຊື່ບໍລິສັດ"
+          name="company_name"
           type="text"
-          placeholder="ປ້ອນຊຶ່ທ່ານຫມໍ"
+          placeholder="ປ້ອນຊື່ບໍລິສັດ"
           register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນຊື່ທ່ານຫມໍກ່ອນ' }}
+          formOptions={{ required: 'ກະລຸນາປ້ອນຊື່ບໍລິສັດກ່ອນ' }}
           errors={errors}
         />
-        <InputBox
-          label="ນາມສະກຸນ"
-          name="emp_surname"
+        <Input
+          label="ທີ່ຢູ່"
+          name="address"
           type="text"
-          placeholder="ນາມສະກຸນ"
+          placeholder="ປ້ອນທີ່ຢູ່"
           register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນນາມສະກຸນກ່ອນ' }}
+          formOptions={{ required: 'ກະລຸນາປ້ອນທີ່ຢູ່ກ່ອນ' }}
           errors={errors}
         />
-        <SelectBox
-          label="ເພດ"
-          name="gender"
-          options={['ຊາຍ', 'ຍິງ']}
-          register={register}
-          errors={errors}
-          value={gender}
-          onSelect={(e) => setGender(e.target.value)}
-        />
-
-        <BoxDate
-          select={getValues('dob')}
-          register={register}
-          errors={errors}
-          name="dob"
-          label="ວັນເດືອນປິເກີດ"
-          formOptions={{ required: 'ກະລຸນາໃສ່ວັນເດືອນປີເກີດ' }}
-          setValue={setValue}
-        />
-
+        
         {/* ✅ Custom Phone Input with 020 prefix and digit validation */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2 text-black dark:text-white">
@@ -263,33 +228,14 @@ const dob = watch('dob');
           )}
         </div>
 
-        <InputBox
-          label="ທີ່ຢູ່"
-          name="address"
-          type="text"
-          placeholder="ປ້ອນທີ່ຢູ່"
-          register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນທີ່ຢູ່ກ່ອນ' }}
-          errors={errors}
-        />
-        <SelectBox
-          label="ຕຳແໜ່ງ"
-          name="role"
-          options={['ທ່ານໝໍ', 'ຜູ້ຊ່ວຍທ່ານໝໍ']}
-          register={register}
-          errors={errors}
-          value={role}
-          onSelect={(e) => setRole(e.target.value)}
-        />
-
-        <div className="mt-4 flex justify-end space-x-4 col-span-full py-4">
-          <ButtonBox variant="save" type="submit" disabled={loading}>
-            {loading ? 'ກຳລັງອັບເດັດ...' : 'ອັບເດັດ'}
-          </ButtonBox>
+        <div className="mt-8 flex justify-end space-x-4 col-span-full py-4">
+          <Button variant="save" type="submit" disabled={loading}>
+            {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
+          </Button>
         </div>
       </form>
     </div>
   );
 };
 
-export default EditEmployee;
+export default EditSupplier;

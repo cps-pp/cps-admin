@@ -200,7 +200,7 @@ const ViewImport = ({ id, onClose, setShow }) => {
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse border border-slate-300">
                   <thead>
-                    <tr className="text-left bg-slate-200 border border-stroke">
+                    <tr className="text-left bg-slate-100 border border-stroke">
                       <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">
                         ລຳດັບ
                       </th>

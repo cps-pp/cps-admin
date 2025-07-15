@@ -20,7 +20,7 @@ const EditSupplier = ({ id, onClose, setShow, getList }) => {
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false);
   const dispatch = useAppDispatch();
-  const [status, setStatus] = useState('');
+  
   const [phoneNumber, setPhoneNumber] = useState('020'); // ✅ เพิ่ม state สำหรับเบอร์โทร
 
   useEffect(() => {
@@ -81,8 +81,7 @@ const EditSupplier = ({ id, onClose, setShow, getList }) => {
 
         setValue('company_name', data.data.company_name);
         setValue('address', data.data.address);
-        setStatus(data.data.status || '');
-        setValue('status', data.data.status);
+
 
         // ✅ จัดการเบอร์โทรพิเศษ - ถ้าไม่ขึ้นต้นด้วย 020 ให้เติม 020 ให้
         let phoneValue = data.data.phone || '020';
@@ -231,18 +230,7 @@ const EditSupplier = ({ id, onClose, setShow, getList }) => {
           )}
         </div>
 
-        <Select
-          label="ສະຖານນະ"
-          name="status"
-          options={['ເປີດ', 'ປິດ']}
-          register={register}
-          errors={errors}
-          value={status}
-          onSelect={(e) => {
-            setStatus(e.target.value);
-            setValue('status', e.target.value);
-          }}
-        />
+     
         <div className="mt-8 flex justify-end space-x-4 col-span-full py-4">
           <Button variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}

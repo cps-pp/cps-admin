@@ -13,6 +13,7 @@ import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
 import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { Empty } from 'antd';
+import SmoothModal from '../../../components/Modal/SmoothModal';
 
 const ExchangePage = () => {
   const [exchanges, setExchanges] = useState([]);
@@ -201,7 +202,7 @@ const ExchangePage = () => {
             <Button
               onClick={() => setShowAddModal(true)}
               icon={iconAdd}
-              className="bg-secondary2 hover:bg-secondary3"
+              className="bg-Third2 hover:bg-Third3"
             >
               ເພີ່ມອັດຕາແລກປ່ຽນ
             </Button>
@@ -321,12 +322,14 @@ const ExchangePage = () => {
                 </svg>
               </button>
 
+              <SmoothModal onClose={() => setShowAddModal(false)}>
               <CreateExChange
                 setShow={setShowAddModal}
                 getList={fetchExchanges}
                 existingIds={existingIds}
                 onCloseCallback={setCreateFormCloseHandler} // ✅ ส่ง callback function
               />
+              </SmoothModal>
             </div>
           </div>
         )}
@@ -354,12 +357,14 @@ const ExchangePage = () => {
                 </svg>
               </button>
 
+              <SmoothModal onClose={() => setShowEditModal(false)}>
               <EditExChange
                 id={selectedId}
                 onClose={() => setShowEditModal(false)}
                 setShow={setShowEditModal}
                 getList={fetchExchanges}
               />
+              </SmoothModal>
             </div>
           </div>
         )}

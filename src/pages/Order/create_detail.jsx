@@ -25,6 +25,11 @@ const AddDetailPreorder = ({ id, setShow, getList, onClose }) => {
   const [showModal, setShowModal] = useState(false);
   const [deleteDetailId, setDeleteDetailId] = useState(null);
   
+  // ✅ เพิ่ม state สำหรับโหมดแก้ไข
+  const [editingDetailId, setEditingDetailId] = useState(null);
+  const [editingQty, setEditingQty] = useState('');
+  const [editLoading, setEditLoading] = useState(false);
+  
   const dispatch = useAppDispatch();
 
   // ใช้ useRef เพื่อเก็บ current value ของ isDirty
@@ -67,14 +72,14 @@ const AddDetailPreorder = ({ id, setShow, getList, onClose }) => {
     const fetchMedicines = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:4000/src/manager/medicines');
+        const response = await fetch('http://localhost:4000/src/manager/medicinesPAPAG');
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
         setMedicines(data.data);
       } catch (error) {
-        console.error('Error fetching medicines:', error);
+        console.error('Error fetching medicinesPAPAG:', error);
         dispatch(
           openAlert({
             type: 'error',
@@ -114,6 +119,24 @@ const AddDetailPreorder = ({ id, setShow, getList, onClose }) => {
     fetchPreorderDetails();
   }, [id]);
 
+  // ✅ ฟังก์ชันตรวจสอบข้อมูลซ้ำ - แก้ไขการเปรียบเทียบ
+  const checkDuplicateMedicine = (medId) => {
+    console.log('🔍 Checking duplicate for med_id:', medId);
+    console.log('📋 Current preorder details:', preorderDetails);
+    
+    // ✅ แปลงเป็น string สำหรับเปรียบเทียบ เพื่อหลีกเลี่ยงปัญหา type mismatch
+    const medIdStr = String(medId);
+    
+    const isDuplicate = preorderDetails.some(detail => {
+      const detailMedIdStr = String(detail.med_id);
+      console.log(`Comparing: "${detailMedIdStr}" === "${medIdStr}"`);
+      return detailMedIdStr === medIdStr;
+    });
+    
+    console.log('❓ Is duplicate:', isDuplicate);
+    return isDuplicate;
+  };
+
   // ✅ ฟังก์ชันสร้าง detail_id ใหม่แบบอัตโนมัติ (ดึงจากฐานข้อมูล)
   const generateDetailId = async () => {
     try {
@@ -136,14 +159,50 @@ const AddDetailPreorder = ({ id, setShow, getList, onClose }) => {
     }
   };
 
-  // ฟังก์ชันหาชื่อยาจาก med_id
-  const getMedicineName = (medId) => {
-    const medicine = medicines.find(med => med.med_id === medId);
-    return medicine ? medicine.med_name : medId;
+  // ✅ ฟังก์ชันช่วยสำหรับรีเฟรชข้อมูล preorder details
+  const fetchPreorderDetailsAgain = async () => {
+    if (!id) return;
+    
+    try {
+      const detailResponse = await fetch(`http://localhost:4000/src/preorder_detail/preorder-detail/${id}`);
+      if (detailResponse.ok) {
+        const detailData = await detailResponse.json();
+        setPreorderDetails(detailData.data || []);
+        const ids = (detailData.data || []).map(detail => detail.detail_id);
+        setExistingDetailIds(ids);
+      }
+    } catch (error) {
+      console.error('Error fetching preorder details:', error);
+    }
   };
 
-  // ฟังก์ชันบันทึกข้อมูล
+  // ✅ ฟังก์ชันบันทึกข้อมูล - แก้ไขปัญหาการอัปเดต state
   const handleSave = async (formData) => {
+    console.log('💾 Form data:', formData);
+    console.log('📋 Current preorder details:', preorderDetails);
+    
+    // ✅ ตรวจสอบข้อมูลซ้ำก่อนบันทึก
+    const isDuplicate = checkDuplicateMedicine(formData.med_id);
+    console.log('🔍 Duplicate check result:', isDuplicate);
+    
+    if (isDuplicate) {
+      const selectedMedicine = medicines.find(med => String(med.med_id) === String(formData.med_id));
+      const medicineName = selectedMedicine ? `${selectedMedicine.med_name} (${selectedMedicine.type_name})` : 'ຢາທີ່ເລືອກ';
+      
+      console.log('❌ Duplicate found! Medicine:', medicineName);
+      
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ຂໍ້ມູນຊ້ຳກັນ',
+          message: `${medicineName} ມີໃນລາຍການແລ້ວ! ກະລຸນາເລືອກຢາອື່ນ`,
+        })
+      );
+      reset();
+      return; // ❌ หยุดการทำงานไม่บันทึกข้อมูล
+    }
+
+    console.log('✅ No duplicate found, proceeding with save...');
     setLoading(true);
 
     try {
@@ -180,7 +239,21 @@ const AddDetailPreorder = ({ id, setShow, getList, onClose }) => {
         })
       );
 
-      // รีเฟรชข้อมูล
+      // ✅ อัปเดต preorderDetails ทันทีหลังจากบันทึกสำเร็จ
+      const selectedMedicine = medicines.find(med => String(med.med_id) === String(formData.med_id));
+      const newDetail = {
+        detail_id: newDetailId,
+        med_id: formData.med_id,
+        qty: parseInt(formData.qty),
+        med_name: selectedMedicine?.med_name || 'Unknown',
+        type_name: selectedMedicine?.type_name || 'Unknown'
+      };
+      
+      // ✅ อัปเดต state ทันทีเพื่อป้องกันการเพิ่มซ้ำ
+      setPreorderDetails(prev => [...prev, newDetail]);
+      setExistingDetailIds(prev => [...prev, newDetailId]);
+
+      // ✅ รีเฟรชข้อมูลจากฐานข้อมูล
       await getList();
       await fetchPreorderDetailsAgain();
       
@@ -241,6 +314,10 @@ const AddDetailPreorder = ({ id, setShow, getList, onClose }) => {
         })
       );
 
+      // ✅ อัปเดต state ทันทีหลังจากลบ
+      setPreorderDetails(prev => prev.filter(detail => detail.detail_id !== deleteDetailId));
+      setExistingDetailIds(prev => prev.filter(id => id !== deleteDetailId));
+
       // รีเฟรชข้อมูลหลังจากลบสำเร็จ
       await getList();
       await fetchPreorderDetailsAgain();
@@ -260,20 +337,93 @@ const AddDetailPreorder = ({ id, setShow, getList, onClose }) => {
     }
   };
 
-  // ✅ ฟังก์ชันช่วยสำหรับรีเฟรชข้อมูล preorder details
-  const fetchPreorderDetailsAgain = async () => {
-    if (!id) return;
-    
+  // ✅ ฟังก์ชันเริ่มต้นการแก้ไข
+  const handleEditClick = (detail) => {
+    console.log('Edit button clicked for detail_id:', detail.detail_id);
+    setEditingDetailId(detail.detail_id);
+    setEditingQty(detail.qty.toString());
+  };
+
+  // ✅ ฟังก์ชันยกเลิกการแก้ไข
+  const handleCancelEdit = () => {
+    setEditingDetailId(null);
+    setEditingQty('');
+  };
+
+  // ✅ ฟังก์ชันบันทึกการแก้ไข
+  const handleSaveEdit = async (detailId) => {
+    if (!editingQty || parseInt(editingQty) <= 0) {
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ເກີດຂໍ້ຜິດພາດ',
+          message: 'ຈຳນວນຕ້ອງມາກກວ່າ 0',
+        })
+      );
+      return;
+    }
+
     try {
-      const detailResponse = await fetch(`http://localhost:4000/src/preorder_detail/preorder-detail/${id}`);
-      if (detailResponse.ok) {
-        const detailData = await detailResponse.json();
-        setPreorderDetails(detailData.data || []);
-        const ids = (detailData.data || []).map(detail => detail.detail_id);
-        setExistingDetailIds(ids);
+      setEditLoading(true);
+      
+      console.log('Updating detail_id:', detailId, 'with qty:', editingQty);
+
+      const payload = {
+        qty: parseInt(editingQty)
+      };
+
+      const response = await fetch(`http://localhost:4000/src/preorder_detail/preorder-detail/${detailId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
       }
+
+      const result = await response.json();
+      console.log('Update result:', result);
+
+      dispatch(
+        openAlert({
+          type: 'success',
+          title: 'ສຳເລັດ',
+          message: `ແກ້ໄຂລາຍການ ID: ${detailId} ສຳເລັດແລ້ວ`,
+        })
+      );
+
+      // ✅ อัปเดต state ทันทีหลังจากแก้ไข
+      setPreorderDetails(prev => 
+        prev.map(detail => 
+          detail.detail_id === detailId 
+            ? { ...detail, qty: parseInt(editingQty) }
+            : detail
+        )
+      );
+
+      // รีเฟรชข้อมูล
+      await getList();
+      await fetchPreorderDetailsAgain();
+
+      // ออกจากโหมดแก้ไข
+      setEditingDetailId(null);
+      setEditingQty('');
+
     } catch (error) {
-      console.error('Error fetching preorder details:', error);
+      console.error('Error updating detail:', error);
+      dispatch(
+        openAlert({
+          type: 'error',
+          title: 'ເກີດຂໍ້ຜິດພາດ',
+          message: error.message || 'ມີຂໍ້ຜິດພາດໃນການແກ້ໄຂຂໍ້ມູນ',
+        })
+      );
+    } finally {
+      setEditLoading(false);
     }
   };
 
@@ -288,13 +438,7 @@ const AddDetailPreorder = ({ id, setShow, getList, onClose }) => {
           ເພີ່ມລາຍລະອຽດສິນຄ້າ - ໃບສັ່ງ: {id}
         </h1>
       </div>
-
-      {/* <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800">
-        <p className="text-sm text-gray-600 dark:text-gray-300">
-          <strong>ລະຫັດໃບສັ່ງ:</strong> {id} 
-          <span className="ml-4"><strong>ສະຖານະ:</strong> ກຳລັງເພີ່ມລາຍລະອຽດສິນຄ້າໃນໃບສັ່ງຊື້</span>
-        </p>
-      </div> */}
+      
 
       {preorderDetails.length > 0 && (
         <div className="mt-4 px-4">
@@ -312,19 +456,57 @@ const AddDetailPreorder = ({ id, setShow, getList, onClose }) => {
               <tbody>
                 {preorderDetails.map((detail, index) => (
                   <tr key={`${detail.detail_id}-${index}`} className="border-b text-md border-stroke">
-                    <td className="px-4 py-2  border-r border-stroke">{detail.detail_id}</td>
-                    <td className="px-4 py-2  border-r border-stroke">
-                      {getMedicineName(detail.med_id)} ({detail.med_id})
+                    <td className="px-4 py-2 border-r border-stroke">{detail.detail_id}</td>
+                    <td className="px-4 py-2 border-r border-stroke">
+                      {detail.med_name} ({detail.type_name})
                     </td>
-                    <td className="px-4 py-2  border-r border-stroke">{detail.qty}</td>
-                    <td className="px-4 py-2  border-l border-stroke">
-                      <button
-                        onClick={() => handleDeleteClick(detail.detail_id)}
-                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
-                        disabled={loading}
-                      >
-                        {loading ? 'ກຳລັງລົບ...' : 'ລົບ'}
-                      </button>
+                    <td className="px-4 py-2 border-r border-stroke">
+                      {editingDetailId === detail.detail_id ? (
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="number"
+                            value={editingQty}
+                            onChange={(e) => setEditingQty(e.target.value)}
+                            className="w-20 px-2 py-1 border border-gray-300 rounded text-center"
+                            min="1"
+                            disabled={editLoading}
+                          />
+                          <button
+                            onClick={() => handleSaveEdit(detail.detail_id)}
+                            className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 transition-colors text-sm"
+                            disabled={editLoading}
+                          >
+                            {editLoading ? '...' : '✓'}
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600 transition-colors text-sm"
+                            disabled={editLoading}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ) : (
+                        <span>{detail.qty}</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2 border-l border-stroke">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEditClick(detail)}
+                          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors"
+                          disabled={loading || editingDetailId !== null}
+                        >
+                          ແກ້ໄຂ
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(detail.detail_id)}
+                          className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
+                          disabled={loading || editingDetailId !== null}
+                        >
+                          {loading ? 'ກຳລັງລົບ...' : 'ລົບ'}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -343,12 +525,12 @@ const AddDetailPreorder = ({ id, setShow, getList, onClose }) => {
           </label>
           <select
             {...register('med_id', { required: 'ກະລຸນາເລືອກຢາ' })}
-            className="text-strokedark dark:text-stroke relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary  capitalize"
+            className="text-strokedark dark:text-stroke relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary capitalize"
           >
             <option value="">-- ເລືອກຢາ --</option>
             {medicines.map((medicine) => (
               <option key={medicine.med_id} value={medicine.med_id}>
-                {medicine.med_name} ({medicine.med_id})
+                {medicine.med_name} ({medicine.type_name})
               </option>
             ))}
           </select>
@@ -369,7 +551,7 @@ const AddDetailPreorder = ({ id, setShow, getList, onClose }) => {
             })}
             type="number"
             placeholder="ປ້ອນຈຳນວນ"
-            className="text-strokedark dark:text-stroke relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary  capitalize"
+            className="text-strokedark dark:text-stroke relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary capitalize"
           />
           {errors.qty && (
             <span className="text-red-500 text-sm">{errors.qty.message}</span>
@@ -380,7 +562,7 @@ const AddDetailPreorder = ({ id, setShow, getList, onClose }) => {
           <ButtonBox 
             variant="save" 
             type="submit" 
-            disabled={loading}
+            disabled={loading || editingDetailId !== null}
           >
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ເພີ່ມສິນຄ້າ'}
           </ButtonBox>

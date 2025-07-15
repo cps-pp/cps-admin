@@ -1,50 +1,40 @@
-import { useForm } from 'react-hook-form';
 import React, { useState, useEffect, useRef } from 'react'; // ✅ เพิ่ม useRef
-import { useAppDispatch } from '@/redux/hook';
+import { useForm } from 'react-hook-form';
 import Loader from '@/common/Loader';
-import Alerts from '@/components/Alerts';
+import { useAppDispatch } from '@/redux/hook';
 import { openAlert } from '@/redux/reducer/alert';
-import DatePicker from '@/components/DatePicker_two';
-import InputBox from '../../../components/Forms/Input_new';
-import SelectBox from '../../../components/Forms/Select';
-import ButtonBox from '../../../components/Button';
-import BoxDate from '../../../components/Date';
+import Alerts from '@/components/Alerts';
+import Select from '@/components/Forms/Select';
+import InputBox from '../../components/Forms/Input_new';
+import ButtonBox from '../../components/Button';
+import PriceInputBox from '../../components/Forms/PriceInput';
 import { usePrompt } from '@/hooks/usePrompt';
 
-
-const CreateEmployee = ({ setShow, getList, existingIds, onCloseCallback }) => {
+const CreateSupplier = ({ setShow, getList, existingIds, onCloseCallback }) => {
   const {
     register,
+    setValue,
     handleSubmit,
     reset,
-    setValue,
     setFocus,
-    watch,
-    formState: { isDirty, errors },
+    formState: { errors, isDirty  },
   } = useForm();
-const dob = watch('dob');
-
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
-  const [role, setRole] = useState('');
-  const [gender, setGender] = useState('');
   const [loadingNextId, setLoadingNextId] = useState(true);
-  const [nextEmpId, setNextEmpId] = useState('');
+  const [nextSupplierId, setNextSupplierId] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('020'); // ✅ เพิ่ม state สำหรับเบอร์โทร
 
   // ✅ ใช้ useRef เพื่อเก็บ current value ของ isDirty
   const isDirtyRef = useRef(isDirty);
-
+  
   // ✅ อัพเดต ref ทุกครั้งที่ isDirty เปลี่ยน
   useEffect(() => {
     isDirtyRef.current = isDirty;
   }, [isDirty]);
-
+  
   // ✅ เตือนเมื่อมีการพยายามออกจากหน้าด้วย navigation (Back / เปลี่ยน route)
-  usePrompt(
-    'ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.',
-    isDirty,
-  );
+  usePrompt('ທ່ານຕ້ອງການອອກຈາກໜ້ານີ້ແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ກຳລັງປ້ອນຈະສູນເສຍ.', isDirty);
 
   // ✅ เตือนเมื่อจะรีเฟรช / ปิดแท็บ
   useEffect(() => {
@@ -63,9 +53,7 @@ const dob = watch('dob');
   // ✅ เตือนเมื่อคลิกปิดฟอร์ม - ใช้ current value จาก ref
   const handleCloseForm = () => {
     if (isDirtyRef.current) {
-      const confirmLeave = window.confirm(
-        'ທ່ານຕ້ອງການປິດຟອມແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ປ້ອນຈະສູນເສຍ',
-      );
+      const confirmLeave = window.confirm('ທ່ານຕ້ອງການປິດຟອມແທ້ຫຼືບໍ? ຂໍ້ມູນທີ່ປ້ອນຈະສູນເສຍ');
       if (!confirmLeave) return;
     }
     setShow(false);
@@ -82,13 +70,14 @@ const dob = watch('dob');
   useEffect(() => {
     setValue('phone', '020', { shouldValidate: false, shouldDirty: false });
   }, [setValue]);
-  
+
+  // ดึงรหัสถัดไปเมื่อ component โหลด
   useEffect(() => {
     const fetchNextId = async () => {
       try {
         setLoadingNextId(true);
         const response = await fetch(
-          'http://localhost:4000/src/manager/next-emp-id',
+          'http://localhost:4000/src/manager/next-supplier-id',
         );
 
         if (!response.ok) {
@@ -96,8 +85,8 @@ const dob = watch('dob');
         }
 
         const data = await response.json();
-        setNextEmpId(data.nextId);
-        setValue('emp_id', data.nextId); // ตั้งค่ารหัสในฟอร์ม
+        setNextSupplierId(data.nextId);
+        setValue('sup_id', data.nextId); // ตั้งค่ารหัสในฟอร์ม
       } catch (error) {
         console.error('Error fetching next ID:', error);
         dispatch(
@@ -115,7 +104,7 @@ const dob = watch('dob');
     fetchNextId();
   }, [dispatch, setValue]);
 
-  // ✅ ฟังก์ชันจัดการการเปลี่ยนแปลงเบอร์โทร - เพิ่มการตรวจสอบตัวเลขที่ 4
+  // ✅ ฟังก์ชันจัดการการเปลี่ยนแปลงเบอร์โทร
   const handlePhoneChange = (e) => {
     let value = e.target.value;
     
@@ -144,12 +133,12 @@ const dob = watch('dob');
     }
   };
 
-  const handleSave = async (data) => {
+  const handleSave = async (formData) => {
     setLoading(true);
 
-    // เช็คว่ามี emp_id ซ้ำไหม
-    if (existingIds.includes(data.emp_id)) {
-      setFocus('emp_id');
+    // เช็คว่ามี sup_id ซ้ำไหม
+    if (existingIds.includes(formData.sup_id)) {
+      setFocus('sup_id');
       dispatch(
         openAlert({
           type: 'error',
@@ -162,33 +151,41 @@ const dob = watch('dob');
     }
 
     try {
-      const response = await fetch('http://localhost:4000/src/manager/emp', {
+      const response = await fetch('http://localhost:4000/src/manager/supplier', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, role, gender }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sup_id: formData.sup_id,
+          company_name: formData.company_name,
+          address: formData.address,
+          phone: formData.phone,
+        }),
       });
 
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'ບັນທຶກຂໍ້ມູບໍ່ສຳເລັດ');
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
 
       dispatch(
         openAlert({
           type: 'success',
           title: 'ສຳເລັດ',
-          message: 'ບັນທຶກຂໍ້ມູນພະນັກງານສຳເລັດແລ້ວ',
-        }),
+          message: 'ບັນທຶກຂໍ້ມູນຜູ້ສະໜອງສຳເລັດແລ້ວ',
+        })
       );
 
+      setShow(false);
       await getList();
       reset();
-      setShow(false);
     } catch (error) {
       dispatch(
         openAlert({
           type: 'error',
           title: 'ເກີດຂໍ້ຜິດພາດ',
           message: 'ມີຂໍ້ຜິດພາດໃນການບັນທຶກຂໍ້ມູນ',
-        }),
+        })
       );
     } finally {
       setLoading(false);
@@ -198,75 +195,52 @@ const dob = watch('dob');
   if (loading || loadingNextId) return <Loader />;
 
   return (
-    <div className="rounded bg-white pt-4 ">
+    <div className="rounded bg-white pt-4 dark:bg-boxdark">
       <Alerts />
-      <div className="flex items-center border-b border-stroke  pb-4">
-        <h1 className="text-md md:text-lg lg:text-xl font-semibold text-strokedark  px-4">
-          ເພີ່ມຂໍ້ມູນພະນັກງານ
+      <div className="flex items-center border-b border-stroke dark:border-strokedark pb-4">
+        <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3 px-4">
+          ເພີ່ມຂໍ້ມູນ
         </h1>
-         {/* <p className="text-Third2 text-sm">ກະລຸນາປ້ອນຂໍ້ມູນໃຫ້ຄົບຖ້ວນ</p> */}
       </div>
 
-      <form
-        onSubmit={handleSubmit(handleSave)}
-        className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 pt-4"
-      >
-        <div className="">
+      <form onSubmit={handleSubmit(handleSave)} className="mt-4 px-4">
+
+        {/* แสดงรหัสที่สร้างอัตโนมัติ (แบบ read-only) */}
+        <div className="mb-4">
           <label className="block text-sm font-medium mb-2 text-black dark:text-white">
-            ລະຫັດໝໍ
+            ລະຫັດຜູ້ສະໜອງ
           </label>
           <input
             type="text"
-            value={nextEmpId}
+            value={nextSupplierId}
             readOnly
-            className="w-full rounded border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
+            className="w-full rounded-lg border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
           />
-          <input type="hidden" {...register('emp_id')} />
-         <p className=" text-sm mt-2"> <span className='text-red-500'>*</span>  ລະບົບສ້າງອັດຕາໂນມັດ</p>
-
+          {/* Hidden input สำหรับส่งค่าไปกับฟอร์ม */}
+          <input type="hidden" {...register('sup_id')} />
         </div>
-
+       
         <InputBox
-          label="ຊື່ທ່ານຫມໍ"
-          name="emp_name"
+          label="ຊື່ບໍລິສັດ"
+          name="company_name"
           type="text"
-          placeholder="ປ້ອນຊຶ່ທ່ານຫມໍ"
+          placeholder="ປ້ອນຊື່ບໍລິສັດ"
           register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນຊື່ທ່ານຫມໍກ່ອນ' }}
-          className='mt-1'
+          formOptions={{ required: 'ກະລຸນາປ້ອນຊື່ບໍລິສັດກ່ອນ' }}
           errors={errors}
         />
         <InputBox
-          label="ນາມສະກຸນ"
-          name="emp_surname"
+          label="ທີ່ຢູ່"
+          name="address"
           type="text"
-          placeholder="ນາມສະກຸນ"
+          placeholder="ປ້ອນທີ່ຢູ່"
           register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນນາມສະກຸນກ່ອນ' }}
+          formOptions={{ required: 'ກະລຸນາປ້ອນທີ່ຢູ່ກ່ອນ' }}
           errors={errors}
-        />
-        <SelectBox
-          label="ເພດ"
-          name="ເພດ"
-          options={['ຊາຍ', 'ຍິງ']}
-          register={register}
-          errors={errors}
-          value={gender}
-          
-          onSelect={(e) => setGender(e.target.value)}
-        />
-
-        <BoxDate
-           select={dob}
-          register={register}
-          errors={errors}
-          name="dob"
-          label="ວັນເດືອນປິເກີດ"
-          formOptions={{ required: 'ກະລຸນາໃສ່ວັນເດືອນປີເກີດ' }}
-          setValue={setValue}
         />
         
-        <div className="">
+        {/* ✅ Custom Phone Input with 020 prefix - แทนที่ PriceInputBox */}
+        <div className="mb-4">
           <label className="block text-sm font-medium mb-2 text-black dark:text-white">
             ເບີຕິດຕໍ່
           </label>
@@ -313,26 +287,9 @@ const dob = watch('dob');
           )}
         </div>
 
-        <InputBox
-          label="ທີ່ຢູ່"
-          name="address"
-          type="text"
-          placeholder="ປ້ອນທີ່ຢູ່"
-          register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນທີ່ຢູ່ກ່ອນ' }}
-          errors={errors}
-        />
-        <SelectBox
-          label="ຕຳແໜ່ງ"
-          name="ຕຳແໜ່ງ"
-          options={['ທ່ານໝໍ', 'ຜູ້ຊ່ວຍທ່ານໝໍ']}
-          register={register}
-          errors={errors}
-          value={role}
-          onSelect={(e) => setRole(e.target.value)}
-        />
-        <div className=" flex justify-end col-span-full py-4">
+        <div className="mt-8 flex justify-end space-x-4 col-span-full py-4">
           
+
           <ButtonBox variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </ButtonBox>
@@ -342,5 +299,4 @@ const dob = watch('dob');
   );
 };
 
-export default CreateEmployee;
-
+export default CreateSupplier;

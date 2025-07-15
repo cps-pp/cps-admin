@@ -188,7 +188,7 @@ const CreateCategory = ({
             type="text"
             value={nextMedtypeId}
             readOnly
-            className="w-full rounded-lg border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
+            className="w-full rounded border-[1.5px] border-stroke bg-gray-100 py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-gray-700 dark:text-white cursor-not-allowed"
           />
           {/* Hidden input สำหรับส่งค่าไปกับฟอร์ม */}
           <input type="hidden" {...register('medtype_id')} />

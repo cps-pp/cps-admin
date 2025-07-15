@@ -15,6 +15,7 @@ import {
   Package,
   Filter,
   XCircle,
+  RotateCcwIcon,
 } from 'lucide-react';
 import { useParams, useLocation } from 'react-router-dom';
 import { Empty } from 'antd';
@@ -36,7 +37,7 @@ const DetailFollowPatient = ({ onBack }) => {
   const [searchInId, setSearchInId] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-
+  const [isReloading, setIsReloading] = useState(false);
   const { id } = useParams();
   const location = useLocation();
   const [patient, setPatient] = useState(location.state?.patient || null);
@@ -200,25 +201,41 @@ const DetailFollowPatient = ({ onBack }) => {
     }
   };
 
-  const clearSearch = () => {
+const handleReload = async () => {
+  console.log('Button clicked!'); 
+  console.log('isReloading:', isReloading);
+  
+  if (isReloading) {
+    // console.log('Already reloading, returning early');
+    return;
+  }
+
+  setIsReloading(true);
+
+  try {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
     setSearchDate('');
     setSearchInId('');
-    setFilteredInspections([]);
-  };
-
-  const handleReload = async () => {
-    setSearchDate('');
-    setSearchInId('');
-
     setFilteredInspections([]);
 
     if (patient) {
+      // console.log('Fetching inspections for patient:', patient.patient_id);
       await fetchInspectionsByPatient(patient.patient_id);
     } else {
+      // console.log('Fetching patient by ID');
       await fetchPatientById();
     }
-  };
-
+    
+    console.log('Reload completed successfully');
+  } catch (error) {
+    console.error('Error reloading:', error);
+  } finally {
+    setTimeout(() => {
+      setIsReloading(false);
+    }, 200);
+  }
+};
   const toggleInspectionExpansion = async (inspectionId) => {
     const isExpanded = expandedInspections[inspectionId];
 
@@ -534,13 +551,25 @@ const DetailFollowPatient = ({ onBack }) => {
               <BackButton />
               <button
                 onClick={handleReload}
-                disabled={loading}
-                className="inline-flex items-center gap-2 px-4 py-2 text-md font-medium rounded border border-secondary2/40 bg-secondary2/10 text-secondary2 hover:bg-secondary2/15 disabled:opacity-50 transition-colors"
+                disabled={loading || isReloading}
+                className={`
+    inline-flex items-center gap-2 px-4 py-2 text-md font-medium rounded 
+    border border-secondary2/40 bg-secondary2/10 text-secondary2 
+    hover:bg-secondary2/15 disabled:opacity-50 
+    transition-all duration-300 ease-in-out
+    ${isReloading ? 'bg-secondary2/20 cursor-not-allowed' : 'hover:scale-105'}
+  `}
               >
                 <RotateCcw
-                  className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}
+                  className={`
+      w-4 h-4 
+      ${isReloading ? 'animate-spin' : ''}
+      transition-transform duration-300
+    `}
                 />
-                ໂຫຼດໃໝ່
+                <span className="transition-opacity duration-300">
+                  {isReloading ? 'ກຳລັງໂຫຼດ...' : 'ໂຫຼດໃໝ່'}
+                </span>
               </button>
             </div>
 
@@ -607,11 +636,15 @@ const DetailFollowPatient = ({ onBack }) => {
                   </button>
                 </div>
               </div>
+                 {(searchDate !== '' || searchInId !== '') && filteredInspections.length === 0 && (
+      <p className="text-sm text-rose-500 mt-3">
+        * ບໍ່ພົບຂໍ້ມູນທີ່ຄົ້ນຫາ
+      </p>
+    )}
             </div>
           )}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Box 1: ຈຳນວນກວດ */}
           <div className="bg-white rounded shadow-sm border border-slate-200 p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -635,7 +668,6 @@ const DetailFollowPatient = ({ onBack }) => {
             </div>
           </div>
 
-          {/* Box 2: ແພັກແກັດ */}
           <div className="bg-white rounded shadow-sm border border-slate-200 p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -665,7 +697,6 @@ const DetailFollowPatient = ({ onBack }) => {
         <div className="grid grid-cols-1 gap-4 ">
           <div className="w-full max-w-sm space-y-4"></div>
 
-          {/* Right Column - Inspection History */}
           <div className="w-full">
             <div className="bg-white rounded shadow-sm border border-stroke">
               <div className="p-4 border-b border-slate-200">

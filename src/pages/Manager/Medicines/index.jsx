@@ -13,6 +13,7 @@ import { useAppDispatch } from '@/redux/hook';
 import Alerts from '@/components/Alerts';
 import FilterSelect from './dropdowncate/filterselect';
 import { Empty } from 'antd';
+import SmoothModal from '../../../components/Modal/SmoothModal';
 
 const MedicinesPage = () => {
   const [medicines, setMedicines] = useState([]);
@@ -287,7 +288,7 @@ const MedicinesPage = () => {
             <Button
               onClick={() => setShowAddMedicinesModal(true)}
               icon={iconAdd}
-              className="bg-secondary2 hover:bg-secondary3"
+              className="bg-Third2 hover:bg-Third3"
             >
               ເພີ່ມຂໍ້ມູນ
             </Button>
@@ -328,7 +329,8 @@ const MedicinesPage = () => {
               onChange={(e) => setSelectedStatus(e.target.value)}
             >
               <option value="">-- ຄົ້ນຫາຕາມສະຖານະ --</option>
-              <option value="ຍັງມີ">ຍັງມີ</option>
+              <option value="ພຽງພໍ">ພຽງພໍ</option>
+              <option value="ກຳລັງຈະໝົດ">ກຳລັງຈະໝົດ</option>
               <option value="ໝົດ">ໝົດ</option>
             </select>
 
@@ -387,8 +389,10 @@ const MedicinesPage = () => {
                     <td className="px-4 py-3">
                       <span
                         className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
-                          medicine.status === 'ຍັງມີ'
+                          medicine.status === 'ພຽງພໍ'
                             ? 'bg-green-100 text-green-700'
+                            : medicine.status === 'ກຳລັງຈະໝົດ'
+                            ? 'bg-yellow-100 text-form-strokedark'
                             : medicine.status === 'ໝົດ'
                               ? 'bg-red-100 text-red-700'
                               : 'bg-gray-100 text-gray-700'
@@ -511,12 +515,14 @@ const MedicinesPage = () => {
                 </svg>
               </button>
 
+              <SmoothModal onClose={() => setShowAddMedicinesModal(false)}>
               <CreateMedicines
                 setShow={setShowAddMedicinesModal}
                 getList={fetchMedicines}
                 existingIds={existingIds} // ✅ เพิ่มบรรทัดน
                 onCloseCallback={setCreateFormCloseHandler} // ✅ ส่ง callback function
               />
+              </SmoothModal>
             </div>
           </div>
         )}
@@ -543,13 +549,14 @@ const MedicinesPage = () => {
                   />
                 </svg>
               </button>
-
+              <SmoothModal onClose={() => setShowEditModal(false)}>
               <EditMedicines
                 id={selectedId}
                 onClose={() => setShowEditModal(false)}
                 setShow={setShowEditModal}
                 getList={fetchMedicines}
               />
+              </SmoothModal>
             </div>
           </div>
         )}

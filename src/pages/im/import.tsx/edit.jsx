@@ -112,16 +112,19 @@ const EditImport = ({ id, setShow, getList }) => {
             im_date: formattedDate,
             preorder_id: importData.preorder_id || '',
             emp_id_create: importData.emp_id_create || '',
+            note: importData.note || '',
           };
 
           // console.log('Form data to reset:', formData);
 
           // Reset form with fetched data
-          reset(formData);
+          
 
           // Set state values
           setSelectedPreorder(importData.preorder_id || '');
           setSelectEmpcreate(importData.emp_id_create || '');
+
+          reset(formData);
 
           setDataLoaded(true);
         } else {
@@ -170,6 +173,8 @@ const EditImport = ({ id, setShow, getList }) => {
       formDataPayload.append('im_date', formData.im_date);
       formDataPayload.append('preorder_id', selectedPreorder || formData.preorder_id);
       formDataPayload.append('emp_id_create', selectEmpcreate || formData.emp_id_create);
+      formDataPayload.append('note', formData.note || '');
+
       
       // Only append file if a new one is selected
       if (selectedFile) {
@@ -327,6 +332,14 @@ const EditImport = ({ id, setShow, getList }) => {
             ຮອງຮັບຟາຍ: PDF, ຮູບ, Word, Excel
           </p>
         </div>
+          <InputBox
+            label="ໝາຍເຫດ"
+            name="note"
+            type="text"
+            register={register}
+            errors={errors}
+          />
+
 
         <div className="flex justify-end space-x-4 col-span-full py-4">
           <Button variant="save" type="submit" disabled={loading}>

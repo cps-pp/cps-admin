@@ -5,11 +5,11 @@ module.exports = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   darkMode: 'class',
   theme: {
-  fontFamily: {
-    lao: ['"Noto Sans Lao"', 'sans-serif'],
-    en: ['"Poppins"', 'sans-serif'],
-    sans: ['"Poppins"', '"Noto Sans Lao"', 'sans-serif'],
-  },
+    fontFamily: {
+      lao: ['"Noto Sans Lao"', 'sans-serif'],
+      en: ['"Poppins"', 'sans-serif'],
+      sans: ['"Poppins"', '"Noto Sans Lao"', 'sans-serif'],
+    },
 
     screens: {
       '2xsm': '375px',
@@ -26,7 +26,7 @@ module.exports = {
         bodydark1: '#DEE4EE',
         bodydark2: '#8A99AF',
         bodydark3: '#C7CDD4',
-        primary: '#51419B',
+        primary: '#5A3AB8',
         // primary: '#7C67DE',
         secondary: '#51419B',
         secondary2: '#51416B',
@@ -34,7 +34,10 @@ module.exports = {
 
         Third: '#EEEBFF',
         Third2: '#7A5FD0',
-
+        Third3: '#5A3AB8',
+        Third4: '#3A1E7F',
+    
+        
         stroke: '#E2E8F0',
         gray: '#F1F5F9',
         graydark: '#333A48',

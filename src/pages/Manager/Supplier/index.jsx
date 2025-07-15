@@ -13,6 +13,7 @@ import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { openAlert } from '@/redux/reducer/alert';
 import Alerts from '@/components/Alerts';
 import { Empty } from 'antd';
+import SmoothModal from '../../../components/Modal/SmoothModal';
 
 const SupplierPage = () => {
   const [suppliers, setSuppliers] = useState([]);
@@ -188,15 +189,15 @@ const handleSortById = () => {
     <>
       <div className="rounded bg-white pt-4 border border-stroke">
         <Alerts />
-        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 dark:border-strokedark">
-          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark dark:text-bodydark3">
+        <div className="flex items-center justify-between border-b border-stroke px-4 pb-4 ">
+          <h1 className="text-md md:text-lg lg:text-xl font-medium text-strokedark ">
             ຈັດການຂໍ້ມູນຜູ້ສະໜອງ
           </h1>
           <div className="flex items-center gap-2">
             <Button
               onClick={() => setShowAddModal(true)}
               icon={iconAdd}
-              className="bg-secondary2 hover:bg-secondary3"
+              className="bg-Third2 hover:bg-Third3"
             >
               ເພີ່ມຜູ້ສະໜອງ
             </Button>
@@ -259,19 +260,7 @@ const handleSortById = () => {
                     <td className="px-4 py-4">{supplier.company_name}</td>
                     <td className="px-4 py-4">{supplier.address}</td>
                     <td className="px-4 py-4">{supplier.phone}</td>
-                    <td className="">
-                      <span
-                        className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
-                          supplier.status === 'ເປີດ'
-                            ? 'bg-green-100 text-green-700'
-                            : supplier.status === 'ປິດ'
-                              ? 'bg-red-100 text-red-700'
-                              : 'bg-gray-100 text-gray-700'
-                        }`}
-                      >
-                        {supplier.status}
-                      </span>
-                    </td>
+                    
                     <td className="px-3 py-4 text-center">
                       <TableAction
                         onDelete={openDeleteModal(supplier.sup_id)}
@@ -318,13 +307,15 @@ const handleSortById = () => {
                   />
                 </svg>
               </button>
-
+ 
+              <SmoothModal onClose={() => setShowAddModal(false)}>
               <CreateSupplier
                 setShow={setShowAddModal}
                 getList={fetchSuppliers}
                 existingIds={existingIds} // ✅ เพิ่มบรรทัดน
                 onCloseCallback={setCreateFormCloseHandler} // ✅ ส่ง callback function
               />
+              </SmoothModal>
             </div>
           </div>
         )}
@@ -352,12 +343,14 @@ const handleSortById = () => {
                 </svg>
               </button>
 
+              <SmoothModal onClose={() => setShowEditModal(false)}>
               <EditSupplier
                 id={selectedId}
                 onClose={() => setShowEditModal(false)}
                 setShow={setShowEditModal}
                 getList={fetchSuppliers}
               />
+              </SmoothModal>
             </div>
           </div>
         )}

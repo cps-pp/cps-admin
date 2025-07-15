@@ -12,6 +12,7 @@ import { openAlert } from '@/redux/reducer/alert';
 import TablePaginationDemo from '@/components/Tables/Pagination_two';
 import { ServiceHeaders } from './column/service.js';
 import { Empty } from 'antd';
+import SmoothModal from '../../../components/Modal/SmoothModal';
 
 const ServicePage = () => {
   const [services, setServices] = useState([]);
@@ -198,7 +199,7 @@ const ServicePage = () => {
             <Button
               onClick={() => setShowAddModal(true)}
               icon={iconAdd}
-              className="bg-secondary2 hover:bg-secondary3"
+              className="bg-Third2 hover:bg-Third3"
             >
               ເພີ່ມຂໍ້ມູນລາຍການ
             </Button>
@@ -319,12 +320,14 @@ const ServicePage = () => {
                 </svg>
               </button>
 
+              <SmoothModal onClose={() => setShowAddModal(false)}>
               <CreateServiceList
                 setShow={setShowAddModal}
                 getList={fetchServiceList}
                 existingIds={existingIds} // ✅ เพิ่มบรรทัดน
                 onCloseCallback={setCreateFormCloseHandler} // ✅ ส่ง callback function
               />
+              </SmoothModal>
             </div>
           </div>
         )}
@@ -352,12 +355,14 @@ const ServicePage = () => {
                 </svg>
               </button>
 
+              <SmoothModal onClose={() => setShowEditModal(false)}>
               <EditServicerList
                 id={selectedId}
                 onClose={() => setShowEditModal(false)}
                 setShow={setShowEditModal}
                 getList={fetchServiceList}
               />
+              </SmoothModal>
             </div>
           </div>
         )}

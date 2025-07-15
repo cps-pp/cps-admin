@@ -21,7 +21,7 @@ const CreateSupplier = ({ setShow, getList, existingIds, onCloseCallback }) => {
   } = useForm();
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
-  const [status, setStatus] = useState('');
+  
   const [loadingNextId, setLoadingNextId] = useState(true);
   const [nextSupplierId, setNextSupplierId] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('020'); // ✅ เพิ่ม state สำหรับเบอร์โทร
@@ -162,7 +162,7 @@ const CreateSupplier = ({ setShow, getList, existingIds, onCloseCallback }) => {
           company_name: formData.company_name,
           address: formData.address,
           phone: formData.phone,
-          status: formData.status,
+
         }),
       });
 
@@ -289,18 +289,7 @@ const CreateSupplier = ({ setShow, getList, existingIds, onCloseCallback }) => {
           )}
         </div>
 
-        <Select
-          label="ສະຖານນະ"
-          name="status"
-          options={['ເປີດ', 'ປິດ']}
-          register={register}
-          errors={errors}
-          value={status}
-          onSelect={(e) => {
-            setStatus(e.target.value);
-            setValue('status', e.target.value);
-          }}
-        />
+
 
         <div className="mt-8 flex justify-end space-x-4 col-span-full py-4">
           
