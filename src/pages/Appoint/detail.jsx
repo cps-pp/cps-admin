@@ -1,36 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   User,
   MapPin,
   Stethoscope,
   Pill,
-  Clock,
   FileText,
   Activity,
-  Eye,
   ChevronDown,
   ChevronUp,
-  Star,
   Phone,
   FileClock,
-  List,
   FileMinus,
-  ArrowLeft,
   RotateCcw,
-  Search,
-  Calendar,
-  Filter,
-  X,
   Package,
   FilterIcon,
   XCircle,
+  ListCheck
 } from 'lucide-react';
 import { useParams, useLocation } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
 import BackButton from '../../components/BackButton';
-import SearchBox from '../../components/Forms/Search_New';
-import { Empty } from 'antd';
+import { Empty, Tag } from 'antd';
 import { URLBaseLocal } from '../../lib/MyURLAPI';
+import moment from 'moment/moment';
 
 const FollowTreatmentPage = ({ onBack }) => {
   const [patientDetails, setPatientDetails] = useState(null);
@@ -40,6 +31,8 @@ const FollowTreatmentPage = ({ onBack }) => {
   const [prescriptionDetails, setPrescriptionDetails] = useState({});
   const [expandedInspections, setExpandedInspections] = useState({});
   const [loadingInspections, setLoadingInspections] = useState({});
+
+  const [statementPayment, setStatementPayment] = useState([]);
 
   const [searchDate, setSearchDate] = useState('');
   const [searchInId, setSearchInId] = useState('');
@@ -133,7 +126,7 @@ const FollowTreatmentPage = ({ onBack }) => {
   const fetchInspectionDetails = async (inspectionId) => {
     try {
       setLoadingInspections((prev) => ({ ...prev, [inspectionId]: true }));
-      console.log('Fetching inspection details for ID:', inspectionId);
+      // console.log('Fetching inspection details for ID:', inspectionId);
 
       const response = await fetch(
         `${URLBaseLocal}/src/report/inspection/${inspectionId}`,
@@ -144,7 +137,7 @@ const FollowTreatmentPage = ({ onBack }) => {
       }
 
       const data = await response.json();
-      console.log('Inspection API response:', data);
+      // console.log('Inspection API response:', data);
 
       if (data.resultCode === '200') {
         let inspectionData = null;
@@ -158,8 +151,10 @@ const FollowTreatmentPage = ({ onBack }) => {
           ...prev,
           [inspectionId]: inspectionData,
         }));
-
+        // console.log(inspectionData)
         await fetchPrescriptionDetails(inspectionId);
+
+
       } else {
         console.error('API returned error:', data);
       }
@@ -174,7 +169,7 @@ const FollowTreatmentPage = ({ onBack }) => {
 
   const fetchPrescriptionDetails = async (inspectionId) => {
     try {
-      console.log('Fetching prescription details for ID:', inspectionId);
+      // console.log('Fetching prescription details for ID:', inspectionId);
       const response = await fetch(
         `${URLBaseLocal}/src/report/prescription?id=${inspectionId}`,
       );
@@ -184,7 +179,7 @@ const FollowTreatmentPage = ({ onBack }) => {
       }
 
       const data = await response.json();
-      console.log('Prescription API response:', data);
+      // console.log('Prescription API response:', data);
 
       if (data.resultCode === '200') {
         let prescriptionData = [];
@@ -194,18 +189,45 @@ const FollowTreatmentPage = ({ onBack }) => {
           prescriptionData = data.data;
         }
 
-        console.log('Setting prescription data:', prescriptionData);
+        // console.log('Setting prescription data:', prescriptionData);
         setPrescriptionDetails((prev) => ({
           ...prev,
           [inspectionId]: prescriptionData,
         }));
       } else {
-        console.error('API returned error:', data);
+        // console.error('API returned error:', data);
         setPrescriptionDetails((prev) => ({ ...prev, [inspectionId]: [] }));
       }
     } catch (error) {
-      console.error('Error fetching prescription details:', error);
+      // console.error('Error fetching prescription details:', error);
       setPrescriptionDetails((prev) => ({ ...prev, [inspectionId]: [] }));
+    }
+  };
+
+  const fetchStatements = async (inspectionId) => {
+
+    try {
+      // console.log('Fetching prescription details for ID:', inspectionId);
+      const response = await fetch(
+        `${URLBaseLocal}/src/invoice/inspection-invoice/${inspectionId}`,
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+
+      if (data.resultCode === '200') {
+        setStatementPayment(data.data)
+      } else {
+        // console.error('API returned error:', data);
+        setStatementPayment([]);
+      }
+    } catch (error) {
+      // console.error('Error fetching prescription details:', error);
+      setStatementPayment([]);
     }
   };
 
@@ -234,6 +256,7 @@ const FollowTreatmentPage = ({ onBack }) => {
     if (!isExpanded && !detailedInspections[inspectionId]) {
       await fetchInspectionDetails(inspectionId);
     }
+    await fetchStatements(inspectionId)
 
     setExpandedInspections((prev) => ({
       ...prev,
@@ -318,7 +341,16 @@ const FollowTreatmentPage = ({ onBack }) => {
               </div>
               <div>
                 <h3 className="font-semibold text-secondary2 mb-1">
-                  ໃບບິນປິ່ນປົວ: {inspection.in_id}
+                  ເລກທີປິ່ນປົວ: {inspection.in_id}
+                  <Tag
+                    className='ml-2 font-normal rounded-full'
+                    style={{ fontFamily: 'Noto Sans Lao' }}
+                    color={`${inspection?.invoice?.status_paid === 'SUCCESS' ? 'green' : 'blue'}`}
+                  >
+                    {
+                      inspection?.invoice?.status_paid === 'SUCCESS' ? 'ສໍາເລັດ' : 'ບໍ່ສໍາເລັດ'
+                    }
+                  </Tag>
                 </h3>
                 <p className="text-sm text-gray-500">
                   ວັນທີ່: {formatDate(inspection.date)}
@@ -398,7 +430,7 @@ const FollowTreatmentPage = ({ onBack }) => {
                           </tr>
                         </thead>
                         <tbody>
-                          {detailedData.services.map((service, index) => (
+                          {detailedData?.services?.map((service, index) => (
                             <tr
                               key={index}
                               className="border-b text-md border-stroke"
@@ -421,14 +453,14 @@ const FollowTreatmentPage = ({ onBack }) => {
                               ລວມທັງໝົດ
                             </td>
                             <td className="px-4 py-2 border border-stroke">
-                              {detailedData.services.reduce(
+                              {detailedData?.services?.reduce(
                                 (sum, service) => sum + (service.qty || 0),
                                 0,
                               )}{' '}
                               ລາຍການ
                             </td>
                             <td className="px-4 py-2 border border-stroke text-right">
-                              {detailedData.services
+                              {detailedData?.services
                                 .reduce(
                                   (sum, service) => sum + (service.total || 0),
                                   0,
@@ -443,7 +475,7 @@ const FollowTreatmentPage = ({ onBack }) => {
                   </div>
                 )}
 
-                {prescriptions.length > 0 && (
+                {prescriptions?.length > 0 && (
                   <div>
                     <h4 className="font-semibold text-secondary2 flex items-center">
                       <Pill className="w-5 h-5 mr-1 text-secondary2" />
@@ -474,7 +506,7 @@ const FollowTreatmentPage = ({ onBack }) => {
                           </tr>
                         </thead>
                         <tbody>
-                          {prescriptions.map((prescription, index) => (
+                          {prescriptions?.map((prescription, index) => (
                             <tr
                               key={prescription.pre_id || index}
                               className="border-b text-md border-stroke"
@@ -530,6 +562,88 @@ const FollowTreatmentPage = ({ onBack }) => {
                     </div>
                   </div>
                 )}
+
+                {statementPayment?.payments?.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-secondary2 flex items-center">
+                      <ListCheck className="w-5 h-5 mr-1 text-secondary2" />
+                      ປະຫວັດການຈ່າຍ
+                    </h4>
+                    <div className="overflow-x-auto p-4">
+                      <table className="w-full border-collapse border border-slate-300">
+                        <thead>
+                          <tr className="text-left bg-slate-100 border border-stroke">
+                            <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-200">
+                              ລະຫັດການຈ່າຍ
+                            </th>
+                            <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-200">
+                              ເວລາ
+                            </th>
+                            <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-200">
+                              ປະເພດ
+                            </th>
+                            <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-200 text-right">
+                              ເລດ
+                            </th>
+                            <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-200 text-right">
+                              ຈຳນວນ
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {statementPayment?.payments?.map((payment, index) => (
+                            <tr
+                              key={payment.pay_id || index}
+                              className="border-b text-md border-stroke"
+                            >
+                              <td className="px-4 py-2 border border-stroke">
+                                {payment.pay_id}
+                              </td>
+                              <td className="px-4 py-2 border border-stroke">
+                                {moment(payment?.pay_date).format('DD/MM/YYYY HH:mm')}
+                              </td>
+                              <td className="px-4 py-2 border border-stroke">
+                                {payment.pay_type}
+                              </td>
+                              <td className="px-4 py-2 border border-stroke text-gray-900 text-right">
+                                {payment?.ex_rate ?? 0}
+                              </td>
+                              <td className="px-4 py-2 border border-stroke text-right">
+                                {Number(payment?.paid_amount || 0).toLocaleString()}
+                              </td>
+
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot>
+                          <tr className="font-semibold text-secondary2">
+                            <td
+                              className="px-4 py-2 border border-stroke text-right"
+                              colSpan={4}
+                            >
+                              ຍອດທັງໝົດ (ກີບ)
+                            </td>
+                            <td className="px-4 py-2 border border-stroke text-right">
+                              {statementPayment?.total_paid?.toLocaleString() ?? 0}
+                            </td>
+                          </tr>
+                          <tr className="font-semibold text-secondary2">
+                            <td
+                              className="px-4 py-2 border border-stroke text-right"
+                              colSpan={4}
+                            >
+                              ຍອດຄ້າງຈ່າຍ (ກີບ)
+                            </td>
+                            <td className="px-4 py-2 border border-stroke text-right">
+                              {((Number(statementPayment?.total) - Number(statementPayment?.total_paid)) || 0).toLocaleString()}
+                            </td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
               </div>
             )}
           </div>
