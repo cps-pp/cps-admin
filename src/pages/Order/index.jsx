@@ -193,9 +193,9 @@ const OrderPage = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:4000/src/preorder/cancel/${id}`,
+        `http://localhost:4000/src/preorder/preorder/${id}`,
         {
-          method: 'PUT',
+          method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,

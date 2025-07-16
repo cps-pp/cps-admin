@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import Alerts from '@/components/Alerts';
 import Loader from '@/common/Loader';
 import { openAlert } from '@/redux/reducer/alert';
@@ -34,8 +34,9 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
   const [loading, setLoading] = useState(false);
   const [loadingNextId, setLoadingNextId] = useState(true);
   const [nextAppointId, setNextAppointId] = useState('');
+  const [dateValue, setDateValue] = useState('');
   const dispatch = useAppDispatch();
-  const selectedDate = watch('date_addmintted');
+
 
   const isDirtyRef = useRef(isDirty);
   
@@ -71,6 +72,43 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
       onCloseCallback(() => handleCloseForm);
     }
   }, [onCloseCallback]);
+
+  // ใช้ useMemo สำหรับ formOptions เพื่อป้องกัน re-render
+  const dateFormOptions = useMemo(() => ({
+    required: 'ກະລຸນາເລືອກວັນທີນັດໝາຍ'
+  }), []);
+
+  const inputFormOptions = useMemo(() => ({
+    required: 'ກະລຸນາປ້ອນລາຍລະອຽດ'
+  }), []);
+
+  const doctorFormOptions = useMemo(() => ({
+    required: 'ກະລຸນາເລືອກທ່ານຫມໍ'
+  }), []);
+
+  const patientFormOptions = useMemo(() => ({
+    required: 'ກະລຸນາເລືອກຄົນເຈັບ'
+  }), []);
+
+  // ใช้ useCallback สำหรับ setValue
+  const handleSetValue = useCallback((name, value) => {
+    setValue(name, value);
+  }, [setValue]);
+
+  // ใช้ useCallback สำหรับ date change
+  const handleDateChange = useCallback((date) => {
+    setDateValue(date);
+    setValue('date_addmintted', date);
+  }, [setValue]);
+
+  // ใช้ useCallback สำหรับ handlers
+  const handleDoctorSelect = useCallback((e) => {
+    setSelectedEmp(e.target.value);
+  }, []);
+
+  const handlePatientSelect = useCallback((e) => {
+    setSelectedPat(e.target.value);
+  }, []);
 
   useEffect(() => {
     const fetchNextId = async () => {
@@ -142,6 +180,23 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
     fetchDoctors();
   }, []);
 
+  // ใช้ useMemo สำหรับ options เพื่อป้องกัน re-render
+  const doctorOptions = useMemo(() => 
+    doctors.map((doctor) => ({
+      value: doctor.emp_id,
+      label: `${doctor.emp_name} - ${doctor.role}`,
+    })), [doctors]
+  );
+
+  const patientOptions = useMemo(() => 
+    patients.map((patient) => ({
+      value: patient.patient_id,
+      label:
+        `${patient.patient_id} ${patient.patient_name}` +
+        (patient.patient_surname ? ` ${patient.patient_surname}` : ''),
+    })), [patients]
+  );
+
   const onSubmit = async (data) => {
     try {
       if (!selectedEmp || !selectedPat) {
@@ -152,16 +207,16 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
       setLoading(true);
 
       // แปลงวันที่ให้เป็น local timezone string
-    const appointmentDate = new Date(data.date_addmintted);
-    const year = appointmentDate.getFullYear();
-    const month = String(appointmentDate.getMonth() + 1).padStart(2, '0');
-    const day = String(appointmentDate.getDate()).padStart(2, '0');
-    const hours = String(appointmentDate.getHours()).padStart(2, '0');
-    const minutes = String(appointmentDate.getMinutes()).padStart(2, '0');
-    const seconds = String(appointmentDate.getSeconds()).padStart(2, '0');
+      const appointmentDate = new Date(data.date_addmintted);
+      const year = appointmentDate.getFullYear();
+      const month = String(appointmentDate.getMonth() + 1).padStart(2, '0');
+      const day = String(appointmentDate.getDate()).padStart(2, '0');
+      const hours = String(appointmentDate.getHours()).padStart(2, '0');
+      const minutes = String(appointmentDate.getMinutes()).padStart(2, '0');
+      const seconds = String(appointmentDate.getSeconds()).padStart(2, '0');
 
-    const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    console.log('Formatted date:', formattedDate); // ตรวจสอบ
+      const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      console.log('Formatted date:', formattedDate); // ตรวจสอบ
 
       const response = await fetch(
         'http://localhost:4000/src/appoint/appointment',
@@ -240,17 +295,20 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
           <input type="hidden" {...register('appoint_id')} />
         </div>
 
-     <DateTime
-  name="date_addmintted"
-  label="ວັນທີນັດໝາຍ"
-  register={register}
-  errors={errors}
-  select={selectedDate}   
-  formOptions={{ required: 'ກະລຸນາເລືອກວັນທີນັດໝາຍ' }}
-  setValue={setValue}
-  
-  withTime={true}
-/>
+        <div className="mb-4">
+        <label className="block text-sm font-medium mb-2 text-black dark:text-white">
+          ວັນທີນັດໝາຍ
+        </label>
+        <input
+          type="datetime-local"
+          {...register('date_addmintted', { required: 'ກະລຸນາເລືອກວັນທີນັດໝາຍ' })}
+          className="w-full rounded-lg border-[1.5px] border-stroke py-3 px-5 text-black outline-none dark:border-form-strokedark dark:bg-form-input dark:text-white"
+        />
+        {errors.date_addmintted && (
+          <span className="text-red-500 text-sm">{errors.date_addmintted.message}</span>
+        )}
+      </div>
+
 
 
 
@@ -261,7 +319,7 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
           type="text"
           placeholder="ປ້ອນລາຍລະອຽດ"
           register={register}
-          formOptions={{ required: 'ກະລຸນາປ້ອນລາຍລະອຽດ' }}
+          formOptions={inputFormOptions}
           errors={errors}
         />
 
@@ -269,30 +327,22 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
           label="ທ່ານຫມໍ"
           name="emp"
           value={selectedEmp}
-          options={doctors.map((doctor) => ({
-            value: doctor.emp_id,
-            label: `${doctor.emp_name} - ${doctor.role}`,
-          }))}
+          options={doctorOptions}
           register={register}
           errors={errors}
-          onSelect={(e) => setSelectedEmp(e.target.value)}
-          formOptions={{ required: 'ກະລຸນາເລືອກທ່ານຫມໍ' }}
+          onSelect={handleDoctorSelect}
+          formOptions={doctorFormOptions}
         />
 
         <SelectBoxId
           label="ຄົນເຈັບ"
           name="patient"
           value={selectedPat}
-          options={patients.map((patient) => ({
-            value: patient.patient_id,
-            label:
-              `${patient.patient_id} ${patient.patient_name}` +
-              (patient.patient_surname ? ` ${patient.patient_surname}` : ''),
-          }))}
+          options={patientOptions}
           register={register}
           errors={errors}
-          onSelect={(e) => setSelectedPat(e.target.value)}
-          formOptions={{ required: 'ກະລຸນາເລືອກຄົນເຈັບ' }}
+          onSelect={handlePatientSelect}
+          formOptions={patientFormOptions}
         />
 
         <div className="flex justify-end space-x-4 col-span-full py-4">

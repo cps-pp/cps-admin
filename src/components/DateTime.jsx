@@ -46,7 +46,10 @@ const clearDate = () => {
       placeholder={
         withTime ? 'ເລືອກວັນ/ເວລາ (ວ/ດ/ປ)' : 'ເລືອກວັນເດືອນປີ (ວ/ດ/ປ)'
       }
-      value={select ? new Date(select) : null}
+     // value={select ? new Date(select) : null}
+      //value={select instanceof Date ? select : (select ? new Date(select) : null)}
+      value={select ? new Date(select) : undefined}
+
       options={{
         enableTime: withTime,
         time_24hr: true,
@@ -57,15 +60,24 @@ const clearDate = () => {
         prevArrow: '<span class="text-gray-600 dark:text-white">‹</span>',
         nextArrow: '<span class="text-gray-600 dark:text-white">›</span>',
       }}
-     onChange={(dates) => {
-  if (dates.length > 0) {
+//      onChange={(dates) => {
+//   if (dates.length > 0) {
   
-    const isoDate = dates[0].toISOString();
-    setValue(name, isoDate, { shouldValidate: true, shouldDirty: true });
-  } else {
-    setValue(name, '', { shouldValidate: true, shouldDirty: true });
-  }
-}}
+//     const isoDate = dates[0].toISOString();
+//     setValue(name, isoDate, { shouldValidate: true, shouldDirty: true });
+//   } else {
+//     setValue(name, '', { shouldValidate: true, shouldDirty: true });
+//   }
+// }}
+
+  onChange={(dates) => {
+    if (dates.length > 0) {
+      setValue(name, dates[0], { shouldValidate: true, shouldDirty: true });
+    } else {
+      setValue(name, null, { shouldValidate: true, shouldDirty: true });
+    }
+  }}
+
 
     />
 

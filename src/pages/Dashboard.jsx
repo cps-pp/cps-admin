@@ -577,7 +577,7 @@ const Dashboard = () => {
           const lowStock = data.data.filter((med) => {
             const qty = parseInt(med.qty) || 0;
             return (
-              qty > 0 && qty <= LOW_STOCK_THRESHOLD && med.status === 'ຍັງມີ'
+              qty > 0 && qty <= LOW_STOCK_THRESHOLD && med.status === 'ກຳລັງຈະໝົດ'
             );
           });
 
@@ -635,9 +635,9 @@ const Dashboard = () => {
     if (quantity === 0 || originalStatus === 'ໝົດ') {
       return 'ໝົດ';
     } else if (quantity <= 50) {
-      return 'ໃກ້ໝົດ';
+      return 'ກຳລັງຈະໃກ້ໝົດ';
     } else {
-      return 'ຍັງມີ';
+      return 'ພຽງພໍ';
     }
   };
 
@@ -645,9 +645,9 @@ const Dashboard = () => {
     const status = getStatusByQty(qty, originalStatus);
 
     switch (status) {
-      case 'ຍັງມີ':
+      case 'ພຽງພໍ':
         return 'bg-green-100 text-green-800';
-      case 'ໃກ້ໝົດ':
+      case 'ກຳລັງຈະໃກ້ໝົດ':
         return 'bg-yellow-100 text-yellow-800';
       case 'ໝົດ':
         return 'bg-red-100 text-red-800';

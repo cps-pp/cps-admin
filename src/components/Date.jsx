@@ -46,8 +46,8 @@ const clearDate = () => {
       placeholder={
         withTime ? 'ເລືອກວັນ/ເວລາ (ວ/ດ/ປ)' : 'ເລືອກວັນເດືອນປີ (ວ/ດ/ປ)'
       }
-                value={select ? new Date(select) : undefined}
-
+      //value={select ? new Date(select) : null}
+      value={select ? new Date(select) : undefined}
       options={{
         enableTime: withTime,
         time_24hr: true,
