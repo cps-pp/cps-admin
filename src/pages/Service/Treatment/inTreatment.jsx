@@ -10,6 +10,7 @@ import { CheckCircle, Save } from 'lucide-react';
 import SelectBoxId from '../../../components/Forms/SelectID';
 import BoxDate from '../../../components/Date';
 import { URLBaseLocal } from '../../../lib/MyURLAPI';
+
 const InTreatmentService = ({
   selectedPatient,
   setSelectedPatient,
@@ -41,25 +42,37 @@ const InTreatmentService = ({
     return '';
   };
 
-  useEffect(() => {
-    const now = new Date().toISOString().split('T')[0];
-    setCreatedAt(now);
-    setValue('created_at', now);
-  }, [setCreatedAt, setValue]);
+  // ฟังก์ชันสำหรับรับวันที่และเวลาปัจจุบัน
+  function getCurrentDateTimeString() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
 
-  // const handleClick = () => {
-  //   if (!inspectionId) {
-  //     dispatch(
-  //       openAlert({
-  //         type: 'warning',
-  //         title: 'ກະລຸນາເລືອກຄົນເຈັບ',
-  //         message: 'ກ່ອນບັນທຶກການປິ່ນປົວ ກະລຸນາເລືອກຄົນເຈັບກ່ອນ',
-  //       }),
-  //     );
-  //     return;
-  //   }
-  //   onTreatmentSubmit();
-  // };
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  }
+
+  function getCurrentDateTimeISO() {
+    const now = new Date();
+    return now.toISOString();
+  }
+
+  function formatDateTimeForInput(dateString) {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    return `${day}-${month}-${year} ${hours}:${minutes}`;
+  }
 
   useEffect(() => {
     fetchPatients();
@@ -91,23 +104,18 @@ const InTreatmentService = ({
       if (res.ok && result?.data?.in_id) {
         const inspection = result.data;
         setInspectionId(inspection.in_id);
-        let formattedDate = '';
+        
+        let formattedDateTime = '';
         if (inspection.date) {
-          const date = new Date(inspection.date);
-
-          if (!isNaN(date.getTime())) {
-            formattedDate = date.toISOString().split('T')[0];
-            // console.log('Formatted date:', formattedDate);
-          }
+          formattedDateTime = formatDateTimeForInput(inspection.date);
         }
 
         setFormData((prev) => {
           const newData = {
             ...prev,
             in_id: inspection.in_id,
-            date: formattedDate,
+            date: formattedDateTime,
           };
-          // console.log('Setting new formData:', newData);
           return newData;
         });
       }
@@ -143,14 +151,12 @@ const InTreatmentService = ({
     });
   }, [refreshKey]);
 
-
   useEffect(() => {
     const fetchEmp = async () => {
       try {
         const response = await fetch(`${URLBaseLocal}/src/manager/emp`);
         const data = await response.json();
         if (response.ok) {
-          // console.log('Employees loaded:', data.data);
           setEmployees(
             data.data.map((em) => ({
               id: em.emp_id,
@@ -183,7 +189,10 @@ const InTreatmentService = ({
     fetchEmp();
   }, [dispatch]);
 
-
+  const handleDateTimeChange = (e) => {
+    const dateTimeValue = e.target.value;
+    setFormData({ ...formData, date: dateTimeValue });
+  };
   return (
     <div className="">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -248,17 +257,15 @@ const InTreatmentService = ({
 
         <div>
           <label className="text-sm text-gray-600 mb-1 block">
-            ວັນທີປິ່ນປົວ
+            ວັນທີ ແລະ ເວລາປິ່ນປົວ
           </label>
           <input
-            type="date"
-            className="w-full mb-2 appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary text-black capitalize"
-            value={formData.date || ''}
-            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-            disabled
+            type="datetime-"
+            className="w-full mb-2 appearance-none rounded border border-stroke bg-transparent py-3 px-4.5 outline-none transition focus:border-primary active:border-primary text-black"
+            value={formData.date || getCurrentDateTimeString()}
+            onChange={handleDateTimeChange}
           />
         </div>
-
         <AntdTextArea
           label="ອາການເບື່ອງຕົ້ນ (Symptom)"
           name="symptom"
@@ -332,18 +339,7 @@ const InTreatmentService = ({
       <div className="overflow-x-auto  mb-4">
         <TypeService refreshKey={refreshKey} />
       </div>
-      {/* <div className="flex justify-end mt-6">
-        <button
-          onClick={handleClick}
-          className={`px-6 py-2 rounded flex items-center gap-2 transition duration-200 ${loading
-            ? 'bg-gray-300 text-gray-600'
-            : 'bg-blue-600 text-white hover:bg-blue-700'
-            }`}
-        >
-          <Save className="w-5 h-5" />
-          {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກການປິ່ນປົວ'}
-        </button>
-      </div> */}
+      
     </div>
   );
 };
