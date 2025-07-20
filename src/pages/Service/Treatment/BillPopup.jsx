@@ -60,28 +60,7 @@ const BillPopup = ({
     0,
   );
   const grandTotal = totalServiceCost + totalMedicineCost;
-
-  // const currentBalance = invoiceData?.balance || 0;
-  // const isDebt = currentBalance > 0;
-
-  // const calculateChange = () => {
-  //   const totalReceived = isMixedPayment
-  //     ? totalMixedAmount
-  //     : parseFloat(receivedAmount || 0);
-
-  //   if (totalReceived > currentBalance) {
-  //     return totalReceived - currentBalance;
-  //   }
-  //   return 0;
-  // };
-
-  // const calculateRemainingBalance = () => {
-  //   const totalReceived = isMixedPayment
-  //     ? totalMixedAmount
-  //     : parseFloat(receivedAmount || 0);
-
-  //   return Math.max(0, currentBalance - totalReceived);
-  // };
+  
 
   const roundCurrency = (amount, currency) => {
     if (currency === 'KIP') {
@@ -288,11 +267,11 @@ const calculateRemainingBalance = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             invoice_id: invoiceData.invoice_id,
-            // paid_amount: parseFloat(receivedAmount),
-            paid_amount:
-              invoiceData?.balance >= receivedAmount
-                ? invoiceData?.balance - receivedAmount
-                : receivedAmount - (receivedAmount - invoiceData?.balance),
+            paid_amount: parseFloat(receivedAmount),
+            // paid_amount:
+            //   invoiceData?.balance >= receivedAmount
+            //     ? invoiceData?.balance - receivedAmount
+            //     : receivedAmount - (receivedAmount - invoiceData?.balance),
 
             pay_type: paymentType.toUpperCase(),
             ex_id: selectedExType,
@@ -435,12 +414,12 @@ const calculateRemainingBalance = () => {
                 ຂໍ້ມູນການປິ່ນປົວ
               </h3>
               <div className="space-y-3 print:space-y-2">
-                <div className="flex justify-between print:text-sm">
+                {/* <div className="flex justify-between print:text-sm">
                   <span className="text-form-strokedark">ວັນທີປິ່ນປົວ:</span>
                   <span className="font-medium text-form-input">
                     {formatDate(inspectionData?.date)}
                   </span>
-                </div>
+                </div> */}
                 <div className="flex justify-between print:text-sm">
                   <span className="text-form-strokedark">ອາການເບື່ອງຕົ້ນ:</span>
                   <span className="font-medium text-form-input">
@@ -611,8 +590,11 @@ const calculateRemainingBalance = () => {
                     <span className="font-bold text-form-input">
                       ລາຄາລວມທັງໝົດ:
                     </span>
-                    <span className="font-bold text-blue-600 text-xl print:text-lg">
-                      {formatCurrency(grandTotal)}
+                    <span className="font-bold text-blue-800 text-md print:text-lg">
+                      {/* {formatCurrency(grandTotal)} */}
+                      <p> {formatCurrency(invoiceData.total)}</p>
+{/* <p>ຈ່າຍແລ້ວ: {formatCurrency(invoiceData.total_paid || 0)}</p>
+<p>ຄ້າງຈ່າຍ: {formatCurrency(invoiceData.balance || invoiceData.total)}</p> */}
                     </span>
                   </div>
                 </div>

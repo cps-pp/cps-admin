@@ -10,7 +10,7 @@ export const HeadersImport = [
   { id: 'ປະເພດນຳເຂົ້າ', name: 'ປະເພດນຳເຂົ້າ', sortable: true },
   { id: 'ໝາຍເຫດ', name: 'ໝາຍເຫດ', sortable: true },
 
-  { id: 'ເພີ່ມແລະເບິ່ງລາຍລະອຽດນຳເຂົ້າ', name: 'ເພີ່ມແລະເບິ່ງລາຍລະອຽດນຳເຂົ້າ', sortable: true },
+  { id: 'ເບິ່ງລາຍລະອຽດນຳເຂົ້າ', name: 'ເບິ່ງລາຍລະອຽດນຳເຂົ້າ', sortable: true },
   { id: 'ຈັດການ', name: 'ຈັດການ', sortable: true },
 
 

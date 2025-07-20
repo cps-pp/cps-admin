@@ -25,6 +25,8 @@ const ReportPreorder = () => {
   const [monthFilter, setMonthFilter] = useState('');
   const [selectedSupplier, setSelectedSupplier] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState('');
+  // ✅ เพิ่ม state สำหรับกรองตามรหัสการสั่งซื้อ
+  const [selectedOrder, setSelectedOrder] = useState('');
 
   // ✅ เพิ่ม state สำหรับการเรียงลำดับ ID
   const [sortOrder, setSortOrder] = useState('asc'); // 'asc' หรือ 'desc'
@@ -172,6 +174,7 @@ const getSupplierName = (sup_id) => {
     setMonthFilter('');
     setSelectedSupplier('');
     setSelectedEmployee('');
+    setSelectedOrder(''); // ✅ ล้างตัวกรองรหัสการสั่งซื้อด้วย
   };
 
   // ✅ ฟังก์ชันสำหรับเรียงลำดับ ID
@@ -200,72 +203,76 @@ const getSupplierName = (sup_id) => {
     applyFiltersWithData(sortedPreorders);
   };
 
-  // ฟังก์ชันกรองข้อมูลแบบรวม (แก้ไขให้รับ data parameter)
+
   const applyFiltersWithData = (data = preorders) => {
-    let filtered = [...data];
+  let filtered = [...data];
 
-    // ✅ กรองตามแท็บ - ตรวจสอบจากคอลัมน์ types
-    if (activeTab === 'medicine') {
-      filtered = filtered.filter(preorder => {
-        const preorderType = getPreorderTypeFromTypes(preorder.types);
-        return preorderType === 'medicine' || preorderType === 'both';
-      });
-    } else if (activeTab === 'equipment') {
-      filtered = filtered.filter(preorder => {
-        const preorderType = getPreorderTypeFromTypes(preorder.types);
-        return preorderType === 'equipment' || preorderType === 'both';
-      });
-    }
+  // กรองตามแท็บ
+  if (activeTab === 'medicine') {
+    filtered = filtered.filter(preorder => {
+      const preorderType = getPreorderTypeFromTypes(preorder.types);
+      return preorderType === 'medicine' || preorderType === 'both';
+    });
+  } else if (activeTab === 'equipment') {
+    filtered = filtered.filter(preorder => {
+      const preorderType = getPreorderTypeFromTypes(preorder.types);
+      return preorderType === 'equipment' || preorderType === 'both';
+    });
+  }
 
-    // กรองตาม search query
-    if (searchQuery.trim() !== '') {
-      filtered = filtered.filter((item) =>
-        Object.values(item)
-          .join(' ')
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()),
-      );
-    }
+  if (searchQuery.trim() !== '') {
+    filtered = filtered.filter((item) =>
+      Object.values(item)
+        .join(' ')
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()),
+    );
+  }
 
-    // กรองตามเดือน
-    if (monthFilter) {
-      filtered = filtered.filter((item) => {
-        const itemMonth = new Date(item.preorder_date).toISOString().slice(0, 7);
-        return itemMonth === monthFilter;
-      });
-    }
+  if (monthFilter) {
+    filtered = filtered.filter((item) => {
+      const itemMonth = new Date(item.preorder_date).toISOString().slice(0, 7);
+      return itemMonth === monthFilter;
+    });
+  }
 
-    // กรองตามผู้สะหนอง
-    if (selectedSupplier !== '') {
-      filtered = filtered.filter((preorder) => preorder.sup_id === selectedSupplier);
-    }
+  if (selectedSupplier !== '') {
+    filtered = filtered.filter((preorder) => preorder.sup_id === selectedSupplier);
+  }
 
-    // กรองตามพนักงาน
-    if (selectedEmployee !== '') {
-      filtered = filtered.filter((preorder) => preorder.emp_id_create === selectedEmployee);
-    }
+  if (selectedEmployee !== '') {
+    filtered = filtered.filter((preorder) => preorder.emp_id_create === selectedEmployee);
+  }
 
-    setFilterPreorder(filtered);
-    setFilterPr(filtered);
-  };
+  // แก้ไขส่วนนี้
+  if (selectedOrder !== '') {
+    filtered = filtered.filter((preorder) => {
+      const preorderId = preorder.preorder_id ? String(preorder.preorder_id) : '';
+      const selectedOrderStr = String(selectedOrder);
+      return preorderId === selectedOrderStr;
+    });
+  }
 
-  // ฟังก์ชันกรองข้อมูลแบบรวม (เดิม)
-  const applyFilters = () => {
-    applyFiltersWithData(preorders);
-  };
+  setFilterPreorder(filtered);
+  setFilterPr(filtered);
+};
 
-  // เรียกใช้ฟังก์ชันกรองเมื่อมีการเปลี่ยนแปลงใน filters หรือข้อมูล
-  useEffect(() => {
-    applyFilters();
-  }, [searchQuery, monthFilter, selectedSupplier, selectedEmployee, preorders, activeTab]);
+const applyFilters = () => {
+  applyFiltersWithData(preorders);
+};
 
-  // ฟังก์ชันล้างตัวกรองทั้งหมด
-  const clearAllFilters = () => {
-    setSearchQuery('');
-    setMonthFilter('');
-    setSelectedSupplier('');
-    setSelectedEmployee('');
-  };
+
+useEffect(() => {
+  applyFilters();
+}, [searchQuery, monthFilter, selectedSupplier, selectedEmployee, selectedOrder, preorders, activeTab]);
+
+const clearAllFilters = () => {
+  setSearchQuery('');
+  setMonthFilter('');
+  setSelectedSupplier('');
+  setSelectedEmployee('');
+  setSelectedOrder(''); // เปลี่ยนจาก setSelectedPreorderId
+};
 
   const handleViewPreorder = (id) => {
     setSelectedId(id);
@@ -465,6 +472,7 @@ const handlePrintReport = async () => {
         <div>
           ${selectedSupplier ? `<p><strong>ຜູ້ສະໜອງ:</strong> ${getSupplierName(selectedSupplier)}</p>` : ''}
           ${selectedEmployee ? `<p><strong>ພະນັກງານ:</strong> ${getEmployeeName(selectedEmployee)}</p>` : ''}
+          ${selectedOrder ? `<p><strong>ລະຫັດສັ່ງຊື້:</strong> ${selectedOrder}</p>` : ''}
           ${monthFilter ? `<p><strong>ເດືອນ:</strong> ${monthFilter}</p>` : ''}
         </div>
       </div>
@@ -698,6 +706,24 @@ const handlePrintReport = async () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+
+          
+            <select
+              className="border border-stroke dark:border-strokedark rounded p-2"
+              value={selectedOrder}
+              onChange={(e) => setSelectedOrder(e.target.value)}
+            >
+              <option value="">-- ກອງຕາມລະຫັດສັ່ງຊື້ --</option>
+              {[...new Set(preorders
+                .map(preorder => preorder.preorder_id)
+                .filter(Boolean)
+              )].map((preorder_id) => (
+                <option key={preorder_id} value={preorder_id}>
+                  {preorder_id}
+                </option>
+              ))}
+            </select>
+
 
             {/* ตัวกรองตามผู้สะหนอง */}
             <select

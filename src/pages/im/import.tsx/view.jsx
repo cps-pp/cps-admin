@@ -116,8 +116,26 @@ const ViewImport = ({ id, onClose, setShow }) => {
   };
 
   const getPreorderInfo = (preorder_id) => {
-    const preorder = preorders.find((p) => p.preorder_id === preorder_id);
-    return preorder ? preorder.preorder_id : '-';
+    if (!preorder_id) return '-';
+    
+    // ถ้าไม่มีข้อมูล preorders ให้แสดง preorder_id โดยตรง
+    if (preorders.length === 0) {
+      return preorder_id;
+    }
+    
+    // แปลงเป็นตัวเลขเพื่อเปรียบเทียบ
+    const searchId = Number(preorder_id);
+    const preorder = preorders.find((p) => Number(p.preorder_id) === searchId);
+    
+    console.log('Debug preorder:', { 
+      searchId, 
+      preorder_id, 
+      preordersLength: preorders.length,
+      preordersData: preorders.slice(0, 3), // แสดง 3 รายการแรก
+      foundPreorder: preorder 
+    });
+    
+    return preorder ? preorder.preorder_id : preorder_id; // แสดง preorder_id ที่ส่งมาถ้าไม่เจอข้อมูล
   };
 
   const formatDate = (dateString) => {
@@ -164,9 +182,14 @@ const ViewImport = ({ id, onClose, setShow }) => {
                 <label className="block text-sm font-medium text-black-2">
                   ວັນທີນຳເຂົ້າ
                 </label>
-                <p className="text-base font-mono text-form-strokedark  border border-stroke px-3 py-2 rounded">
-                  {formatDate(importData.im_date)}
+                <p className="text-base font-mono text-form-strokedark border border-stroke px-3 py-2 rounded">
+                  {new Date(importData.im_date).toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                  })}
                 </p>
+
               </div>
 
               <div className="space-y-1.5">
@@ -213,9 +236,7 @@ const ViewImport = ({ id, onClose, setShow }) => {
                       <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">
                         ຫົວໜ່ວຍ
                       </th>
-                      <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-300">
-                        ວັນໝົດອາຍຸ
-                      </th>
+          
                     </tr>
                   </thead>
                   <tbody>
@@ -236,22 +257,7 @@ const ViewImport = ({ id, onClose, setShow }) => {
                         <td className="px-4 py-2 border-r border-stroke">
                           {getMedicineUnit(detail.med_id)}
                         </td>
-                        <td className="px-4 py-3 border-r border-stroke">
-                          <span
-                            className={`px-2 py-1 rounded text-md ${
-                              new Date(detail.expired_date) < new Date()
-                                ? 'bg-red-100 text-red-800'
-                                : new Date(detail.expired_date) <
-                                    new Date(
-                                      Date.now() + 30 * 24 * 60 * 60 * 1000,
-                                    )
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-green-100 text-green-800'
-                            }`}
-                          >
-                            {formatDate(detail.expired_date)}
-                          </span>
-                        </td>
+                    
                       </tr>
                     ))}
                   </tbody>

@@ -33,6 +33,9 @@ export default function CreatePreOrder({ tab }) {
   // สำหรับ validation errors
   const [errors, setErrors] = useState({});
 
+  // สำหรับยาที่ใกล้หมด
+  const [lowStockItems, setLowStockItems] = useState([]);
+
   useEffect(() => {
     if (tab === 2) {
       fetchSuppliers();
@@ -91,6 +94,10 @@ export default function CreatePreOrder({ tab }) {
 
       // เก็บรายการทั้งหมดไว้ในตัวแปรเดียว
       setAllItems(items);
+      
+      // กรองยาที่มีจำนวนคงเหลือ <= 25
+      const lowStock = items.filter(item => item.qty <= 25);
+      setLowStockItems(lowStock);
     } catch (err) {
       console.error('Error fetching items:', err);
       dispatch(
@@ -103,6 +110,12 @@ export default function CreatePreOrder({ tab }) {
     } finally {
       setLoadingItems(false);
     }
+  };
+
+  // ฟังก์ชันหาจำนวนคงเหลือของยา
+  const getItemStock = (medId) => {
+    const item = allItems.find(item => item.med_id === medId);
+    return item ? item.qty || 0 : 0;
   };
 
   // ฟังก์ชันตรวจสอบรายการซ้ำ - ลบช่องที่เลือกซ้ำออก
@@ -313,10 +326,39 @@ export default function CreatePreOrder({ tab }) {
   };
 
   return (
-    <div className=" ">
+    <div className="">
       <div className="flex justify-between">
         <h2 className="text-xl font-medium mb-4">ສ້າງການສັ່ງຊື້</h2>
       </div>
+
+      {/* แสดงยาที่ใกล้หมด */}
+      {lowStockItems.length > 0 && (
+        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="flex items-center mb-3">
+            <span className="text-2xl mr-2">⚠️</span>
+            <h3 className="text-lg font-semibold text-yellow-800">
+              ຢາທີ່ໃກ້ໝົດ (ຄົງເຫຼືອ ≤ 25)
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {lowStockItems.map((item) => (
+              <div 
+                key={item.med_id} 
+                className="bg-white p-3 rounded border border-yellow-300"
+              >
+                <div className="flex justify-between items-center">
+                  <div className="font-medium text-gray-800">
+                    {item.med_name} ({item.type_name})
+                  </div>
+                  <div className="text-sm font-semibold text-red-600 ml-2">
+                    ຄົງເຫຼືອ: {item.qty || 0}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
@@ -407,7 +449,7 @@ export default function CreatePreOrder({ tab }) {
                   onChange={(value) =>
                     handleItemDetailChange(index, 'med_id', value)
                   }
-                  className="w-full"
+                  className="w-full h-8"
                   size="middle"
                   loading={loadingItems}
                   optionFilterProp="children"
@@ -427,7 +469,15 @@ export default function CreatePreOrder({ tab }) {
                 </Select>
               </div>
 
-              <div className="w-20">
+              {/* แสดงจำนวนคงเหลือ */}
+              <div className="w-32">
+                <p className="text-xs font-medium text-gray-600">ຄົງເຫຼືອ</p>
+                <div className="border rounded p-2 text-center text-base bg-gray h-8 flex items-center justify-center">
+                  {detail.med_id ? getItemStock(detail.med_id) : '-'}
+                </div>
+              </div>
+
+              <div className="w-28">
                 <p className="text-xs font-medium text-gray-600">ຈຳນວນ</p>
                 <input
                   type="number"
@@ -436,7 +486,7 @@ export default function CreatePreOrder({ tab }) {
                   onChange={(e) =>
                     handleItemDetailChange(index, 'qty', e.target.value)
                   }
-                  className="w-full border p-1 rounded text-center text-sm"
+                  className="w-full border p-2 rounded text-center text-base h-8"
                   required
                 />
               </div>

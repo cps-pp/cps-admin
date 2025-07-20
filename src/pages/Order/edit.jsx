@@ -85,7 +85,7 @@ const EditPreorder = ({ id, setShow, getList }) => {
 
       try {
         console.log('Fetching preorder with ID:', id);
-        const res = await fetch(`http://localhost:4000/src/preorder/preorder/${id}`);
+        const res = await fetch(`http://localhost:4000/src/preorder/${id}`);
         const result = await res.json();
         console.log('API Response:', result);
 

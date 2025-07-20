@@ -63,105 +63,116 @@ const EditPreorder = ({ id, setShow, getList }) => {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    async function fetchPreorder() {
-      if (!id) return;
+  // แก้ไข useEffect ใน EditPreorder component
+useEffect(() => {
+  async function fetchPreorder() {
+    if (!id) return;
 
-      setLoading(true);
-      setDataLoaded(false);
+    setLoading(true);
+    setDataLoaded(false);
 
-      try {
-        const res = await fetch(`http://localhost:4000/src/preorder/preorder/${id}`);
-        const result = await res.json();
+    try {
+      // ✅ ใช้ route /preorder/${id} ที่มีอยู่แล้ว
+      const res = await fetch(`http://localhost:4000/src/preorder/preorder/${id}`);
+      const result = await res.json();
 
-        if (res.ok && result.data) {
-          const preorder = result.data;
-          setPreorderData(preorder);
+      if (res.ok && result.data) {
+        const preorder = result.data;
+        setPreorderData(preorder);
 
-          const formattedDate = preorder.preorder_date
-            ? preorder.preorder_date.split('T')[0]
-            : '';
+        // ✅ แก้ไขการ format date
+        const formattedDate = preorder.preorder_date
+          ? preorder.preorder_date.split(' ')[0] // ตัดเฉพาะวันที่ถ้ามี timestamp
+          : '';
 
-          const formData = {
-            preorder_id: preorder.preorder_id || '',
-            preorder_date: formattedDate,
-            sup_id: preorder.sup_id || '',
-            emp_id_create: preorder.emp_id_create || '',
-          };
+        const formData = {
+          preorder_id: preorder.preorder_id || '',
+          preorder_date: formattedDate,
+          sup_id: preorder.sup_id || '',
+          emp_id_create: preorder.emp_id_create || '',
+        };
 
-          reset(formData);
-          setSelectedSupplier(preorder.sup_id || '');
-          setSelectEmpcreate(preorder.emp_id_create || '');
+        reset(formData);
+        setSelectedSupplier(preorder.sup_id || '');
+        setSelectEmpcreate(preorder.emp_id_create || '');
 
-          setDataLoaded(true);
-        } else {
-          dispatch(
-            openAlert({
-              type: 'error',
-              title: 'ເກີດຂໍ້ຜິດພາດ',
-              message: result.message || 'ບໍ່ສາມາດດຶງຂໍ້ມູນສັ່ງຊື້ໄດ້',
-            }),
-          );
-        }
-      } catch (err) {
+        setDataLoaded(true);
+      } else {
         dispatch(
           openAlert({
             type: 'error',
             title: 'ເກີດຂໍ້ຜິດພາດ',
-            message: 'ເກີດຂໍ້ຜິດພາດໃນການດຶງຂໍ້ມູນ',
+            message: result.message || 'ບໍ່ສາມາດດຶງຂໍ້ມູນສັ່ງຊື້ໄດ້',
           }),
         );
-      } finally {
-        setLoading(false);
       }
-    }
-
-    fetchPreorder();
-  }, [id, dispatch, reset]);
-
-  const handleSave = async (formData) => {
-    setLoading(true);
-
-    try {
-      const payload = {
-        preorder_id: preorderData.preorder_id,
-        preorder_date: preorderData.preorder_date,
-        sup_id: selectedSupplier || formData.sup_id,
-        emp_id_create: selectEmpcreate || formData.emp_id_create,
-      };
-
-      const res = await fetch(`http://localhost:4000/src/preorder/preorder/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await res.json();
-
-      if (!res.ok) throw new Error(result.error || 'ແກ້ໄຂຂໍ້ມູນບໍ່ສໍາເລັດ');
-
-      dispatch(
-        openAlert({
-          type: 'success',
-          title: 'ສຳເລັດ',
-          message: 'ແກ້ໄຂຂໍ້ມູນສັ່ງຊື້ສໍາເລັດ',
-        }),
-      );
-
-      await getList();
-      setShow(false);
-    } catch (error) {
+    } catch (err) {
+      console.error('Fetch error:', err); // ✅ เพิ่ม console.error เพื่อ debug
       dispatch(
         openAlert({
           type: 'error',
           title: 'ເກີດຂໍ້ຜິດພາດ',
-          message: error.message,
+          message: 'ເກີດຂໍ້ຜິດພາດໃນການດຶງຂໍ້ມູນ',
         }),
       );
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  fetchPreorder();
+}, [id, dispatch, reset]);
+
+  // แก้ไข handleSave function ใน EditPreorder component
+const handleSave = async (formData) => {
+  setLoading(true);
+
+  try {
+    const payload = {
+      preorder_date: formData.preorder_date,
+      sup_id: selectedSupplier || formData.sup_id,
+      emp_id_create: selectEmpcreate || formData.emp_id_create,
+    };
+
+    console.log('Sending payload:', payload); // ✅ เพิ่ม debug log
+
+    // ✅ แก้ไข URL ให้ตรงกับ backend route
+    const res = await fetch(`http://localhost:4000/src/preorder/preorder/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await res.json();
+    console.log('Server response:', result); // ✅ เพิ่ม debug log
+
+    if (!res.ok) {
+      throw new Error(result.error || result.message || 'ແກ້ໄຂຂໍ້ມູນບໍ່ສໍາເລັດ');
+    }
+
+    dispatch(
+      openAlert({
+        type: 'success',
+        title: 'ສຳເລັດ',
+        message: 'ແກ້ໄຂຂໍ້ມູນສັ່ງຊື້ສໍາເລັດ',
+      }),
+    );
+
+    await getList();
+    setShow(false);
+  } catch (error) {
+    console.error('Update error:', error); // ✅ เพิ่ม debug log
+    dispatch(
+      openAlert({
+        type: 'error',
+        title: 'ເກີດຂໍ້ຜິດພາດ',
+        message: error.message,
+      }),
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (loading && !dataLoaded) return <Loader />;
 
@@ -212,7 +223,7 @@ const EditPreorder = ({ id, setShow, getList }) => {
               value: sup.sup_id,
               label: `${sup.company_name} - ${sup.address}`,
             }))}
-            register={register}
+            register={register}ฤ
             errors={errors}
             formOptions={{ required: 'ກະລຸນາເລືອກຜູ້ສະຫນອງ' }}
             onSelect={(e) => {

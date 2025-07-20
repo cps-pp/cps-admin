@@ -521,7 +521,7 @@ const EditFollow = ({ setShow, getList, id }) => {
 
         <div className="flex justify-end space-x-4 col-span-full py-4">
           <ButtonBox variant="save" type="submit">
-            ແກ້ໄຂ
+            ບັນທຶກ
           </ButtonBox>
         </div>
       </form>

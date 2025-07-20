@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   User,
   MapPin,
@@ -13,18 +13,17 @@ import {
   FileMinus,
   RotateCcw,
   Package,
-  Filter,
+  FilterIcon,
   XCircle,
-  RotateCcwIcon,
+  ClipboardCheck,
 } from 'lucide-react';
 import { useParams, useLocation } from 'react-router-dom';
-import { Empty } from 'antd';
 import BackButton from '../../../components/BackButton';
-import SearchBox from '../../../components/Forms/Search_New';
+import { Empty, Tag } from 'antd';
+import moment from 'moment/moment';
 import { URLBaseLocal } from '../../../lib/MyURLAPI';
 
 const DetailFollowPatient = ({ onBack }) => {
-  const [showFilters, setShowFilters] = useState(false);
   const [patientDetails, setPatientDetails] = useState(null);
   const [inspectionDetails, setInspectionDetails] = useState([]);
   const [filteredInspections, setFilteredInspections] = useState([]);
@@ -33,11 +32,13 @@ const DetailFollowPatient = ({ onBack }) => {
   const [expandedInspections, setExpandedInspections] = useState({});
   const [loadingInspections, setLoadingInspections] = useState({});
 
+  const [statementPayment, setStatementPayment] = useState([]);
+
   const [searchDate, setSearchDate] = useState('');
   const [searchInId, setSearchInId] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isReloading, setIsReloading] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const { id } = useParams();
   const location = useLocation();
   const [patient, setPatient] = useState(location.state?.patient || null);
@@ -91,9 +92,7 @@ const DetailFollowPatient = ({ onBack }) => {
   const fetchPatientById = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `${URLBaseLocal}/src/report/patient/${id}`,
-      );
+      const response = await fetch(`${URLBaseLocal}/src/report/patient/${id}`);
       if (!response.ok)
         throw new Error(`HTTP error! Status: ${response.status}`);
       const data = await response.json();
@@ -125,7 +124,7 @@ const DetailFollowPatient = ({ onBack }) => {
   const fetchInspectionDetails = async (inspectionId) => {
     try {
       setLoadingInspections((prev) => ({ ...prev, [inspectionId]: true }));
-      console.log('Fetching inspection details for ID:', inspectionId);
+      // console.log('Fetching inspection details for ID:', inspectionId);
 
       const response = await fetch(
         `${URLBaseLocal}/src/report/inspection/${inspectionId}`,
@@ -136,7 +135,7 @@ const DetailFollowPatient = ({ onBack }) => {
       }
 
       const data = await response.json();
-      console.log('Inspection API response:', data);
+      // console.log('Inspection API response:', data);
 
       if (data.resultCode === '200') {
         let inspectionData = null;
@@ -150,7 +149,7 @@ const DetailFollowPatient = ({ onBack }) => {
           ...prev,
           [inspectionId]: inspectionData,
         }));
-
+        // console.log(inspectionData)
         await fetchPrescriptionDetails(inspectionId);
       } else {
         console.error('API returned error:', data);
@@ -166,7 +165,7 @@ const DetailFollowPatient = ({ onBack }) => {
 
   const fetchPrescriptionDetails = async (inspectionId) => {
     try {
-      console.log('Fetching prescription details for ID:', inspectionId);
+      // console.log('Fetching prescription details for ID:', inspectionId);
       const response = await fetch(
         `${URLBaseLocal}/src/report/prescription?id=${inspectionId}`,
       );
@@ -176,7 +175,7 @@ const DetailFollowPatient = ({ onBack }) => {
       }
 
       const data = await response.json();
-      console.log('Prescription API response:', data);
+      // console.log('Prescription API response:', data);
 
       if (data.resultCode === '200') {
         let prescriptionData = [];
@@ -186,62 +185,72 @@ const DetailFollowPatient = ({ onBack }) => {
           prescriptionData = data.data;
         }
 
-        console.log('Setting prescription data:', prescriptionData);
+        // console.log('Setting prescription data:', prescriptionData);
         setPrescriptionDetails((prev) => ({
           ...prev,
           [inspectionId]: prescriptionData,
         }));
       } else {
-        console.error('API returned error:', data);
+        // console.error('API returned error:', data);
         setPrescriptionDetails((prev) => ({ ...prev, [inspectionId]: [] }));
       }
     } catch (error) {
-      console.error('Error fetching prescription details:', error);
+      // console.error('Error fetching prescription details:', error);
       setPrescriptionDetails((prev) => ({ ...prev, [inspectionId]: [] }));
     }
   };
 
-const handleReload = async () => {
-  console.log('Button clicked!'); 
-  console.log('isReloading:', isReloading);
-  
-  if (isReloading) {
-    // console.log('Already reloading, returning early');
-    return;
-  }
+  const fetchStatements = async (inspectionId) => {
+    try {
+      // console.log('Fetching prescription details for ID:', inspectionId);
+      const response = await fetch(
+       ` ${URLBaseLocal}/src/invoice/inspection-invoice/${inspectionId}`,
+      );
 
-  setIsReloading(true);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-  try {
-    await new Promise((resolve) => setTimeout(resolve, 300));
+      const data = await response.json();
 
+      if (data.resultCode === '200') {
+        setStatementPayment(data.data);
+      } else {
+        // console.error('API returned error:', data);
+        setStatementPayment([]);
+      }
+    } catch (error) {
+      // console.error('Error fetching prescription details:', error);
+      setStatementPayment([]);
+    }
+  };
+
+  const clearSearch = () => {
     setSearchDate('');
     setSearchInId('');
     setFilteredInspections([]);
+  };
+
+  const handleReload = async () => {
+    setSearchDate('');
+    setSearchInId('');
+
+    setFilteredInspections([]);
 
     if (patient) {
-      // console.log('Fetching inspections for patient:', patient.patient_id);
       await fetchInspectionsByPatient(patient.patient_id);
     } else {
-      // console.log('Fetching patient by ID');
       await fetchPatientById();
     }
-    
-    console.log('Reload completed successfully');
-  } catch (error) {
-    console.error('Error reloading:', error);
-  } finally {
-    setTimeout(() => {
-      setIsReloading(false);
-    }, 200);
-  }
-};
+  };
+
   const toggleInspectionExpansion = async (inspectionId) => {
     const isExpanded = expandedInspections[inspectionId];
 
     if (!isExpanded && !detailedInspections[inspectionId]) {
       await fetchInspectionDetails(inspectionId);
     }
+    await fetchStatements(inspectionId);
 
     setExpandedInspections((prev) => ({
       ...prev,
@@ -280,6 +289,7 @@ const handleReload = async () => {
   const detailedData = latestInspectionId
     ? detailedInspections[latestInspectionId]
     : null;
+  // เพิ่ม function เพื่อดึง SPK services จาก inspection ล่าสุด
   const getLatestSPKServices = () => {
     const latestInspectionId = inspectionDetails
       .slice()
@@ -291,11 +301,13 @@ const handleReload = async () => {
 
     if (!latestDetailedData?.services) return [];
 
+    // กรองเฉพาะ services ที่มีรหัสขึ้นต้นด้วย "SPK"
     return latestDetailedData.services.filter(
       (service) => service.ser_id && service.ser_id.startsWith('SPK'),
     );
   };
 
+  // เพิ่ม function เพื่อรวมชื่อ services ทั้งหมด
   const getSPKServiceNames = () => {
     const spkServices = getLatestSPKServices();
     if (spkServices.length === 0) return '-';
@@ -322,7 +334,16 @@ const handleReload = async () => {
               </div>
               <div>
                 <h3 className="font-semibold text-secondary2 mb-1">
-                  ໃບບິນປິ່ນປົວ: {inspection.in_id}
+                  ເລກທີປິ່ນປົວ: {inspection.in_id}
+                  <Tag
+                    className="ml-2 font-normal rounded-full"
+                    style={{ fontFamily: 'Noto Sans Lao' }}
+                    color={`${inspection?.invoice?.status_paid === 'SUCCESS' ? 'green' : 'blue'}`}
+                  >
+                    {inspection?.invoice?.status_paid === 'SUCCESS'
+                      ? 'ສໍາເລັດ'
+                      : 'ບໍ່ສໍາເລັດ'}
+                  </Tag>
                 </h3>
                 <p className="text-sm text-gray-500">
                   ວັນທີ່: {formatDate(inspection.date)}
@@ -401,7 +422,7 @@ const handleReload = async () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {detailedData.services.map((service, index) => (
+                          {detailedData?.services?.map((service, index) => (
                             <tr
                               key={index}
                               className="border-b text-md border-stroke"
@@ -424,14 +445,14 @@ const handleReload = async () => {
                               ລວມທັງໝົດ
                             </td>
                             <td className="px-4 py-2 border border-stroke">
-                              {detailedData.services.reduce(
+                              {detailedData?.services?.reduce(
                                 (sum, service) => sum + (service.qty || 0),
                                 0,
                               )}{' '}
                               ລາຍການ
                             </td>
                             <td className="px-4 py-2 border border-stroke text-right">
-                              {detailedData.services
+                              {detailedData?.services
                                 .reduce(
                                   (sum, service) => sum + (service.total || 0),
                                   0,
@@ -446,7 +467,7 @@ const handleReload = async () => {
                   </div>
                 )}
 
-                {prescriptions.length > 0 && (
+                {prescriptions?.length > 0 && (
                   <div>
                     <h4 className="font-semibold text-secondary2 flex items-center">
                       <Pill className="w-5 h-5 mr-1 text-secondary2" />
@@ -477,7 +498,7 @@ const handleReload = async () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {prescriptions.map((prescription, index) => (
+                          {prescriptions?.map((prescription, index) => (
                             <tr
                               key={prescription.pre_id || index}
                               className="border-b text-md border-stroke"
@@ -487,10 +508,11 @@ const handleReload = async () => {
                               </td>
                               <td className="px-4 py-2 border border-stroke">
                                 <span
-                                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${prescription.type_name === 'ຢາ'
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-purple-100 text-secondary2'
-                                    }`}
+                                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                    prescription.type_name === 'ຢາ'
+                                      ? 'bg-green-100 text-green-800'
+                                      : 'bg-purple-100 text-secondary2'
+                                  }`}
                                 >
                                   {prescription.type_name}
                                 </span>
@@ -533,6 +555,113 @@ const handleReload = async () => {
                     </div>
                   </div>
                 )}
+
+                {statementPayment?.payments?.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-Third4 flex items-center">
+                      <ClipboardCheck className="w-5 h-5 mr-1 text-Third4" />
+                      ປະຫວັດການຈ່າຍ
+                    </h4>
+                    <div className="overflow-x-auto p-4">
+                      <table className="w-full border-collapse border border-slate-300">
+                        <thead>
+                          <tr className="text-left bg-slate-100 border border-stroke">
+                            <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-200">
+                              ລະຫັດການຈ່າຍ
+                            </th>
+                            <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-200">
+                              ເວລາ
+                            </th>
+                            <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-200">
+                              ປະເພດ
+                            </th>
+                            <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-200 text-right">
+                              ເລດ
+                            </th>
+                            <th className="px-4 py-3 tracking-wide text-form-input font-semibold border-r border-slate-200 text-right">
+                              ຈຳນວນ
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {statementPayment?.payments?.map((payment, index) => (
+                            <tr
+                              key={payment.pay_id || index}
+                              className="border-b text-md border-stroke"
+                            >
+                              <td className="px-4 py-2 border border-stroke">
+                                {payment.pay_id}
+                              </td>
+                              <td className="px-4 py-2 border border-stroke">
+                                {moment(payment?.pay_date).format(
+                                  'DD/MM/YYYY HH:mm',
+                                )}
+                              </td>
+                              <td className="px-4 py-2 border border-stroke">
+                                {payment.pay_type?.toUpperCase() === 'CASH' && (
+                                  <span className="inline-block bg-secondary2/10 text-secondary text-sm  px-3 py-1 rounded-full">
+                                    CASH
+                                  </span>
+                                )}
+                                {payment.pay_type?.toUpperCase() === 'TRANSFER' && (
+                                  <span className="inline-block bg-blue-100 text-blue-800 text-sm  px-3 py-1 rounded-full">
+                                    TRANSFER
+                                  </span>
+                                )}
+                             
+                                {!['CASH', 'TRANSFER'].includes(
+                                  payment.pay_type?.toUpperCase(),
+                                ) && (
+                                  <span className="inline-block bg-gray-100 text-gray-700 text-sm  px-3 py-1 rounded-full">
+                                    {payment.pay_type}
+                                  </span>
+                                )}
+
+                              </td>
+
+                              <td className="px-4 py-2 border border-stroke text-gray-900 text-right">
+                                {payment?.ex_rate ?? 0}
+                              </td>
+                              <td className="px-4 py-2 border border-stroke text-right">
+                                {Number(
+                                  payment?.paid_amount || 0,
+                                ).toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot>
+                          <tr className="font-semibold text-secondary2">
+                            <td
+                              className="px-4 py-2 border border-stroke text-right"
+                              colSpan={4}
+                            >
+                              ຍອດທັງໝົດ (ກີບ)
+                            </td>
+                            <td className="px-4 py-2 border border-stroke text-right">
+                              {statementPayment?.total_paid?.toLocaleString() ??
+                                0}
+                            </td>
+                          </tr>
+                          <tr className="font-semibold text-red-500">
+                            <td
+                              className="px-4 py-2 border border-stroke text-right"
+                              colSpan={4}
+                            >
+                              ຍອດຄ້າງຈ່າຍ (ກີບ)
+                            </td>
+                            <td className="px-4 py-2 border text-red-500 border-stroke text-right">
+                              {(
+                                Number(statementPayment?.total) -
+                                  Number(statementPayment?.total_paid) || 0
+                              ).toLocaleString()}
+                            </td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -540,6 +669,37 @@ const handleReload = async () => {
       </div>
     );
   };
+
+  if (!id) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+          <p className="text-gray-600">ບໍ່ມີຂໍ້ມູນຄົນເຈັບ</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">ກຳລັງໂຫຼດຂໍ້ມູນຄົນເຈັບ...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!patient) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+          <p className="text-red-500">ບໍ່ພົບຂໍ້ມູນຄົນເຈັບ</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -551,39 +711,29 @@ const handleReload = async () => {
               <BackButton />
               <button
                 onClick={handleReload}
-                disabled={loading || isReloading}
-                className={`
-    inline-flex items-center gap-2 px-4 py-2 text-md font-medium rounded 
-    border border-secondary2/40 bg-secondary2/10 text-secondary2 
-    hover:bg-secondary2/15 disabled:opacity-50 
-    transition-all duration-300 ease-in-out
-    ${isReloading ? 'bg-secondary2/20 cursor-not-allowed' : 'hover:scale-105'}
-  `}
+                disabled={loading}
+                className="inline-flex items-center gap-2 px-4 py-2 text-md font-medium rounded border border-secondary2/40 bg-secondary2/10 text-secondary2 hover:bg-secondary2/15 disabled:opacity-50 transition-colors"
               >
                 <RotateCcw
-                  className={`
-      w-4 h-4 
-      ${isReloading ? 'animate-spin' : ''}
-      transition-transform duration-300
-    `}
+                  className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}
                 />
-                <span className="transition-opacity duration-300">
-                  {isReloading ? 'ກຳລັງໂຫຼດ...' : 'ໂຫຼດໃໝ່'}
-                </span>
+                ໂຫຼດໃໝ່
               </button>
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`inline-flex items-center gap-2 px-3 py-2 text-md font-semibold rounded border transition-all duration-200 shadow-sm ${showFilters
-                  ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
-                  : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
-                  }`}
+                className={`inline-flex items-center gap-2 px-3 py-2 text-md font-semibold rounded border transition-all duration-200 shadow-sm ${
+                  showFilters
+                    ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                    : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                }`}
               >
-                <Filter
-                  className={`w-4 h-4 transition-transform duration-200 ${showFilters ? 'rotate-90' : ''
-                    }`}
+                <FilterIcon
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    showFilters ? 'rotate-90' : ''
+                  }`}
                 />
                 {showFilters ? 'ປິດ' : 'ເປີດການຄົ້ນຫາ'}
               </button>
@@ -593,6 +743,7 @@ const handleReload = async () => {
           {showFilters && (
             <div className="mt-4">
               <div className="flex flex-col lg:flex-row gap-4 items-end">
+                {/* ค้นหาตามวันที่ */}
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     ຄົ້ນຫາຕາມວັນທີ່
@@ -636,67 +787,166 @@ const handleReload = async () => {
                   </button>
                 </div>
               </div>
-                 {(searchDate !== '' || searchInId !== '') && filteredInspections.length === 0 && (
-      <p className="text-sm text-rose-500 mt-3">
-        * ບໍ່ພົບຂໍ້ມູນທີ່ຄົ້ນຫາ
-      </p>
-    )}
             </div>
           )}
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="bg-white rounded shadow-sm border border-slate-200 p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-secondary2 rounded-full flex items-center justify-center">
-                  <Activity className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-form-input">ຈຳນວນກວດ</h3>
-                  <p className="text-sm text-slate-500">ລວມ</p>
+
+        <div className="grid grid-cols-1 lg:grid-cols-[350px,1fr] gap-6 ">
+          <div className="w-full max-w-sm space-y-4">
+            <div className="bg-white rounded  border border-stroke overflow-hidden">
+              <div className="bg-white p-6">
+                <div className="flex flex-col items-center gap-4 mb-2 ">
+                  <div className="w-16 h-16 bg-secondary2 rounded-full flex items-center justify-center shadow">
+                    <User className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-xl font-semibold text-form-input">
+                      {patient.patient_name} {patient.patient_surname}
+                    </h3>
+                    <p className="text-md text-slate-500 font-medium">
+                      ລະຫັດ: {patient.patient_id}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="h-10 ml-4 border-l border-slate-400 mx-3" />
+                <div className="">
+                  <div className="flex items-center justify-between py-1">
+                    <span className="text-md text-form-input">ເພດ</span>
+                    <span className="text-md font-medium text-form-input">
+                      {patient.gender || '-'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-1">
+                    <span className="text-md text-form-input">ອາຍຸ</span>
+                    <span className="text-md font-medium text-form-input">
+                      {calculateAge(patient.dob)} ປີ
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-1">
+                    <span className="text-md text-form-input">ວັນເກີດ</span>
+                    <span className="text-md font-medium text-form-input">
+                      {formatDate(patient.dob)}
+                    </span>
+                  </div>
+                </div>
               </div>
 
-              <div className="text-right">
-                <div className="text-2xl font-bold text-secondary2">
-                  {inspectionDetails.length}{' '}
-                  <span className="text-secondary2">ຮອບ</span>
+              <div className="p-4 space-y-4 border-t border-stroke">
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-secondary2 mt-1" />
+                  <div className="flex-1">
+                    <p className="text-md font-medium text-form-input">
+                      {patient.village || '-'}
+                    </p>
+                    <p className="text-sm text-form-input">
+                      {patient.district}, {patient.province}
+                    </p>
+                  </div>
                 </div>
+
+                <div className="flex items-center gap-3">
+                  <Phone className="w-5 h-5 text-secondary2" />
+                  <span className="text-md text-form-input">
+                    {patient.phone1 || '-'}{' '}
+                    {`patient.phone2 && / ${patient.phone2}`}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded shadow-sm border border-slate-200 p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-secondary2 rounded-full flex items-center justify-center">
+                    <Activity className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-form-input">ຈຳນວນກວດ</h3>
+                    <p className="text-sm text-slate-500">ລວມ</p>
+                  </div>
+
+                  <div className="h-10 ml-4 border-l border-slate-400 mx-3" />
+                </div>
+
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-secondary2">
+                    {inspectionDetails.length}{' '}
+                    <span className="text-secondary2">ຮອບ</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded shadow-sm border border-slate-200 p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-secondary2 rounded-full flex items-center justify-center">
+                    <Package className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-form-input">ແພັກແກັດ</h3>
+                  </div>
+
+                  <div className="h-10  border-l border-slate-400 mx-7" />
+                </div>
+
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-secondary2">
+                    {getLatestSPKServices().length}{' '}
+                    <span className="text-secondary2">ລາຍການ</span>
+                  </div>
+                  <div className="text-sm text-slate-500 mt-1">
+                    ແພັກແກັກ{getSPKServiceNames()}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/*  */}
+            <div className="mt-6 bg-white rounded shadow-sm border border-slate-200 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-secondary2 rounded-full flex items-center justify-center">
+                  <FileClock className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-md font-semibold text-slate-900 mb-1">
+                    ກວດຄັ້ງລ່າສຸດ
+                  </h3>
+                  <p className="text-sm text-slate-500">ການອັບເດດຫຼ້າສຸດ</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {inspectionDetails
+                  .sort(
+                    (a, b) =>
+                      new Date(b.date).getTime() - new Date(a.date).getTime(),
+                  )
+                  .slice(0, 3)
+                  .map((inspection, index) => (
+                    <div
+                      key={inspection.in_id}
+                      className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg"
+                    >
+                      <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md">
+                        <span className="text-xs font-semibold text-secondary2">
+                          {index + 1}
+                        </span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-md text-secondary2 font-semibold mb-1">
+                          ວັນທີ່ມາກວດ: {formatDate(inspection.date)}
+                        </p>
+                        <p className="text-xs font-medium text-slate-500">
+                          ໃບບິນປິ່ນປົວ: {inspection.in_id}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded shadow-sm border border-slate-200 p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-secondary2 rounded-full flex items-center justify-center">
-                  <Package className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-form-input">ແພັກແກັດ</h3>
-                </div>
-
-                <div className="h-10 border-l border-slate-400 mx-7" />
-              </div>
-
-              <div className="text-right">
-                <div className="text-2xl font-bold text-secondary2">
-                  {getLatestSPKServices().length}{' '}
-                  <span className="text-secondary2">ລາຍການ</span>
-                </div>
-                <div className="text-sm text-slate-500 mt-1">
-                  ແພັກແກັກ {getSPKServiceNames()}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 ">
-          <div className="w-full max-w-sm space-y-4"></div>
-
+          {/* Right Column - Inspection History */}
           <div className="w-full">
             <div className="bg-white rounded shadow-sm border border-stroke">
               <div className="p-4 border-b border-slate-200">
@@ -741,5 +991,7 @@ const handleReload = async () => {
     </>
   );
 };
+
+
 
 export default DetailFollowPatient;

@@ -422,13 +422,13 @@ const ImportPage = () => {
 
                   <td className="px-3 py-4 ">
                     <div className="flex gap-2 ">
-                      <button
+                      {/*<button
                         onClick={() => handleAdd_detail(im.im_id)}
                         className="inline-flex items-center  px-3 py-1  text-md  text-emerald-700 bg-emerald-50 border border-emerald-200 rounded hover:bg-emerald-100 hover:text-emerald-800 transition-colors"
                       >
                         <Plus className="w-4 h-4  mr-1 " />
                         ເພີ່ມ
-                      </button>
+                      </button> */}
 
                       <button
                         onClick={() => handleViewImport(im.im_id)}
