@@ -386,6 +386,7 @@ const CreateMedicines = ({
           onSelect={(e) => {
             setSelectedMedType(e.target.value);
           }}
+          
         />
 
         <SelectBoxId

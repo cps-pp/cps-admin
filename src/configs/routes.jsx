@@ -37,6 +37,8 @@ import DetailPatientService from '../pages/Service/Detail';
 import ReportFollowPatient from '../pages/report/ReportFollow';
 import DetailFollowPatient from '../pages/report/ReportFollow/detail';
 import DetailEmployee from '../pages/Manager/Employee/detail';
+import CreateImport from '../pages/im/import.tsx/create';
+import ImportHistory from '../pages/im/import.tsx/ImportHistory';
 
 export const ROUTES = [
   {
@@ -163,6 +165,16 @@ export const ROUTES = [
     path: '/importorder',
     title: 'Import | CPS Admin',
     component: <ImportPage />,
+  },
+  {
+    path: '/importorder/createimport',
+    title: 'Import | CPS Admin',
+    component: <CreateImport />,
+  },
+  {
+    path: '/importorder/importhistory',
+    title: 'Import | CPS Admin',
+    component: <ImportHistory />,
   },
   // -------------------------- Follow Path --------------------------------
   {

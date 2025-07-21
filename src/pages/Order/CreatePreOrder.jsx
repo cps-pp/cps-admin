@@ -327,24 +327,24 @@ export default function CreatePreOrder({ tab }) {
 
   return (
     <div className="">
-      <div className="flex justify-between">
+      {/* <div className="flex justify-between">
         <h2 className="text-xl font-medium mb-4">ສ້າງການສັ່ງຊື້</h2>
-      </div>
+      </div> */}
 
       {/* แสดงยาที่ใกล้หมด */}
       {lowStockItems.length > 0 && (
-        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <div className="mb-6 p-4 bg-Third3/5 border border-Third3/5 rounded-lg">
           <div className="flex items-center mb-3">
             <span className="text-2xl mr-2">⚠️</span>
             <h3 className="text-lg font-semibold text-yellow-800">
-              ຢາທີ່ໃກ້ໝົດ (ຄົງເຫຼືອ ≤ 25)
+              ຢາ ແລະ ອຸປະກອນ ທີ່ໃກ້ໝົດ 
             </h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {lowStockItems.map((item) => (
               <div 
                 key={item.med_id} 
-                className="bg-white p-3 rounded border border-yellow-300"
+                className="bg-white p-3 rounded border border-stroke"
               >
                 <div className="flex justify-between items-center">
                   <div className="font-medium text-gray-800">
@@ -363,7 +363,7 @@ export default function CreatePreOrder({ tab }) {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block font-medium">ເລືອກພະນັກງານ</label>
+            <label className="block font-medium mb-1">ເລືອກພະນັກງານ</label>
             <Select
               showSearch
               placeholder="Select an employee"
@@ -393,7 +393,7 @@ export default function CreatePreOrder({ tab }) {
           </div>
 
           <div>
-            <label className="block font-medium">ເລືອກຜູ້ສະໜອງ</label>
+            <label className="block font-medium mb-1">ເລືອກຜູ້ສະໜອງ</label>
             <Select
               showSearch
               placeholder="Select a supplier"
@@ -426,7 +426,7 @@ export default function CreatePreOrder({ tab }) {
         <div className="border rounded-md p-4 border-stroke">
           <div className="flex justify-between items-center mb-3">
             <label className="block font-semibold text-gray-700">
-              ຢາ ຫຼື ອຸປະກອນ
+              ເລືອກເພີ່ມ ຢາ ຫຼື ອຸປະກອນ
             </label>
             <button
               type="button"

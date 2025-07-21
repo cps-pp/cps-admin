@@ -667,7 +667,7 @@ const handlePrintReport = async () => {
   value={selectedEmployee}
   onChange={(e) => setSelectedEmployee(e.target.value)}
 >
-  <option value="">-- ກອງຕາມພະນັກງານ --</option>
+  <option value="">-- ຄົ້ນຫາຕາມພະນັກງານ --</option>
   {[...new Set(Im.map((im) => im.emp_id_create))].map((empId) => {
     const employee = empName.find((emp) => emp.emp_id === empId);
     return (
@@ -693,7 +693,7 @@ const handlePrintReport = async () => {
               onClick={clearAllFilters}
               className="bg-slate-600 hover:bg-slate-800 text-white"
             >
-              ລ້າງຕົວກອງ
+              ລ້າງການຄົ້ນຫາ
             </Button>
           </div>
         </div>

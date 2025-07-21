@@ -479,7 +479,6 @@ const EditFollow = ({ setShow, getList, id }) => {
             <span className="text-red-500 text-sm">{errors.date_addmintted.message}</span>
           )}
         </div>
-
         <SelectBox
           label="ສະຖານະ"
           name="status"

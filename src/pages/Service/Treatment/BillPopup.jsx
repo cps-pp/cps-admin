@@ -365,17 +365,25 @@ const calculateRemainingBalance = () => {
                     {invoiceData?.invoice_id}
                   </span>
                 </div>
+               
                 <div className="flex justify-between items-center print:justify-between print:items-center">
                   <span className="text-form-strokedark">ວັນທີອອກໃບບິນ:</span>
                   <span className="font-semibold text-form-input ml-4 print:ml-4">
                     {formatDate(new Date())}
                   </span>
                 </div>
+                
+                <div className="flex justify-between print:text-sm">
+                  <span className="text-form-strokedark">ເລກທີປິ່ນປົວ:</span>
+                  <span className="font-medium text-form-input">
+                    {inspectionData?.in_id}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-2 print:grid-cols-2 print:gap-4">
+          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-2 print:grid-cols-2 print:gap-4">
             <div className="bg-gray-50 p-5 print:bg-white ">
               <h3 className="font-semibold text-form-input mb-2 flex items-center text-lg print:text-base">
                 ຂໍ້ມູນຄົນເຈັບ
@@ -414,12 +422,12 @@ const calculateRemainingBalance = () => {
                 ຂໍ້ມູນການປິ່ນປົວ
               </h3>
               <div className="space-y-3 print:space-y-2">
-                {/* <div className="flex justify-between print:text-sm">
+                <div className="flex justify-between print:text-sm">
                   <span className="text-form-strokedark">ວັນທີປິ່ນປົວ:</span>
                   <span className="font-medium text-form-input">
                     {formatDate(inspectionData?.date)}
                   </span>
-                </div> */}
+                </div>
                 <div className="flex justify-between print:text-sm">
                   <span className="text-form-strokedark">ອາການເບື່ອງຕົ້ນ:</span>
                   <span className="font-medium text-form-input">
@@ -440,7 +448,7 @@ const calculateRemainingBalance = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           <div className="mb-4 print:mb-4">
             <h3 className="font-semibold text-form-input mb-4 text-lg print:text-base print:mb-2">

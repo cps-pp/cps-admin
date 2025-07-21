@@ -124,7 +124,7 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
 
         const data = await response.json();
         setNextAppointId(data.nextId);
-        setValue('appoint_id', data.nextId); // ตั้งค่ารหัสในฟอร์ม
+        setValue('appoint_id', data.nextId); // 
       } catch (error) {
         console.error('Error fetching next ID:', error);
         dispatch(
@@ -282,7 +282,7 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
         className="grid grid-cols-1 md:lg:grid-cols-2 lg:grid-cols-2 gap-4 px-4 pt-4"
       >
         {/* แสดงรหัสที่สร้างอัตโนมัติ (แบบ read-only) */}
-        <div className="mb-4">
+        <div className="">
           <label className="block text-sm font-medium mb-2 text-black dark:text-white">
             ລະຫັດນັດໝາຍ
           </label>
@@ -295,7 +295,7 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
           <input type="hidden" {...register('appoint_id')} />
         </div>
 
-        <div className="mb-4">
+        <div className="">
         <label className="block text-sm font-medium mb-2 text-black dark:text-white">
           ວັນທີນັດໝາຍ
         </label>
@@ -309,10 +309,6 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
         )}
       </div>
 
-
-
-
-         
         <InputBox
           label="ລາຍລະອຽດ"
           name="description"
@@ -345,7 +341,7 @@ const CreateFollow = ({ setShow, getList, onCloseCallback }) => {
           formOptions={patientFormOptions}
         />
 
-        <div className="flex justify-end space-x-4 col-span-full py-4">
+        <div className="flex justify-end col-span-full py-4">
           <ButtonBox variant="save" type="submit" disabled={loading}>
             {loading ? 'ກຳລັງບັນທຶກ...' : 'ບັນທຶກ'}
           </ButtonBox>

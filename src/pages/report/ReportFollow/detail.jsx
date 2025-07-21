@@ -848,7 +848,7 @@ const DetailFollowPatient = ({ onBack }) => {
                   <Phone className="w-5 h-5 text-secondary2" />
                   <span className="text-md text-form-input">
                     {patient.phone1 || '-'}{' '}
-                    {`patient.phone2 && / ${patient.phone2}`}
+                    {patient.phone2 && `/ ${patient.phone2}`}
                   </span>
                 </div>
               </div>

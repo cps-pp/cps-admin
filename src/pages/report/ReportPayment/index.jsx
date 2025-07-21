@@ -465,7 +465,7 @@ const ReportPay = () => {
               value={paymentTypeFilter}
               onChange={(e) => setPaymentTypeFilter(e.target.value)}
             >
-              <option value="">-- ກັອງຕາມປະເພດການຊຳລະ --</option>
+              <option value="">-- ຄົ້ນຫາຕາມປະເພດການຊຳລະ --</option>
               {[...new Set(payments.map((payment) => payment.pay_type))].map((type) => (
                 <option key={type} value={type}>
                   {type?.toUpperCase()}
@@ -486,7 +486,7 @@ const ReportPay = () => {
               onClick={clearAllFilters}
               className="bg-slate-600 hover:bg-slate-800 text-white"
             >
-              ລ້າງການກັອງ
+              ລ້າງການຄົ້ນຫາ
             </Button>
           </div>
         </div>

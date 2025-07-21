@@ -713,7 +713,7 @@ const handlePrintReport = async () => {
               value={selectedOrder}
               onChange={(e) => setSelectedOrder(e.target.value)}
             >
-              <option value="">-- ກອງຕາມລະຫັດສັ່ງຊື້ --</option>
+              <option value="">-- ຄົ້ນຫາຕາມລະຫັດສັ່ງຊື້ --</option>
               {[...new Set(preorders
                 .map(preorder => preorder.preorder_id)
                 .filter(Boolean)
@@ -731,7 +731,7 @@ const handlePrintReport = async () => {
               value={selectedSupplier}
               onChange={(e) => setSelectedSupplier(e.target.value)}
             >
-              <option value="">-- ກອງຕາມຜູ້ສະໜອງ --</option>
+              <option value="">-- ຄົ້ນຫາຕາມຜູ້ສະໜອງ --</option>
               {[...new Set(preorders.map((preorder) => preorder.sup_id))].map((sup_id) => (
                 <option key={sup_id} value={sup_id}>
                   {getSupplierName(sup_id)}
@@ -745,7 +745,7 @@ const handlePrintReport = async () => {
               value={selectedEmployee}
               onChange={(e) => setSelectedEmployee(e.target.value)}
             >
-              <option value="">-- ກອງຕາມພະນັກງານ --</option>
+              <option value="">-- ຄົ້ນຫາຕາມພະນັກງານ --</option>
               {[...new Set(preorders.map((preorder) => preorder.emp_id_create))].map((empId) => {
                 const employee = empName.find((emp) => emp.emp_id === empId);
                    return (
@@ -771,7 +771,7 @@ const handlePrintReport = async () => {
               onClick={clearAllFilters}
               className="bg-slate-600 hover:bg-slate-800 text-white"
             >
-              ລ້າງຕົວກອງ
+              ລ້າງການຄົ້ນຫາ
             </Button>
           </div>
         </div>
